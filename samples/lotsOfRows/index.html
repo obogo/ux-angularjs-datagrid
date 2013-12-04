@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html ng-app="app">
+<head>
+    <title>ListView</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="YES">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="google" value="no translate">
+    <link rel="shortcut icon" href="images/favicon.ico">
+
+    <link type="text/css" rel="stylesheet" href="loader.css">
+    <link type="text/css" rel="stylesheet" href="main.css">
+    <link type="text/css" rel="stylesheet" href="cssIcons.css">
+    <script src="../../lib/jquery-2.0.3.js"></script>
+    <script src="../../lib/angular.js"></script>
+    <script src="../../src/lib/each.js"></script>
+    <script src="../../src/lib/charPack.js"></script>
+    <script src="../../src/lib/ux-dispatcher.js"></script>
+    <script src="../../src/ux-listView-config.js"></script>
+    <script src="../../src/core/addons/chunkModel.js"></script>
+    <script src="../../src/core/Flow.js"></script>
+    <script src="../../src/core/addons/templateModel.js"></script>
+    <script src="../../src/core/addons/scrollModel.js"></script>
+    <script src="../../src/core/addons/normalizeModel.js"></script>
+    <script src="../../src/core/addons/statsModel.js"></script>
+    <script src="../../src/core/addons/creepRenderModel.js"></script>
+    <script src="../../src/ux-listView.js"></script>
+    <script src="../../src/addons/iosScrollFrictionAddon.js"></script>
+    <script src="../../src/lib/angular-ux-addons.js"></script>
+    <!-- performance testing -->
+    <style type="text/css">
+        .performance-report {
+            position: absolute !important;
+        }
+    </style>
+    <script>
+
+        var records = 50000;
+
+        function root($scope) {
+            $scope.counter = 0;
+            $scope.records = records;
+            $scope.$on(ux.listView.events.RENDER_PROGRESS, function (event, percent) {
+                $scope.percent = percent;
+                $scope.$digest();
+            });
+            $scope.$on(ux.listView.events.STATS_UPDATE, function (event, stats) {
+                $scope.stats = stats;
+            });
+            setInterval(function () {
+                $scope.counter += 1;
+//                if (!$scope.$$phase) {
+//                    $scope.$apply();
+//                }
+            }, 1000);
+
+            $scope.scrollToPercent = function (percent) {
+                var listView = angular.element.find('.list-view');
+                listView[0].scrollTop = angular.element(listView[0]).children()[0].offsetHeight * percent;
+            }
+        }
+
+        function simpleArray($scope) {
+            var i = 0, len = records;
+            $scope.items = [];
+            while (i < len) {
+                $scope.items.push({id: i});
+                i += 1;
+            }
+        }
+
+        function complexArray($scope) {
+            var i = 0, len = records, group, rand;
+            $scope.items = [];
+            while (i < len) {
+                rand = Math.random();
+                rand = rand >= 0.8 ? rand : 0;
+                if (!group || Math.round(rand)) {
+                    $scope.items.push(group = {
+                        id: 'G' + ($scope.items.length + 1),
+                        name: 'Group ' + ($scope.items.length + 1),
+                        _template: 'group',
+                        children: []
+                    });
+                }
+//                addSubChildren(group, {id: 'I', template: 'default'});
+                group.children.push({id: 'I' + group.children.length + 1, children: [], _template: Math.round(Math.random()) ? 'sub' : 'default'});
+//                addSubChildren(group.children[group.children.length - 1], '---S', 'sub');// supports infinite nested children.
+                i += 1;
+            }
+
+            function addSubChildren(item, name, template) {
+                var j = 0, rand = Math.floor(Math.random() * 4);
+                while (j < rand) {
+                    item.children.push({id: name + item.children.length + 1, _template: template});
+                    j += 1;
+                }
+                i += 1;
+            }
+        }
+
+
+        angular.module('progress', ['ng']).directive('progressBar', function () {
+            return {
+                restrict: 'A',
+                scope: true,
+                template: '<div></div>',
+                link: function (scope, element, attr) {
+                    scope.percent = 0;
+                    var onProgress = function (event, percent) {
+                        console.log('percent %s', percent);
+                        scope.percent = Math.round(percent * 100);
+                        if (!scope.$$phase) {
+                            scope.$digest();
+                        }
+                        angular.element(element[0].childNodes[0]).css({width: (percent*100) + '%'});
+                    };
+                    scope.$root.$on(ux.listView.events.RENDER_PROGRESS, onProgress);
+                }
+            }
+        });
+
+        angular.module('app', ['ux', 'progress', 'addons']);
+    </script>
+    <!--//
+        Note: {{fake}} below is to get angular to process the class attribute. This wipes out any css classes that were added by jquery.
+    //-->
+</head>
+<body data-ng-controller="root">
+The purpose of this example is to test the performance of lots of rows in the list-view.
+<div class="stats">
+    <div>records {{records|number}} stats: {{stats}}</div>
+    <div>counter {{counter}}</div>
+    <div progress-bar class="progress-bar"></div>
+    <span>SCROLL TO:</span>
+    <a href="" data-ng-click="scrollToPercent(0.0)">0%</a>
+    <a href="" data-ng-click="scrollToPercent(0.25)">25%</a>
+    <a href="" data-ng-click="scrollToPercent(0.5)">50%</a>
+    <a href="" data-ng-click="scrollToPercent(0.75)">75%</a>
+    <a href="" data-ng-click="scrollToPercent(1)">100%</a>
+</div>
+<!--<div data-ng-controller="simpleArray" class="listA">-->
+    <!--<div progress-bar class="progrss-bar"></div>-->
+    <!--<div data-ux-list-view="items" class="list-view" data-addons="iosScrollFrictionAddon">-->
+        <!--<script type="template/html" data-template-name="default" data-template-item="item">-->
+            <!--<div class="row {{fake}}">-->
+                <!--<div class="text">{{item.id}} {{$id}} {{counter}}</div>-->
+                <!--<div random-icons="pencil droid trash"></div>-->
+                <!--<input type="text">-->
+            <!--</div>-->
+        <!--</script>-->
+        <!--<div class="content"></div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--// container to put a background loader behind the datagrid //-->
+<div class="my-container">
+    <!--// This is the background loader //-->
+    <div class="loader">
+         <div></div>
+         <div></div>
+         <div></div>
+    </div>
+    <!--// this is the controller for the list-view //-->
+    <div data-ng-controller="complexArray" class="listA">
+        <!--// this is the list-view //-->
+        <div ux-list-view="items" class="list-view" data-grouped="'children'">
+            <script type="template/html" data-template-name="group" data-template-item="item">
+                <div class="group {{fake}}">
+                    <div class="text">{{item.id}} {{$id}} {{counter}} height: 20px</div>
+                </div>
+            </script>
+            <script type="template/html" data-template-name="default" data-template-item="item">
+                <div class="row {{fake}}">
+                    <div class="text">{{item.id}} {{$id}} {{counter}} height: 40px</div>
+                    <input type="text">
+                </div>
+            </script>
+            <script type="template/html" data-template-name="sub" data-template-item="item">
+                <div class="sub {{fake}}">
+                    <div class="text">{{item.id}} {{$id}} {{counter}} height: 30px</div>
+                    <input type="text">
+                </div>
+            </script>
+        </div>
+    </div>
+</div>
+</body>
+</html>

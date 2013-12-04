@@ -1,0 +1,101 @@
+describe("Chunker", function () {
+
+    var chunkModel, exports, rowHeight;
+
+    beforeEach(function () {
+        exports = {
+            templateModel: {
+                templates: {},
+                getTemplate: function (name) {
+                    return this.templates[name];
+                },
+                getHeight: function (list, startIndex, endIndex) {
+                    return (endIndex + 1 - startIndex) * rowHeight;
+                }
+            }
+        }
+        rowHeight = 10;
+        chunkModel = new ux.listView.coreAddons.chunkModel(exports);
+    });
+
+    function createTests() {
+        var i,
+            tests = [
+                // chunk size 3
+                {input: '123456789', find: '4', chunkSize: 3, expected: [1, 0]},
+                {input: 'abcdefghijkl', find: 'g', chunkSize: 3, expected: [0, 2, 0]},
+                {input: 'abcdefghijklmnoqrs', find: 'i', chunkSize: 3, expected: [0, 2, 2]},
+                {input: 'abcdefghijklmnoqrs', find: 'k', chunkSize: 3, expected: [1, 0, 1]},
+                {input: 'abcdefghijklmnoqrs', find: 'r', chunkSize: 3, expected: [1, 2, 1]},
+                {input: 'abcdefghijklmnoqrs', find: 's', chunkSize: 3, expected: [1, 2, 2]},
+                {input: 'abcdefghijklmnoqrstuvwxy', find: 'x', chunkSize: 3, expected: [2, 1, 1]},
+                {input: 'abcdefghijklmnoqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', find: 'X', chunkSize: 3, expected: [1, 2, 1, 0]},
+
+                // chunk size 4
+                {input: '123456789', find: '4', chunkSize: 4, expected: [0, 3]},
+                {input: 'abcdefghijkl', find: 'g', chunkSize: 4, expected: [1, 2]},
+                {input: 'abcdefghijklmnoqrs', find: 'i', chunkSize: 4, expected: [0, 2, 0]},
+                {input: 'abcdefghijklmnoqrs', find: 'k', chunkSize: 4, expected: [0, 2, 2]},
+                {input: 'abcdefghijklmnoqrs', find: 'r', chunkSize: 4, expected: [1, 0, 0]},
+                {input: 'abcdefghijklmnoqrs', find: 's', chunkSize: 4, expected: [1, 0, 1]},
+                {input: 'abcdefghijklmnoqrstuvwxy', find: 'x', chunkSize: 4, expected: [1, 1, 2]},
+                {input: 'abcdefghijklmnoqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', find: 'X', chunkSize: 4, expected: [3, 0, 0]},
+
+                {input: createList(500), find: '250', chunkSize: 10, expected: [2, 4, 9]},
+                {input: createList(1000), find: '901', chunkSize: 10, expected: [9, 0, 0]},
+                {input: createList(5000), find: '250', chunkSize: 10, expected: [0, 2, 4, 9]},
+                {input: createList(50000), find: '25000', chunkSize: 100, expected: [2, 49, 99]},
+                {input: createList(50000), find: '49267', chunkSize: 18, expected: [8, 8, 1, 0]},
+            ];
+        for (i = 0; i < tests.length; i += 1) {
+            createTest(tests[i]);
+        }
+    }
+
+    function createTest(test) {
+        test.input = generateList(test.input);
+        it("should return indexes " + test.expected.join(',') + " when length of " + test.input.length + " chunk of " + test.chunkSize + " and find index of \"" + test.find + "\"", function () {
+            run(test.input, test.find, test.chunkSize, test.expected);
+        });
+    }
+
+    function createList(len) {
+        var i, list = [];
+        for (i = 0; i < len; i += 1) {
+            list[i] = (i + 1).toString();
+        }
+        return list;
+    }
+
+    function generateList(input) {
+        if (typeof input === "string") {
+            return input.split('');
+        }
+        if (typeof input === "function") {
+            return input();
+        }
+        return input;
+    }
+
+    function run(list, find, chunkSize, result) {
+        var i, rowIndex = list.indexOf(find);
+        for (i = 0; i < list.length; i += 1) {
+            exports.templateModel.templates[list[i]] = {
+                name: list[i],
+                item: 'item',
+                height: 10,
+                template: '<div class="row row-' + i + '">' + list[i] + '</div>'
+            };
+        }
+        var el = document.createElement('div');
+        chunkModel.chunkDom(list, chunkSize, '<div class="chunky">', '</div>', el);
+//        console.log("original %o", el.childNodes[0]);
+        var indexes = chunkModel.getRowIndexes(rowIndex);
+        el = chunkModel.getRow(rowIndex);
+        expect(indexes).toEqual(result);
+        expect(el.innerHTML).toEqual(find);
+    }
+
+    createTests();
+
+});

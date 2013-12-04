@@ -1,5 +1,5 @@
 function Flow() {
-    var exports = {},
+    var exp = {},
         running = false,
         intv,
         current = null,
@@ -27,7 +27,7 @@ function Flow() {
         var i = 0, len = list.length;
         while (i < len) {
             if (list[i].label === item.label && list[i] !== current) {
-                exports.log("flow:clear duplicate item %c%s", consoleMethodStyle, item.label);
+                exp.log("flow:clear duplicate item %c%s", consoleMethodStyle, item.label);
                 list.splice(i, 1);
                 i -= 1;
                 len -= 1;
@@ -64,7 +64,7 @@ function Flow() {
 
     function done() {
         execEndTime = Date.now();
-        exports.log("flow:finish %c%s took %dms", consoleMethodStyle, current.label, execEndTime - execStartTime);
+        exp.log("flow:finish %c%s took %dms", consoleMethodStyle, current.label, execEndTime - execStartTime);
         current = null;
         list.shift();
         if (list.length) {
@@ -77,7 +77,7 @@ function Flow() {
         if (!current && list.length) {
             current = list[0];
             if (current.delay !== undefined) {
-                exports.log("\tflow:delay for %c%s %sms", consoleMethodStyle, current.label, current.delay);
+                exp.log("\tflow:delay for %c%s %sms", consoleMethodStyle, current.label, current.delay);
                 clearTimeout(intv);
                 intv = setTimeout(exec, current.delay);
             } else {
@@ -87,7 +87,7 @@ function Flow() {
     }
 
     function exec() {
-        exports.log("flow:start method %c%s", consoleMethodStyle, current.label);
+        exp.log("flow:start method %c%s", consoleMethodStyle, current.label);
         var methodHasDoneArg = hasDoneArg(current.method);
         if (methodHasDoneArg) current.args.push(done);
         execStartTime = Date.now();
@@ -103,18 +103,18 @@ function Flow() {
     function destroy() {
         clearTimeout(intv);
         list.length = 0;
-        exports.log('flow destroyed');
-        exports = null;
+        exp.log('flow destroyed');
+        exp = null;
     }
 
-    exports.insert = insert;
-    exports.add = add;
-    exports.unique = unique;
-    exports.run = run;
-    exports.destroy = destroy;
-    exports.log = function () {
+    exp.insert = insert;
+    exp.add = add;
+    exp.unique = unique;
+    exp.run = run;
+    exp.destroy = destroy;
+    exp.log = function () {
         console.log.apply(console, arguments);
     };
 
-    return exports;
+    return exp;
 }

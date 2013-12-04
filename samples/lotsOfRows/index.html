@@ -12,21 +12,9 @@
     <link type="text/css" rel="stylesheet" href="loader.css">
     <link type="text/css" rel="stylesheet" href="main.css">
     <link type="text/css" rel="stylesheet" href="cssIcons.css">
-    <script src="../../lib/angular.js"></script>
-    <script src="../../src/lib/each.js"></script>
-    <script src="../../src/lib/charPack.js"></script>
-    <script src="../../src/lib/ux-dispatcher.js"></script>
-    <script src="../../src/ux-listView-config.js"></script>
-    <script src="../../src/core/addons/chunkModel.js"></script>
-    <script src="../../src/core/Flow.js"></script>
-    <script src="../../src/core/addons/templateModel.js"></script>
-    <script src="../../src/core/addons/scrollModel.js"></script>
-    <script src="../../src/core/addons/normalizeModel.js"></script>
-    <script src="../../src/core/addons/statsModel.js"></script>
-    <script src="../../src/core/addons/creepRenderModel.js"></script>
-    <script src="../../src/ux-listView.js"></script>
-    <script src="../../src/addons/iosScrollFrictionAddon.js"></script>
-    <script src="../../src/lib/angular-ux-addons.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.1.5/angular.min.js"></script>
+    <!--<script src="../../lib/angular.js"></script>-->
+    <script src="../../build/angular-ux-listview.js"></script>
     <!-- performance testing -->
     <style type="text/css">
         .performance-report {
@@ -55,7 +43,7 @@
             }, 1000);
 
             $scope.scrollToPercent = function (percent) {
-                var listView = angular.element.find('.list-view');
+                var listView = document.getElementsByClassName('list-view');
                 listView[0].scrollTop = angular.element(listView[0]).children()[0].offsetHeight * percent;
             }
         }
@@ -120,7 +108,7 @@
             }
         });
 
-        angular.module('app', ['ux', 'progress', 'addons']);
+        angular.module('app', ['ux', 'progress']);
     </script>
     <!--//
         Note: {{fake}} below is to get angular to process the class attribute. This wipes out any css classes that were added by jquery.

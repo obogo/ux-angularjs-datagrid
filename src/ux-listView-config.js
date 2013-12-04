@@ -1,5 +1,11 @@
-window.ux = window.ux || {};
-ux.listView = {
+var module;
+try {
+    module = angular.module('ux', ['ng']);
+} catch (e) {
+    module = angular.module('ux');
+}
+
+exports.listView = {
     states: {
         BUILDING: 'lsitView:building',
         APPENDING: 'listView:appending',

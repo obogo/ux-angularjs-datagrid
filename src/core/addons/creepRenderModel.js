@@ -1,5 +1,5 @@
-ux.listView.events.RENDER_PROGRESS = "listView:renderProgress";
-ux.listView.coreAddons.push(function creepRenderModel(exports) {
+exports.listView.events.RENDER_PROGRESS = "listView:renderProgress";
+exports.listView.coreAddons.push(function creepRenderModel(exp) {
 
     var intv = 0,
         percent = 0,
@@ -7,32 +7,32 @@ ux.listView.coreAddons.push(function creepRenderModel(exports) {
         creepLimit = 10; // TODO: this needs to read from export.options
 
     function digest(index) {
-        var s = exports.scopes[index];
+        var s = exp.scopes[index];
         if (!s || !s.digested) {// just skip if already digested.
-            exports.forceRenderScope(index);
+            exp.forceRenderScope(index);
         }
     }
 
     function onInterval(started, ended) {
-        var upIndex = started, downIndex = ended, time = Date.now() + exports.options.renderThreshold;
-        while (time > Date.now() && (upIndex > 0 || downIndex < exports.rowsLength)) {
+        var upIndex = started, downIndex = ended, time = Date.now() + exp.options.renderThreshold;
+        while (time > Date.now() && (upIndex > 0 || downIndex < exp.rowsLength)) {
             if (upIndex >= 0) {
                 digest(upIndex);
                 upIndex -= 1;
             }
-            if (downIndex < exports.rowsLength) {
+            if (downIndex < exp.rowsLength) {
                 digest(downIndex);
                 downIndex += 1;
             }
         }
-        percent = exports.scopes.length / exports.rowsLength;
+        percent = exp.scopes.length / exp.rowsLength;
 //        console.log("rendered %s%", Math.round(percent * 100));
         stop();
         creepCount += 1;
-        if (!exports.values.speed && exports.scopes.length < exports.rowsLength) {
+        if (!exp.values.speed && exp.scopes.length < exp.rowsLength) {
             resetInterval(upIndex, downIndex);
         }
-        exports.dispatch(ux.listView.events.RENDER_PROGRESS, percent);
+        exp.dispatch(ux.listView.events.RENDER_PROGRESS, percent);
     }
 
     function stop() {
@@ -43,7 +43,7 @@ ux.listView.coreAddons.push(function creepRenderModel(exports) {
     function resetInterval(started, ended) {
         stop();
         if (creepCount < creepLimit) {
-            intv = setTimeout(onInterval, exports.options.renderThreshold, started, ended);
+            intv = setTimeout(onInterval, exp.options.renderThreshold, started, ended);
         }
     }
 
@@ -54,6 +54,6 @@ ux.listView.coreAddons.push(function creepRenderModel(exports) {
         }
     }
 
-    exports.unwatchers.push(exports.scope.$on(ux.listView.events.BEFORE_UPDATE_WATCHERS, stop));
-    exports.unwatchers.push(exports.scope.$on(ux.listView.events.AFTER_UPDATE_WATCHERS, onAfterUpdateWatchers));
+    exp.unwatchers.push(exp.scope.$on(ux.listView.events.BEFORE_UPDATE_WATCHERS, stop));
+    exp.unwatchers.push(exp.scope.$on(ux.listView.events.AFTER_UPDATE_WATCHERS, onAfterUpdateWatchers));
 });

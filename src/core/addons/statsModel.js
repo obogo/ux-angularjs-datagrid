@@ -1,5 +1,5 @@
-ux.listView.events.STATS_UPDATE = 'ux-listView:statsUpdate';
-ux.listView.coreAddons.push(function statsModel(exports) {
+exports.listView.events.STATS_UPDATE = 'ux-listView:statsUpdate';
+exports.listView.coreAddons.push(function statsModel(exp) {
     var initStartTime = 0, rendersTotal = 0, renders = [], unwatchers = [];
     var api = {
         initialRenderTime: 0,
@@ -35,14 +35,14 @@ ux.listView.coreAddons.push(function statsModel(exports) {
     function updateAverage() {
         api.renders = renders.length;
         api.averageRenderTime = rendersTotal / api.renders;
-        exports.dispatch(ux.listView.events.STATS_UPDATE, api);
+        exp.dispatch(exports.listView.events.STATS_UPDATE, api);
     }
 
-    unwatchers.push(exports.scope.$on(ux.listView.events.INIT, startInit));
-    unwatchers.push(exports.scope.$on(ux.listView.events.READY, stopInit));
+    unwatchers.push(exp.scope.$on(exports.listView.events.INIT, startInit));
+    unwatchers.push(exp.scope.$on(exports.listView.events.READY, stopInit));
 
-    exports.unwatchers.push(exports.scope.$on(ux.listView.events.BEFORE_UPDATE_WATCHERS, renderStart));
-    exports.unwatchers.push(exports.scope.$on(ux.listView.events.AFTER_UPDATE_WATCHERS, renderStop));
+    exp.unwatchers.push(exp.scope.$on(exports.listView.events.BEFORE_UPDATE_WATCHERS, renderStart));
+    exp.unwatchers.push(exp.scope.$on(exports.listView.events.AFTER_UPDATE_WATCHERS, renderStop));
 
-    exports.stats = api;
+    exp.stats = api;
 });

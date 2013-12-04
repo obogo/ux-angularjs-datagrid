@@ -4,30 +4,63 @@
 * License: MIT.
 */
 (function(exports, global){
-(function() {
-    "use strict";
-    angular.module("addons", []).factory("addons", [ "$injector", function($injector) {
-        function applyAddons(addons, instance) {
-            var i = 0, len = addons.length, result;
-            while (i < len) {
-                result = $injector.get(addons[i]);
-                if (typeof result === "function") {
-                    result(instance);
-                } else {
-                    throw new Error("Addons expect a function to pass the grid instance to.");
-                }
-                i += 1;
+var module;
+
+try {
+    module = angular.module("ux", [ "ng" ]);
+} catch (e) {
+    module = angular.module("ux");
+}
+
+exports.listView = {
+    states: {
+        BUILDING: "lsitView:building",
+        APPENDING: "listView:appending",
+        READY: "listView:ready",
+        DEACTIVATED: "listView:deactivated",
+        ACTIVATED: "listView:activated"
+    },
+    events: {
+        INIT: "uxListView:init",
+        BUILDING_PROGRESS: "uxListView:buildingProgress",
+        APPENDING_PROGRESS: "uxListView:appendingProgress",
+        READY: "uxListView:ready",
+        BEFORE_UPDATE_WATCHERS: "uxListView:beforeUpdateWatchers",
+        AFTER_UPDATE_WATCHERS: "uxListView:afterUpdateWatchers"
+    },
+    options: {
+        compileAllRowsOnInit: false,
+        updateDelay: 50,
+        cushion: 100,
+        chunkSize: 100,
+        uncompiledClass: "uncompiled",
+        dynamicRowHeights: false,
+        renderThreshold: 50
+    },
+    coreAddons: []
+};
+
+module.factory("addons", [ "$injector", function($injector) {
+    function applyAddons(addons, instance) {
+        var i = 0, len = addons.length, result;
+        while (i < len) {
+            result = $injector.get(addons[i]);
+            if (typeof result === "function") {
+                result(instance);
+            } else {
+                throw new Error("Addons expect a function to pass the grid instance to.");
             }
+            i += 1;
         }
-        return function(instance, addons) {
-            addons = addons instanceof Array ? addons : addons && addons.split(",") || [];
-            if (instance.addons) {
-                addons = instance.addons = instance.addons.concat(addons);
-            }
-            applyAddons(addons, instance);
-        };
-    } ]);
-})();
+    }
+    return function(instance, addons) {
+        addons = addons instanceof Array ? addons : addons && addons.split(",") || [];
+        if (instance.addons) {
+            addons = instance.addons = instance.addons.concat(addons);
+        }
+        applyAddons(addons, instance);
+    };
+} ]);
 
 function charPack(char, amount) {
     var str = "";
@@ -123,7 +156,7 @@ exports.util.array = exports.util.array || {};
 exports.util.array.toArray = toArray;
 
 function Flow() {
-    var exports = {}, running = false, intv, current = null, list = [], uniqueMethods = {}, execStartTime, execEndTime, consoleMethodStyle = "font-weight: bold;color:#3399FF;";
+    var exp = {}, running = false, intv, current = null, list = [], uniqueMethods = {}, execStartTime, execEndTime, consoleMethodStyle = "font-weight: bold;color:#3399FF;";
     function getMethodName(method) {
         return method.toString().split(/\b/)[2];
     }
@@ -143,7 +176,7 @@ function Flow() {
         var i = 0, len = list.length;
         while (i < len) {
             if (list[i].label === item.label && list[i] !== current) {
-                exports.log("flow:clear duplicate item %c%s", consoleMethodStyle, item.label);
+                exp.log("flow:clear duplicate item %c%s", consoleMethodStyle, item.label);
                 list.splice(i, 1);
                 i -= 1;
                 len -= 1;
@@ -174,7 +207,7 @@ function Flow() {
     }
     function done() {
         execEndTime = Date.now();
-        exports.log("flow:finish %c%s took %dms", consoleMethodStyle, current.label, execEndTime - execStartTime);
+        exp.log("flow:finish %c%s took %dms", consoleMethodStyle, current.label, execEndTime - execStartTime);
         current = null;
         list.shift();
         if (list.length) {
@@ -186,7 +219,7 @@ function Flow() {
         if (!current && list.length) {
             current = list[0];
             if (current.delay !== undefined) {
-                exports.log("	flow:delay for %c%s %sms", consoleMethodStyle, current.label, current.delay);
+                exp.log("	flow:delay for %c%s %sms", consoleMethodStyle, current.label, current.delay);
                 clearTimeout(intv);
                 intv = setTimeout(exec, current.delay);
             } else {
@@ -195,7 +228,7 @@ function Flow() {
         }
     }
     function exec() {
-        exports.log("flow:start method %c%s", consoleMethodStyle, current.label);
+        exp.log("flow:start method %c%s", consoleMethodStyle, current.label);
         var methodHasDoneArg = hasDoneArg(current.method);
         if (methodHasDoneArg) current.args.push(done);
         execStartTime = Date.now();
@@ -209,183 +242,560 @@ function Flow() {
     function destroy() {
         clearTimeout(intv);
         list.length = 0;
-        exports.log("flow destroyed");
-        exports = null;
+        exp.log("flow destroyed");
+        exp = null;
     }
-    exports.insert = insert;
-    exports.add = add;
-    exports.unique = unique;
-    exports.run = run;
-    exports.destroy = destroy;
-    exports.log = function() {
+    exp.insert = insert;
+    exp.add = add;
+    exp.unique = unique;
+    exp.run = run;
+    exp.destroy = destroy;
+    exp.log = function() {
         console.log.apply(console, arguments);
     };
-    return exports;
+    return exp;
 }
 
-(function() {
-    "use strict";
-    var ChunkArray = function() {};
-    ChunkArray.prototype = Array.prototype;
-    ChunkArray.prototype.min = 0;
-    ChunkArray.prototype.max = 0;
-    ChunkArray.prototype.templateStart = "";
-    ChunkArray.prototype.templateEnd = "";
-    ChunkArray.prototype.getStub = function getStub(str) {
-        return this.templateStart + str + this.templateEnd;
+function ListView(scope, element, attr, $compile) {
+    var flow = new Flow(), unwatchers = [], content, scopes = [], active = [], lastVisibleScrollStart = 0, rowHeights = {}, rowOffsets = {}, viewHeight = 0, options, states = exports.listView.states, events = exports.listView.events, state = states.BUILDING, values = {
+        scroll: 0,
+        speed: 0,
+        absSpeed: 0,
+        scrollingStopIntv: null,
+        activeRange: {
+            min: 0,
+            max: 0
+        }
+    }, exp = {};
+    function init() {
+        flow.unique(render);
+        flow.unique(updateRowWatchers);
+        element.append('<div class="content"></div>');
+        content = element[0].getElementsByClassName("content")[0];
+        setupExports();
+    }
+    function setupExports() {
+        exp.__name = "ux-ListView";
+        exp.scope = scope;
+        exp.element = element;
+        exp.attr = attr;
+        exp.rowsLength = 0;
+        exp.scopes = scopes;
+        exp.data = exp.data || [];
+        exp.flow = flow;
+        exp.unwatchers = unwatchers;
+        exp.values = values;
+        exp.options = options = angular.extend({}, ux.listView.options, scope.$eval(attr.options) || {});
+    }
+    exp.start = function start() {
+        exp.dispatch(ux.listView.events.INIT);
+        flow.add(exp.templateModel.createTemplates);
+        flow.add(function updateDynamicRowHeights() {
+            options.dynamicRowHeights = exp.templateModel.dynamicHeights();
+        });
+        flow.add(addListeners);
+        flow.add(exp.setupScrolling);
     };
-    ChunkArray.prototype.getChildrenStr = function(deep) {
-        var i = 0, len = this.length, str = "", ca = this;
-        while (i < len) {
-            if (ca[i] instanceof ChunkArray) {
-                str += ca[i].getStub(deep ? ca[i].getChildrenStr(deep) : "");
+    function addListeners() {
+        unwatchers.push(scope.$watch(function() {
+            return scope.$eval(attr.uxListView);
+        }, function() {
+            flow.add(onDataChanged, [ arguments ]);
+        }));
+        unwatchers.push(scope.$on("$destroy", destroy));
+    }
+    function getScope(index) {
+        return scopes[index];
+    }
+    function getRowElm(index) {
+        return exp.chunkModel.getRow(index);
+    }
+    function getRowOffset(index) {
+        if (rowOffsets[index] === undefined) {
+            if (options.dynamicRowHeights) {
+                updateAllHeights();
             } else {
-                str += this.templateModel.getTemplate(ca[i]).template;
+                rowOffsets[index] = index * options.rowHeight;
+            }
+        }
+        return rowOffsets[index];
+    }
+    function createDom(list) {
+        flow.log("OVERWRITE DOM!!!");
+        var len = list.length;
+        flow.add(exp.chunkModel.chunkDom, [ list, options.chunkSize, '<div class="ux-list-view-chunk">', "</div>", content ], 0);
+        exp.rowsLength = len;
+        rowHeights = {};
+        flow.log("created %s dom elements", len);
+    }
+    function compileRows(startIndex, limit) {
+        var s, time = Date.now() + options.renderThreshold, count = 0, nextIndex = startIndex;
+        limit = limit || exp.rowsLength;
+        scope.$emit(events.BUILDING_PROGRESS, startIndex, exp.rowsLength);
+        console.log("	compiling at %s", startIndex);
+        while (count < limit && time > Date.now()) {
+            compileRow(startIndex + count);
+            count += 1;
+        }
+        nextIndex += count;
+        flow.log("	compiled %s of %s", count, limit);
+        if (nextIndex < limit) {
+            flow.insert(compileRows, [ nextIndex, limit ], 0);
+        }
+        return count;
+    }
+    function compileRow(index) {
+        var s = scopes[index], prev, tpl, el, unwatch;
+        if (!s) {
+            s = scope.$new();
+            prev = getScope(index - 1);
+            tpl = exp.templateModel.getTemplate(exp.data[index]);
+            if (prev) {
+                prev.$$nextSibling = s;
+                s.$$prevSibling = prev;
+            }
+            s.$status = "compiled";
+            s[tpl.item] = exp.data[index];
+            unwatch = s.$watch(function() {
+                s.digested = true;
+                unwatch();
+            });
+            scopes[index] = s;
+            el = getRowElm(index);
+            $compile(el)(s);
+            deactivateScope(s);
+        }
+        return s;
+    }
+    function buildRows(list) {
+        state = states.BUILDING;
+        if (options.compileAllRowsOnInit) {
+            flow.insert(compileRows, [ 0, exp.rowsLength ]);
+        }
+        flow.insert(createDom, [ list ], 0);
+    }
+    function ready() {
+        state = states.READY;
+        flow.add(render);
+        flow.add(fireReadyEvent);
+        flow.add(safeDigest, [ scope ]);
+    }
+    function fireReadyEvent() {
+        scope.$emit(ux.listView.events.READY);
+    }
+    function safeDigest(s) {
+        if (!s.$$phase) {
+            s.$digest();
+        }
+    }
+    function hasClass(node, cls) {
+        var elClasses = " " + node.className + " ";
+        return elClasses.indexOf(cls) >= 0;
+    }
+    function removeClass(node, cls) {
+        if (cls) {
+            var newClass = " " + node.className.replace(/[\t\r\n]/g, " ") + " ";
+            var classes = newClass.split(" ");
+            var index = classes.indexOf(cls);
+            if (index !== -1) {
+                classes.splice(index, 1);
+                node.className = classes.join(" ");
+            }
+        } else {
+            node.className = "";
+        }
+    }
+    function deactivateScope(s) {
+        var child;
+        if (s && !isActive(s)) {
+            s.$broadcast(events.DEACTIVATED);
+            s.$$$watchers = s.$$watchers;
+            s.$$watchers = [];
+            if (s.$$childHead) {
+                child = s.$$childHead;
+                while (child) {
+                    deactivateScope(child);
+                    child = child.$$nextSibling;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    function activateScope(s) {
+        var child;
+        if (s && s.$$$watchers) {
+            s.$$watchers = s.$$$watchers;
+            s.$$$watchers = null;
+            if (s.$$childHead) {
+                child = s.$$childHead;
+                while (child) {
+                    activateScope(child);
+                    child = child.$$nextSibling;
+                }
+            }
+            s.$broadcast(events.ACTIVATED);
+            return true;
+        }
+        return !!(s && !s.$$$watchers);
+    }
+    function isActive(index) {
+        var s = scopes[index];
+        return !!(s && !s.$$$watchers);
+    }
+    function getOffsetIndex(offset) {
+        var est = Math.floor(offset / exp.templateModel.averageTemplateHeight()), i = 0;
+        if (rowOffsets[est] && rowOffsets[est] <= offset) {
+            i = est;
+        }
+        while (i < exp.rowsLength) {
+            if (rowOffsets[i] > offset) {
+                return i - 1;
             }
             i += 1;
         }
-        this.rendered = true;
-        return str;
-    };
-    ux.listView.coreAddons.chunkModel = function chunkModel(exports) {
-        var _list, _rows, _chunkSize, _el, result = {};
-        function getChunkList() {
-            return _list;
+        return i;
+    }
+    function getStartingIndex() {
+        var height = viewHeight, result = {
+            startIndex: 0,
+            i: 0,
+            inc: 1,
+            end: exp.rowsLength,
+            visibleScrollStart: values.scroll + options.cushion,
+            visibleScrollEnd: values.scroll + height - options.cushion
+        };
+        result.startIndex = result.i = getOffsetIndex(values.scroll);
+        return result;
+    }
+    function updateAllHeights() {
+        var height = 0, i = 0;
+        while (i < exp.rowsLength) {
+            rowOffsets[i] = height;
+            height += exp.templateModel.getTemplateHeight(exp.data[i]);
+            i += 1;
         }
-        function chunkList(list, size, templateStart, templateEnd) {
-            var i = 0, len = list.length, result = new ChunkArray(), childAry, item;
-            while (i < len) {
-                item = list[i];
-                if (i % size === 0) {
-                    if (childAry) {
-                        calculateHeight(childAry);
-                    }
-                    childAry = new ChunkArray();
-                    childAry.min = item.min || i;
-                    childAry.templateModel = exports.templateModel;
-                    childAry.templateStart = templateStart;
-                    childAry.templateEnd = templateEnd;
-                    result.push(childAry);
+        options.rowHeight = exp.templateModel.getTemplateHeight("default");
+    }
+    function updateRowWatchers() {
+        var loop = getStartingIndex(), offset = loop.i * 40, lastActive = [].concat(active), lastActiveIndex, s, prevS;
+        exp.dispatch(events.BEFORE_UPDATE_WATCHERS, loop);
+        resetMinMax();
+        active.length = 0;
+        flow.log("	visibleScrollStart %s visibleScrollEnd %s", loop.visibleScrollStart, loop.visibleScrollEnd);
+        while (loop.i < exp.rowsLength) {
+            prevS = scope.$$childHead ? scopes[loop.i - 1] : null;
+            s = compileRow(loop.i);
+            offset = getRowOffset(loop.i);
+            if (offset >= loop.visibleScrollStart && offset <= loop.visibleScrollEnd) {
+                if (loop.started === undefined) {
+                    loop.started = loop.i;
                 }
-                childAry.push(item);
-                childAry.max = item.max || i;
+                updateMinMax(loop.i);
+                if (activateScope(s)) {
+                    removeClass(getRowElm(loop.i), options.uncompiledClass);
+                    lastActiveIndex = lastActive.indexOf(loop.i);
+                    if (lastActiveIndex !== -1) {
+                        lastActive.splice(lastActiveIndex, 1);
+                    }
+                    active.push(loop.i);
+                }
+            }
+            loop.i += loop.inc;
+            if (loop.inc > 0 && offset > loop.visibleScrollEnd || loop.inc < 0 && offset < loop.visibleScrollStart) {
+                break;
+            }
+        }
+        loop.ended = loop.i - 1;
+        flow.log("	startIndex %s endIndex %s", loop.startIndex, loop.i);
+        deactivateList(lastActive);
+        lastVisibleScrollStart = loop.visibleScrollStart;
+        flow.log("	activated %s", active.join(", "));
+        updateLinks();
+        exp.dispatch(events.AFTER_UPDATE_WATCHERS, loop);
+        flow.add(safeDigest, [ scope ]);
+    }
+    function deactivateList(lastActive) {
+        var lastActiveIndex, deactivated = [];
+        while (lastActive.length) {
+            lastActiveIndex = lastActive.pop();
+            deactivated.push(lastActiveIndex);
+            deactivateScope(scopes[lastActiveIndex]);
+        }
+        flow.log("	deactivated %s", deactivated.join(", "));
+    }
+    function updateLinks() {
+        if (active.length) {
+            var lastIndex = active[active.length - 1], i = 0, len = active.length;
+            scope.$$childHead = scopes[active[0]];
+            scope.$$childTail = scopes[lastIndex];
+            while (i < len) {
+                scopes[active[i]].$$prevSibling = scopes[active[i - 1]];
+                scopes[active[i]].$$nextSibling = scopes[active[i + 1]];
                 i += 1;
             }
-            calculateHeight(childAry);
-            if (!result.min) {
-                result.min = result[0].min;
-                result.max = result[result.length - 1].max;
-                result.templateStart = templateStart;
-                result.templateEnd = templateEnd;
-                calculateHeight(result);
-            }
-            return result.length > size ? chunkList(result, size, templateStart, templateEnd) : result;
         }
-        function calculateHeight(ary) {
-            if (ary[0] instanceof ChunkArray) {
-                var i = 0, len = ary.length, height = 0;
-                while (i < len) {
-                    height += ary[i].height;
-                    i += 1;
+    }
+    function resetMinMax() {
+        values.activeRange.min = values.activeRange.max = -1;
+    }
+    function updateMinMax(activeIndex) {
+        values.activeRange.min = values.activeRange.min < activeIndex && values.activeRange.min > 0 ? values.activeRange.min : activeIndex;
+        values.activeRange.max = values.activeRange.max > activeIndex && values.activeRange.max > 0 ? values.activeRange.max : activeIndex;
+    }
+    function render() {
+        if (state === states.BUILDING) {
+            viewHeight = element[0].offsetHeight;
+            flow.add(buildRows, [ exp.data ], 0);
+            flow.add(updateAllHeights);
+            flow.add(ready);
+        } else if (state === states.READY) {
+            flow.add(updateRowWatchers);
+        } else {
+            throw new Error("RENDER STATE INVALID");
+        }
+    }
+    function onDataChanged() {
+        flow.log("dataChanged");
+        exp.data = exp.setData(scope.$eval(attr.uxListView || attr.list), scope.$eval(attr.grouped)) || [];
+        flow.add(reset);
+    }
+    function reset() {
+        viewHeight = 0;
+        destroyScopes();
+        content.innerHTML = "";
+        setupExports();
+        exp.chunkModel.reset();
+        state = states.BUILDING;
+        flow.add(render);
+    }
+    exp.forceRenderScope = function forceRenderScope(index) {
+        var s = scopes[index];
+        if (!s && index > 0 && index < exp.rowsLength) {
+            s = compileRow(index);
+        }
+        if (s) {
+            activateScope(s);
+            s.$digest();
+            deactivateScope(s);
+        }
+    };
+    exp.dispatch = function dispatch() {
+        scope.$emit.apply(scope, arguments);
+    };
+    function destroyScopes() {
+        each(scopes, function(s) {
+            return s && s.$destroy();
+        });
+    }
+    function destroy() {
+        clearTimeout(values.scrollingStopIntv);
+        values = null;
+        while (unwatchers.length) {
+            unwatchers.pop()();
+        }
+        flow.destroy();
+        element[0].removeEventListener("scroll", exp.onUpdateScroll);
+        scope.$$childHead = scopes[0];
+        destroyScopes();
+        for (var i in exp) {
+            if (exp[i] && exp.hasOwnProperty("destroy")) {
+                exp[i].destroy();
+            }
+            exp[i] = null;
+        }
+    }
+    flow.add(init);
+    flow.run();
+    exp.render = function() {
+        flow.add(render);
+    };
+    return exp;
+}
+
+module.directive("uxListView", [ "$compile", "addons", function($compile, addons) {
+    return {
+        restrict: "AE",
+        link: function(scope, element, attr) {
+            var lv = new ListView(scope, element, attr, $compile);
+            each(ux.listView.coreAddons, function(method) {
+                method.apply(lv, [ lv ]);
+            });
+            addons(lv, attr.addons);
+            lv.start();
+        }
+    };
+} ]);
+
+var ChunkArray = function() {};
+
+ChunkArray.prototype = Array.prototype;
+
+ChunkArray.prototype.min = 0;
+
+ChunkArray.prototype.max = 0;
+
+ChunkArray.prototype.templateStart = "";
+
+ChunkArray.prototype.templateEnd = "";
+
+ChunkArray.prototype.getStub = function getStub(str) {
+    return this.templateStart + str + this.templateEnd;
+};
+
+ChunkArray.prototype.getChildrenStr = function(deep) {
+    var i = 0, len = this.length, str = "", ca = this;
+    while (i < len) {
+        if (ca[i] instanceof ChunkArray) {
+            str += ca[i].getStub(deep ? ca[i].getChildrenStr(deep) : "");
+        } else {
+            str += this.templateModel.getTemplate(ca[i]).template;
+        }
+        i += 1;
+    }
+    this.rendered = true;
+    return str;
+};
+
+ux.listView.coreAddons.chunkModel = function chunkModel(exp) {
+    var _list, _rows, _chunkSize, _el, result = {};
+    function getChunkList() {
+        return _list;
+    }
+    function chunkList(list, size, templateStart, templateEnd) {
+        var i = 0, len = list.length, result = new ChunkArray(), childAry, item;
+        while (i < len) {
+            item = list[i];
+            if (i % size === 0) {
+                if (childAry) {
+                    calculateHeight(childAry);
                 }
-                ary.height = height;
-            } else {
-                ary.height = exports.templateModel.getHeight(_rows, ary.min, ary.max);
+                childAry = new ChunkArray();
+                childAry.min = item.min || i;
+                childAry.templateModel = exp.templateModel;
+                childAry.templateStart = templateStart;
+                childAry.templateEnd = templateEnd;
+                result.push(childAry);
             }
-            ary.templateStart = ary.templateStart.substr(0, ary.templateStart.length - 1) + ' style="width:100%;height:' + ary.height + 'px;">';
+            childAry.push(item);
+            childAry.max = item.max || i;
+            i += 1;
         }
-        function chunkDom(list, size, templateStart, templateEnd, el) {
-            _el = el;
-            _chunkSize = size;
-            _rows = list;
-            _list = chunkList(list, size, templateStart, templateEnd);
-            return el;
+        if (childAry) calculateHeight(childAry);
+        if (!result.min) {
+            result.min = result[0] ? result[0].min : 0;
+            result.max = result[result.length - 1] ? result[result.length - 1].max : 0;
+            result.templateStart = templateStart;
+            result.templateEnd = templateEnd;
+            calculateHeight(result);
         }
-        function getRowIndexes(rowIndex, chunkList, indexes) {
-            var i = 0, len = chunkList.length, chunk;
-            indexes = indexes || [];
+        return result.length > size ? chunkList(result, size, templateStart, templateEnd) : result;
+    }
+    function calculateHeight(ary) {
+        if (ary[0] instanceof ChunkArray) {
+            var i = 0, len = ary.length, height = 0;
             while (i < len) {
-                chunk = chunkList[i];
-                if (chunk instanceof ChunkArray) {
-                    if (rowIndex >= chunk.min && rowIndex <= chunk.max) {
-                        indexes.push(i);
-                        getRowIndexes(rowIndex, chunk, indexes);
-                        break;
-                    }
-                } else {
-                    indexes.push(rowIndex % _chunkSize);
+                height += ary[i].height;
+                i += 1;
+            }
+            ary.height = height;
+        } else {
+            ary.height = exp.templateModel.getHeight(_rows, ary.min, ary.max);
+        }
+        ary.templateStart = ary.templateStart.substr(0, ary.templateStart.length - 1) + ' style="width:100%;height:' + ary.height + 'px;">';
+    }
+    function chunkDom(list, size, templateStart, templateEnd, el) {
+        _el = el;
+        _chunkSize = size;
+        _rows = list;
+        _list = chunkList(list, size, templateStart, templateEnd);
+        return el;
+    }
+    function getRowIndexes(rowIndex, chunkList, indexes) {
+        var i = 0, len = chunkList.length, chunk;
+        indexes = indexes || [];
+        while (i < len) {
+            chunk = chunkList[i];
+            if (chunk instanceof ChunkArray) {
+                if (rowIndex >= chunk.min && rowIndex <= chunk.max) {
+                    indexes.push(i);
+                    getRowIndexes(rowIndex, chunk, indexes);
                     break;
                 }
-                i += 1;
+            } else {
+                indexes.push(rowIndex % _chunkSize);
+                break;
             }
-            return indexes;
+            i += 1;
         }
-        function getRow(rowIndex) {
-            var indexes = getRowIndexes(rowIndex, _list);
-            return buildDomByIndexes(indexes);
-        }
-        function buildDomByIndexes(indexes) {
-            var i = 0, index, indxs = indexes.slice(0), ca = _list, el = _el;
-            while (i < indxs.length) {
-                index = indxs.shift();
-                if (!ca.rendered) {
-                    //!el.childElementCount) {
-                    el.innerHTML = ca.getChildrenStr();
-                }
-                ca = ca[index];
-                el = el.childNodes[index];
+        return indexes;
+    }
+    function getRow(rowIndex) {
+        var indexes = getRowIndexes(rowIndex, _list);
+        return buildDomByIndexes(indexes);
+    }
+    function buildDomByIndexes(indexes) {
+        var i = 0, index, indxs = indexes.slice(0), ca = _list, el = _el;
+        while (i < indxs.length) {
+            index = indxs.shift();
+            if (!ca.rendered) {
+                //!el.childElementCount) {
+                el.innerHTML = ca.getChildrenStr();
             }
-            return el;
+            ca = ca[index];
+            el = el.childNodes[index];
         }
-        function reset() {
-            if (_el) _el.innerHTML = "";
-            _list = null;
-            _chunkSize = null;
-            _el = null;
-        }
-        result.chunkDom = chunkDom;
-        result.getChunkList = getChunkList;
-        result.getRowIndexes = function(rowIndex) {
-            return getRowIndexes(rowIndex, _list);
-        };
-        result.getRow = getRow;
-        result.reset = reset;
-        dispatcher(result);
-        exports.chunkModel = result;
-        return result;
+        return el;
+    }
+    function reset() {
+        if (_el) _el.innerHTML = "";
+        _list = null;
+        _chunkSize = null;
+        _el = null;
+    }
+    result.chunkDom = chunkDom;
+    result.getChunkList = getChunkList;
+    result.getRowIndexes = function(rowIndex) {
+        return getRowIndexes(rowIndex, _list);
     };
-    ux.listView.coreAddons.push(ux.listView.coreAddons.chunkModel);
-})();
+    result.getRow = getRow;
+    result.reset = reset;
+    dispatcher(result);
+    exp.chunkModel = result;
+    return result;
+};
 
-ux.listView.events.RENDER_PROGRESS = "listView:renderProgress";
+exports.listView.coreAddons.push(ux.listView.coreAddons.chunkModel);
 
-ux.listView.coreAddons.push(function creepRenderModel(exports) {
+exports.listView.events.RENDER_PROGRESS = "listView:renderProgress";
+
+exports.listView.coreAddons.push(function creepRenderModel(exp) {
     var intv = 0, percent = 0, creepCount = 0, creepLimit = 10;
     function digest(index) {
-        var s = exports.scopes[index];
+        var s = exp.scopes[index];
         if (!s || !s.digested) {
-            exports.forceRenderScope(index);
+            exp.forceRenderScope(index);
         }
     }
     function onInterval(started, ended) {
-        var upIndex = started, downIndex = ended, time = Date.now() + exports.options.renderThreshold;
-        while (time > Date.now() && (upIndex > 0 || downIndex < exports.rowsLength)) {
+        var upIndex = started, downIndex = ended, time = Date.now() + exp.options.renderThreshold;
+        while (time > Date.now() && (upIndex > 0 || downIndex < exp.rowsLength)) {
             if (upIndex >= 0) {
                 digest(upIndex);
                 upIndex -= 1;
             }
-            if (downIndex < exports.rowsLength) {
+            if (downIndex < exp.rowsLength) {
                 digest(downIndex);
                 downIndex += 1;
             }
         }
-        percent = exports.scopes.length / exports.rowsLength;
+        percent = exp.scopes.length / exp.rowsLength;
         stop();
         creepCount += 1;
-        if (!exports.values.speed && exports.scopes.length < exports.rowsLength) {
+        if (!exp.values.speed && exp.scopes.length < exp.rowsLength) {
             resetInterval(upIndex, downIndex);
         }
-        exports.dispatch(ux.listView.events.RENDER_PROGRESS, percent);
+        exp.dispatch(ux.listView.events.RENDER_PROGRESS, percent);
     }
     function stop() {
         clearTimeout(intv);
@@ -394,7 +804,7 @@ ux.listView.coreAddons.push(function creepRenderModel(exports) {
     function resetInterval(started, ended) {
         stop();
         if (creepCount < creepLimit) {
-            intv = setTimeout(onInterval, exports.options.renderThreshold, started, ended);
+            intv = setTimeout(onInterval, exp.options.renderThreshold, started, ended);
         }
     }
     function onAfterUpdateWatchers(event, loopData) {
@@ -403,11 +813,11 @@ ux.listView.coreAddons.push(function creepRenderModel(exports) {
             resetInterval(loopData.started, loopData.ended);
         }
     }
-    exports.unwatchers.push(exports.scope.$on(ux.listView.events.BEFORE_UPDATE_WATCHERS, stop));
-    exports.unwatchers.push(exports.scope.$on(ux.listView.events.AFTER_UPDATE_WATCHERS, onAfterUpdateWatchers));
+    exp.unwatchers.push(exp.scope.$on(ux.listView.events.BEFORE_UPDATE_WATCHERS, stop));
+    exp.unwatchers.push(exp.scope.$on(ux.listView.events.AFTER_UPDATE_WATCHERS, onAfterUpdateWatchers));
 });
 
-ux.listView.coreAddons.push(function normalizeModel(exports) {
+exports.listView.coreAddons.push(function normalizeModel(exp) {
     var originalData, normalizedData;
     function normalize(data, grouped, normalized) {
         var i = 0, len = data.length;
@@ -421,7 +831,7 @@ ux.listView.coreAddons.push(function normalizeModel(exports) {
         }
         return normalized;
     }
-    exports.setData = function(data, grouped) {
+    exp.setData = function(data, grouped) {
         originalData = data;
         if (grouped) {
             normalizedData = normalize(data, grouped);
@@ -430,50 +840,50 @@ ux.listView.coreAddons.push(function normalizeModel(exports) {
         }
         return normalizedData;
     };
-    exports.getData = function() {
+    exp.getData = function() {
         return normalizedData;
     };
-    exports.getOriginalData = function() {
+    exp.getOriginalData = function() {
         return originalData;
     };
-    return exports;
+    return exp;
 });
 
-ux.listView.coreAddons.push(function scrollModel(exports) {
-    exports.setupScrolling = function setupScrolling() {
-        exports.element[0].addEventListener("scroll", exports.onUpdateScroll);
-        exports.unwatchers.push(function() {
-            exports.element[0].removeEventListener("scroll", exports.onUpdateScroll);
+exports.listView.coreAddons.push(function scrollModel(exp) {
+    exp.setupScrolling = function setupScrolling() {
+        exp.element[0].addEventListener("scroll", exp.onUpdateScroll);
+        exp.unwatchers.push(function() {
+            exp.element[0].removeEventListener("scroll", exp.onUpdateScroll);
         });
     };
-    exports.onUpdateScroll = function onUpdateScroll(event) {
-        var val = (event.target || event.srcElement || exports.element[0]).scrollTop;
-        if (exports.values.scroll !== val) {
-            exports.values.speed = val - exports.values.scroll;
-            exports.values.absSpeed = Math.abs(exports.values.speed);
-            exports.values.scroll = val;
+    exp.onUpdateScroll = function onUpdateScroll(event) {
+        var val = (event.target || event.srcElement || exp.element[0]).scrollTop;
+        if (exp.values.scroll !== val) {
+            exp.values.speed = val - exp.values.scroll;
+            exp.values.absSpeed = Math.abs(exp.values.speed);
+            exp.values.scroll = val;
         }
-        exports.waitForStop();
+        exp.waitForStop();
     };
-    exports.scrollTo = function scrollTo(value) {
-        exports.element[0].scrollTop = value;
-        exports.waitForStop();
+    exp.scrollTo = function scrollTo(value) {
+        exp.element[0].scrollTop = value;
+        exp.waitForStop();
     };
-    exports.waitForStop = function waitForStop() {
-        clearTimeout(exports.values.scrollingStopIntv);
-        exports.values.scrollingStopIntv = setTimeout(exports.onScrollingStop, exports.options.updateDelay);
+    exp.waitForStop = function waitForStop() {
+        clearTimeout(exp.values.scrollingStopIntv);
+        exp.values.scrollingStopIntv = setTimeout(exp.onScrollingStop, exp.options.updateDelay);
     };
-    exports.onScrollingStop = function onScrollingStop() {
-        exports.flow.log("scrollingStop");
-        exports.values.speed = 0;
-        exports.values.absSpeed = 0;
-        exports.flow.add(exports.render);
+    exp.onScrollingStop = function onScrollingStop() {
+        exp.flow.log("scrollingStop");
+        exp.values.speed = 0;
+        exp.values.absSpeed = 0;
+        exp.flow.add(exp.render);
     };
 });
 
-ux.listView.events.STATS_UPDATE = "ux-listView:statsUpdate";
+exports.listView.events.STATS_UPDATE = "ux-listView:statsUpdate";
 
-ux.listView.coreAddons.push(function statsModel(exports) {
+exports.listView.coreAddons.push(function statsModel(exp) {
     var initStartTime = 0, rendersTotal = 0, renders = [], unwatchers = [];
     var api = {
         initialRenderTime: 0,
@@ -503,16 +913,16 @@ ux.listView.coreAddons.push(function statsModel(exports) {
     function updateAverage() {
         api.renders = renders.length;
         api.averageRenderTime = rendersTotal / api.renders;
-        exports.dispatch(ux.listView.events.STATS_UPDATE, api);
+        exp.dispatch(exports.listView.events.STATS_UPDATE, api);
     }
-    unwatchers.push(exports.scope.$on(ux.listView.events.INIT, startInit));
-    unwatchers.push(exports.scope.$on(ux.listView.events.READY, stopInit));
-    exports.unwatchers.push(exports.scope.$on(ux.listView.events.BEFORE_UPDATE_WATCHERS, renderStart));
-    exports.unwatchers.push(exports.scope.$on(ux.listView.events.AFTER_UPDATE_WATCHERS, renderStop));
-    exports.stats = api;
+    unwatchers.push(exp.scope.$on(exports.listView.events.INIT, startInit));
+    unwatchers.push(exp.scope.$on(exports.listView.events.READY, stopInit));
+    exp.unwatchers.push(exp.scope.$on(exports.listView.events.BEFORE_UPDATE_WATCHERS, renderStart));
+    exp.unwatchers.push(exp.scope.$on(exports.listView.events.AFTER_UPDATE_WATCHERS, renderStop));
+    exp.stats = api;
 });
 
-ux.listView.coreAddons.push(function templateModel(exports) {
+exports.listView.coreAddons.push(function templateModel(exp) {
     "use strict";
     function trim(str) {
         str = str.replace(/\n/g, "");
@@ -521,21 +931,21 @@ ux.listView.coreAddons.push(function templateModel(exports) {
         str = str.replace(/>[\t ]+$/g, ">");
         return str;
     }
-    exports.templateModel = function() {
+    exp.templateModel = function() {
         var templates = {}, totalHeight;
         function createTemplates() {
-            var i, scriptTemplates = exports.element[0].getElementsByTagName("script"), len = scriptTemplates.length;
+            var i, scriptTemplates = exp.element[0].getElementsByTagName("script"), len = scriptTemplates.length;
             for (i = 0; i < len; i += 1) {
                 createTemplate(scriptTemplates[i]);
             }
             while (scriptTemplates.length) {
-                exports.element[0].removeChild(scriptTemplates[0]);
+                exp.element[0].removeChild(scriptTemplates[0]);
             }
         }
         function createTemplate(scriptTemplate) {
             var template = trim(angular.element(scriptTemplate).html()), wrapper = document.createElement("div"), templateData;
             template = angular.element(template)[0];
-            template.className += " " + exports.options.uncompiledClass + " {{$status}}";
+            template.className += " " + exp.options.uncompiledClass + " {{$status}}";
             wrapper.appendChild(template);
             document.body.appendChild(wrapper);
             template = trim(wrapper.innerHTML);
@@ -598,6 +1008,9 @@ ux.listView.coreAddons.push(function templateModel(exports) {
         }
         function getHeight(list, startRowIndex, endRowIndex) {
             var i = startRowIndex, height = 0;
+            if (!list.length) {
+                return 0;
+            }
             while (i <= endRowIndex) {
                 height += getTemplateHeight(list[i]);
                 i += 1;
@@ -617,60 +1030,57 @@ ux.listView.coreAddons.push(function templateModel(exports) {
     }();
 });
 
-(function() {
-    "use strict";
-    angular.module("ux").factory("iosScrollFrictionAddon", function() {
-        return function(listView) {
-            var exports = listView, values = exports.values, flow = exports.flow, friction = .95, stopThreshold = 1, iOS = navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false;
-            if (iOS) {
-                exports.setupScrolling = function setupScrolling() {
-                    flow.log("scrollFriction:setupScrolling");
-                    exports.options.updateDelay = 10;
-                    exports.element[0].addEventListener("scroll", exports.onUpdateScroll);
-                    exports.unwatchers.push(function() {
-                        exports.element[0].removeEventListener("scroll", exports.onUpdateScroll);
-                    });
-                };
-                exports.onUpdateScroll = function onUpdateScroll(event) {
-                    flow.log("scrollFriction:onUpdateScroll");
-                    var val = (event.target || event.srcElement || exports.element[0]).scrollTop;
-                    if (values.scroll !== val) {
-                        values.speed = val - values.scroll;
-                        values.absSpeed = Math.abs(values.speed);
-                        values.scroll = val;
-                    }
-                    exports.waitForStop();
-                };
-                exports.scrollTo = function scrollTo(value) {
-                    exports.element[0].scrollTop = value;
-                    exports.waitForStop();
-                };
-                exports.waitForStop = function waitForStop() {
-                    flow.log("scrollFriction:waitForStop");
-                    clearTimeout(values.scrollingStopIntv);
-                    values.scrollingStopIntv = setTimeout(exports.onScrollingStop, exports.options.updateDelay);
-                };
-                exports.onScrollingStop = function onScrollingStop() {
-                    flow.log("scrollFriction:scrollingStop");
-                    if (values.absSpeed > stopThreshold) {
-                        exports.applyScrollFriction();
-                    } else {
-                        values.speed = 0;
-                        values.absSpeed = 0;
-                        flow.add(exports, exports.render);
-                    }
-                };
-                exports.applyScrollFriction = function applyScrollFriction() {
-                    var value = 0;
-                    if (values.absSpeed > stopThreshold) {
-                        value = values.speed * friction;
-                    }
-                    if (value) {
-                        listView.element[0].scrollTop += value;
-                    }
-                };
-            }
-        };
-    });
-})();
+angular.module("ux").factory("iosScrollFrictionAddon", function() {
+    return function(listView) {
+        var exp = listView, values = exp.values, flow = exp.flow, friction = .95, stopThreshold = 1, iOS = navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false;
+        if (iOS) {
+            exp.setupScrolling = function setupScrolling() {
+                flow.log("scrollFriction:setupScrolling");
+                exp.options.updateDelay = 10;
+                exp.element[0].addEventListener("scroll", exp.onUpdateScroll);
+                exp.unwatchers.push(function() {
+                    exp.element[0].removeEventListener("scroll", exp.onUpdateScroll);
+                });
+            };
+            exp.onUpdateScroll = function onUpdateScroll(event) {
+                flow.log("scrollFriction:onUpdateScroll");
+                var val = (event.target || event.srcElement || exp.element[0]).scrollTop;
+                if (values.scroll !== val) {
+                    values.speed = val - values.scroll;
+                    values.absSpeed = Math.abs(values.speed);
+                    values.scroll = val;
+                }
+                exp.waitForStop();
+            };
+            exp.scrollTo = function scrollTo(value) {
+                exp.element[0].scrollTop = value;
+                exp.waitForStop();
+            };
+            exp.waitForStop = function waitForStop() {
+                flow.log("scrollFriction:waitForStop");
+                clearTimeout(values.scrollingStopIntv);
+                values.scrollingStopIntv = setTimeout(exp.onScrollingStop, exp.options.updateDelay);
+            };
+            exp.onScrollingStop = function onScrollingStop() {
+                flow.log("scrollFriction:scrollingStop");
+                if (values.absSpeed > stopThreshold) {
+                    exp.applyScrollFriction();
+                } else {
+                    values.speed = 0;
+                    values.absSpeed = 0;
+                    flow.add(exp.render);
+                }
+            };
+            exp.applyScrollFriction = function applyScrollFriction() {
+                var value = 0;
+                if (values.absSpeed > stopThreshold) {
+                    value = values.speed * friction;
+                }
+                if (value) {
+                    listView.element[0].scrollTop += value;
+                }
+            };
+        }
+    };
+});
 }(this.ux = this.ux || {}, function() {return this;}()));

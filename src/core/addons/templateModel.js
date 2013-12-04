@@ -1,5 +1,5 @@
 /*global angular */
-ux.listView.coreAddons.push(function templateModel(exports) {
+exports.listView.coreAddons.push(function templateModel(exp) {
     'use strict';
 
     function trim(str) {
@@ -14,17 +14,17 @@ ux.listView.coreAddons.push(function templateModel(exports) {
         return str;
     }
 
-    exports.templateModel = function () {
+    exp.templateModel = function () {
 
         var templates = {}, totalHeight;
 
         function createTemplates() {
-            var i, scriptTemplates = exports.element[0].getElementsByTagName('script'), len = scriptTemplates.length;
+            var i, scriptTemplates = exp.element[0].getElementsByTagName('script'), len = scriptTemplates.length;
             for (i = 0; i < len; i += 1) {
                 createTemplate(scriptTemplates[i]);
             }
             while (scriptTemplates.length) {
-                exports.element[0].removeChild(scriptTemplates[0]);
+                exp.element[0].removeChild(scriptTemplates[0]);
             }
         }
 
@@ -33,7 +33,7 @@ ux.listView.coreAddons.push(function templateModel(exports) {
                 wrapper = document.createElement('div'),
                 templateData;
             template = angular.element(template)[0];
-            template.className += ' ' + exports.options.uncompiledClass + ' {{$status}}';
+            template.className += ' ' + exp.options.uncompiledClass + ' {{$status}}';
             wrapper.appendChild(template);
             document.body.appendChild(wrapper);
             template = trim(wrapper.innerHTML);
@@ -108,6 +108,9 @@ ux.listView.coreAddons.push(function templateModel(exports) {
 
         function getHeight(list, startRowIndex, endRowIndex) {
             var i = startRowIndex, height = 0;
+            if (!list.length) {
+                return 0;
+            }
             while (i <= endRowIndex) {
                 height += getTemplateHeight(list[i]);
                 i += 1;

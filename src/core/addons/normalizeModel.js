@@ -1,5 +1,5 @@
 /*global ux */
-ux.listView.coreAddons.push(function normalizeModel(exports) {
+exports.listView.coreAddons.push(function normalizeModel(exp) {
 
     var originalData, normalizedData;
 
@@ -16,7 +16,7 @@ ux.listView.coreAddons.push(function normalizeModel(exports) {
         return normalized;
     }
 
-    exports.setData = function (data, grouped) {
+    exp.setData = function (data, grouped) {
         originalData = data;
         if (grouped) {
             normalizedData = normalize(data, grouped);
@@ -25,12 +25,12 @@ ux.listView.coreAddons.push(function normalizeModel(exports) {
         }
         return normalizedData;
     };
-    exports.getData = function () {
+    exp.getData = function () {
         return normalizedData;
     };
-    exports.getOriginalData = function () {
+    exp.getOriginalData = function () {
         return originalData;
     };
 
-    return exports;
+    return exp;
 });

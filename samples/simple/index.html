@@ -8,7 +8,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="shortcut icon" href="images/favicon.ico">
 
-    <link type="text/css" rel="stylesheet" href="loader.css">
     <link type="text/css" rel="stylesheet" href="main.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.min.js"></script>
     <!--<script src="../../lib/angular.js"></script>-->
@@ -20,13 +19,6 @@
         function root($scope) {
             $scope.counter = 0;
             $scope.records = records;
-            $scope.$on(ux.datagrid.events.RENDER_PROGRESS, function (event, percent) {
-                $scope.percent = percent;
-                $scope.$digest();
-            });
-            $scope.$on(ux.datagrid.events.STATS_UPDATE, function (event, stats) {
-                $scope.stats = stats;
-            });
             setInterval(function () {
                 $scope.counter += 1;
 //                if (!$scope.$$phase) {
@@ -49,28 +41,7 @@
             }
         }
 
-
-        angular.module('progress', ['ng']).directive('progressBar', function () {
-            return {
-                restrict: 'A',
-                scope: true,
-                template: '<div></div>',
-                link: function (scope, element, attr) {
-                    scope.percent = 0;
-                    var onProgress = function (event, percent) {
-                        console.log('percent %s', percent);
-                        scope.percent = Math.round(percent * 100);
-                        if (!scope.$$phase) {
-                            scope.$digest();
-                        }
-                        angular.element(element[0].childNodes[0]).css({width: (percent * 100) + '%'});
-                    };
-                    scope.$root.$on(ux.datagrid.events.RENDER_PROGRESS, onProgress);
-                }
-            }
-        });
-
-        angular.module('app', ['ux', 'progress']);
+        angular.module('app', ['ux']);
     </script>
     <!--//
         Note: {{fake}} below is to get angular to process the class attribute. This wipes out any css classes that were added by jquery.
@@ -79,9 +50,7 @@
 <body data-ng-controller="root">
 This is a simple example of using the datagrid with 50k rows.
 <div class="stats">
-    <div>records {{records|number}} stats: {{stats}}</div>
-    <div>counter {{counter}}</div>
-    <div progress-bar class="progress-bar"></div>
+    <div>records {{records|number}}</div>
     <span>SCROLL TO:</span>
     <a href="" data-ng-click="scrollToPercent(0.0)">0%</a>
     <a href="" data-ng-click="scrollToPercent(0.25)">25%</a>
@@ -91,15 +60,9 @@ This is a simple example of using the datagrid with 50k rows.
 </div>
 <!--// container to put a background loader behind the datagrid //-->
 <div class="my-container">
-    <!--// This is the background loader //-->
-    <div class="loader">
-        <div></div>
-        <div></div>
-        <div></div>
-    </div>
     <div data-ng-controller="simpleArray" class="listA">
         <!--// this is the datagrid //-->
-        <div data-ux-datagrid="items" class="datagrid" data-addons="iosScrollFrictionAddon">
+        <div data-ux-datagrid="items" class="datagrid">
             <script type="template/html" data-template-name="default" data-template-item="item">
                 <div class="row {{fake}}">
                     <div class="text">{{item.id}} {{$id}} {{counter}}</div>

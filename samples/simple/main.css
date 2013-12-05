@@ -17,18 +17,6 @@ input[type="text"] {
     border: 1px solid #000000;
 }
 
-.loader {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-    margin: auto;
-    display: block;
-    height: 50px;
-    width: 100px;
-}
-
 .listA {
     position: absolute;
     top: 0px;

@@ -35,8 +35,7 @@ module.exports = function (grunt) {
                         'src/lib/*.js',
                         'src/core/Flow.js',
                         'src/ux-datagrid.js',
-                        'src/core/addons/*.js',
-                        'src/addons/*.js'
+                        'src/core/addons/*.js'
                     ]
                 }
             },

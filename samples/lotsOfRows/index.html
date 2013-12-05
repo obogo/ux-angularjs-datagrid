@@ -13,6 +13,10 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.min.js"></script>
     <!--<script src="../../lib/angular.js"></script>-->
     <script src="../../build/angular-ux-datagrid.js"></script>
+
+    <!--// addons //-->
+    <script src="../../src/addons/statsModel.js"></script>
+    <script src="../../src/addons/iosScrollFrictionAddon.js"></script>
     <script>
 
         var records = 50000;
@@ -112,7 +116,7 @@ The purpose of this example is to test the performance of lots of rows in the da
     <!--// this is the controller for the datagrid //-->
     <div data-ng-controller="complexArray" class="listA">
         <!--// this is the datagrid //-->
-        <div ux-datagrid="items" class="datagrid" data-grouped="'children'">
+        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="gridStatsModel">
             <script type="template/html" data-template-name="group" data-template-item="item">
                 <div class="group {{fake}}">
                     <div class="text">{{item.id}} {{$id}} {{counter}} height: 20px</div>

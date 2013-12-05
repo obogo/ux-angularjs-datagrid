@@ -31,7 +31,7 @@ exports.datagrid = {
     options: {
         compileAllRowsOnInit: false,
         updateDelay: 50,
-        cushion: 100,
+        cushion: -50,
         chunkSize: 100,
         uncompiledClass: "uncompiled",
         dynamicRowHeights: false,
@@ -881,47 +881,6 @@ exports.datagrid.coreAddons.push(function scrollModel(datagrid) {
     };
 });
 
-exports.datagrid.events.STATS_UPDATE = "ux-datagrid:statsUpdate";
-
-exports.datagrid.coreAddons.push(function statsModel(exp) {
-    var initStartTime = 0, rendersTotal = 0, renders = [], unwatchers = [];
-    var api = {
-        initialRenderTime: 0,
-        averageRenderTime: 0
-    };
-    function startInit() {
-        initStartTime = Date.now();
-    }
-    function stopInit() {
-        api.initialRenderTime = Date.now() - initStartTime;
-        clearWatchers();
-    }
-    function clearWatchers() {
-        while (unwatchers.length) {
-            unwatchers.pop()();
-        }
-    }
-    function renderStart() {
-        renders.push(Date.now());
-    }
-    function renderStop() {
-        var index = renders.length - 1;
-        renders[index] = Date.now() - renders[index];
-        rendersTotal += renders[index];
-        updateAverage();
-    }
-    function updateAverage() {
-        api.renders = renders.length;
-        api.averageRenderTime = rendersTotal / api.renders;
-        exp.dispatch(exports.datagrid.events.STATS_UPDATE, api);
-    }
-    unwatchers.push(exp.scope.$on(exports.datagrid.events.INIT, startInit));
-    unwatchers.push(exp.scope.$on(exports.datagrid.events.READY, stopInit));
-    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, renderStart));
-    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, renderStop));
-    exp.stats = api;
-});
-
 exports.datagrid.coreAddons.push(function templateModel(exp) {
     "use strict";
     function trim(str) {
@@ -1028,59 +987,5 @@ exports.datagrid.coreAddons.push(function templateModel(exp) {
             getTemplateHeight: getTemplateHeight
         };
     }();
-});
-
-angular.module("ux").factory("iosScrollFrictionAddon", function() {
-    return function(datagrid) {
-        var exp = datagrid, values = exp.values, flow = exp.flow, friction = .95, stopThreshold = 1, iOS = navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false;
-        if (iOS) {
-            exp.setupScrolling = function setupScrolling() {
-                flow.log("scrollFriction:setupScrolling");
-                exp.options.updateDelay = 10;
-                exp.element[0].addEventListener("scroll", exp.onUpdateScroll);
-                exp.unwatchers.push(function() {
-                    exp.element[0].removeEventListener("scroll", exp.onUpdateScroll);
-                });
-            };
-            exp.onUpdateScroll = function onUpdateScroll(event) {
-                flow.log("scrollFriction:onUpdateScroll");
-                var val = (event.target || event.srcElement || exp.element[0]).scrollTop;
-                if (values.scroll !== val) {
-                    values.speed = val - values.scroll;
-                    values.absSpeed = Math.abs(values.speed);
-                    values.scroll = val;
-                }
-                exp.waitForStop();
-            };
-            exp.scrollTo = function scrollTo(value) {
-                exp.element[0].scrollTop = value;
-                exp.waitForStop();
-            };
-            exp.waitForStop = function waitForStop() {
-                flow.log("scrollFriction:waitForStop");
-                clearTimeout(values.scrollingStopIntv);
-                values.scrollingStopIntv = setTimeout(exp.onScrollingStop, exp.options.updateDelay);
-            };
-            exp.onScrollingStop = function onScrollingStop() {
-                flow.log("scrollFriction:scrollingStop");
-                if (values.absSpeed > stopThreshold) {
-                    exp.applyScrollFriction();
-                } else {
-                    values.speed = 0;
-                    values.absSpeed = 0;
-                    flow.add(exp.render);
-                }
-            };
-            exp.applyScrollFriction = function applyScrollFriction() {
-                var value = 0;
-                if (values.absSpeed > stopThreshold) {
-                    value = values.speed * friction;
-                }
-                if (value) {
-                    datagrid.element[0].scrollTop += value;
-                }
-            };
-        }
-    };
 });
 }(this.ux = this.ux || {}, function() {return this;}()));

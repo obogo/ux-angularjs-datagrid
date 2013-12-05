@@ -24,7 +24,7 @@ exports.datagrid = {
     options: {
         compileAllRowsOnInit: false,// this can cause it to take a long time to initialize.
         updateDelay: 50,
-        cushion: 100,// debugging cushion about what is deactivated.
+        cushion: -50,// debugging cushion about what is deactivated.
         chunkSize: 100,
         uncompiledClass: 'uncompiled',
         dynamicRowHeights: false,//true,

@@ -40,28 +40,16 @@
             }
         }
 
-        function complexArray($scope) {
-            var i = 0, len = records, group, rand;
+        function simpleArray($scope) {
+            var i = 0, len = records;
             $scope.items = [];
             while (i < len) {
-                rand = Math.random();
-                rand = rand >= 0.8 ? rand : 0;
-                if (!group || Math.round(rand)) {
-                    $scope.items.push(group = {
-                        id: 'G' + ($scope.items.length + 1),
-                        name: 'Group ' + ($scope.items.length + 1),
-                        _template: 'group',
-                        children: []
-                    });
-                }
-                group.children.push({id: 'I' + group.children.length + 1, children: [], _template: Math.round(Math.random()) ? 'sub' : 'default'});
+                $scope.items.push({id: i});
                 i += 1;
             }
         }
 
-        /**
-         * this is the progress bar showing how many of the rows are rendered.
-         */
+
         angular.module('progress', ['ng']).directive('progressBar', function () {
             return {
                 restrict: 'A',
@@ -75,7 +63,7 @@
                         if (!scope.$$phase) {
                             scope.$digest();
                         }
-                        angular.element(element[0].childNodes[0]).css({width: (percent*100) + '%'});
+                        angular.element(element[0].childNodes[0]).css({width: (percent * 100) + '%'});
                     };
                     scope.$root.$on(ux.datagrid.events.RENDER_PROGRESS, onProgress);
                 }
@@ -89,7 +77,7 @@
     //-->
 </head>
 <body data-ng-controller="root">
-The purpose of this example is to test the performance of lots of rows in the datagrid. Notice that these are not all the same height. Each template row can have it's own height.
+This is a simple example of using the datagrid with 50k rows.
 <div class="stats">
     <div>records {{records|number}} stats: {{stats}}</div>
     <div>counter {{counter}}</div>
@@ -105,31 +93,21 @@ The purpose of this example is to test the performance of lots of rows in the da
 <div class="my-container">
     <!--// This is the background loader //-->
     <div class="loader">
-         <div></div>
-         <div></div>
-         <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
     </div>
-    <!--// this is the controller for the datagrid //-->
-    <div data-ng-controller="complexArray" class="listA">
+    <div data-ng-controller="simpleArray" class="listA">
         <!--// this is the datagrid //-->
-        <div ux-datagrid="items" class="datagrid" data-grouped="'children'">
-            <script type="template/html" data-template-name="group" data-template-item="item">
-                <div class="group {{fake}}">
-                    <div class="text">{{item.id}} {{$id}} {{counter}} height: 20px</div>
-                </div>
-            </script>
+        <div data-ux-datagrid="items" class="datagrid" data-addons="iosScrollFrictionAddon">
             <script type="template/html" data-template-name="default" data-template-item="item">
                 <div class="row {{fake}}">
-                    <div class="text">{{item.id}} {{$id}} {{counter}} height: 40px</div>
+                    <div class="text">{{item.id}} {{$id}} {{counter}}</div>
+                    <div random-icons="pencil droid trash"></div>
                     <input type="text">
                 </div>
             </script>
-            <script type="template/html" data-template-name="sub" data-template-item="item">
-                <div class="sub {{fake}}">
-                    <div class="text">{{item.id}} {{$id}} {{counter}} height: 30px</div>
-                    <input type="text">
-                </div>
-            </script>
+            <div class="content"></div>
         </div>
     </div>
 </div>

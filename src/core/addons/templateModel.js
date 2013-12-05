@@ -1,5 +1,5 @@
 /*global angular */
-exports.listView.coreAddons.push(function templateModel(exp) {
+exports.datagrid.coreAddons.push(function templateModel(exp) {
     'use strict';
 
     function trim(str) {

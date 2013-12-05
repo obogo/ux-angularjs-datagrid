@@ -1,5 +1,5 @@
 /*global ux */
-exports.listView.coreAddons.push(function normalizeModel(exp) {
+exports.datagrid.coreAddons.push(function normalizeModel(exp) {
 
     var originalData, normalizedData;
 

@@ -31,10 +31,10 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'build/angular-ux-<%= pkg.filename %>.js': [
-                        'src/ux-listView-config.js',
+                        'src/ux-datagrid-config.js',
                         'src/lib/*.js',
                         'src/core/Flow.js',
-                        'src/ux-listView.js',
+                        'src/ux-datagrid.js',
                         'src/core/addons/*.js',
                         'src/addons/*.js'
                     ]

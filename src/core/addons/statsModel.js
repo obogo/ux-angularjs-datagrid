@@ -1,5 +1,5 @@
-exports.listView.events.STATS_UPDATE = 'ux-listView:statsUpdate';
-exports.listView.coreAddons.push(function statsModel(exp) {
+exports.datagrid.events.STATS_UPDATE = 'ux-datagrid:statsUpdate';
+exports.datagrid.coreAddons.push(function statsModel(exp) {
     var initStartTime = 0, rendersTotal = 0, renders = [], unwatchers = [];
     var api = {
         initialRenderTime: 0,
@@ -35,14 +35,14 @@ exports.listView.coreAddons.push(function statsModel(exp) {
     function updateAverage() {
         api.renders = renders.length;
         api.averageRenderTime = rendersTotal / api.renders;
-        exp.dispatch(exports.listView.events.STATS_UPDATE, api);
+        exp.dispatch(exports.datagrid.events.STATS_UPDATE, api);
     }
 
-    unwatchers.push(exp.scope.$on(exports.listView.events.INIT, startInit));
-    unwatchers.push(exp.scope.$on(exports.listView.events.READY, stopInit));
+    unwatchers.push(exp.scope.$on(exports.datagrid.events.INIT, startInit));
+    unwatchers.push(exp.scope.$on(exports.datagrid.events.READY, stopInit));
 
-    exp.unwatchers.push(exp.scope.$on(exports.listView.events.BEFORE_UPDATE_WATCHERS, renderStart));
-    exp.unwatchers.push(exp.scope.$on(exports.listView.events.AFTER_UPDATE_WATCHERS, renderStop));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, renderStart));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, renderStop));
 
     exp.stats = api;
 });

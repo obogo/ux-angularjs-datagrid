@@ -1,5 +1,5 @@
 /*
-* uxListView v.0.1.0
+* uxDatagrid v.0.1.0
 * (c) 2013, WebUX
 * License: MIT.
 */
@@ -12,21 +12,21 @@ try {
     module = angular.module("ux");
 }
 
-exports.listView = {
+exports.datagrid = {
     states: {
-        BUILDING: "lsitView:building",
-        APPENDING: "listView:appending",
-        READY: "listView:ready",
-        DEACTIVATED: "listView:deactivated",
-        ACTIVATED: "listView:activated"
+        BUILDING: "datagrid:building",
+        APPENDING: "datagrid:appending",
+        READY: "datagrid:ready",
+        DEACTIVATED: "datagrid:deactivated",
+        ACTIVATED: "datagrid:activated"
     },
     events: {
-        INIT: "uxListView:init",
-        BUILDING_PROGRESS: "uxListView:buildingProgress",
-        APPENDING_PROGRESS: "uxListView:appendingProgress",
-        READY: "uxListView:ready",
-        BEFORE_UPDATE_WATCHERS: "uxListView:beforeUpdateWatchers",
-        AFTER_UPDATE_WATCHERS: "uxListView:afterUpdateWatchers"
+        INIT: "datagrid:init",
+        BUILDING_PROGRESS: "datagrid:buildingProgress",
+        APPENDING_PROGRESS: "datagrid:appendingProgress",
+        READY: "datagrid:ready",
+        BEFORE_UPDATE_WATCHERS: "datagrid:beforeUpdateWatchers",
+        AFTER_UPDATE_WATCHERS: "datagrid:afterUpdateWatchers"
     },
     options: {
         compileAllRowsOnInit: false,
@@ -256,8 +256,8 @@ function Flow() {
     return exp;
 }
 
-function ListView(scope, element, attr, $compile) {
-    var flow = new Flow(), unwatchers = [], content, scopes = [], active = [], lastVisibleScrollStart = 0, rowHeights = {}, rowOffsets = {}, viewHeight = 0, options, states = exports.listView.states, events = exports.listView.events, state = states.BUILDING, values = {
+function Datagrid(scope, element, attr, $compile) {
+    var flow = new Flow(), unwatchers = [], content, scopes = [], active = [], lastVisibleScrollStart = 0, rowHeights = {}, rowOffsets = {}, viewHeight = 0, options, states = exports.datagrid.states, events = exports.datagrid.events, state = states.BUILDING, values = {
         scroll: 0,
         speed: 0,
         absSpeed: 0,
@@ -275,7 +275,7 @@ function ListView(scope, element, attr, $compile) {
         setupExports();
     }
     function setupExports() {
-        exp.__name = "ux-ListView";
+        exp.__name = "ux-datagrid";
         exp.scope = scope;
         exp.element = element;
         exp.attr = attr;
@@ -285,10 +285,10 @@ function ListView(scope, element, attr, $compile) {
         exp.flow = flow;
         exp.unwatchers = unwatchers;
         exp.values = values;
-        exp.options = options = angular.extend({}, ux.listView.options, scope.$eval(attr.options) || {});
+        exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
     }
     exp.start = function start() {
-        exp.dispatch(ux.listView.events.INIT);
+        exp.dispatch(exports.datagrid.events.INIT);
         flow.add(exp.templateModel.createTemplates);
         flow.add(function updateDynamicRowHeights() {
             options.dynamicRowHeights = exp.templateModel.dynamicHeights();
@@ -298,7 +298,7 @@ function ListView(scope, element, attr, $compile) {
     };
     function addListeners() {
         unwatchers.push(scope.$watch(function() {
-            return scope.$eval(attr.uxListView);
+            return scope.$eval(attr.uxDatagrid);
         }, function() {
             flow.add(onDataChanged, [ arguments ]);
         }));
@@ -323,7 +323,7 @@ function ListView(scope, element, attr, $compile) {
     function createDom(list) {
         flow.log("OVERWRITE DOM!!!");
         var len = list.length;
-        flow.add(exp.chunkModel.chunkDom, [ list, options.chunkSize, '<div class="ux-list-view-chunk">', "</div>", content ], 0);
+        flow.add(exp.chunkModel.chunkDom, [ list, options.chunkSize, '<div class="ux-datagrid-chunk">', "</div>", content ], 0);
         exp.rowsLength = len;
         rowHeights = {};
         flow.log("created %s dom elements", len);
@@ -381,7 +381,7 @@ function ListView(scope, element, attr, $compile) {
         flow.add(safeDigest, [ scope ]);
     }
     function fireReadyEvent() {
-        scope.$emit(ux.listView.events.READY);
+        scope.$emit(exports.datagrid.events.READY);
     }
     function safeDigest(s) {
         if (!s.$$phase) {
@@ -557,7 +557,7 @@ function ListView(scope, element, attr, $compile) {
     }
     function onDataChanged() {
         flow.log("dataChanged");
-        exp.data = exp.setData(scope.$eval(attr.uxListView || attr.list), scope.$eval(attr.grouped)) || [];
+        exp.data = exp.setData(scope.$eval(attr.uxDatagrid || attr.list), scope.$eval(attr.grouped)) || [];
         flow.add(reset);
     }
     function reset() {
@@ -613,12 +613,12 @@ function ListView(scope, element, attr, $compile) {
     return exp;
 }
 
-module.directive("uxListView", [ "$compile", "addons", function($compile, addons) {
+module.directive("uxDatagrid", [ "$compile", "addons", function($compile, addons) {
     return {
         restrict: "AE",
         link: function(scope, element, attr) {
-            var lv = new ListView(scope, element, attr, $compile);
-            each(ux.listView.coreAddons, function(method) {
+            var lv = new Datagrid(scope, element, attr, $compile);
+            each(exports.datagrid.coreAddons, function(method) {
                 method.apply(lv, [ lv ]);
             });
             addons(lv, attr.addons);
@@ -657,7 +657,7 @@ ChunkArray.prototype.getChildrenStr = function(deep) {
     return str;
 };
 
-exports.listView.coreAddons.chunkModel = function chunkModel(exp) {
+exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
     var _list, _rows, _chunkSize, _el, result = {};
     function getChunkList() {
         return _list;
@@ -765,11 +765,11 @@ exports.listView.coreAddons.chunkModel = function chunkModel(exp) {
     return result;
 };
 
-exports.listView.coreAddons.push(ux.listView.coreAddons.chunkModel);
+exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);
 
-exports.listView.events.RENDER_PROGRESS = "listView:renderProgress";
+exports.datagrid.events.RENDER_PROGRESS = "datagrid:renderProgress";
 
-exports.listView.coreAddons.push(function creepRenderModel(exp) {
+exports.datagrid.coreAddons.push(function creepRenderModel(exp) {
     var intv = 0, percent = 0, creepCount = 0, creepLimit = 10;
     function digest(index) {
         var s = exp.scopes[index];
@@ -795,7 +795,7 @@ exports.listView.coreAddons.push(function creepRenderModel(exp) {
         if (!exp.values.speed && exp.scopes.length < exp.rowsLength) {
             resetInterval(upIndex, downIndex);
         }
-        exp.dispatch(ux.listView.events.RENDER_PROGRESS, percent);
+        exp.dispatch(exports.datagrid.events.RENDER_PROGRESS, percent);
     }
     function stop() {
         clearTimeout(intv);
@@ -813,11 +813,11 @@ exports.listView.coreAddons.push(function creepRenderModel(exp) {
             resetInterval(loopData.started, loopData.ended);
         }
     }
-    exp.unwatchers.push(exp.scope.$on(ux.listView.events.BEFORE_UPDATE_WATCHERS, stop));
-    exp.unwatchers.push(exp.scope.$on(ux.listView.events.AFTER_UPDATE_WATCHERS, onAfterUpdateWatchers));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, stop));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, onAfterUpdateWatchers));
 });
 
-exports.listView.coreAddons.push(function normalizeModel(exp) {
+exports.datagrid.coreAddons.push(function normalizeModel(exp) {
     var originalData, normalizedData;
     function normalize(data, grouped, normalized) {
         var i = 0, len = data.length;
@@ -849,41 +849,41 @@ exports.listView.coreAddons.push(function normalizeModel(exp) {
     return exp;
 });
 
-exports.listView.coreAddons.push(function scrollModel(exp) {
-    exp.setupScrolling = function setupScrolling() {
-        exp.element[0].addEventListener("scroll", exp.onUpdateScroll);
-        exp.unwatchers.push(function() {
-            exp.element[0].removeEventListener("scroll", exp.onUpdateScroll);
+exports.datagrid.coreAddons.push(function scrollModel(datagrid) {
+    datagrid.setupScrolling = function setupScrolling() {
+        datagrid.element[0].addEventListener("scroll", datagrid.onUpdateScroll);
+        datagrid.unwatchers.push(function() {
+            datagrid.element[0].removeEventListener("scroll", datagrid.onUpdateScroll);
         });
     };
-    exp.onUpdateScroll = function onUpdateScroll(event) {
-        var val = (event.target || event.srcElement || exp.element[0]).scrollTop;
-        if (exp.values.scroll !== val) {
-            exp.values.speed = val - exp.values.scroll;
-            exp.values.absSpeed = Math.abs(exp.values.speed);
-            exp.values.scroll = val;
+    datagrid.onUpdateScroll = function onUpdateScroll(event) {
+        var val = (event.target || event.srcElement || datagrid.element[0]).scrollTop;
+        if (datagrid.values.scroll !== val) {
+            datagrid.values.speed = val - datagrid.values.scroll;
+            datagrid.values.absSpeed = Math.abs(datagrid.values.speed);
+            datagrid.values.scroll = val;
         }
-        exp.waitForStop();
+        datagrid.waitForStop();
     };
-    exp.scrollTo = function scrollTo(value) {
-        exp.element[0].scrollTop = value;
-        exp.waitForStop();
+    datagrid.scrollTo = function scrollTo(value) {
+        datagrid.element[0].scrollTop = value;
+        datagrid.waitForStop();
     };
-    exp.waitForStop = function waitForStop() {
-        clearTimeout(exp.values.scrollingStopIntv);
-        exp.values.scrollingStopIntv = setTimeout(exp.onScrollingStop, exp.options.updateDelay);
+    datagrid.waitForStop = function waitForStop() {
+        clearTimeout(datagrid.values.scrollingStopIntv);
+        datagrid.values.scrollingStopIntv = setTimeout(datagrid.onScrollingStop, datagrid.options.updateDelay);
     };
-    exp.onScrollingStop = function onScrollingStop() {
-        exp.flow.log("scrollingStop");
-        exp.values.speed = 0;
-        exp.values.absSpeed = 0;
-        exp.flow.add(exp.render);
+    datagrid.onScrollingStop = function onScrollingStop() {
+        datagrid.flow.log("scrollingStop");
+        datagrid.values.speed = 0;
+        datagrid.values.absSpeed = 0;
+        datagrid.flow.add(datagrid.render);
     };
 });
 
-exports.listView.events.STATS_UPDATE = "ux-listView:statsUpdate";
+exports.datagrid.events.STATS_UPDATE = "ux-datagrid:statsUpdate";
 
-exports.listView.coreAddons.push(function statsModel(exp) {
+exports.datagrid.coreAddons.push(function statsModel(exp) {
     var initStartTime = 0, rendersTotal = 0, renders = [], unwatchers = [];
     var api = {
         initialRenderTime: 0,
@@ -913,16 +913,16 @@ exports.listView.coreAddons.push(function statsModel(exp) {
     function updateAverage() {
         api.renders = renders.length;
         api.averageRenderTime = rendersTotal / api.renders;
-        exp.dispatch(exports.listView.events.STATS_UPDATE, api);
+        exp.dispatch(exports.datagrid.events.STATS_UPDATE, api);
     }
-    unwatchers.push(exp.scope.$on(exports.listView.events.INIT, startInit));
-    unwatchers.push(exp.scope.$on(exports.listView.events.READY, stopInit));
-    exp.unwatchers.push(exp.scope.$on(exports.listView.events.BEFORE_UPDATE_WATCHERS, renderStart));
-    exp.unwatchers.push(exp.scope.$on(exports.listView.events.AFTER_UPDATE_WATCHERS, renderStop));
+    unwatchers.push(exp.scope.$on(exports.datagrid.events.INIT, startInit));
+    unwatchers.push(exp.scope.$on(exports.datagrid.events.READY, stopInit));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, renderStart));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, renderStop));
     exp.stats = api;
 });
 
-exports.listView.coreAddons.push(function templateModel(exp) {
+exports.datagrid.coreAddons.push(function templateModel(exp) {
     "use strict";
     function trim(str) {
         str = str.replace(/\n/g, "");
@@ -1031,8 +1031,8 @@ exports.listView.coreAddons.push(function templateModel(exp) {
 });
 
 angular.module("ux").factory("iosScrollFrictionAddon", function() {
-    return function(listView) {
-        var exp = listView, values = exp.values, flow = exp.flow, friction = .95, stopThreshold = 1, iOS = navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false;
+    return function(datagrid) {
+        var exp = datagrid, values = exp.values, flow = exp.flow, friction = .95, stopThreshold = 1, iOS = navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false;
         if (iOS) {
             exp.setupScrolling = function setupScrolling() {
                 flow.log("scrollFriction:setupScrolling");
@@ -1077,7 +1077,7 @@ angular.module("ux").factory("iosScrollFrictionAddon", function() {
                     value = values.speed * friction;
                 }
                 if (value) {
-                    listView.element[0].scrollTop += value;
+                    datagrid.element[0].scrollTop += value;
                 }
             };
         }

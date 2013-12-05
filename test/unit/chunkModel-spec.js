@@ -15,7 +15,7 @@ describe("chunkModel", function () {
             }
         }
         rowHeight = 10;
-        chunkModel = new ux.listView.coreAddons.chunkModel(exports);
+        chunkModel = new ux.datagrid.coreAddons.chunkModel(exports);
     });
 
     function createTests() {

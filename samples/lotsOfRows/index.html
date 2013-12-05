@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html ng-app="app">
 <head>
-    <title>ListView</title>
+    <title>Datagrid</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="YES">
@@ -14,7 +14,7 @@
     <link type="text/css" rel="stylesheet" href="cssIcons.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.1.5/angular.min.js"></script>
     <!--<script src="../../lib/angular.js"></script>-->
-    <script src="../../build/angular-ux-listview.js"></script>
+    <script src="../../build/angular-ux-datagrid.js"></script>
     <!-- performance testing -->
     <style type="text/css">
         .performance-report {
@@ -28,11 +28,11 @@
         function root($scope) {
             $scope.counter = 0;
             $scope.records = records;
-            $scope.$on(ux.listView.events.RENDER_PROGRESS, function (event, percent) {
+            $scope.$on(ux.datagrid.events.RENDER_PROGRESS, function (event, percent) {
                 $scope.percent = percent;
                 $scope.$digest();
             });
-            $scope.$on(ux.listView.events.STATS_UPDATE, function (event, stats) {
+            $scope.$on(ux.datagrid.events.STATS_UPDATE, function (event, stats) {
                 $scope.stats = stats;
             });
             setInterval(function () {
@@ -43,8 +43,8 @@
             }, 1000);
 
             $scope.scrollToPercent = function (percent) {
-                var listView = document.getElementsByClassName('list-view');
-                listView[0].scrollTop = angular.element(listView[0]).children()[0].offsetHeight * percent;
+                var datagrid = document.getElementsByClassName('datagrid');
+                datagrid[0].scrollTop = angular.element(datagrid[0]).children()[0].offsetHeight * percent;
             }
         }
 
@@ -103,7 +103,7 @@
                         }
                         angular.element(element[0].childNodes[0]).css({width: (percent*100) + '%'});
                     };
-                    scope.$root.$on(ux.listView.events.RENDER_PROGRESS, onProgress);
+                    scope.$root.$on(ux.datagrid.events.RENDER_PROGRESS, onProgress);
                 }
             }
         });
@@ -115,7 +115,7 @@
     //-->
 </head>
 <body data-ng-controller="root">
-The purpose of this example is to test the performance of lots of rows in the list-view.
+The purpose of this example is to test the performance of lots of rows in the datagrid.
 <div class="stats">
     <div>records {{records|number}} stats: {{stats}}</div>
     <div>counter {{counter}}</div>
@@ -129,7 +129,7 @@ The purpose of this example is to test the performance of lots of rows in the li
 </div>
 <!--<div data-ng-controller="simpleArray" class="listA">-->
     <!--<div progress-bar class="progrss-bar"></div>-->
-    <!--<div data-ux-list-view="items" class="list-view" data-addons="iosScrollFrictionAddon">-->
+    <!--<div data-ux-datagrid="items" class="datagrid" data-addons="iosScrollFrictionAddon">-->
         <!--<script type="template/html" data-template-name="default" data-template-item="item">-->
             <!--<div class="row {{fake}}">-->
                 <!--<div class="text">{{item.id}} {{$id}} {{counter}}</div>-->
@@ -148,10 +148,10 @@ The purpose of this example is to test the performance of lots of rows in the li
          <div></div>
          <div></div>
     </div>
-    <!--// this is the controller for the list-view //-->
+    <!--// this is the controller for the datagrid //-->
     <div data-ng-controller="complexArray" class="listA">
-        <!--// this is the list-view //-->
-        <div ux-list-view="items" class="list-view" data-grouped="'children'">
+        <!--// this is the datagrid //-->
+        <div ux-datagrid="items" class="datagrid" data-grouped="'children'">
             <script type="template/html" data-template-name="group" data-template-item="item">
                 <div class="group {{fake}}">
                     <div class="text">{{item.id}} {{$id}} {{counter}} height: 20px</div>

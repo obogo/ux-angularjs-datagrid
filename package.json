@@ -1,7 +1,7 @@
 {
-    "name": "uxListView",
+    "name": "uxDatagrid",
     "version": "0.1.0",
-    "filename": "listview",
+    "filename": "datagrid",
     "packageName": "ux",
     "dependencies": {},
     "devDependencies": {

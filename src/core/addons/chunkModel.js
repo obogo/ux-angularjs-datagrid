@@ -46,7 +46,7 @@ ChunkArray.prototype.getChildrenStr = function (deep) {
  * @param exp
  * @returns {{}}
  */
-exports.listView.coreAddons.chunkModel = function chunkModel(exp) {
+exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
 
     var _list, _rows, _chunkSize, _el, result = {};
 
@@ -214,4 +214,4 @@ exports.listView.coreAddons.chunkModel = function chunkModel(exp) {
     exp.chunkModel = result;
     return result;
 };
-exports.listView.coreAddons.push(ux.listView.coreAddons.chunkModel);
+exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);

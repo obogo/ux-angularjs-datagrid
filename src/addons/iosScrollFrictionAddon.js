@@ -1,8 +1,8 @@
 /*global */
 //TODO: this is not updating correctly when jumping to sections in the scroller.
 angular.module('ux').factory('iosScrollFrictionAddon', function () {
-    return function (listView) {
-        var exp = listView, values = exp.values, flow = exp.flow,
+    return function (datagrid) {
+        var exp = datagrid, values = exp.values, flow = exp.flow,
             friction = 0.95, stopThreshold = 1,
             iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
 
@@ -56,7 +56,7 @@ angular.module('ux').factory('iosScrollFrictionAddon', function () {
                     value = values.speed * friction;
                 }
                 if (value) {
-                    listView.element[0].scrollTop += value;
+                    datagrid.element[0].scrollTop += value;
                 }
             };
         }

@@ -1,5 +1,5 @@
-exports.listView.events.RENDER_PROGRESS = "listView:renderProgress";
-exports.listView.coreAddons.push(function creepRenderModel(exp) {
+exports.datagrid.events.RENDER_PROGRESS = "datagrid:renderProgress";
+exports.datagrid.coreAddons.push(function creepRenderModel(exp) {
 
     var intv = 0,
         percent = 0,
@@ -32,7 +32,7 @@ exports.listView.coreAddons.push(function creepRenderModel(exp) {
         if (!exp.values.speed && exp.scopes.length < exp.rowsLength) {
             resetInterval(upIndex, downIndex);
         }
-        exp.dispatch(ux.listView.events.RENDER_PROGRESS, percent);
+        exp.dispatch(exports.datagrid.events.RENDER_PROGRESS, percent);
     }
 
     function stop() {
@@ -54,6 +54,6 @@ exports.listView.coreAddons.push(function creepRenderModel(exp) {
         }
     }
 
-    exp.unwatchers.push(exp.scope.$on(ux.listView.events.BEFORE_UPDATE_WATCHERS, stop));
-    exp.unwatchers.push(exp.scope.$on(ux.listView.events.AFTER_UPDATE_WATCHERS, onAfterUpdateWatchers));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, stop));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, onAfterUpdateWatchers));
 });

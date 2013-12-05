@@ -1,39 +1,39 @@
 /*global ux */
-exports.listView.coreAddons.push(function scrollModel(exp) {
+exports.datagrid.coreAddons.push(function scrollModel(datagrid) {
     //TODO: need to implement scrollToIndex here.
-    exp.setupScrolling = function setupScrolling() {
-        exp.element[0].addEventListener('scroll', exp.onUpdateScroll);
-        exp.unwatchers.push(function () {
-            exp.element[0].removeEventListener('scroll', exp.onUpdateScroll);
+    datagrid.setupScrolling = function setupScrolling() {
+        datagrid.element[0].addEventListener('scroll', datagrid.onUpdateScroll);
+        datagrid.unwatchers.push(function () {
+            datagrid.element[0].removeEventListener('scroll', datagrid.onUpdateScroll);
         });
     };
 
-    exp.onUpdateScroll = function onUpdateScroll(event) {
+    datagrid.onUpdateScroll = function onUpdateScroll(event) {
 //        exp.flow.log("onUpdateScroll");
-        var val = (event.target || event.srcElement || exp.element[0]).scrollTop;
-        if (exp.values.scroll !== val) {
-            exp.values.speed = val - exp.values.scroll;
-            exp.values.absSpeed = Math.abs(exp.values.speed);
-            exp.values.scroll = val;
+        var val = (event.target || event.srcElement || datagrid.element[0]).scrollTop;
+        if (datagrid.values.scroll !== val) {
+            datagrid.values.speed = val - datagrid.values.scroll;
+            datagrid.values.absSpeed = Math.abs(datagrid.values.speed);
+            datagrid.values.scroll = val;
         }
-        exp.waitForStop();
+        datagrid.waitForStop();
     };
 
-    exp.scrollTo = function scrollTo(value) {
-        exp.element[0].scrollTop = value;
-        exp.waitForStop();
+    datagrid.scrollTo = function scrollTo(value) {
+        datagrid.element[0].scrollTop = value;
+        datagrid.waitForStop();
     };
 
-    exp.waitForStop = function waitForStop() {
+    datagrid.waitForStop = function waitForStop() {
 //        exp.flow.log("waitForStop");
-        clearTimeout(exp.values.scrollingStopIntv);
-        exp.values.scrollingStopIntv = setTimeout(exp.onScrollingStop, exp.options.updateDelay);
+        clearTimeout(datagrid.values.scrollingStopIntv);
+        datagrid.values.scrollingStopIntv = setTimeout(datagrid.onScrollingStop, datagrid.options.updateDelay);
     };
 
-    exp.onScrollingStop = function onScrollingStop() {
-        exp.flow.log("scrollingStop");
-        exp.values.speed = 0;
-        exp.values.absSpeed = 0;
-        exp.flow.add(exp.render);
+    datagrid.onScrollingStop = function onScrollingStop() {
+        datagrid.flow.log("scrollingStop");
+        datagrid.values.speed = 0;
+        datagrid.values.absSpeed = 0;
+        datagrid.flow.add(datagrid.render);
     };
 });

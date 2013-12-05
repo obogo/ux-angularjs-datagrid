@@ -2,7 +2,7 @@
 
 //TODO: The events or calls to the datagrid need to all be added to a queue. So if the grid is unable to do something then it will not loose it and can try it later. Even keep the last few that just went by so we know what just happened. This could ignore some updates if it knows there are more updates pending.
 
-function ListView(scope, element, attr, $compile) {
+function Datagrid(scope, element, attr, $compile) {
     var flow = new Flow(),
         unwatchers = [],
         content,// the dom element with all of the chunks.
@@ -15,8 +15,8 @@ function ListView(scope, element, attr, $compile) {
         viewHeight = 0,
     // convenience
         options,
-        states = exports.listView.states,
-        events = exports.listView.events,
+        states = exports.datagrid.states,
+        events = exports.datagrid.events,
     // rendering
         state = states.BUILDING, // ready is set to true after the initial digest.
     // exports
@@ -42,7 +42,7 @@ function ListView(scope, element, attr, $compile) {
     }
 
     function setupExports() {
-        exp.__name = 'ux-ListView';
+        exp.__name = 'ux-datagrid';
         exp.scope = scope;
         exp.element = element;
         exp.attr = attr;
@@ -53,14 +53,14 @@ function ListView(scope, element, attr, $compile) {
         exp.flow = flow;
         exp.unwatchers = unwatchers;
         exp.values = values;
-        exp.options = options = angular.extend({}, ux.listView.options, scope.$eval(attr.options) || {});
+        exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
     }
 
     /**
      * This is called after addons to allow overrides.
      */
     exp.start = function start() {
-        exp.dispatch(ux.listView.events.INIT);
+        exp.dispatch(exports.datagrid.events.INIT);
         flow.add(exp.templateModel.createTemplates);
         // if the templates have different heights. Then they are dynamic.
         flow.add(function updateDynamicRowHeights() {
@@ -72,7 +72,7 @@ function ListView(scope, element, attr, $compile) {
 
     function addListeners() {
         unwatchers.push(scope.$watch(function () {
-            return scope.$eval(attr.uxListView);
+            return scope.$eval(attr.uxDatagrid);
         }, function () {
             flow.add(onDataChanged, [arguments]);
         }));
@@ -104,7 +104,7 @@ function ListView(scope, element, attr, $compile) {
         //TODO: if there is any dom. It needs destroyed first.
         flow.log("OVERWRITE DOM!!!");
         var len = list.length;
-        flow.add(exp.chunkModel.chunkDom, [list, options.chunkSize, '<div class="ux-list-view-chunk">', '</div>', content], 0);
+        flow.add(exp.chunkModel.chunkDom, [list, options.chunkSize, '<div class="ux-datagrid-chunk">', '</div>', content], 0);
         exp.rowsLength = len;
         rowHeights = {};
         flow.log("created %s dom elements", len);
@@ -167,7 +167,7 @@ function ListView(scope, element, attr, $compile) {
     }
 
     function fireReadyEvent() {
-        scope.$emit(ux.listView.events.READY);
+        scope.$emit(exports.datagrid.events.READY);
     }
 
     function safeDigest(s) {
@@ -385,7 +385,7 @@ function ListView(scope, element, attr, $compile) {
 
     function onDataChanged() {
         flow.log("dataChanged");
-        exp.data = exp.setData(scope.$eval(attr.uxListView || attr.list), scope.$eval(attr.grouped)) || [];
+        exp.data = exp.setData(scope.$eval(attr.uxDatagrid || attr.list), scope.$eval(attr.grouped)) || [];
         flow.add(reset);
     }
 
@@ -457,12 +457,12 @@ function ListView(scope, element, attr, $compile) {
     return exp;
 }
 
-module.directive('uxListView', ['$compile', 'addons', function ($compile, addons) {
+module.directive('uxDatagrid', ['$compile', 'addons', function ($compile, addons) {
     return {
         restrict: 'AE',
         link: function (scope, element, attr) {
-            var lv = new ListView(scope, element, attr, $compile);
-            each(ux.listView.coreAddons, function (method) {
+            var lv = new Datagrid(scope, element, attr, $compile);
+            each(exports.datagrid.coreAddons, function (method) {
                 method.apply(lv, [lv]);
             });
             addons(lv, attr.addons);

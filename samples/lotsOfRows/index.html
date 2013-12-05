@@ -16,7 +16,7 @@
 
     <!--// optional addons //-->
     <script src="../../src/addons/statsModel.js"></script>
-    <script src="../../src/addons/iosScrollFrictionAddon.js"></script>
+    <!--<script src="../../src/addons/iosScrollFrictionAddon.js"></script>-->
     <script>
 
         var records = 50000;
@@ -24,6 +24,7 @@
         function root($scope) {
             $scope.counter = 0;
             $scope.records = records;
+            $scope.percents = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
             $scope.$on(ux.datagrid.events.RENDER_PROGRESS, function (event, percent) {
                 $scope.percent = percent;
                 $scope.$digest();
@@ -33,9 +34,9 @@
             });
             setInterval(function () {
                 $scope.counter += 1;
-//                if (!$scope.$$phase) {
-//                    $scope.$apply();
-//                }
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                }
             }, 1000);
 
             $scope.scrollToPercent = function (percent) {
@@ -92,17 +93,12 @@
     //-->
 </head>
 <body data-ng-controller="root">
-The purpose of this example is to test the performance of lots of rows in the datagrid. Notice that these are not all the same height. Each template row can have it's own height.
 <div class="stats">
-    <div>records {{records|number}} stats: {{stats}}</div>
-    <div>counter {{counter}}</div>
+    The purpose of this example is to test the performance of lots of rows in the datagrid. Notice that these are not all the same height. Each template row can have it's own height.
+    <div>records {{records|number}} counter:{{counter}}</div>
     <div progress-bar class="progress-bar"></div>
     <span>SCROLL TO:</span>
-    <a href="" data-ng-click="scrollToPercent(0.0)">0%</a>
-    <a href="" data-ng-click="scrollToPercent(0.25)">25%</a>
-    <a href="" data-ng-click="scrollToPercent(0.5)">50%</a>
-    <a href="" data-ng-click="scrollToPercent(0.75)">75%</a>
-    <a href="" data-ng-click="scrollToPercent(1)">100%</a>
+    <span data-ng-repeat="percent in percents"><a href="" data-ng-click="scrollToPercent(percent/100)">{{percent}}%</a> </span>
 </div>
 <!--// container to put a background loader behind the datagrid //-->
 <div class="my-container">

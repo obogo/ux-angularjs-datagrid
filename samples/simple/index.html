@@ -19,11 +19,12 @@
         function root($scope) {
             $scope.counter = 0;
             $scope.records = records;
+            $scope.percents = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
             setInterval(function () {
                 $scope.counter += 1;
-//                if (!$scope.$$phase) {
-//                    $scope.$apply();
-//                }
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                }
             }, 1000);
 
             $scope.scrollToPercent = function (percent) {
@@ -48,15 +49,11 @@
     //-->
 </head>
 <body data-ng-controller="root">
-This is a simple example of using the datagrid with {{records|number}} rows.
 <div class="stats">
+    This is a simple example of using the datagrid with {{records|number}} rows. No iScroll or any other scrolling plugin. Just native scrolling on a layered div.
     <div>records {{records|number}}</div>
     <span>SCROLL TO:</span>
-    <a href="" data-ng-click="scrollToPercent(0.0)">0%</a>
-    <a href="" data-ng-click="scrollToPercent(0.25)">25%</a>
-    <a href="" data-ng-click="scrollToPercent(0.5)">50%</a>
-    <a href="" data-ng-click="scrollToPercent(0.75)">75%</a>
-    <a href="" data-ng-click="scrollToPercent(1)">100%</a>
+    <span data-ng-repeat="percent in percents"><a href="" data-ng-click="scrollToPercent(percent/100)">{{percent}}%</a> </span>
 </div>
 <!--// container to put a background loader behind the datagrid //-->
 <div class="my-container">

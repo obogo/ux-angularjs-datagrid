@@ -96,6 +96,7 @@ table {
 
 .progress-bar {
     position: relative;
+    display: inline-block;
     width: 100px;
     height: 10px;
     background: #FFFFFF;

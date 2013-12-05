@@ -46,7 +46,7 @@ ChunkArray.prototype.getChildrenStr = function (deep) {
  * @param exp
  * @returns {{}}
  */
-ux.listView.coreAddons.chunkModel = function chunkModel(exp) {
+exports.listView.coreAddons.chunkModel = function chunkModel(exp) {
 
     var _list, _rows, _chunkSize, _el, result = {};
 

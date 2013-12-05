@@ -657,7 +657,7 @@ ChunkArray.prototype.getChildrenStr = function(deep) {
     return str;
 };
 
-ux.listView.coreAddons.chunkModel = function chunkModel(exp) {
+exports.listView.coreAddons.chunkModel = function chunkModel(exp) {
     var _list, _rows, _chunkSize, _el, result = {};
     function getChunkList() {
         return _list;

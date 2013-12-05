@@ -1,4 +1,4 @@
-describe("Chunker", function () {
+describe("chunkModel", function () {
 
     var chunkModel, exports, rowHeight;
 

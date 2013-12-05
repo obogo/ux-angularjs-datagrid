@@ -28,7 +28,8 @@ exports.datagrid = {
         chunkSize: 100,
         uncompiledClass: 'uncompiled',
         dynamicRowHeights: false,//true,
-        renderThreshold: 50
+        renderThreshold: 50,
+        creepLimit: 20
     },
     coreAddons: []
 };

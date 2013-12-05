@@ -71,7 +71,7 @@
             return {
                 restrict: 'A',
                 scope: true,
-                template: '<div></div>',
+                template: '<div>{{percent}}%</div>',
                 link: function (scope, element, attr) {
                     scope.percent = 0;
                     var onProgress = function (event, percent) {
@@ -79,7 +79,7 @@
                         if (!scope.$$phase) {
                             scope.$digest();
                         }
-                        angular.element(element[0].childNodes[0]).css({width: (percent*100) + '%'});
+                        angular.element(element[0].childNodes[0]).css({width: (percent*100) + '%', overflow: 'visible'});
                     };
                     scope.$root.$on(ux.datagrid.events.RENDER_PROGRESS, onProgress);
                 }

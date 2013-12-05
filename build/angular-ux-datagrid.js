@@ -35,7 +35,8 @@ exports.datagrid = {
         chunkSize: 100,
         uncompiledClass: "uncompiled",
         dynamicRowHeights: false,
-        renderThreshold: 50
+        renderThreshold: 50,
+        creepLimit: 20
     },
     coreAddons: []
 };
@@ -773,12 +774,22 @@ exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);
 exports.datagrid.events.RENDER_PROGRESS = "datagrid:renderProgress";
 
 exports.datagrid.coreAddons.push(function creepRenderModel(exp) {
-    var intv = 0, percent = 0, creepCount = 0, creepLimit = 10;
+    var intv = 0, percent = 0, creepCount = 0;
     function digest(index) {
         var s = exp.scopes[index];
         if (!s || !s.digested) {
             exp.forceRenderScope(index);
         }
+    }
+    function calculatePercent() {
+        var result = {
+            count: 0
+        };
+        each(exp.scopes, calculateScopePercent, result);
+        return result.count / exp.rowsLength;
+    }
+    function calculateScopePercent(s, index, list, result) {
+        result.count += s ? 1 : 0;
     }
     function onInterval(started, ended) {
         var upIndex = started, downIndex = ended, time = Date.now() + exp.options.renderThreshold;
@@ -792,7 +803,7 @@ exports.datagrid.coreAddons.push(function creepRenderModel(exp) {
                 downIndex += 1;
             }
         }
-        percent = exp.scopes.length / exp.rowsLength;
+        percent = calculatePercent();
         stop();
         creepCount += 1;
         if (!exp.values.speed && exp.scopes.length < exp.rowsLength) {
@@ -806,7 +817,7 @@ exports.datagrid.coreAddons.push(function creepRenderModel(exp) {
     }
     function resetInterval(started, ended) {
         stop();
-        if (creepCount < creepLimit) {
+        if (creepCount < exp.options.creepLimit) {
             intv = setTimeout(onInterval, exp.options.renderThreshold, started, ended);
         }
     }

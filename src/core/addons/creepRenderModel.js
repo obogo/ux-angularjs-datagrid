@@ -3,14 +3,23 @@ exports.datagrid.coreAddons.push(function creepRenderModel(exp) {
 
     var intv = 0,
         percent = 0,
-        creepCount = 0,
-        creepLimit = 10; // TODO: this needs to read from export.options
+        creepCount = 0;
 
     function digest(index) {
         var s = exp.scopes[index];
         if (!s || !s.digested) {// just skip if already digested.
             exp.forceRenderScope(index);
         }
+    }
+
+    function calculatePercent() {
+        var result = {count: 0};
+        each(exp.scopes, calculateScopePercent, result);
+        return result.count / exp.rowsLength;
+    }
+
+    function calculateScopePercent(s, index, list, result) {
+        result.count += s ? 1 : 0;
     }
 
     function onInterval(started, ended) {
@@ -25,8 +34,7 @@ exports.datagrid.coreAddons.push(function creepRenderModel(exp) {
                 downIndex += 1;
             }
         }
-        percent = exp.scopes.length / exp.rowsLength;
-//        console.log("rendered %s%", Math.round(percent * 100));
+        percent = calculatePercent();
         stop();
         creepCount += 1;
         if (!exp.values.speed && exp.scopes.length < exp.rowsLength) {
@@ -42,7 +50,7 @@ exports.datagrid.coreAddons.push(function creepRenderModel(exp) {
 
     function resetInterval(started, ended) {
         stop();
-        if (creepCount < creepLimit) {
+        if (creepCount < exp.options.creepLimit) {
             intv = setTimeout(onInterval, exp.options.renderThreshold, started, ended);
         }
     }

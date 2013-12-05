@@ -14,7 +14,7 @@
     <!--<script src="../../lib/angular.js"></script>-->
     <script src="../../build/angular-ux-datagrid.js"></script>
 
-    <!--// addons //-->
+    <!--// optional addons //-->
     <script src="../../src/addons/statsModel.js"></script>
     <script src="../../src/addons/iosScrollFrictionAddon.js"></script>
     <script>
@@ -74,7 +74,6 @@
                 link: function (scope, element, attr) {
                     scope.percent = 0;
                     var onProgress = function (event, percent) {
-                        console.log('percent %s', percent);
                         scope.percent = Math.round(percent * 100);
                         if (!scope.$$phase) {
                             scope.$digest();

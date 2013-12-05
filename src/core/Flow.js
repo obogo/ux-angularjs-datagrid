@@ -107,13 +107,16 @@ function Flow() {
         exp = null;
     }
 
+    exp.debug = false;
     exp.insert = insert;
     exp.add = add;
     exp.unique = unique;
     exp.run = run;
     exp.destroy = destroy;
     exp.log = function () {
-        console.log.apply(console, arguments);
+        if (exp.debug) {
+            console.log.apply(console, arguments);
+        }
     };
 
     return exp;

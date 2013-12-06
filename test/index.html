@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="app">
 <head>
     <title>Runner Unit Tests.</title>
     <link rel="stylesheet" type="text/css" href="unit/lib/jasmine.css">
@@ -13,9 +13,15 @@
     <!-- modules to test -->
     <script src="../build/angular-ux-datagrid.js"></script>
     <!-- setup -->
+    <script>
+        angular.module('app', ['ux']).run();
+    </script>
 
     <!-- tests -->
     <script src="unit/chunkModel-spec.js"></script>
+    <script src="unit/creepRenderModel-spec.js"></script>
+    <script src="unit/normalizeModel-spec.js"></script>
+    <script src="unit/scrollModel-spec.js"></script>
 
 </head>
 <body>

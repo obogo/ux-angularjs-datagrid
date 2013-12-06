@@ -1,5 +1,5 @@
 /*global ux */
-exports.datagrid.coreAddons.push(function normalizeModel(exp) {
+exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
 
     var originalData, normalizedData;
 
@@ -33,4 +33,5 @@ exports.datagrid.coreAddons.push(function normalizeModel(exp) {
     };
 
     return exp;
-});
+};
+exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.normalizeModel);

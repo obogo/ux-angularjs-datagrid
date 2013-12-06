@@ -73,7 +73,7 @@ function charPack(char, amount) {
 
 function each(list, method, data) {
     var i = 0, len, result;
-    if (list.length) {
+    if (list && list.length) {
         len = list.length;
         while (i < len) {
             result = method(list[i], i, list, data);
@@ -156,8 +156,8 @@ exports.util.array = exports.util.array || {};
 
 exports.util.array.toArray = toArray;
 
-function Flow() {
-    var exp = {}, running = false, intv, current = null, list = [], uniqueMethods = {}, execStartTime, execEndTime, consoleMethodStyle = "font-weight: bold;color:#3399FF;";
+function Flow(exp) {
+    var running = false, intv, current = null, list = [], uniqueMethods = {}, execStartTime, execEndTime, consoleMethodStyle = "font-weight: bold;color:#3399FF;";
     function getMethodName(method) {
         return method.toString().split(/\b/)[2];
     }
@@ -219,7 +219,7 @@ function Flow() {
     function next() {
         if (!current && list.length) {
             current = list[0];
-            if (current.delay !== undefined) {
+            if (exp.async && current.delay !== undefined) {
                 exp.log("	flow:delay for %c%s %sms", consoleMethodStyle, current.label, current.delay);
                 clearTimeout(intv);
                 intv = setTimeout(exec, current.delay);
@@ -246,7 +246,9 @@ function Flow() {
         exp.log("flow destroyed");
         exp = null;
     }
-    exp.debug = false;
+    exp = exp || {};
+    exp.async = exp.hasOwnProperty("async") ? exp.async : true;
+    exp.debug = exp.hasOwnProperty("debug") ? exp.debug : false;
     exp.insert = insert;
     exp.add = add;
     exp.unique = unique;
@@ -259,6 +261,8 @@ function Flow() {
     };
     return exp;
 }
+
+exports.datagrid.Flow = Flow;
 
 function Datagrid(scope, element, attr, $compile) {
     var flow = new Flow(), unwatchers = [], content, scopes = [], active = [], lastVisibleScrollStart = 0, rowHeights = {}, rowOffsets = {}, viewHeight = 0, options, states = exports.datagrid.states, events = exports.datagrid.events, state = states.BUILDING, values = {
@@ -298,7 +302,6 @@ function Datagrid(scope, element, attr, $compile) {
             options.dynamicRowHeights = exp.templateModel.dynamicHeights();
         });
         flow.add(addListeners);
-        flow.add(exp.setupScrolling);
     };
     function addListeners() {
         unwatchers.push(scope.$watch(function() {
@@ -773,7 +776,7 @@ exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);
 
 exports.datagrid.events.RENDER_PROGRESS = "datagrid:renderProgress";
 
-exports.datagrid.coreAddons.push(function creepRenderModel(exp) {
+exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
     var intv = 0, percent = 0, creepCount = 0;
     function digest(index) {
         var s = exp.scopes[index];
@@ -793,7 +796,7 @@ exports.datagrid.coreAddons.push(function creepRenderModel(exp) {
     }
     function onInterval(started, ended) {
         var upIndex = started, downIndex = ended, time = Date.now() + exp.options.renderThreshold;
-        while (time > Date.now() && (upIndex > 0 || downIndex < exp.rowsLength)) {
+        while (time > Date.now() && (upIndex >= 0 || downIndex < exp.rowsLength)) {
             if (upIndex >= 0) {
                 digest(upIndex);
                 upIndex -= 1;
@@ -812,13 +815,13 @@ exports.datagrid.coreAddons.push(function creepRenderModel(exp) {
         exp.dispatch(exports.datagrid.events.RENDER_PROGRESS, percent);
     }
     function stop() {
-        clearTimeout(intv);
-        intv = 0;
+        intv = false;
     }
     function resetInterval(started, ended) {
         stop();
         if (creepCount < exp.options.creepLimit) {
-            intv = setTimeout(onInterval, exp.options.renderThreshold, started, ended);
+            exp.flow.add(onInterval, [ started, ended ], exp.options.renderThreshold);
+            intv = true;
         }
     }
     function onAfterUpdateWatchers(event, loopData) {
@@ -829,9 +832,11 @@ exports.datagrid.coreAddons.push(function creepRenderModel(exp) {
     }
     exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, stop));
     exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, onAfterUpdateWatchers));
-});
+};
 
-exports.datagrid.coreAddons.push(function normalizeModel(exp) {
+exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.creepRenderModel);
+
+exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
     var originalData, normalizedData;
     function normalize(data, grouped, normalized) {
         var i = 0, len = data.length;
@@ -861,15 +866,17 @@ exports.datagrid.coreAddons.push(function normalizeModel(exp) {
         return originalData;
     };
     return exp;
-});
+};
 
-exports.datagrid.coreAddons.push(function scrollModel(datagrid) {
-    datagrid.setupScrolling = function setupScrolling() {
+exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.normalizeModel);
+
+exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
+    function setupScrolling() {
         datagrid.element[0].addEventListener("scroll", datagrid.onUpdateScroll);
         datagrid.unwatchers.push(function() {
             datagrid.element[0].removeEventListener("scroll", datagrid.onUpdateScroll);
         });
-    };
+    }
     datagrid.onUpdateScroll = function onUpdateScroll(event) {
         var val = (event.target || event.srcElement || datagrid.element[0]).scrollTop;
         if (datagrid.values.scroll !== val) {
@@ -884,8 +891,12 @@ exports.datagrid.coreAddons.push(function scrollModel(datagrid) {
         datagrid.waitForStop();
     };
     datagrid.waitForStop = function waitForStop() {
-        clearTimeout(datagrid.values.scrollingStopIntv);
-        datagrid.values.scrollingStopIntv = setTimeout(datagrid.onScrollingStop, datagrid.options.updateDelay);
+        if (datagrid.flow.async) {
+            clearTimeout(datagrid.values.scrollingStopIntv);
+            datagrid.values.scrollingStopIntv = setTimeout(datagrid.onScrollingStop, datagrid.options.updateDelay);
+        } else {
+            datagrid.onScrollingStop();
+        }
     };
     datagrid.onScrollingStop = function onScrollingStop() {
         datagrid.flow.log("scrollingStop");
@@ -893,7 +904,14 @@ exports.datagrid.coreAddons.push(function scrollModel(datagrid) {
         datagrid.values.absSpeed = 0;
         datagrid.flow.add(datagrid.render);
     };
-});
+    datagrid.scrollToIndex = function scrollToIndex(index) {};
+    datagrid.scrollToItem = function scrollToItem(item) {};
+    datagrid.getNormalizedIndex = function getNormalizedIndex(item) {};
+    datagrid.scope.$on(exports.datagrid.events.READY, setupScrolling);
+    return datagrid;
+};
+
+exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.scrollModel);
 
 exports.datagrid.coreAddons.push(function templateModel(exp) {
     "use strict";

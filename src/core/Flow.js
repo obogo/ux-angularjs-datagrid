@@ -1,6 +1,5 @@
-function Flow() {
-    var exp = {},
-        running = false,
+function Flow(exp) {
+    var running = false,
         intv,
         current = null,
         list = [],
@@ -76,7 +75,7 @@ function Flow() {
     function next() {
         if (!current && list.length) {
             current = list[0];
-            if (current.delay !== undefined) {
+            if (exp.async && current.delay !== undefined) {
                 exp.log("\tflow:delay for %c%s %sms", consoleMethodStyle, current.label, current.delay);
                 clearTimeout(intv);
                 intv = setTimeout(exec, current.delay);
@@ -106,8 +105,9 @@ function Flow() {
         exp.log('flow destroyed');
         exp = null;
     }
-
-    exp.debug = false;
+    exp = exp || {};
+    exp.async = exp.hasOwnProperty('async') ? exp.async : true;
+    exp.debug = exp.hasOwnProperty('debug') ? exp.debug : false;
     exp.insert = insert;
     exp.add = add;
     exp.unique = unique;
@@ -121,3 +121,4 @@ function Flow() {
 
     return exp;
 }
+exports.datagrid.Flow = Flow;

@@ -67,7 +67,7 @@ function Datagrid(scope, element, attr, $compile) {
             options.dynamicRowHeights = exp.templateModel.dynamicHeights();
         });
         flow.add(addListeners);
-        flow.add(exp.setupScrolling);
+//        flow.add(exp.setupScrolling);
     };
 
     function addListeners() {

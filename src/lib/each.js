@@ -1,6 +1,6 @@
 function each(list, method, data) {
     var i = 0, len, result;
-    if (list.length) {
+    if (list && list.length) {
         len = list.length;
         while (i < len) {
             result = method(list[i], i, list, data);

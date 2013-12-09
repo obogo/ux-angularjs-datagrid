@@ -1,7 +1,7 @@
 /*global ux */
 exports.datagrid.events.SCROLL_START = "datagrid:scrollStart";
 exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
-exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
+exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
 
     var started = false;
 
@@ -9,9 +9,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
      * Listen for scrollingEvents.
      */
     function setupScrolling() {
-        datagrid.element[0].addEventListener('scroll', datagrid.onUpdateScroll);
-        datagrid.unwatchers.push(function () {
-            datagrid.element[0].removeEventListener('scroll', datagrid.onUpdateScroll);
+        exp.element[0].addEventListener('scroll', exp.onUpdateScroll);
+        exp.unwatchers.push(function () {
+            exp.element[0].removeEventListener('scroll', exp.onUpdateScroll);
         });
     }
 
@@ -19,54 +19,54 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
      * When a scrollEvent is fired, recalculate the values.
      * @param event
      */
-    datagrid.onUpdateScroll = function onUpdateScroll(event) {
-        var val = (event.target || event.srcElement || datagrid.element[0]).scrollTop;
-        if (datagrid.values.scroll !== val) {
+    exp.onUpdateScroll = function onUpdateScroll(event) {
+        var val = (event.target || event.srcElement || exp.element[0]).scrollTop;
+        if (exp.values.scroll !== val) {
             if (!started) {
                 console.log('start scrolling');
                 started = true;
-                datagrid.dispatch(exports.datagrid.events.SCROLL_START, val);
+                exp.dispatch(exports.datagrid.events.SCROLL_START, val);
             }
-            datagrid.values.speed = val - datagrid.values.scroll;
-            datagrid.values.absSpeed = Math.abs(datagrid.values.speed);
-            datagrid.values.scroll = val;
+            exp.values.speed = val - exp.values.scroll;
+            exp.values.absSpeed = Math.abs(exp.values.speed);
+            exp.values.scroll = val;
         }
-        datagrid.waitForStop();
+        exp.waitForStop();
     };
 
     /**
      * Scroll to the numeric value.
      * @param value
      */
-    datagrid.scrollTo = function scrollTo(value) {
-        datagrid.element[0].scrollTop = value;
-        datagrid.waitForStop();
+    exp.scrollTo = function scrollTo(value) {
+        exp.element[0].scrollTop = value;
+        exp.waitForStop();
     };
 
     /**
      * Wait for the datagrid to slow down enough to render.
      */
-    datagrid.waitForStop = function waitForStop() {
+    exp.waitForStop = function waitForStop() {
         console.log("waitForStop");
-        if (datagrid.flow.async) {
-            clearTimeout(datagrid.values.scrollingStopIntv);
-            datagrid.values.scrollingStopIntv = setTimeout(datagrid.onScrollingStop, datagrid.options.updateDelay);
+        if (exp.flow.async) {
+            clearTimeout(exp.values.scrollingStopIntv);
+            exp.values.scrollingStopIntv = setTimeout(exp.onScrollingStop, exp.options.updateDelay);
         } else {
-            datagrid.onScrollingStop();
+            exp.onScrollingStop();
         }
     };
 
     /**
      * When it stops render.
      */
-    datagrid.onScrollingStop = function onScrollingStop() {
+    exp.onScrollingStop = function onScrollingStop() {
         console.log("scrollingStop");
-        datagrid.values.speed = 0;
-        datagrid.values.absSpeed = 0;
-        datagrid.flow.add(datagrid.render);
+        exp.values.speed = 0;
+        exp.values.absSpeed = 0;
+        exp.flow.add(exp.render);
         if (started) {
             started = false;
-            datagrid.dispatch(exports.datagrid.events.SCROLL_STOP, datagrid.values.scroll);
+            exp.dispatch(exports.datagrid.events.SCROLL_STOP, exp.values.scroll);
         }
     };
 
@@ -74,31 +74,34 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
      * Scroll to the normalized index.
      * @param index
      */
-    datagrid.scrollToIndex = function scrollToIndex(index) {
-        //TODO: implement
+    exp.scrollToIndex = function scrollToIndex(index) {
+        exp.scrollTo(exp.getRowOffset(index));
     };
 
     /**
      * Scroll to an item by finding it's normalized index.
      * @param item
      */
-    datagrid.scrollToItem = function scrollToItem(item) {
-        //TODO: implement
+    exp.scrollToItem = function scrollToItem(item) {
+        var index = exp.getNormalizedIndex(item);
+        if (index !== -1) {
+            exp.scrollToIndex(index);
+        }
     };
 
     /**
      * Get the normalized index for an item.
      * @param item
      */
-    datagrid.getNormalizedIndex = function getNormalizedIndex(item) {
-        //TODO: implement
+    exp.getNormalizedIndex = function getNormalizedIndex(item) {
+        return exp.data.indexOf(item);
     };
 
     /**
      * Wait till the grid is ready before we setup our listeners.
      */
-    datagrid.scope.$on(exports.datagrid.events.READY, setupScrolling);
+    exp.scope.$on(exports.datagrid.events.READY, setupScrolling);
 
-    return datagrid;
+    return exp;
 };
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.scrollModel);

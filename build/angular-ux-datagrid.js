@@ -30,7 +30,7 @@ exports.datagrid = {
     },
     options: {
         compileAllRowsOnInit: false,
-        updateDelay: 50,
+        updateDelay: 100,
         cushion: -50,
         chunkSize: 100,
         uncompiledClass: "uncompiled",
@@ -295,14 +295,14 @@ function Datagrid(scope, element, attr, $compile) {
         exp.values = values;
         exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
     }
-    exp.start = function start() {
+    function start() {
         exp.dispatch(exports.datagrid.events.INIT);
         flow.add(exp.templateModel.createTemplates);
         flow.add(function updateDynamicRowHeights() {
             options.dynamicRowHeights = exp.templateModel.dynamicHeights();
         });
         flow.add(addListeners);
-    };
+    }
     function addListeners() {
         unwatchers.push(scope.$watch(function() {
             return scope.$eval(attr.uxDatagrid);
@@ -335,22 +335,6 @@ function Datagrid(scope, element, attr, $compile) {
         rowHeights = {};
         flow.log("created %s dom elements", len);
     }
-    function compileRows(startIndex, limit) {
-        var s, time = Date.now() + options.renderThreshold, count = 0, nextIndex = startIndex;
-        limit = limit || exp.rowsLength;
-        scope.$emit(events.BUILDING_PROGRESS, startIndex, exp.rowsLength);
-        console.log("	compiling at %s", startIndex);
-        while (count < limit && time > Date.now()) {
-            compileRow(startIndex + count);
-            count += 1;
-        }
-        nextIndex += count;
-        flow.log("	compiled %s of %s", count, limit);
-        if (nextIndex < limit) {
-            flow.insert(compileRows, [ nextIndex, limit ], 0);
-        }
-        return count;
-    }
     function compileRow(index) {
         var s = scopes[index], prev, tpl, el, unwatch;
         if (!s) {
@@ -376,9 +360,6 @@ function Datagrid(scope, element, attr, $compile) {
     }
     function buildRows(list) {
         state = states.BUILDING;
-        if (options.compileAllRowsOnInit) {
-            flow.insert(compileRows, [ 0, exp.rowsLength ]);
-        }
         flow.insert(createDom, [ list ], 0);
     }
     function ready() {
@@ -394,10 +375,6 @@ function Datagrid(scope, element, attr, $compile) {
         if (!s.$$phase) {
             s.$digest();
         }
-    }
-    function hasClass(node, cls) {
-        var elClasses = " " + node.className + " ";
-        return elClasses.indexOf(cls) >= 0;
     }
     function removeClass(node, cls) {
         if (cls) {
@@ -568,15 +545,15 @@ function Datagrid(scope, element, attr, $compile) {
         flow.add(reset);
     }
     function reset() {
-        viewHeight = 0;
         destroyScopes();
         content.innerHTML = "";
+        viewHeight = 0;
         setupExports();
         exp.chunkModel.reset();
         state = states.BUILDING;
         flow.add(render);
     }
-    exp.forceRenderScope = function forceRenderScope(index) {
+    function forceRenderScope(index) {
         var s = scopes[index];
         if (!s && index > 0 && index < exp.rowsLength) {
             s = compileRow(index);
@@ -586,10 +563,10 @@ function Datagrid(scope, element, attr, $compile) {
             s.$digest();
             deactivateScope(s);
         }
-    };
-    exp.dispatch = function dispatch() {
+    }
+    function dispatch() {
         scope.$emit.apply(scope, arguments);
-    };
+    }
     function destroyScopes() {
         each(scopes, function(s) {
             return s && s.$destroy();
@@ -612,11 +589,21 @@ function Datagrid(scope, element, attr, $compile) {
             exp[i] = null;
         }
     }
-    flow.add(init);
-    flow.run();
+    exp.start = start;
+    exp.reset = reset;
+    exp.forceRenderScope = forceRenderScope;
+    exp.dispatch = dispatch;
     exp.render = function() {
         flow.add(render);
     };
+    exp.updateAllHeights = updateAllHeights;
+    exp.getOffsetIndex = getOffsetIndex;
+    exp.isActive = isActive;
+    exp.getScope = getScope;
+    exp.getRowElm = getRowElm;
+    exp.getRowOffset = getRowOffset;
+    flow.add(init);
+    flow.run();
     return exp;
 }
 
@@ -779,7 +766,7 @@ exports.datagrid.events.RENDER_PROGRESS = "datagrid:renderProgress";
 exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
     var intv = 0, percent = 0, creepCount = 0;
     function digest(index) {
-        var s = exp.scopes[index];
+        var s = exp.getScope(index);
         if (!s || !s.digested) {
             exp.forceRenderScope(index);
         }
@@ -874,56 +861,65 @@ exports.datagrid.events.SCROLL_START = "datagrid:scrollStart";
 
 exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
 
-exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
+exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
     var started = false;
     function setupScrolling() {
-        datagrid.element[0].addEventListener("scroll", datagrid.onUpdateScroll);
-        datagrid.unwatchers.push(function() {
-            datagrid.element[0].removeEventListener("scroll", datagrid.onUpdateScroll);
+        exp.element[0].addEventListener("scroll", exp.onUpdateScroll);
+        exp.unwatchers.push(function() {
+            exp.element[0].removeEventListener("scroll", exp.onUpdateScroll);
         });
     }
-    datagrid.onUpdateScroll = function onUpdateScroll(event) {
-        var val = (event.target || event.srcElement || datagrid.element[0]).scrollTop;
-        if (datagrid.values.scroll !== val) {
+    exp.onUpdateScroll = function onUpdateScroll(event) {
+        var val = (event.target || event.srcElement || exp.element[0]).scrollTop;
+        if (exp.values.scroll !== val) {
             if (!started) {
                 console.log("start scrolling");
                 started = true;
-                datagrid.dispatch(exports.datagrid.events.SCROLL_START, val);
+                exp.dispatch(exports.datagrid.events.SCROLL_START, val);
             }
-            datagrid.values.speed = val - datagrid.values.scroll;
-            datagrid.values.absSpeed = Math.abs(datagrid.values.speed);
-            datagrid.values.scroll = val;
+            exp.values.speed = val - exp.values.scroll;
+            exp.values.absSpeed = Math.abs(exp.values.speed);
+            exp.values.scroll = val;
         }
-        datagrid.waitForStop();
+        exp.waitForStop();
     };
-    datagrid.scrollTo = function scrollTo(value) {
-        datagrid.element[0].scrollTop = value;
-        datagrid.waitForStop();
+    exp.scrollTo = function scrollTo(value) {
+        exp.element[0].scrollTop = value;
+        exp.waitForStop();
     };
-    datagrid.waitForStop = function waitForStop() {
+    exp.waitForStop = function waitForStop() {
         console.log("waitForStop");
-        if (datagrid.flow.async) {
-            clearTimeout(datagrid.values.scrollingStopIntv);
-            datagrid.values.scrollingStopIntv = setTimeout(datagrid.onScrollingStop, datagrid.options.updateDelay);
+        if (exp.flow.async) {
+            clearTimeout(exp.values.scrollingStopIntv);
+            exp.values.scrollingStopIntv = setTimeout(exp.onScrollingStop, exp.options.updateDelay);
         } else {
-            datagrid.onScrollingStop();
+            exp.onScrollingStop();
         }
     };
-    datagrid.onScrollingStop = function onScrollingStop() {
+    exp.onScrollingStop = function onScrollingStop() {
         console.log("scrollingStop");
-        datagrid.values.speed = 0;
-        datagrid.values.absSpeed = 0;
-        datagrid.flow.add(datagrid.render);
+        exp.values.speed = 0;
+        exp.values.absSpeed = 0;
+        exp.flow.add(exp.render);
         if (started) {
             started = false;
-            datagrid.dispatch(exports.datagrid.events.SCROLL_STOP, datagrid.values.scroll);
+            exp.dispatch(exports.datagrid.events.SCROLL_STOP, exp.values.scroll);
         }
     };
-    datagrid.scrollToIndex = function scrollToIndex(index) {};
-    datagrid.scrollToItem = function scrollToItem(item) {};
-    datagrid.getNormalizedIndex = function getNormalizedIndex(item) {};
-    datagrid.scope.$on(exports.datagrid.events.READY, setupScrolling);
-    return datagrid;
+    exp.scrollToIndex = function scrollToIndex(index) {
+        exp.scrollTo(exp.getRowOffset(index));
+    };
+    exp.scrollToItem = function scrollToItem(item) {
+        var index = exp.getNormalizedIndex(item);
+        if (index !== -1) {
+            exp.scrollToIndex(index);
+        }
+    };
+    exp.getNormalizedIndex = function getNormalizedIndex(item) {
+        return exp.data.indexOf(item);
+    };
+    exp.scope.$on(exports.datagrid.events.READY, setupScrolling);
+    return exp;
 };
 
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.scrollModel);

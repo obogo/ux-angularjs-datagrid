@@ -59,7 +59,7 @@ function Datagrid(scope, element, attr, $compile) {
     /**
      * This is called after addons to allow overrides.
      */
-    exp.start = function start() {
+    function start() {
         exp.dispatch(exports.datagrid.events.INIT);
         flow.add(exp.templateModel.createTemplates);
         // if the templates have different heights. Then they are dynamic.
@@ -67,8 +67,7 @@ function Datagrid(scope, element, attr, $compile) {
             options.dynamicRowHeights = exp.templateModel.dynamicHeights();
         });
         flow.add(addListeners);
-//        flow.add(exp.setupScrolling);
-    };
+    }
 
     function addListeners() {
         unwatchers.push(scope.$watch(function () {
@@ -90,6 +89,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     function getRowOffset(index) {
 //TODO: need to reset row heights when a row is activated for the first time.... possibly every time for expanding rows.
+        // TODO: may want to update heights through a hierarchy for expanding rows.
         if (rowOffsets[index] === undefined) {
             if (options.dynamicRowHeights) { // dynamicRowHeights should be set by the templates.
                 updateAllHeights();
@@ -108,23 +108,6 @@ function Datagrid(scope, element, attr, $compile) {
         exp.rowsLength = len;
         rowHeights = {};
         flow.log("created %s dom elements", len);
-    }
-
-    function compileRows(startIndex, limit) {
-        var s, time = Date.now() + options.renderThreshold, count = 0, nextIndex = startIndex;
-        limit = limit || exp.rowsLength;
-        scope.$emit(events.BUILDING_PROGRESS, startIndex, exp.rowsLength);
-        console.log("\tcompiling at %s", startIndex);
-        while (count < limit && time > Date.now()) {
-            compileRow(startIndex + count);
-            count += 1;
-        }
-        nextIndex += count;
-        flow.log("\tcompiled %s of %s", count, limit);
-        if (nextIndex < limit) {
-            flow.insert(compileRows, [nextIndex, limit], 0);
-        }
-        return count;
     }
 
     function compileRow(index) {
@@ -153,9 +136,6 @@ function Datagrid(scope, element, attr, $compile) {
 
     function buildRows(list) {
         state = states.BUILDING;
-        if (options.compileAllRowsOnInit) {
-            flow.insert(compileRows, [0, exp.rowsLength]);
-        }
         flow.insert(createDom, [list], 0);
     }
 
@@ -174,11 +154,6 @@ function Datagrid(scope, element, attr, $compile) {
         if (!s.$$phase) {
             s.$digest();
         }
-    }
-
-    function hasClass(node, cls) {
-        var elClasses = " " + node.className + " ";
-        return elClasses.indexOf(cls) >= 0;
     }
 
     function removeClass(node, cls) {
@@ -304,7 +279,7 @@ function Datagrid(scope, element, attr, $compile) {
         while (loop.i < exp.rowsLength) {
             prevS = scope.$$childHead ? scopes[loop.i - 1] : null;
             s = compileRow(loop.i); // only compiles if it is not already compiled. Still returns the scope.
-            offset = getRowOffset(loop.i);
+            offset = getRowOffset(loop.i); // this is where the chunks and rows get created is when they are requested if they don't exist.
             if ((offset >= loop.visibleScrollStart && offset <= loop.visibleScrollEnd)) {
                 if (loop.started === undefined) {
                     loop.started = loop.i;
@@ -391,10 +366,10 @@ function Datagrid(scope, element, attr, $compile) {
 
     //reset = clear all and restart.
     function reset() {
-        viewHeight = 0; // force to recalculate heights.
         destroyScopes();
         // now destroy all of the dom.
         content.innerHTML = '';
+        viewHeight = 0; // force to recalculate heights.
         setupExports();
         // make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.
         exp.chunkModel.reset();
@@ -402,7 +377,7 @@ function Datagrid(scope, element, attr, $compile) {
         flow.add(render);
     }
 
-    exp.forceRenderScope = function forceRenderScope(index) {
+    function forceRenderScope(index) {
         var s = scopes[index];
         if (!s && index > 0 && index < exp.rowsLength) {
             s = compileRow(index);
@@ -412,11 +387,11 @@ function Datagrid(scope, element, attr, $compile) {
             s.$digest();
             deactivateScope(s);
         }
-    };
+    }
 
-    exp.dispatch = function dispatch() {
+    function dispatch() {
         scope.$emit.apply(scope, arguments);
-    };
+    }
 
     function destroyScopes() {
         // because child scopes may not be in order because of rendering techniques. We must loop through
@@ -447,12 +422,24 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
 
-    flow.add(init);
-    flow.run();
-
+    // define public api.
+    exp.start = start;
+    exp.reset = reset;
+    exp.forceRenderScope = forceRenderScope;
+    exp.dispatch = dispatch;
     exp.render = function () {
         flow.add(render);
     };
+    exp.updateAllHeights = updateAllHeights;
+    exp.getOffsetIndex = getOffsetIndex;
+    exp.isActive = isActive;
+    exp.getScope = getScope;
+    exp.getRowElm = getRowElm;
+    exp.getRowOffset = getRowOffset;
+
+    // initialize core.
+    flow.add(init);
+    flow.run();
 
     return exp;
 }

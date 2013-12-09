@@ -6,6 +6,9 @@ describe("creepRenderModel", function () {
         var $rootScope = angular.element(document).injector().get('$rootScope');
         exp = {
             scope: $rootScope.$new(),
+            getScope: function (index) {
+                return this.scopes[index];
+            },
             scopes: [{}, {}, {}, {}, {}],
             rowsLength: 5,
             flow: new ux.datagrid.Flow({async: false}),

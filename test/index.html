@@ -8,14 +8,13 @@
     <script src="unit/lib/jasmine-html.js"></script>
     <script src="unit/lib/boot.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular-mock.js"></script>
     <!--<script src="../lib/angular.js"></script>-->
 
     <!-- modules to test -->
     <script src="../build/angular-ux-datagrid.js"></script>
     <!-- setup -->
-    <script>
-        angular.module('app', ['ux']).run();
-    </script>
+    <script src="unit/app.js"></script>
 
     <!-- tests -->
     <script src="unit/chunkModel-spec.js"></script>
@@ -23,6 +22,7 @@
     <script src="unit/normalizeModel-spec.js"></script>
     <script src="unit/scrollModel-spec.js"></script>
     <script src="unit/templateModel-spec.js"></script>
+    <script src="unit/datagrid-spec.js"></script>
 
 </head>
 <body>

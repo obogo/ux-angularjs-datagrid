@@ -56,4 +56,16 @@ describe("scrollModel", function () {
         expect(model.values.speed).toBe(50);
     });
 
+    it("scrollToIndex should scroll to the correct index", function() {
+
+    });
+
+    it("scrollToItem should scroll to the item", function() {
+
+    });
+
+    it("getNormalizedIndex should get the index in the normalized array of the item that is passed", function() {
+
+    });
+
 });

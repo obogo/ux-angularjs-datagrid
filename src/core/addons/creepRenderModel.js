@@ -6,7 +6,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
         creepCount = 0;
 
     function digest(index) {
-        var s = exp.scopes[index];
+        var s = exp.getScope(index);
         if (!s || !s.digested) {// just skip if already digested.
             exp.forceRenderScope(index);
         }

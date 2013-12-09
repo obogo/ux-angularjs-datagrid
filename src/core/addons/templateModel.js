@@ -1,5 +1,5 @@
 /*global angular */
-exports.datagrid.coreAddons.push(function templateModel(exp) {
+exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
     'use strict';
 
     function trim(str) {
@@ -16,10 +16,13 @@ exports.datagrid.coreAddons.push(function templateModel(exp) {
 
     exp.templateModel = function () {
 
-        var templates = {}, totalHeight;
+        var templates = [], totalHeight;
 
         function createTemplates() {
             var i, scriptTemplates = exp.element[0].getElementsByTagName('script'), len = scriptTemplates.length;
+            if (!len) {
+                throw new Error("at least one template is required.");
+            }
             for (i = 0; i < len; i += 1) {
                 createTemplate(scriptTemplates[i]);
             }
@@ -44,6 +47,7 @@ exports.datagrid.coreAddons.push(function templateModel(exp) {
                 height: wrapper.offsetHeight
             };
             templates[templateData.name] = templateData;
+            templates.push(templateData);
             document.body.removeChild(wrapper);
             totalHeight = 0;// reset cached value.
             return templateData;
@@ -89,17 +93,7 @@ exports.datagrid.coreAddons.push(function templateModel(exp) {
         }
 
         function countTemplates() {
-            return count(templates);
-        }
-
-        function count(obj){
-            var i, c = 0;
-            for (i in obj) {
-                if (obj.hasOwnProperty(i)) {
-                    c += 1;
-                }
-            }
-            return c;
+            return templates.length;
         }
 
         function getTemplateHeight(item) {
@@ -129,4 +123,7 @@ exports.datagrid.coreAddons.push(function templateModel(exp) {
             getTemplateHeight: getTemplateHeight
         };
     }();
-});
+
+    return exp.templateModel;
+};
+exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.templateModel);

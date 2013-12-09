@@ -870,7 +870,12 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
 
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.normalizeModel);
 
+exports.datagrid.events.SCROLL_START = "datagrid:scrollStart";
+
+exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
+
 exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
+    var started = false;
     function setupScrolling() {
         datagrid.element[0].addEventListener("scroll", datagrid.onUpdateScroll);
         datagrid.unwatchers.push(function() {
@@ -880,6 +885,11 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
     datagrid.onUpdateScroll = function onUpdateScroll(event) {
         var val = (event.target || event.srcElement || datagrid.element[0]).scrollTop;
         if (datagrid.values.scroll !== val) {
+            if (!started) {
+                console.log("start scrolling");
+                started = true;
+                datagrid.dispatch(exports.datagrid.events.SCROLL_START, val);
+            }
             datagrid.values.speed = val - datagrid.values.scroll;
             datagrid.values.absSpeed = Math.abs(datagrid.values.speed);
             datagrid.values.scroll = val;
@@ -891,6 +901,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
         datagrid.waitForStop();
     };
     datagrid.waitForStop = function waitForStop() {
+        console.log("waitForStop");
         if (datagrid.flow.async) {
             clearTimeout(datagrid.values.scrollingStopIntv);
             datagrid.values.scrollingStopIntv = setTimeout(datagrid.onScrollingStop, datagrid.options.updateDelay);
@@ -899,10 +910,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
         }
     };
     datagrid.onScrollingStop = function onScrollingStop() {
-        datagrid.flow.log("scrollingStop");
+        console.log("scrollingStop");
         datagrid.values.speed = 0;
         datagrid.values.absSpeed = 0;
         datagrid.flow.add(datagrid.render);
+        if (started) {
+            started = false;
+            datagrid.dispatch(exports.datagrid.events.SCROLL_STOP, datagrid.values.scroll);
+        }
     };
     datagrid.scrollToIndex = function scrollToIndex(index) {};
     datagrid.scrollToItem = function scrollToItem(item) {};
@@ -913,7 +928,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
 
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.scrollModel);
 
-exports.datagrid.coreAddons.push(function templateModel(exp) {
+exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
     "use strict";
     function trim(str) {
         str = str.replace(/\n/g, "");
@@ -923,9 +938,12 @@ exports.datagrid.coreAddons.push(function templateModel(exp) {
         return str;
     }
     exp.templateModel = function() {
-        var templates = {}, totalHeight;
+        var templates = [], totalHeight;
         function createTemplates() {
             var i, scriptTemplates = exp.element[0].getElementsByTagName("script"), len = scriptTemplates.length;
+            if (!len) {
+                throw new Error("at least one template is required.");
+            }
             for (i = 0; i < len; i += 1) {
                 createTemplate(scriptTemplates[i]);
             }
@@ -947,6 +965,7 @@ exports.datagrid.coreAddons.push(function templateModel(exp) {
                 height: wrapper.offsetHeight
             };
             templates[templateData.name] = templateData;
+            templates.push(templateData);
             document.body.removeChild(wrapper);
             totalHeight = 0;
             return templateData;
@@ -983,16 +1002,7 @@ exports.datagrid.coreAddons.push(function templateModel(exp) {
             return totalHeight / len;
         }
         function countTemplates() {
-            return count(templates);
-        }
-        function count(obj) {
-            var i, c = 0;
-            for (i in obj) {
-                if (obj.hasOwnProperty(i)) {
-                    c += 1;
-                }
-            }
-            return c;
+            return templates.length;
         }
         function getTemplateHeight(item) {
             return getTemplate(item).height;
@@ -1019,5 +1029,8 @@ exports.datagrid.coreAddons.push(function templateModel(exp) {
             getTemplateHeight: getTemplateHeight
         };
     }();
-});
+    return exp.templateModel;
+};
+
+exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.templateModel);
 }(this.ux = this.ux || {}, function() {return this;}()));

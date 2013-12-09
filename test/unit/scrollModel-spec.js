@@ -18,6 +18,9 @@ describe("scrollModel", function () {
                 scroll: 0,
                 speed: 0,
                 absSpeed: 0
+            },
+            dispatch: function () {
+
             }
         });
         model.flow.run();

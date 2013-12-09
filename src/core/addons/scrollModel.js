@@ -1,5 +1,9 @@
 /*global ux */
+exports.datagrid.events.SCROLL_START = "datagrid:scrollStart";
+exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
 exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
+
+    var started = false;
 
     /**
      * Listen for scrollingEvents.
@@ -16,9 +20,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
      * @param event
      */
     datagrid.onUpdateScroll = function onUpdateScroll(event) {
-//        exp.flow.log("onUpdateScroll");
         var val = (event.target || event.srcElement || datagrid.element[0]).scrollTop;
         if (datagrid.values.scroll !== val) {
+            if (!started) {
+                console.log('start scrolling');
+                started = true;
+                datagrid.dispatch(exports.datagrid.events.SCROLL_START, val);
+            }
             datagrid.values.speed = val - datagrid.values.scroll;
             datagrid.values.absSpeed = Math.abs(datagrid.values.speed);
             datagrid.values.scroll = val;
@@ -39,7 +47,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
      * Wait for the datagrid to slow down enough to render.
      */
     datagrid.waitForStop = function waitForStop() {
-//        exp.flow.log("waitForStop");
+        console.log("waitForStop");
         if (datagrid.flow.async) {
             clearTimeout(datagrid.values.scrollingStopIntv);
             datagrid.values.scrollingStopIntv = setTimeout(datagrid.onScrollingStop, datagrid.options.updateDelay);
@@ -52,10 +60,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(datagrid) {
      * When it stops render.
      */
     datagrid.onScrollingStop = function onScrollingStop() {
-        datagrid.flow.log("scrollingStop");
+        console.log("scrollingStop");
         datagrid.values.speed = 0;
         datagrid.values.absSpeed = 0;
         datagrid.flow.add(datagrid.render);
+        if (started) {
+            started = false;
+            datagrid.dispatch(exports.datagrid.events.SCROLL_STOP, datagrid.values.scroll);
+        }
     };
 
     /**

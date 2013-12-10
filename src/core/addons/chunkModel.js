@@ -180,11 +180,11 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
         var i = 0, index, indxs = indexes.slice(0), ca = _list, el = _el;
         while (i < indxs.length) {
             index = indxs.shift();
-            if (!ca.rendered) { //!el.childElementCount) {
-                el.innerHTML = ca.getChildrenStr();
+            if (!ca.rendered) {
+                el.html(ca.getChildrenStr());
             }
             ca = ca[index];
-            el = el.childNodes[index];
+            el = angular.element(el.children()[index]);
         }
         return el;
     }
@@ -195,9 +195,14 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
     function reset() {
         //TODO: this needs to make sure it destroys things properly
         if (_el) _el.innerHTML = '';
+        _rows = null;
         _list = null;
         _chunkSize = null;
         _el = null;
+    }
+
+    function destroy() {
+        reset();
     }
 
     result.chunkDom = chunkDom;
@@ -207,6 +212,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
     };
     result.getRow = getRow;
     result.reset = reset;
+    result.destroy = destroy;
 
     // apply event dispatching.
     dispatcher(result);

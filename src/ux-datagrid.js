@@ -3,7 +3,7 @@
 //TODO: The events or calls to the datagrid need to all be added to a queue. So if the grid is unable to do something then it will not loose it and can try it later. Even keep the last few that just went by so we know what just happened. This could ignore some updates if it knows there are more updates pending.
 
 function Datagrid(scope, element, attr, $compile) {
-    var flow = new Flow(),
+    var flow,
         unwatchers = [],
         content,// the dom element with all of the chunks.
         scopes = [],
@@ -34,11 +34,12 @@ function Datagrid(scope, element, attr, $compile) {
      * init
      */
     function init() {
+        setupExports();
         flow.unique(render);
         flow.unique(updateRowWatchers);
-        element.append('<div class="content"></div>');
-        content = element[0].getElementsByClassName('content')[0];
-        setupExports();
+        content = angular.element('<div class="content"></div>');
+        element.append(content);
+//        content = element[0].getElementsByClassName('content')[0];
     }
 
     function setupExports() {
@@ -49,11 +50,8 @@ function Datagrid(scope, element, attr, $compile) {
         exp.rowsLength = 0;
         exp.scopes = scopes;
         exp.data = exp.data || [];
-        // add variables that can be modified externally.
-        exp.flow = flow;
         exp.unwatchers = unwatchers;
         exp.values = values;
-        exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
     }
 
     /**
@@ -70,10 +68,19 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function addListeners() {
+        var lastLength = 0, lastResult = null, len;
         unwatchers.push(scope.$watch(function () {
-            return scope.$eval(attr.uxDatagrid);
+            var result = scope.$eval(attr.uxDatagrid);
+            len = result && result.length || 0;
+            if (lastResult === result && lastLength !== len) {
+                //TODO: this needs tested to make sure it calls if the length changes.
+                flow.add(onDataChanged);// the length of the array changed.
+            }
+            lastResult = result;
+            lastLength = len;
+            return result;
         }, function () {
-            flow.add(onDataChanged, [arguments]);
+            flow.add(onDataChanged);
         }));
 
         unwatchers.push(scope.$on('$destroy', destroy));
@@ -84,7 +91,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function getRowElm(index) {
-        return exp.chunkModel.getRow(index);
+        return angular.element(exp.chunkModel.getRow(index));
     }
 
     function getRowOffset(index) {
@@ -156,20 +163,6 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
 
-    function removeClass(node, cls) {
-        if (cls) {
-            var newClass = " " + node.className.replace(/[\t\r\n]/g, " ") + " ";
-            var classes = newClass.split(' ');
-            var index = classes.indexOf(cls);
-            if (index !== -1) {
-                classes.splice(index, 1);
-                node.className = classes.join(' ');
-            }
-        } else {
-            node.className = "";
-        }
-    }
-
     /**
      * Turn off watchers for that index scope and any of it's children.
      * @param s
@@ -178,7 +171,7 @@ function Datagrid(scope, element, attr, $compile) {
         var child;
         // if the scope is not created yet. just skip.
         if (s && !isActive(s)) { // do not deactivate one that is already deactivated.
-            s.$broadcast(events.DEACTIVATED); // can use to turn off jquery listeners.
+//            s.$broadcast(events.DEACTIVATED); // can use to turn off jquery listeners.
             s.$$$watchers = s.$$watchers;
             s.$$watchers = [];
             // recursively go through children and deactivate them.
@@ -211,7 +204,7 @@ function Datagrid(scope, element, attr, $compile) {
                     child = child.$$nextSibling;
                 }
             }
-            s.$broadcast(events.ACTIVATED); // can use to turn on jquery listeners.
+//            s.$broadcast(events.ACTIVATED); // can use to turn on jquery listeners.
             return true;
         }
         return !!(s && !s.$$$watchers); // if it is active or not.
@@ -286,7 +279,7 @@ function Datagrid(scope, element, attr, $compile) {
                 }
                 updateMinMax(loop.i);
                 if (activateScope(s)) {
-                    removeClass(getRowElm(loop.i), options.uncompiledClass);
+                    getRowElm(loop.i).removeClass(options.uncompiledClass);
                     lastActiveIndex = lastActive.indexOf(loop.i);
                     if (lastActiveIndex !== -1) {
                         lastActive.splice(lastActiveIndex, 1);
@@ -368,7 +361,11 @@ function Datagrid(scope, element, attr, $compile) {
     function reset() {
         destroyScopes();
         // now destroy all of the dom.
-        content.innerHTML = '';
+        rowOffsets = {};
+        rowHeights = {};
+        active.length = 0;
+        scopes.length = 0;
+        content.children().remove();
         viewHeight = 0; // force to recalculate heights.
         setupExports();
         // make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.
@@ -382,7 +379,7 @@ function Datagrid(scope, element, attr, $compile) {
         if (!s && index > 0 && index < exp.rowsLength) {
             s = compileRow(index);
         }
-        if (s) {
+        if (s && !scope.$$phase) {
             activateScope(s);
             s.$digest();
             deactivateScope(s);
@@ -393,33 +390,84 @@ function Datagrid(scope, element, attr, $compile) {
         scope.$emit.apply(scope, arguments);
     }
 
-    function destroyScopes() {
+    function activateAllScopes() {
         // because child scopes may not be in order because of rendering techniques. We must loop through
         // all scopes and destroy them manually.
-        each(scopes, function (s) {
+        var lastScope, nextScope, i = 0;
+        each(scopes, function (s, index) {
             // listeners should be destroyed with the angular destroy.
-            return s && s.$destroy(); // some scopes may be null because they were not compiled. Destroy existing ones.
+            if (s) {
+                s.$$prevSibling = lastScope || undefined;
+                i = index;
+                while (!nextScope && i < exp.rowsLength) {
+                    i += 1;
+                    nextScope = scopes[i] || undefined;
+                }
+                activateScope(s);
+                lastScope = s;
+            }
         });
+    }
+
+    function destroyScopes() {
+        activateAllScopes();
+        each(scopes, function (s) {
+            if (s) {
+                s.$destroy(); // some scopes may be null because they were not compiled. Destroy existing ones.
+            }
+        });
+        scope.$$childHead = undefined;
+        scope.$$childTail = undefined;
+        scopes.length = 0;
+    }
+
+    function removeDomElements(el) {
+        var children = el.children(), i = 0, len = children.length, child;
+        while (i < len) {
+            child = angular.element(children[i]);
+            removeDomElements(child);
+            el[0].removeChild(children[i]);
+        }
     }
 
     // destroy needs to put all watcher back before destroying or it will not destroy child scopes, or remove watchers.
     function destroy() {
         clearTimeout(values.scrollingStopIntv);
-        values = null;
+        // destroy flow.
+        flow.destroy();
+        exp.flow = undefined;
+        flow = null;
+        // destroy watchers.
         while (unwatchers.length) {
             unwatchers.pop()();
         }
-        flow.destroy();
-        element[0].removeEventListener('scroll', exp.onUpdateScroll);
-        scope.$$childHead = scopes[0];
-        destroyScopes();
+        //activate scopes so they can be destroyed by angular.
+        activateAllScopes();
         // now remove every property on exports.
         for (var i in exp) {
-            if (exp[i] && exp.hasOwnProperty('destroy')) {
+            if (exp[i] && exp[i].hasOwnProperty('destroy')) {
                 exp[i].destroy();
             }
             exp[i] = null;
         }
+        element.remove();
+        exp = null;
+        scope = null;
+        element = null;
+        attr = null;
+        unwatchers = null;
+        content = null;
+        rowOffsets = null;
+        rowHeights = null;
+        active.length = 0;
+        active = null;
+        scopes.length = 0;
+        scopes = null;
+        viewHeight = 0; // force to recalculate heights.
+        values = null;
+        states = null;
+        events = null;
+        $compile = null;
     }
 
     // define public api.
@@ -438,6 +486,9 @@ function Datagrid(scope, element, attr, $compile) {
     exp.getRowOffset = getRowOffset;
 
     // initialize core.
+    exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
+    // add variables that can be modified externally.
+    exp.flow = flow = new Flow({async: options.hasOwnProperty('async') ? !!options.async : true, debug: options.hasOwnProperty('debug') ? !!options.debug : false});
     flow.add(init);
     flow.run();
 
@@ -448,12 +499,13 @@ module.directive('uxDatagrid', ['$compile', 'addons', function ($compile, addons
     return {
         restrict: 'AE',
         link: function (scope, element, attr) {
-            var lv = new Datagrid(scope, element, attr, $compile);
+            var inst = new Datagrid(scope, element, attr, $compile);
+            scope.datagrid = inst;// expose to scope.
             each(exports.datagrid.coreAddons, function (method) {
-                method.apply(lv, [lv]);
+                method.apply(inst, [inst]);
             });
-            addons(lv, attr.addons);
-            lv.start();
+            addons(inst, attr.addons);
+            inst.start();
         }
     };
 }]);

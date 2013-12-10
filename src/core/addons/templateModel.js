@@ -113,6 +113,11 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             return height;
         }
 
+        function destroy() {
+            templates.length = 0;
+            templates = null;
+        }
+
         return {
             createTemplates: createTemplates,
             getTemplate: getTemplate,
@@ -121,7 +126,8 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             dynamicHeights: dynamicHeights,
             averageTemplateHeight: averageTemplateHeight,
             getHeight: getHeight,
-            getTemplateHeight: getTemplateHeight
+            getTemplateHeight: getTemplateHeight,
+            destroy: destroy
         };
     }();
 

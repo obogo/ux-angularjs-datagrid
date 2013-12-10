@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html ng-app="app">
+<head>
+    <title>Datagrid App</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="YES">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="shortcut icon" href="images/favicon.ico">
+
+    <link type="text/css" rel="stylesheet" href="main.css">
+    <!--<script src="../../lib/angular.js"></script>-->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.js"></script>
+    <!--<script src="../../lib/angular-ui-router.js"></script>-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.0/angular-ui-router.min.js"></script>
+    <script src="../../build/angular-ux-datagrid.js"></script>
+    <script>
+        var app = angular.module('app', ['ui.router', 'ux']);
+        app.config(function ($stateProvider, $urlRouterProvider) {
+            //
+            // For any unmatched url, redirect to /state1
+            $urlRouterProvider.otherwise("/state1");
+            //
+            // Now set up the states
+            $stateProvider
+                    .state('state1', {
+                        url: "/state1",
+                        templateUrl: "partials/state1.html"
+                    })
+                    .state('state1.list', {
+                        url: "/list",
+                        templateUrl: "partials/state1.list.html",
+                        controller: function simpleArray($scope) {
+                            var i = 0;
+                            $scope.items = [];
+                            while (i < records) {
+                                $scope.items.push({id: i});
+                                i += 1;
+                            }
+                        }
+                    })
+                    .state('state2', {
+                        url: "/state2",
+                        templateUrl: "partials/state2.html"
+                    })
+                    .state('state2.list', {
+                        url: "/list",
+                        templateUrl: "partials/state2.list.html",
+                        controller: function ($scope) {
+                            $scope.things = ["A", "Set", "Of", "Things"];
+                        }
+                    })
+        });
+
+        var records = 50000;
+
+        function root($scope) {
+            $scope.counter = 0;
+            $scope.records = records;
+            $scope.percents = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+            setInterval(function () {
+                $scope.counter += 1;
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                }
+            }, 1000);
+
+            $scope.scrollToPercent = function (percent) {
+                var datagrid = document.getElementsByClassName('datagrid');
+                datagrid[0].scrollTop = angular.element(datagrid[0]).children()[0].offsetHeight * percent;
+            }
+
+            $scope.create = function () {
+
+            };
+        }
+
+    </script>
+</head>
+<body data-ng-controller="root">
+<!-- We'll also add some navigation: -->
+<a ui-sref="state1">State 1</a>
+<a ui-sref="state2">State 2</a>
+<div ui-view class="content-area"></div>
+</body>
+</html>

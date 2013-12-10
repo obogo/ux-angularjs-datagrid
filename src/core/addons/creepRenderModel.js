@@ -3,7 +3,8 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
 
     var intv = 0,
         percent = 0,
-        creepCount = 0;
+        creepCount = 0,
+        model = {};
 
     function digest(index) {
         var s = exp.getScope(index);
@@ -61,6 +62,11 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
             resetInterval(loopData.started, loopData.ended);
         }
     }
+
+    model.destroy = function destroy() {
+        exp = null;
+        model = null;
+    };
 
     exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, stop));
     exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, onAfterUpdateWatchers));

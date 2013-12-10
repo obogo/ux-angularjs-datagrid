@@ -9,7 +9,7 @@
     <link rel="shortcut icon" href="images/favicon.ico">
 
     <link type="text/css" rel="stylesheet" href="main.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.js"></script>
     <!--<script src="../../lib/angular.js"></script>-->
     <script src="../../build/angular-ux-datagrid.js"></script>
     <script>
@@ -31,10 +31,14 @@
                 var datagrid = document.getElementsByClassName('datagrid');
                 datagrid[0].scrollTop = angular.element(datagrid[0]).children()[0].offsetHeight * percent;
             }
+
+            $scope.create = function () {
+
+            };
         }
 
         function simpleArray($scope) {
-            var i = 0, len = records;
+            var i = 0;
             $scope.items = [];
             while (i < len) {
                 $scope.items.push({id: i});

@@ -102,7 +102,6 @@ function Flow(exp) {
     function destroy() {
         clearTimeout(intv);
         list.length = 0;
-        exp.log('flow destroyed');
         exp = null;
     }
     exp = exp || {};

@@ -3,38 +3,40 @@ describe("creepRenderModel", function () {
     var exp;
 
     beforeEach(function () {
-        var $rootScope = angular.element(document).injector().get('$rootScope');
-        exp = {
-            scope: $rootScope.$new(),
-            getScope: function (index) {
-                return this.scopes[index];
-            },
-            scopes: [{}, {}, {}, {}, {}],
-            rowsLength: 5,
-            flow: new ux.datagrid.Flow({async: false}),
-            unwatchers: [],
-            options: {
-                renderThreshold: 100,
-                creepLimit: 1
-            },
-            values: {
-                scroll: 0,
-                speed: 0,
-                absSpeed: 0,
-                scrollingStopIntv: null,
-                activeRange: {min: 0, max: 0}
-            },
-            forceRendered: {},
-            forceRenderScope: function (index) {
-                this.forceRendered[index] = true;
-            },
-            afterUpdateWatchers: function (started, ended) {
-                exp.scope.$emit(ux.datagrid.events.AFTER_UPDATE_WATCHERS, {started: started, ended: ended});
-            },
-            dispatch: function () {}
-        };
-        ux.datagrid.coreAddons.creepRenderModel(exp);
-        exp.flow.run();
+        var invoke = angular.injector(['ng','ux']).invoke;
+        invoke(function ($rootScope) {
+            exp = {
+                scope: $rootScope.$new(),
+                getScope: function (index) {
+                    return this.scopes[index];
+                },
+                scopes: [{}, {}, {}, {}, {}],
+                rowsLength: 5,
+                flow: new ux.datagrid.Flow({async: false}),
+                unwatchers: [],
+                options: {
+                    renderThreshold: 100,
+                    creepLimit: 1
+                },
+                values: {
+                    scroll: 0,
+                    speed: 0,
+                    absSpeed: 0,
+                    scrollingStopIntv: null,
+                    activeRange: {min: 0, max: 0}
+                },
+                forceRendered: {},
+                forceRenderScope: function (index) {
+                    this.forceRendered[index] = true;
+                },
+                afterUpdateWatchers: function (started, ended) {
+                    exp.scope.$emit(ux.datagrid.events.AFTER_UPDATE_WATCHERS, {started: started, ended: ended});
+                },
+                dispatch: function () {}
+            };
+            ux.datagrid.coreAddons.creepRenderModel(exp);
+            exp.flow.run();
+        });
     });
 
     it("should start after update watchers", function () {

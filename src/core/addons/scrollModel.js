@@ -3,15 +3,17 @@ exports.datagrid.events.SCROLL_START = "datagrid:scrollStart";
 exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
 exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
 
-    var started = false;
+    var started = false,
+        result = {};
 
     /**
      * Listen for scrollingEvents.
      */
     function setupScrolling() {
-        exp.element[0].addEventListener('scroll', exp.onUpdateScroll);
+        exp.element[0].addEventListener('scroll', result.onUpdateScroll);
+        // make it auto destroy.
         exp.unwatchers.push(function () {
-            exp.element[0].removeEventListener('scroll', exp.onUpdateScroll);
+            exp.element[0].removeEventListener('scroll', result.onUpdateScroll);
         });
     }
 
@@ -19,7 +21,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * When a scrollEvent is fired, recalculate the values.
      * @param event
      */
-    exp.onUpdateScroll = function onUpdateScroll(event) {
+    result.onUpdateScroll = function onUpdateScroll(event) {
         var val = (event.target || event.srcElement || exp.element[0]).scrollTop;
         if (exp.values.scroll !== val) {
             if (!started) {
@@ -31,35 +33,35 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
             exp.values.absSpeed = Math.abs(exp.values.speed);
             exp.values.scroll = val;
         }
-        exp.waitForStop();
+        result.waitForStop();
     };
 
     /**
      * Scroll to the numeric value.
      * @param value
      */
-    exp.scrollTo = function scrollTo(value) {
+    result.scrollTo = function scrollTo(value) {
         exp.element[0].scrollTop = value;
-        exp.waitForStop();
+        result.waitForStop();
     };
 
     /**
      * Wait for the datagrid to slow down enough to render.
      */
-    exp.waitForStop = function waitForStop() {
+    result.waitForStop = function waitForStop() {
         console.log("waitForStop");
         if (exp.flow.async) {
             clearTimeout(exp.values.scrollingStopIntv);
-            exp.values.scrollingStopIntv = setTimeout(exp.onScrollingStop, exp.options.updateDelay);
+            exp.values.scrollingStopIntv = setTimeout(result.onScrollingStop, exp.options.updateDelay);
         } else {
-            exp.onScrollingStop();
+            result.onScrollingStop();
         }
     };
 
     /**
      * When it stops render.
      */
-    exp.onScrollingStop = function onScrollingStop() {
+    result.onScrollingStop = function onScrollingStop() {
         console.log("scrollingStop");
         exp.values.speed = 0;
         exp.values.absSpeed = 0;
@@ -74,16 +76,16 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * Scroll to the normalized index.
      * @param index
      */
-    exp.scrollToIndex = function scrollToIndex(index) {
-        exp.scrollTo(exp.getRowOffset(index));
+    result.scrollToIndex = function scrollToIndex(index) {
+        result.scrollTo(result.getRowOffset(index));
     };
 
     /**
      * Scroll to an item by finding it's normalized index.
      * @param item
      */
-    exp.scrollToItem = function scrollToItem(item) {
-        var index = exp.getNormalizedIndex(item);
+    result.scrollToItem = function scrollToItem(item) {
+        var index = result.getNormalizedIndex(item);
         if (index !== -1) {
             exp.scrollToIndex(index);
         }
@@ -93,14 +95,22 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * Get the normalized index for an item.
      * @param item
      */
-    exp.getNormalizedIndex = function getNormalizedIndex(item) {
+    result.getNormalizedIndex = function getNormalizedIndex(item) {
         return exp.data.indexOf(item);
     };
+
+    function destroy() {
+
+    }
 
     /**
      * Wait till the grid is ready before we setup our listeners.
      */
     exp.scope.$on(exports.datagrid.events.READY, setupScrolling);
+
+    result.destroy = destroy;
+
+    exp.scrollModel = result;// all models should try not to pollute the main model to keep it clean.
 
     return exp;
 };

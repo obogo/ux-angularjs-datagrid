@@ -87,13 +87,13 @@ describe("chunkModel", function () {
                 template: '<div class="row row-' + i + '">' + list[i] + '</div>'
             };
         }
-        var el = document.createElement('div');
+        var el = angular.element('<div></div>');
         chunkModel.chunkDom(list, chunkSize, '<div class="chunky">', '</div>', el);
 //        console.log("original %o", el.childNodes[0]);
         var indexes = chunkModel.getRowIndexes(rowIndex);
         el = chunkModel.getRow(rowIndex);
         expect(indexes).toEqual(result);
-        expect(el.innerHTML).toEqual(find);
+        expect(el.html()).toEqual(find);
     }
 
     createTests();

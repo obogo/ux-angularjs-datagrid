@@ -27,7 +27,7 @@ describe("scrollModel", function () {
     });
 
     it("should update the scroll values", function() {
-        model.onUpdateScroll({
+        model.scrollModel.onUpdateScroll({
             target: {
                 scrollTop: 40
             }
@@ -36,7 +36,7 @@ describe("scrollModel", function () {
     });
 
     it("should render after scroll update", function() {
-        model.onUpdateScroll({
+        model.scrollModel.onUpdateScroll({
             target: {
                 scrollTop: 1
             }
@@ -48,7 +48,7 @@ describe("scrollModel", function () {
         // this needs to be async to run.
         model.flow.async = true;
         model.options = {updateDelay: 1};
-        model.onUpdateScroll({
+        model.scrollModel.onUpdateScroll({
             target: {
                 scrollTop: 50
             }

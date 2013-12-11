@@ -32,6 +32,16 @@ ChunkArray.prototype.getChildrenStr = function (deep) {
     this.rendered = true;
     return str;
 };
+/**
+ * Perform proper cleanup.
+ */
+ChunkArray.prototype.destroy = function () {
+    this.templateStart = '';
+    this.templateEnd = '';
+    this.templateModel = null;
+    this.rendered = false;
+    this.length = 0;
+};
 
 /**
  * chunkModel
@@ -195,6 +205,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
     function reset() {
         //TODO: this needs to make sure it destroys things properly
         if (_el) _el.innerHTML = '';
+        if (_list) _list.destroy();
         _rows = null;
         _list = null;
         _chunkSize = null;

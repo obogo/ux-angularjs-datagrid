@@ -264,7 +264,7 @@ function Flow(exp) {
 exports.datagrid.Flow = Flow;
 
 function Datagrid(scope, element, attr, $compile) {
-    var flow, unwatchers = [], content, scopes = [], active = [], lastVisibleScrollStart = 0, rowHeights = {}, rowOffsets = {}, viewHeight = 0, options, states = exports.datagrid.states, events = exports.datagrid.events, state = states.BUILDING, values = {
+    var flow, changeWatcherSet = false, unwatchers = [], content, scopes = [], active = [], lastVisibleScrollStart = 0, rowHeights = {}, rowOffsets = {}, viewHeight = 0, options, states = exports.datagrid.states, events = exports.datagrid.events, state = states.BUILDING, values = {
         scroll: 0,
         speed: 0,
         absSpeed: 0,
@@ -301,20 +301,27 @@ function Datagrid(scope, element, attr, $compile) {
         flow.add(addListeners);
     }
     function addListeners() {
-        var lastLength = 0, lastResult = null, len;
-        unwatchers.push(scope.$watch(function() {
-            var result = scope.$eval(attr.uxDatagrid);
-            len = result && result.length || 0;
-            if (lastResult === result && lastLength !== len) {
-                flow.add(onDataChanged);
-            }
-            lastResult = result;
-            lastLength = len;
-            return result;
-        }, function() {
-            flow.add(onDataChanged);
-        }));
         unwatchers.push(scope.$on("$destroy", destroy));
+        flow.add(setupChangeWatcher, [], 0);
+    }
+    function setupChangeWatcher() {
+        if (!changeWatcherSet) {
+            changeWatcherSet = true;
+            var lastLength = 0, lastResult = null, len;
+            unwatchers.push(scope.$watch(function() {
+                var result = scope.$eval(attr.uxDatagrid);
+                len = result && result.length || 0;
+                if (lastResult === result && lastLength !== len) {
+                    flow.add(onDataChanged);
+                }
+                lastResult = result;
+                lastLength = len;
+                return result;
+            }, function() {
+                flow.add(onDataChanged);
+            }));
+            safeDigest(scope);
+        }
     }
     function getScope(index) {
         return scopes[index];
@@ -358,6 +365,7 @@ function Datagrid(scope, element, attr, $compile) {
             });
             scopes[index] = s;
             el = getRowElm(index);
+            el.removeClass(options.uncompiledClass);
             $compile(el)(s);
             deactivateScope(s);
         }
@@ -467,7 +475,6 @@ function Datagrid(scope, element, attr, $compile) {
                 }
                 updateMinMax(loop.i);
                 if (activateScope(s)) {
-                    getRowElm(loop.i).removeClass(options.uncompiledClass);
                     lastActiveIndex = lastActive.indexOf(loop.i);
                     if (lastActiveIndex !== -1) {
                         lastActive.splice(lastActiveIndex, 1);
@@ -486,8 +493,8 @@ function Datagrid(scope, element, attr, $compile) {
         lastVisibleScrollStart = loop.visibleScrollStart;
         flow.log("	activated %s", active.join(", "));
         updateLinks();
-        exp.dispatch(events.AFTER_UPDATE_WATCHERS, loop);
         flow.add(safeDigest, [ scope ]);
+        exp.dispatch(events.AFTER_UPDATE_WATCHERS, loop);
     }
     function deactivateList(lastActive) {
         var lastActiveIndex, deactivated = [];
@@ -561,7 +568,7 @@ function Datagrid(scope, element, attr, $compile) {
     function dispatch() {
         scope.$emit.apply(scope, arguments);
     }
-    function activateAllScopes() {
+    function destroyScopes() {
         var lastScope, nextScope, i = 0;
         each(scopes, function(s, index) {
             if (s) {
@@ -573,13 +580,6 @@ function Datagrid(scope, element, attr, $compile) {
                 }
                 activateScope(s);
                 lastScope = s;
-            }
-        });
-    }
-    function destroyScopes() {
-        activateAllScopes();
-        each(scopes, function(s) {
-            if (s) {
                 s.$destroy();
             }
         });
@@ -587,15 +587,9 @@ function Datagrid(scope, element, attr, $compile) {
         scope.$$childTail = undefined;
         scopes.length = 0;
     }
-    function removeDomElements(el) {
-        var children = el.children(), i = 0, len = children.length, child;
-        while (i < len) {
-            child = angular.element(children[i]);
-            removeDomElements(child);
-            el[0].removeChild(children[i]);
-        }
-    }
     function destroy() {
+        scope.datagrid = null;
+        flow.log("destroying grid");
         clearTimeout(values.scrollingStopIntv);
         flow.destroy();
         exp.flow = undefined;
@@ -603,7 +597,7 @@ function Datagrid(scope, element, attr, $compile) {
         while (unwatchers.length) {
             unwatchers.pop()();
         }
-        activateAllScopes();
+        destroyScopes();
         for (var i in exp) {
             if (exp[i] && exp[i].hasOwnProperty("destroy")) {
                 exp[i].destroy();
@@ -697,6 +691,14 @@ ChunkArray.prototype.getChildrenStr = function(deep) {
     return str;
 };
 
+ChunkArray.prototype.destroy = function() {
+    this.templateStart = "";
+    this.templateEnd = "";
+    this.templateModel = null;
+    this.rendered = false;
+    this.length = 0;
+};
+
 exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
     var _list, _rows, _chunkSize, _el, result = {};
     function getChunkList() {
@@ -788,6 +790,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
     }
     function reset() {
         if (_el) _el.innerHTML = "";
+        if (_list) _list.destroy();
         _rows = null;
         _list = null;
         _chunkSize = null;
@@ -906,6 +909,9 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
     exp.getOriginalData = function() {
         return originalData;
     };
+    exp.getNormalizedIndex = function getNormalizedIndex(item) {
+        return exp.data.indexOf(item);
+    };
     return exp;
 };
 
@@ -961,16 +967,16 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         }
     };
     result.scrollToIndex = function scrollToIndex(index) {
-        result.scrollTo(result.getRowOffset(index));
+        var offset = exp.getRowOffset(index);
+        result.scrollTo(offset);
+        return offset;
     };
     result.scrollToItem = function scrollToItem(item) {
-        var index = result.getNormalizedIndex(item);
+        var index = exp.getNormalizedIndex(item);
         if (index !== -1) {
-            exp.scrollToIndex(index);
+            return result.scrollToIndex(index);
         }
-    };
-    result.getNormalizedIndex = function getNormalizedIndex(item) {
-        return exp.data.indexOf(item);
+        return exp.values.scroll;
     };
     function destroy() {}
     exp.scope.$on(exports.datagrid.events.READY, setupScrolling);

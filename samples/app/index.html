@@ -10,51 +10,61 @@
 
     <link type="text/css" rel="stylesheet" href="main.css">
     <!--<script src="../../lib/angular.js"></script>-->
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.js"></script>
-    <!--<script src="../../lib/angular-ui-router.js"></script>-->
-    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.0/angular-ui-router.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular-route.js"></script>
     <script src="../../build/angular-ux-datagrid.js"></script>
+    <script src="../../src/addons/statsModel.js"></script>
     <script>
-        var app = angular.module('app', ['ui.router', 'ux']);
-        app.config(function ($stateProvider, $urlRouterProvider) {
-            //
-            // For any unmatched url, redirect to /state1
-            $urlRouterProvider.otherwise("/state1");
-            //
-            // Now set up the states
-            $stateProvider
-                    .state('state1', {
-                        url: "/state1",
-                        templateUrl: "partials/state1.html"
-                    })
-                    .state('state1.list', {
-                        url: "/list",
-                        templateUrl: "partials/state1.list.html",
-                        controller: function simpleArray($scope) {
-                            var i = 0;
-                            $scope.items = [];
-                            while (i < records) {
-                                $scope.items.push({id: i});
-                                i += 1;
+        var app = angular.module('app', ['ngRoute', 'ux', 'progress']), records = 50000;
+
+        app.config(function ($routeProvider) {
+            $routeProvider
+                .when('/', {
+                    templateUrl: "partials/home.html",
+                    controller: function HomeCtrl($scope) {
+                        $scope.name = 'Home';
+                    }
+                })
+                .when('/simple', {
+                    templateUrl: "partials/simple.html",
+                    controller: function SimpleCtrl($scope) {
+                        $scope.name = "Simple Example";
+                        var i = 0;
+                        $scope.items = [];
+                        while (i < records) {
+                            $scope.items.push({id: i});
+                            i += 1;
+                        }
+                    }
+                })
+                .when('/grouped', {
+                    templateUrl: "partials/grouped.html",
+                    controller: function ($scope) {
+                        $scope.name = "Grouped Example";
+                        var i = 0, len = records, group, rand;
+                        $scope.items = [];
+                        while (i < len) {
+                            rand = Math.random();
+                            rand = rand >= 0.8 ? rand : 0;
+                            if (!group || Math.round(rand)) {
+                                $scope.items.push(group = {
+                                    id: 'G' + ($scope.items.length + 1),
+                                    name: 'Group ' + ($scope.items.length + 1),
+                                    _template: 'group',
+                                    children: []
+                                });
                             }
+                            group.children.push({id: 'I' + group.children.length + 1, children: [], _template: Math.round(Math.random()) ? 'sub' : 'default'});
+                            i += 1;
                         }
-                    })
-                    .state('state2', {
-                        url: "/state2",
-                        templateUrl: "partials/state2.html"
-                    })
-                    .state('state2.list', {
-                        url: "/list",
-                        templateUrl: "partials/state2.list.html",
-                        controller: function ($scope) {
-                            $scope.things = ["A", "Set", "Of", "Things"];
-                        }
-                    })
+                    }
+                })
+                .otherwise({
+                    redirectTo: '/'
+                });
         });
 
-        var records = 50000;
-
-        function root($scope) {
+        app.controller('root', function root($scope) {
             $scope.counter = 0;
             $scope.records = records;
             $scope.percents = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
@@ -73,14 +83,39 @@
             $scope.create = function () {
 
             };
-        }
+        });
+
+        /**
+         * this is the progress bar showing how many of the rows are rendered.
+         */
+        angular.module('progress', ['ng']).directive('progressBar', function () {
+            return {
+                restrict: 'A',
+                scope: true,
+                template: '<div>{{percent}}%</div>',
+                link: function (scope, element, attr) {
+                    scope.percent = 0;
+                    var onProgress = function (event, percent) {
+                        scope.percent = Math.round(percent * 100);
+                        if (!scope.$$phase) {
+                            scope.$digest();
+                        }
+                        angular.element(element[0].childNodes[0]).css({width: (percent * 100) + '%', overflow: 'visible'});
+                    };
+                    scope.$root.$on(ux.datagrid.events.RENDER_PROGRESS, onProgress);
+                }
+            }
+        });
 
     </script>
 </head>
-<body data-ng-controller="root">
+<body ng-controller="root">
 <!-- We'll also add some navigation: -->
-<a ui-sref="state1">State 1</a>
-<a ui-sref="state2">State 2</a>
-<div ui-view class="content-area"></div>
+<div class="stats page-title">
+    <a href="#/home">Home</a>
+    <a href="#/simple">Simple</a>
+    <a href="#/grouped">Grouped</a>
+</div>
+<div ng-view class="content-area"></div>
 </body>
 </html>

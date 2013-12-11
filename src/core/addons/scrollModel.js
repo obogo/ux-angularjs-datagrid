@@ -77,7 +77,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * @param index
      */
     result.scrollToIndex = function scrollToIndex(index) {
-        result.scrollTo(result.getRowOffset(index));
+        var offset = exp.getRowOffset(index);
+        result.scrollTo(offset);
+        return offset;
     };
 
     /**
@@ -85,18 +87,11 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * @param item
      */
     result.scrollToItem = function scrollToItem(item) {
-        var index = result.getNormalizedIndex(item);
+        var index = exp.getNormalizedIndex(item);
         if (index !== -1) {
-            exp.scrollToIndex(index);
+            return result.scrollToIndex(index);
         }
-    };
-
-    /**
-     * Get the normalized index for an item.
-     * @param item
-     */
-    result.getNormalizedIndex = function getNormalizedIndex(item) {
-        return exp.data.indexOf(item);
+        return exp.values.scroll;
     };
 
     function destroy() {

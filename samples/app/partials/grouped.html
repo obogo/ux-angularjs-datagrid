@@ -1,0 +1,36 @@
+<div class="stats">
+    <div class="page-title">{{name}}</div>
+    <div progress-bar class="progress-bar"></div>
+    <span>SCROLL TO:</span>
+    <span data-ng-repeat="percent in percents"><a href="" data-ng-click="scrollToPercent(percent/100)">{{percent}}%</a> </span>
+</div>
+<div class="my-container">
+    <div class="listA">
+        <!--// This is the background loader //-->
+        <div class="loader">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <!--// this is the datagrid //-->
+        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="gridStatsModel">
+            <script type="template/html" data-template-name="group" data-template-item="item">
+                <div class="group {{fake}}">
+                    <div class="text">{{item.id}} {{$id}} {{counter}} height: 20px</div>
+                </div>
+            </script>
+            <script type="template/html" data-template-name="default" data-template-item="item">
+                <div class="row {{fake}}">
+                    <div class="text">{{item.id}} {{$id}} {{counter}} height: 40px</div>
+                    <input type="text">
+                </div>
+            </script>
+            <script type="template/html" data-template-name="sub" data-template-item="item">
+                <div class="sub {{fake}}">
+                    <div class="text">{{item.id}} {{$id}} {{counter}} height: 30px</div>
+                    <input type="text">
+                </div>
+            </script>
+        </div>
+    </div>
+</div>

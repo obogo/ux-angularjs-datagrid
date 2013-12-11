@@ -1,6 +1,6 @@
 /*global ux */
 exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
-
+//TODO: this needs to be put on exp.normalizedModel
     var originalData, normalizedData;
 
     function normalize(data, grouped, normalized) {
@@ -30,6 +30,14 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
     };
     exp.getOriginalData = function () {
         return originalData;
+    };
+
+    /**
+     * Get the normalized index for an item.
+     * @param item
+     */
+    exp.getNormalizedIndex = function getNormalizedIndex(item) {
+        return exp.data.indexOf(item);
     };
 
     return exp;

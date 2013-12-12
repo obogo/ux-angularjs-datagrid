@@ -22,6 +22,10 @@ exports.datagrid = {
         READY: 'datagrid:ready',
         BEFORE_UPDATE_WATCHERS: 'datagrid:beforeUpdateWatchers',
         AFTER_UPDATE_WATCHERS: 'datagrid:afterUpdateWatchers',
+        BEFORE_DATA_CHANGE: 'datagrid:beforeDataChange',
+        AFTER_DATA_CHANGE: 'datagrid:afterDataChange',
+        BEFORE_RENDER_AFTER_DATA_CHANGE: 'datagrid:beforeRenderAfterDataChange',
+        RENDER_AFTER_DATA_CHANGE: 'datagrid:renderAfterDataChange'
     },
     options: {
         compileAllRowsOnInit: false,// this can cause it to take a long time to initialize.

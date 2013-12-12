@@ -1,8 +1,11 @@
 var app = angular.module('app', ['ngRoute', 'ux', 'progress']), records = 50000;
 
-function createSimpleList() {
-    var i = 0, items = [];
-    while (i < records) {
+function createSimpleList(len, offset) {
+    var i, items = [];
+    len = len || records;
+    i = offset || 0;
+    len += i;
+    while (i < len) {
         items.push({id: i});
         i += 1;
     }
@@ -53,26 +56,40 @@ app.config(function ($routeProvider) {
         .when('/addons/disableHoverWhileScrolling', {
             templateUrl: "partials/addons/disableHoverWhileScrolling.html",
             controller: function ($scope) {
-                $scope.name = "Desktop >> Disable Hover While Scrolling";
+                $scope.name = "Addons >> Desktop >> Disable Hover While Scrolling";
                 $scope.items = createSimpleList();
             }
         })
         .when('/addons/iosScrollFriction', {
             templateUrl: "partials/addons/iosScrollFriction.html",
             controller: function ($scope) {
-                $scope.name = "Touch >> ISO >> Scroll Friction";
+                $scope.name = "Addons >> Touch >> ISO >> Scroll Friction";
                 $scope.items = createSimpleList();
             }
         })
         .when('/addons/statsModel', {
             templateUrl: "partials/addons/statsModel.html",
             controller: function ($scope) {
-                $scope.name = "Touch >> Stats Model";
+                $scope.name = "Addons >> Touch >> Stats Model";
                 $scope.items = createSimpleList();
                 $scope.$on(ux.datagrid.events.STATS_UPDATE, function (event, result) {
                     $scope.stats = result;
                     $scope.$digest();
                 });
+            }
+        })
+        .when('/addons/infiniteScroll', {
+            templateUrl: "partials/addons/infiniteScroll.html",
+            controller: function ($scope) {
+                $scope.name = "Addons >> InfiniteScroll";
+                $scope.items = createSimpleList(20);
+                $scope.$on(ux.datagrid.events.SCROLL_TO_BOTTOM, function () {
+                    // we are doing a timeout here to simulate time that an ajax call may need to get the paginated data.
+                    setTimeout(function () {
+                        $scope.items = $scope.items.concat(createSimpleList(20, $scope.items.length));
+                        $scope.$apply();
+                    }, 1000);
+                })
             }
         })
         .otherwise({

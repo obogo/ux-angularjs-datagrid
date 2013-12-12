@@ -25,7 +25,6 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         var val = (event.target || event.srcElement || exp.element[0]).scrollTop;
         if (exp.values.scroll !== val) {
             if (!started) {
-                console.log('start scrolling');
                 started = true;
                 exp.dispatch(exports.datagrid.events.SCROLL_START, val);
             }
@@ -39,17 +38,23 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
     /**
      * Scroll to the numeric value.
      * @param value
+     * @param {Boolean=} immediately
      */
-    result.scrollTo = function scrollTo(value) {
+    result.scrollTo = function scrollTo(value, immediately) {
         exp.element[0].scrollTop = value;
-        result.waitForStop();
+        if (immediately) {
+            exp.values.scroll = value;
+            clearTimeout(exp.values.scrollingStopIntv);
+            result.onScrollingStop();
+        } else {
+            result.waitForStop();
+        }
     };
 
     /**
      * Wait for the datagrid to slow down enough to render.
      */
     result.waitForStop = function waitForStop() {
-        console.log("waitForStop");
         if (exp.flow.async) {
             clearTimeout(exp.values.scrollingStopIntv);
             exp.values.scrollingStopIntv = setTimeout(result.onScrollingStop, exp.options.updateDelay);
@@ -62,7 +67,6 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * When it stops render.
      */
     result.onScrollingStop = function onScrollingStop() {
-        console.log("scrollingStop");
         exp.values.speed = 0;
         exp.values.absSpeed = 0;
         exp.flow.add(exp.render);

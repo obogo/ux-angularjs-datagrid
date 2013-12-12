@@ -26,7 +26,11 @@ exports.datagrid = {
         APPENDING_PROGRESS: "datagrid:appendingProgress",
         READY: "datagrid:ready",
         BEFORE_UPDATE_WATCHERS: "datagrid:beforeUpdateWatchers",
-        AFTER_UPDATE_WATCHERS: "datagrid:afterUpdateWatchers"
+        AFTER_UPDATE_WATCHERS: "datagrid:afterUpdateWatchers",
+        BEFORE_DATA_CHANGE: "datagrid:beforeDataChange",
+        AFTER_DATA_CHANGE: "datagrid:afterDataChange",
+        BEFORE_RENDER_AFTER_DATA_CHANGE: "datagrid:beforeRenderAfterDataChange",
+        RENDER_AFTER_DATA_CHANGE: "datagrid:renderAfterDataChange"
     },
     options: {
         compileAllRowsOnInit: false,
@@ -265,6 +269,7 @@ exports.datagrid.Flow = Flow;
 
 function Datagrid(scope, element, attr, $compile) {
     var flow, changeWatcherSet = false, unwatchers = [], content, scopes = [], active = [], lastVisibleScrollStart = 0, rowHeights = {}, rowOffsets = {}, viewHeight = 0, options, states = exports.datagrid.states, events = exports.datagrid.events, state = states.BUILDING, values = {
+        dirty: false,
         scroll: 0,
         speed: 0,
         absSpeed: 0,
@@ -338,6 +343,12 @@ function Datagrid(scope, element, attr, $compile) {
             }
         }
         return rowOffsets[index];
+    }
+    function getRowHeight(index) {
+        return exp.templateModel.getTemplateHeight(exp.data[index]);
+    }
+    function getViewportHeight() {
+        return viewHeight;
     }
     function createDom(list) {
         flow.log("OVERWRITE DOM!!!");
@@ -480,6 +491,7 @@ function Datagrid(scope, element, attr, $compile) {
                         lastActive.splice(lastActiveIndex, 1);
                     }
                     active.push(loop.i);
+                    safeDigest(s);
                 }
             }
             loop.i += loop.inc;
@@ -524,6 +536,17 @@ function Datagrid(scope, element, attr, $compile) {
         values.activeRange.min = values.activeRange.min < activeIndex && values.activeRange.min > 0 ? values.activeRange.min : activeIndex;
         values.activeRange.max = values.activeRange.max > activeIndex && values.activeRange.max > 0 ? values.activeRange.max : activeIndex;
     }
+    function beforeRenderAfterDataChange() {
+        if (values.dirty) {
+            dispatch(exports.datagrid.events.BEFORE_RENDER_AFTER_DATA_CHANGE);
+        }
+    }
+    function afterRenderAfterDataChange() {
+        if (values.dirty) {
+            values.dirty = false;
+            dispatch(exports.datagrid.events.RENDER_AFTER_DATA_CHANGE);
+        }
+    }
     function render() {
         if (state === states.BUILDING) {
             viewHeight = element[0].offsetHeight;
@@ -531,14 +554,19 @@ function Datagrid(scope, element, attr, $compile) {
             flow.add(updateAllHeights);
             flow.add(ready);
         } else if (state === states.READY) {
+            flow.add(beforeRenderAfterDataChange);
             flow.add(updateRowWatchers);
+            flow.add(afterRenderAfterDataChange);
         } else {
             throw new Error("RENDER STATE INVALID");
         }
     }
     function onDataChanged() {
+        dispatch(exports.datagrid.events.BEFORE_DATA_CHANGE);
+        values.dirty = true;
         flow.log("dataChanged");
         exp.data = exp.setData(scope.$eval(attr.uxDatagrid || attr.list), scope.$eval(attr.grouped)) || [];
+        dispatch(exports.datagrid.events.AFTER_DATA_CHANGE);
         flow.add(reset);
     }
     function reset() {
@@ -611,13 +639,10 @@ function Datagrid(scope, element, attr, $compile) {
         attr = null;
         unwatchers = null;
         content = null;
-        rowOffsets = null;
-        rowHeights = null;
         active.length = 0;
         active = null;
         scopes.length = 0;
         scopes = null;
-        viewHeight = 0;
         values = null;
         states = null;
         events = null;
@@ -636,6 +661,8 @@ function Datagrid(scope, element, attr, $compile) {
     exp.getScope = getScope;
     exp.getRowElm = getRowElm;
     exp.getRowOffset = getRowOffset;
+    exp.getRowHeight = getRowHeight;
+    exp.getViewportHeight = getViewportHeight;
     exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
     exp.flow = flow = new Flow({
         async: options.hasOwnProperty("async") ? !!options.async : true,
@@ -899,7 +926,7 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
         if (grouped) {
             normalizedData = normalize(data, grouped);
         } else {
-            normalizedData = data;
+            normalizedData = data.slice(0);
         }
         return normalizedData;
     };
@@ -933,7 +960,6 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         var val = (event.target || event.srcElement || exp.element[0]).scrollTop;
         if (exp.values.scroll !== val) {
             if (!started) {
-                console.log("start scrolling");
                 started = true;
                 exp.dispatch(exports.datagrid.events.SCROLL_START, val);
             }
@@ -943,12 +969,17 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         }
         result.waitForStop();
     };
-    result.scrollTo = function scrollTo(value) {
+    result.scrollTo = function scrollTo(value, immediately) {
         exp.element[0].scrollTop = value;
-        result.waitForStop();
+        if (immediately) {
+            exp.values.scroll = value;
+            clearTimeout(exp.values.scrollingStopIntv);
+            result.onScrollingStop();
+        } else {
+            result.waitForStop();
+        }
     };
     result.waitForStop = function waitForStop() {
-        console.log("waitForStop");
         if (exp.flow.async) {
             clearTimeout(exp.values.scrollingStopIntv);
             exp.values.scrollingStopIntv = setTimeout(result.onScrollingStop, exp.options.updateDelay);
@@ -957,7 +988,6 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         }
     };
     result.onScrollingStop = function onScrollingStop() {
-        console.log("scrollingStop");
         exp.values.speed = 0;
         exp.values.absSpeed = 0;
         exp.flow.add(exp.render);

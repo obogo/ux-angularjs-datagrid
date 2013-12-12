@@ -155,6 +155,9 @@ table {
     background: url(images/row-loader.gif) no-repeat center #AADDFF !important;
 }
 
+.loadingRow {
+    background: url(images/row-loader.gif) no-repeat center #FFFFFF !important;
+}
 
 .uncompiled > * {
     visibility: hidden;

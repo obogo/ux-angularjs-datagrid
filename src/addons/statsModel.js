@@ -3,7 +3,7 @@
  * @type {string}
  */
 ux.datagrid.events.STATS_UPDATE = 'datagrid:statsUpdate';
-angular.module('ux').factory('gridStatsModel', function () {
+angular.module('ux').factory('statsModel', function () {
     return function (exp) {
         var initStartTime = 0, rendersTotal = 0, renders = [], unwatchers = [];
         var api = {

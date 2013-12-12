@@ -139,12 +139,25 @@ table {
     color: #FFFFFF;
 }
 
-.uncompiled > * {
-    visibility: hidden;
+.row.uncompiled {
+    background: url(images/row-loader.gif) no-repeat center #efefef !important;
 }
 
-.uncompiled.compiled > * {
-    visibility: visible;
+.row.uncompiled:nth-child(odd) {
+    background: url(images/row-loader.gif) no-repeat center #dfdfdf !important;
+}
+
+.sub.uncompiled {
+    background: url(images/row-loader.gif) no-repeat center #99CCFF !important;
+}
+
+.sub.uncompiled:nth-child(odd) {
+    background: url(images/row-loader.gif) no-repeat center #AADDFF !important;
+}
+
+
+.uncompiled > * {
+    visibility: hidden;
 }
 
 .ux-datagrid-chunk {
@@ -172,4 +185,20 @@ table {
 
 .page-title a:last-child {
     border-right: 0px solid #FFFFFF;
+}
+
+.hoverIcon {
+    display: inline-block;
+    width: 80px;
+    height: 20px;
+    background-color: #333333;
+    color: #FFFFFF;
+    vertical-align: middle;
+    line-height: 20px;
+    text-align: center;
+    margin-left: 10px;
+}
+
+.hover:hover {
+  box-shadow: 2px 2px 2px #F00;
 }

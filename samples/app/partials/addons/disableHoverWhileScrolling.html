@@ -1,0 +1,22 @@
+<div class="stats">
+    <div class="page-title">{{name}}</div>
+    <div>In desktop applications with hovers in the scrolling performance can decrease on scrolling dom. This will automatically disable hovers while scrolling. see <a href="http://www.thecssninja.com/javascript/pointer-events-60fps" target="hoverScroll">http://www.thecssninja.com/javascript/pointer-events-60fps</a> for more information.</div>
+</div>
+<div class="my-container">
+    <div class="listA">
+        <!--// This is the background loader //-->
+        <div class="spinningSquares">
+            <div data-ng-repeat="num in [1, 2, 3, 4, 5, 6, 7, 8]" class="spinningSquaresG spinningSquares_{{num}}"></div>
+        </div>
+        <!--// this is the datagrid //-->
+        <div data-ux-datagrid="items" class="datagrid" data-addons="disableHoverWhileScrolling">
+            <script type="template/html" data-template-name="default" data-template-item="item">
+                <div class="row {{fake}}">
+                    <div class="text">{{item.id}} {{$id}} {{counter}}
+                        <div class="hoverIcon hover">Hover Me</div>
+                    </div>
+                </div>
+            </script>
+        </div>
+    </div>
+</div>

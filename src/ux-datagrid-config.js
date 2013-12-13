@@ -16,9 +16,7 @@ exports.datagrid = {
     },
     events: {
         INIT: 'datagrid:init',
-        //TODO: these 2 events need to be deprecated.
-        BUILDING_PROGRESS: 'datagrid:buildingProgress',
-        APPENDING_PROGRESS: 'datagrid:appendingProgress',
+        RESIZE: 'datagrid:resize',
         READY: 'datagrid:ready',
         BEFORE_UPDATE_WATCHERS: 'datagrid:beforeUpdateWatchers',
         AFTER_UPDATE_WATCHERS: 'datagrid:afterUpdateWatchers',

@@ -53,6 +53,13 @@ app.config(function ($routeProvider) {
                 $scope.items = createGroupedList();
             }
         })
+        .when('/addons/columns', {
+            templateUrl: "partials/addons/columns.html",
+            controller: function ($scope) {
+                $scope.name = "Addons >> Columns";
+                $scope.items = createSimpleList();
+            }
+        })
         .when('/addons/disableHoverWhileScrolling', {
             templateUrl: "partials/addons/disableHoverWhileScrolling.html",
             controller: function ($scope) {

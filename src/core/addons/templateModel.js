@@ -53,6 +53,10 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             return templateData;
         }
 
+        function getTemplates() {
+            return templates;
+        }
+
         /**
          * Use the data object from each item in the array to determine the template for that item.
          * @param data
@@ -120,6 +124,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
 
         return {
             createTemplates: createTemplates,
+            getTemplates: getTemplates,
             getTemplate: getTemplate,
             getTemplateByName: getTemplateByName,
             templateCount: countTemplates,

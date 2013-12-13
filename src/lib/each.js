@@ -21,3 +21,4 @@ function each(list, method, data) {
     }
     return list;
 }
+exports.each = each;

@@ -74,6 +74,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function addListeners() {
+        window.addEventListener('resize', onResize);
         unwatchers.push(scope.$on('$destroy', destroy));
         flow.add(setupChangeWatcher, [], 0);
     }
@@ -97,6 +98,10 @@ function Datagrid(scope, element, attr, $compile) {
             }));
             safeDigest(scope);
         }
+    }
+
+    function onResize(event) {
+        dispatch(exports.datagrid.events.RESIZE, {event:event});
     }
 
     function getScope(index) {

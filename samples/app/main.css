@@ -205,3 +205,11 @@ table {
 .hover:hover {
   box-shadow: 2px 2px 2px #F00;
 }
+
+.col {
+    text-align: center;
+    outline: 1px solid #000000;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}

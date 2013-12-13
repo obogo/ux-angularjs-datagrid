@@ -72,10 +72,10 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
      * Create a ChunkArray from the array of data that is passed.
      * The array that is passed should not be multi-dimensional. This will only work with a single
      * dimensional array.
-     * @param list {Array}
-     * @param size {Number}
-     * @param templateStart {String}
-     * @param templateEnd {String}
+     * @param {Array} list
+     * @param {Number} size
+     * @param {String} templateStart
+     * @param {String} templateEnd
      * @returns {ChunkArray}
      */
     function chunkList(list, size, templateStart, templateEnd) {
@@ -129,11 +129,11 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
     /**
      * Create the chunkList so that it is ready for dom. Set properties needed to create the dom.
      * The dom gets created when the rows are accessed.
-     * @param list {Array} // single dimensional array only.
-     * @param size {Number}
-     * @param templateStart {String}
-     * @param templateEnd {String}
-     * @param el {DomElement}
+     * @param {Array} list // single dimensional array only.
+     * @param {Number} size
+     * @param {String} templateStart
+     * @param {String} templateEnd
+     * @param {DomElement} el
      * @returns {DomElement}
      */
     function chunkDom(list, size, templateStart, templateEnd, el) {
@@ -204,7 +204,6 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
      */
     function reset() {
         //TODO: this needs to make sure it destroys things properly
-        if (_el) _el.innerHTML = '';
         if (_list) _list.destroy();
         _rows = null;
         _list = null;

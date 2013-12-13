@@ -7,6 +7,7 @@ function Datagrid(scope, element, attr, $compile) {
         changeWatcherSet = false,
         unwatchers = [],
         content,// the dom element with all of the chunks.
+        oldContent,// the content being replaced.
         scopes = [],
     // compiling
         active = [],
@@ -39,9 +40,12 @@ function Datagrid(scope, element, attr, $compile) {
         setupExports();
         flow.unique(render);
         flow.unique(updateRowWatchers);
-        content = angular.element('<div class="content"></div>');
-        element.append(content);
-//        content = element[0].getElementsByClassName('content')[0];
+    }
+
+    function createContent() {
+        var cnt = angular.element('<div class="content"></div>');
+        element.append(cnt);
+        return cnt;
     }
 
     function setupExports() {
@@ -363,6 +367,10 @@ function Datagrid(scope, element, attr, $compile) {
 
     function afterRenderAfterDataChange() {
         if (values.dirty) {
+            if (oldContent) {
+                oldContent.remove();
+                oldContent = null;
+            }
             values.dirty = false;
             dispatch(exports.datagrid.events.RENDER_AFTER_DATA_CHANGE);
         }
@@ -402,7 +410,11 @@ function Datagrid(scope, element, attr, $compile) {
         rowHeights = {};
         active.length = 0;
         scopes.length = 0;
-        content.children().remove();
+        if (content) {
+            oldContent = content;
+            oldContent.css({position:"absolute", top: 0, left: 0, zIndex: 1});
+        }
+        content = createContent();
         viewHeight = 0; // force to recalculate heights.
         setupExports();
         // make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.

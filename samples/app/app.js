@@ -80,15 +80,16 @@ app.config(function ($routeProvider) {
         })
         .when('/addons/infiniteScroll', {
             templateUrl: "partials/addons/infiniteScroll.html",
-            controller: function ($scope) {
+            controller: function ($scope, $timeout) {
                 $scope.name = "Addons >> InfiniteScroll";
                 $scope.items = createSimpleList(20);
                 $scope.$on(ux.datagrid.events.SCROLL_TO_BOTTOM, function () {
-                    // we are doing a timeout here to simulate time that an ajax call may need to get the paginated data.
-                    setTimeout(function () {
-                        $scope.items = $scope.items.concat(createSimpleList(20, $scope.items.length));
-                        $scope.$apply();
-                    }, 1000);
+                    if ($scope.items.length < $scope.datagrid.options.infiniteScrollLimit) {
+                        // we are doing a timeout here to simulate time that an ajax call may need to get the paginated data.
+                        $timeout(function () {
+                            $scope.items = $scope.items.concat(createSimpleList(20, $scope.items.length));
+                        }, 1000, true);
+                    }
                 })
             }
         })

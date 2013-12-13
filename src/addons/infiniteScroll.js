@@ -9,7 +9,7 @@ angular.module('ux').factory('infiniteScroll', function () {
 
         result.beforeDataChange = function beforeDataChange() {
             scrollOffset = exp.values.scroll;
-            if (exp.data[exp.data.length - 1] !== loadingRow) {
+            if (exp.data[exp.data.length - 1] !== loadingRow && (!exp.options.infiniteScrollLimit || exp.data.length < exp.options.infiniteScrollLimit)) {
                 exp.data.push(loadingRow);
             }
         };

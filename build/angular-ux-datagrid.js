@@ -268,7 +268,7 @@ function Flow(exp) {
 exports.datagrid.Flow = Flow;
 
 function Datagrid(scope, element, attr, $compile) {
-    var flow, changeWatcherSet = false, unwatchers = [], content, scopes = [], active = [], lastVisibleScrollStart = 0, rowHeights = {}, rowOffsets = {}, viewHeight = 0, options, states = exports.datagrid.states, events = exports.datagrid.events, state = states.BUILDING, values = {
+    var flow, changeWatcherSet = false, unwatchers = [], content, oldContent, scopes = [], active = [], lastVisibleScrollStart = 0, rowHeights = {}, rowOffsets = {}, viewHeight = 0, options, states = exports.datagrid.states, events = exports.datagrid.events, state = states.BUILDING, values = {
         dirty: false,
         scroll: 0,
         speed: 0,
@@ -283,8 +283,11 @@ function Datagrid(scope, element, attr, $compile) {
         setupExports();
         flow.unique(render);
         flow.unique(updateRowWatchers);
-        content = angular.element('<div class="content"></div>');
-        element.append(content);
+    }
+    function createContent() {
+        var cnt = angular.element('<div class="content"></div>');
+        element.append(cnt);
+        return cnt;
     }
     function setupExports() {
         exp.__name = "ux-datagrid";
@@ -543,6 +546,10 @@ function Datagrid(scope, element, attr, $compile) {
     }
     function afterRenderAfterDataChange() {
         if (values.dirty) {
+            if (oldContent) {
+                oldContent.remove();
+                oldContent = null;
+            }
             values.dirty = false;
             dispatch(exports.datagrid.events.RENDER_AFTER_DATA_CHANGE);
         }
@@ -575,7 +582,16 @@ function Datagrid(scope, element, attr, $compile) {
         rowHeights = {};
         active.length = 0;
         scopes.length = 0;
-        content.children().remove();
+        if (content) {
+            oldContent = content;
+            oldContent.css({
+                position: "absolute",
+                top: 0,
+                left: 0,
+                zIndex: 1
+            });
+        }
+        content = createContent();
         viewHeight = 0;
         setupExports();
         exp.chunkModel.reset();
@@ -816,7 +832,6 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
         return el;
     }
     function reset() {
-        if (_el) _el.innerHTML = "";
         if (_list) _list.destroy();
         _rows = null;
         _list = null;

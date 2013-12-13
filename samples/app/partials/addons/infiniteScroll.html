@@ -1,6 +1,6 @@
 <div class="stats">
     <div class="page-title">{{name}}</div>
-    <div>Infinite Scroll is used to add more data to the grid as it scrolls to the bottom.</div>
+    <div>Infinite Scroll is used to add more data to the grid as it scrolls to the bottom. The infiniteScrollLimit is set to 500 so that it will not load more or show a spinner after 200.</div>
 </div>
 <div class="my-container">
     <div class="listA">
@@ -9,7 +9,7 @@
             <div data-ng-repeat="num in [1, 2, 3, 4, 5, 6, 7, 8]" class="spinningSquaresG spinningSquares_{{num}}"></div>
         </div>
         <!--// this is the datagrid //-->
-        <div data-ux-datagrid="items" class="datagrid" data-addons="iosScrollFriction, infiniteScroll">
+        <div data-ux-datagrid="items" class="datagrid" data-options="{infiniteScrollLimit: 200}" data-addons="iosScrollFriction, infiniteScroll">
             <script type="template/html" data-template-name="default" data-template-item="item">
                 <div class="row">
                     <div class="text">{{item.id}} {{$id}} {{counter}}</div>

@@ -24,7 +24,6 @@ angular.module('ux').factory('infiniteScroll', function () {
 
         result.onUpdateScroll = function onUpdateScroll(event, scroll) {
             if (scroll >= bottomOffset) {
-                console.log("scroll to bottom");
                 exp.dispatch(ux.datagrid.events.SCROLL_TO_BOTTOM);
             }
         };

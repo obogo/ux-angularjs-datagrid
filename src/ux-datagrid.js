@@ -277,7 +277,7 @@ function Datagrid(scope, element, attr, $compile) {
             height += exp.templateModel.getTemplateHeight(exp.data[i]);
             i += 1;
         }
-        options.rowHeight = exp.templateModel.getTemplateHeight('default');
+        options.rowHeight = exp.rowsLength ? exp.templateModel.getTemplateHeight('default') : 0;
     }
 
     /**

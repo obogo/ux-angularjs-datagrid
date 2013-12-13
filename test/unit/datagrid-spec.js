@@ -70,11 +70,12 @@ describe('datagrid', function () {
         });
 
         it("reset should clear the dom and rebuild it", function() {
-            var content = element[0].childNodes[0];
+            var content = element[0].getElementsByClassName('content')[0];
             var firstChunk = content.childNodes[0];
             firstChunk.beforeReset = true;
             expect(firstChunk.beforeReset).toBe(true);
             scope.datagrid.reset();
+            content = element[0].getElementsByClassName('content')[1];// oldContent is removing.
             expect(content.childNodes[0].beforeReset).toBe(undefined);
         });
 
@@ -160,11 +161,12 @@ describe('datagrid', function () {
         });
 
         it("reset should clear the dom and rebuild it", function() {
-            var content = element[0].childNodes[0];
+            var content = element[0].getElementsByClassName('content')[0];
             var firstChunk = content.childNodes[0];
             firstChunk.beforeReset = true;
             expect(firstChunk.beforeReset).toBe(true);
             scope.datagrid.reset();
+            content = element[0].getElementsByClassName('content')[1];// oldContent is removing.
             expect(content.childNodes[0].beforeReset).toBe(undefined);
         });
 

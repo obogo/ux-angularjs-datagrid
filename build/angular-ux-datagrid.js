@@ -471,7 +471,7 @@ function Datagrid(scope, element, attr, $compile) {
             height += exp.templateModel.getTemplateHeight(exp.data[i]);
             i += 1;
         }
-        options.rowHeight = exp.templateModel.getTemplateHeight("default");
+        options.rowHeight = exp.rowsLength ? exp.templateModel.getTemplateHeight("default") : 0;
     }
     function updateRowWatchers() {
         var loop = getStartingIndex(), offset = loop.i * 40, lastActive = [].concat(active), lastActiveIndex, s, prevS;
@@ -964,7 +964,7 @@ exports.datagrid.events.SCROLL_START = "datagrid:scrollStart";
 exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
 
 exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
-    var started = false, result = {};
+    var result = {};
     function setupScrolling() {
         exp.element[0].addEventListener("scroll", result.onUpdateScroll);
         exp.unwatchers.push(function() {
@@ -974,10 +974,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
     result.onUpdateScroll = function onUpdateScroll(event) {
         var val = (event.target || event.srcElement || exp.element[0]).scrollTop;
         if (exp.values.scroll !== val) {
-            if (!started) {
-                started = true;
-                exp.dispatch(exports.datagrid.events.SCROLL_START, val);
-            }
+            exp.dispatch(exports.datagrid.events.SCROLL_START, val);
             exp.values.speed = val - exp.values.scroll;
             exp.values.absSpeed = Math.abs(exp.values.speed);
             exp.values.scroll = val;
@@ -1006,10 +1003,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         exp.values.speed = 0;
         exp.values.absSpeed = 0;
         exp.flow.add(exp.render);
-        if (started) {
-            started = false;
-            exp.dispatch(exports.datagrid.events.SCROLL_STOP, exp.values.scroll);
-        }
+        exp.dispatch(exports.datagrid.events.SCROLL_STOP, exp.values.scroll);
     };
     result.scrollToIndex = function scrollToIndex(index) {
         var offset = exp.getRowOffset(index);

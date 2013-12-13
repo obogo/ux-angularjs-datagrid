@@ -3,8 +3,7 @@ exports.datagrid.events.SCROLL_START = "datagrid:scrollStart";
 exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
 exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
 
-    var started = false,
-        result = {};
+    var result = {};
 
     /**
      * Listen for scrollingEvents.
@@ -24,10 +23,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
     result.onUpdateScroll = function onUpdateScroll(event) {
         var val = (event.target || event.srcElement || exp.element[0]).scrollTop;
         if (exp.values.scroll !== val) {
-            if (!started) {
-                started = true;
-                exp.dispatch(exports.datagrid.events.SCROLL_START, val);
-            }
+            exp.dispatch(exports.datagrid.events.SCROLL_START, val);
             exp.values.speed = val - exp.values.scroll;
             exp.values.absSpeed = Math.abs(exp.values.speed);
             exp.values.scroll = val;
@@ -70,10 +66,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         exp.values.speed = 0;
         exp.values.absSpeed = 0;
         exp.flow.add(exp.render);
-        if (started) {
-            started = false;
-            exp.dispatch(exports.datagrid.events.SCROLL_STOP, exp.values.scroll);
-        }
+        exp.dispatch(exports.datagrid.events.SCROLL_STOP, exp.values.scroll);
     };
 
     /**

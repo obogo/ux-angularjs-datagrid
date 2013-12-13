@@ -90,7 +90,7 @@ app.config(function ($routeProvider) {
                             $scope.items = $scope.items.concat(createSimpleList(20, $scope.items.length));
                         }, 1000, true);
                     }
-                })
+                });
             }
         })
         .otherwise({

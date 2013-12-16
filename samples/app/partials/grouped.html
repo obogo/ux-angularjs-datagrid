@@ -14,19 +14,29 @@
         <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="statsModel,iosScrollFriction">
             <script type="template/html" data-template-name="group" data-template-item="item">
                 <div class="group {{fake}}">
-                    <div class="text">{{item.id}} {{$id}} {{counter}} height: 20px</div>
+                    <div class="col col1">{{item.id}}</div>
+                    <div class="col col2">{{$id}}</div>
+                    <div class="col col4">{{counter}}</div>
+                    <div class="col col3">height 20px</div>
+                    <div class="col col5"></div>
                 </div>
             </script>
             <script type="template/html" data-template-name="default" data-template-item="item">
                 <div class="row {{fake}}">
-                    <div class="text">{{item.id}} {{$id}} {{counter}} height: 40px</div>
-                    <input type="text">
+                    <div class="col col1">{{item.id}}</div>
+                    <div class="col col2">{{$id}}</div>
+                    <div class="col col4">{{counter}}</div>
+                    <div class="col col3">height 40px</div>
+                    <div class="col col5"><input type="text"></div>
                 </div>
             </script>
             <script type="template/html" data-template-name="sub" data-template-item="item">
                 <div class="sub {{fake}}">
-                    <div class="text">{{item.id}} {{$id}} {{counter}} height: 30px</div>
-                    <input type="text">
+                    <div class="col col1">{{item.id}}</div>
+                    <div class="col col2">{{$id}}</div>
+                    <div class="col col4">{{counter}}</div>
+                    <div class="col col3">height 30px</div>
+                    <div class="col col5"><input type="text"></div>
                 </div>
             </script>
         </div>

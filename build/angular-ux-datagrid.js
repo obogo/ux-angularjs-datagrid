@@ -75,7 +75,7 @@ function charPack(char, amount) {
 }
 
 exports.css = function CSS() {
-    var customStyleSheets = {}, cnst = {
+    var customStyleSheets = {}, cache = {}, cnst = {
         head: "head",
         screen: "screen",
         string: "string",
@@ -154,10 +154,60 @@ exports.css = function CSS() {
             styleSheet.insertRule(selector + "{" + style + "}", 0);
         }
     }
+    function getSelector(selector) {
+        var i, ilen, sheet, classes, result;
+        if (selector.indexOf("{") !== -1 || selector.indexOf("}") !== -1) {
+            return null;
+        }
+        if (cache[selector]) {
+            return cache[selector];
+        }
+        for (i = 0, ilen = document.styleSheets.length; i < ilen; i += 1) {
+            sheet = document.styleSheets[i];
+            classes = sheet.rules || sheet.cssRules;
+            result = getRules(classes, selector);
+            if (result) {
+                return result;
+            }
+        }
+        return null;
+    }
+    function getRules(classes, selector) {
+        var j, jlen, cls, result;
+        if (classes) {
+            for (j = 0, jlen = classes.length; j < jlen; j += 1) {
+                cls = classes[j];
+                if (cls.cssRules) {
+                    result = getRules(cls.cssRules, selector);
+                    if (result) {
+                        return result;
+                    }
+                }
+                if (cls.selectorText) {
+                    var expression = "(\b)*" + selector.replace(".", "\\.") + "([^-a-zA-Z0-9]|,|$)", matches = cls.selectorText.match(expression);
+                    if (matches && matches.indexOf(selector) !== -1) {
+                        cache[selector] = cls.style;
+                        return cls.style;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    function getCSSValue(selector, property) {
+        var cls = getSelector(selector);
+        return cls && cls[property] !== undefined ? cls[property] : null;
+    }
+    function setCSSValue(selector, property, value) {
+        var cls = getSelector(selector);
+        cls[property] = value;
+    }
     return {
         createdStyleSheets: [],
         createStyleSheet: createStyleSheet,
-        createClass: createClass
+        createClass: createClass,
+        getCSSValue: getCSSValue,
+        setCSSValue: setCSSValue
     };
 }();
 

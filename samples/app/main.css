@@ -13,7 +13,8 @@ html, body {
 }
 
 input[type="text"] {
-    width: 40px;
+    width: 30px;
+    line-height: 20px;
 }
 
 .content-area {
@@ -63,10 +64,6 @@ input[type="text"] {
     overflow: auto;
 }
 
-table {
-    width: 100%;
-}
-
 .content {
     width: 100%;
     height: auto;
@@ -100,7 +97,7 @@ table {
 }
 
 .row > div {
-    display: inline-block;
+    /*display: inline-block;*/
 }
 
 .sub {
@@ -113,12 +110,7 @@ table {
 }
 
 .sub > div {
-    display: inline-block;
-}
-
-.icon {
-    display: inline-block;
-    margin-left: 100px;
+    /*display: inline-block;*/
 }
 
 .progress-bar {
@@ -204,12 +196,4 @@ table {
 
 .hover:hover {
   box-shadow: 2px 2px 2px #F00;
-}
-
-.col {
-    text-align: center;
-    outline: 1px solid #000000;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
 }

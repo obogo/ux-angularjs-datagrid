@@ -81,7 +81,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     function addListeners() {
         window.addEventListener('resize', onResize);
-        unwatchers.push(scope.$on(exports.datagrid.events.ROW_TEMPLATE_CHANGE, onRowTemplateChange));
+        unwatchers.push(scope.$on(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, onRowTemplateChange));
         unwatchers.push(scope.$on('$destroy', destroy));
         flow.add(setupChangeWatcher, [], 0);
     }
@@ -458,7 +458,7 @@ function Datagrid(scope, element, attr, $compile) {
         scopes[index] = null;
         el.replaceWith(exp.templateModel.getTemplate(item).template);
         scopes[index] = compileRow(index);
-        updateHeightValues();
+        updateHeights(index);
     }
 
     function updateHeights(rowIndex) {

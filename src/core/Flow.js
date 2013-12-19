@@ -6,6 +6,7 @@ function Flow(exp) {
         uniqueMethods = {},
         execStartTime,
         execEndTime,
+        timeouts = {},
         consoleMethodStyle = "font-weight: bold;color:#3399FF;";
 
     function getMethodName(method) {
@@ -53,6 +54,25 @@ function Flow(exp) {
 
     function remove(method) {
         clearSimilarItemsFromList({label: getMethodName(method)});
+    }
+
+    function timeout(method, time) {
+        var intv, item = createItem(method, [], time), startTime = Date.now(),
+            timeoutCall = function () {
+                exp.log("flow:exec timeout method %c%s %sms", consoleMethodStyle, item.label, Date.now() - startTime);
+                method();
+            };
+        exp.log("flow:wait for timeout method %c%s", consoleMethodStyle, item.label);
+        intv = setTimeout(timeoutCall, time);
+        timeouts[intv] = function () {
+            clearTimeout(intv);
+            delete timeouts[intv];
+        };
+        return intv;
+    }
+
+    function stopTimeout(intv) {
+        if (timeouts[intv]) timeouts[intv]();
     }
 
     function getArguments(fn) {
@@ -108,6 +128,7 @@ function Flow(exp) {
         list.length = 0;
         exp = null;
     }
+
     exp = exp || {};
     exp.async = exp.hasOwnProperty('async') ? exp.async : true;
     exp.debug = exp.hasOwnProperty('debug') ? exp.debug : false;
@@ -115,6 +136,8 @@ function Flow(exp) {
     exp.add = add;
     exp.unique = unique;
     exp.remove = remove;
+    exp.timeout = timeout;
+    exp.stopTimeout = stopTimeout;
     exp.run = run;
     exp.destroy = destroy;
     exp.log = function () {

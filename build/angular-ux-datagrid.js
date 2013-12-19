@@ -30,7 +30,7 @@ exports.datagrid = {
         AFTER_DATA_CHANGE: "datagrid:afterDataChange",
         BEFORE_RENDER_AFTER_DATA_CHANGE: "datagrid:beforeRenderAfterDataChange",
         RENDER_AFTER_DATA_CHANGE: "datagrid:renderAfterDataChange",
-        ROW_TEMPLATE_CHANGE: "datagrid:rowTemplateChange",
+        ON_ROW_TEMPLATE_CHANGE: "datagrid:onRowTemplateChange",
         ON_SCROLL: "datagrid:onScroll"
     },
     options: {
@@ -301,7 +301,7 @@ exports.util.array = exports.util.array || {};
 exports.util.array.toArray = toArray;
 
 function Flow(exp) {
-    var running = false, intv, current = null, list = [], uniqueMethods = {}, execStartTime, execEndTime, consoleMethodStyle = "font-weight: bold;color:#3399FF;";
+    var running = false, intv, current = null, list = [], uniqueMethods = {}, execStartTime, execEndTime, timeouts = {}, consoleMethodStyle = "font-weight: bold;color:#3399FF;";
     function getMethodName(method) {
         return method.toString().split(/\b/)[2];
     }
@@ -346,6 +346,22 @@ function Flow(exp) {
         clearSimilarItemsFromList({
             label: getMethodName(method)
         });
+    }
+    function timeout(method, time) {
+        var intv, item = createItem(method, [], time), startTime = Date.now(), timeoutCall = function() {
+            exp.log("flow:exec timeout method %c%s %sms", consoleMethodStyle, item.label, Date.now() - startTime);
+            method();
+        };
+        exp.log("flow:wait for timeout method %c%s", consoleMethodStyle, item.label);
+        intv = setTimeout(timeoutCall, time);
+        timeouts[intv] = function() {
+            clearTimeout(intv);
+            delete timeouts[intv];
+        };
+        return intv;
+    }
+    function stopTimeout(intv) {
+        if (timeouts[intv]) timeouts[intv]();
     }
     function getArguments(fn) {
         var str = fn.toString(), match = str.match(/\(.*\)/);
@@ -401,6 +417,8 @@ function Flow(exp) {
     exp.add = add;
     exp.unique = unique;
     exp.remove = remove;
+    exp.timeout = timeout;
+    exp.stopTimeout = stopTimeout;
     exp.run = run;
     exp.destroy = destroy;
     exp.log = function() {
@@ -466,7 +484,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
     function addListeners() {
         window.addEventListener("resize", onResize);
-        unwatchers.push(scope.$on(exports.datagrid.events.ROW_TEMPLATE_CHANGE, onRowTemplateChange));
+        unwatchers.push(scope.$on(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, onRowTemplateChange));
         unwatchers.push(scope.$on("$destroy", destroy));
         flow.add(setupChangeWatcher, [], 0);
     }
@@ -782,7 +800,7 @@ function Datagrid(scope, element, attr, $compile) {
         scopes[index] = null;
         el.replaceWith(exp.templateModel.getTemplate(item).template);
         scopes[index] = compileRow(index);
-        updateHeightValues();
+        updateHeights(index);
     }
     function updateHeights(rowIndex) {
         flow.add(exp.chunkModel.updateAllChunkHeights, [ rowIndex ]);
@@ -1273,15 +1291,15 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         exp.flow.add(exp.render);
         exp.dispatch(exports.datagrid.events.SCROLL_STOP, exp.values.scroll);
     };
-    result.scrollToIndex = function scrollToIndex(index) {
+    result.scrollToIndex = function scrollToIndex(index, immediately) {
         var offset = exp.getRowOffset(index);
-        result.scrollTo(offset);
+        result.scrollTo(offset, immediately);
         return offset;
     };
-    result.scrollToItem = function scrollToItem(item) {
+    result.scrollToItem = function scrollToItem(item, immediately) {
         var index = exp.getNormalizedIndex(item);
         if (index !== -1) {
-            return result.scrollToIndex(index);
+            return result.scrollToIndex(index, immediately);
         }
         return exp.values.scroll;
     };
@@ -1346,9 +1364,9 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
         function getTemplates() {
             return templates;
         }
-        function getTemplate(data) {
-            return getTemplateByName(data._template);
-        }
+        result.getTemplate = function getTemplate(data) {
+            return result.getTemplateByName(data._template);
+        };
         function getTemplateName(el) {
             return el.attr ? el.attr("template") : el.getAttribute("template");
         }
@@ -1384,7 +1402,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             return templates.length;
         }
         function getTemplateHeight(item) {
-            return getTemplate(item).height;
+            return result.getTemplate(item).height;
         }
         function getHeight(list, startRowIndex, endRowIndex) {
             var i = startRowIndex, height = 0;
@@ -1397,31 +1415,32 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             }
             return height;
         }
+        function setTemplateName(item, templateName) {
+            item._template = templateName;
+        }
         function setTemplate(itemOrIndex, newTemplateName) {
             var item = typeof itemOrIndex === "number" ? exp.data[itemOrIndex] : itemOrIndex;
-            var oldTemplate = item._template;
-            item._template = newTemplateName;
-            exp.dispatch(exports.datagrid.events.ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName);
+            var oldTemplate = result.getTemplate(item).name;
+            result.setTemplateName(item, newTemplateName);
+            exp.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName);
         }
         function destroy() {
             templates.length = 0;
             templates = null;
         }
-        result = {
-            defaultName: defaultName,
-            createTemplates: createTemplates,
-            getTemplates: getTemplates,
-            getTemplate: getTemplate,
-            getTemplateName: getTemplateName,
-            getTemplateByName: getTemplateByName,
-            templateCount: countTemplates,
-            dynamicHeights: dynamicHeights,
-            averageTemplateHeight: averageTemplateHeight,
-            getHeight: getHeight,
-            getTemplateHeight: getTemplateHeight,
-            setTemplate: setTemplate,
-            destroy: destroy
-        };
+        result.defaultName = defaultName;
+        result.createTemplates = createTemplates;
+        result.getTemplates = getTemplates;
+        result.getTemplateName = getTemplateName;
+        result.getTemplateByName = getTemplateByName;
+        result.templateCount = countTemplates;
+        result.dynamicHeights = dynamicHeights;
+        result.averageTemplateHeight = averageTemplateHeight;
+        result.getHeight = getHeight;
+        result.getTemplateHeight = getTemplateHeight;
+        result.setTemplate = setTemplate;
+        result.setTemplateName = setTemplateName;
+        result.destroy = destroy;
         return result;
     }();
     return exp.templateModel;

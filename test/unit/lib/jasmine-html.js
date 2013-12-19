@@ -26,11 +26,12 @@ jasmineRequire.html = function(j$) {
   j$.QueryString = jasmineRequire.QueryString();
   j$.HtmlSpecFilter = jasmineRequire.HtmlSpecFilter();
 };
+
 jasmineRequire.HtmlReporter = function(j$) {
 
   var noopTimer = {
-    start: function(){},
-    elapsed: function(){ return 0; }
+    start: function() {},
+    elapsed: function() { return 0; }
   };
 
   function HtmlReporter(options) {
@@ -101,7 +102,8 @@ jasmineRequire.HtmlReporter = function(j$) {
       symbols.appendChild(createDom("li", {
           className: result.status,
           id: "spec_" + result.id,
-          title: result.fullName}
+          title: result.fullName
+        }
       ));
 
       if (result.status == "failed") {
@@ -109,7 +111,9 @@ jasmineRequire.HtmlReporter = function(j$) {
 
         var failure =
           createDom("div", {className: "spec-detail failed"},
-            createDom("a", {className: "description", title: result.fullName, href: specHref(result)}, result.fullName),
+            createDom("div", {className: "description"},
+              createDom("a", {title: result.fullName, href: specHref(result)}, result.fullName)
+            ),
             createDom("div", {className: "messages"})
           );
         var messages = failure.childNodes[1];
@@ -305,6 +309,7 @@ jasmineRequire.ResultsNode = function() {
 
   return ResultsNode;
 };
+
 jasmineRequire.QueryString = function() {
   function QueryString(options) {
 

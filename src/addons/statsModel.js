@@ -8,7 +8,9 @@ angular.module('ux').factory('statsModel', function () {
         var initStartTime = 0, rendersTotal = 0, renders = [], unwatchers = [];
         var api = {
             initialRenderTime: 0,
-            averageRenderTime: 0
+            averageRenderTime: 0,
+            lastRenderTime: 0,
+            renders: 0
         };
 
         function startInit() {
@@ -33,6 +35,7 @@ angular.module('ux').factory('statsModel', function () {
         function renderStop() {
             var index = renders.length - 1;
             renders[index] = Date.now() - renders[index];
+            api.lastRenderTime = renders[index];
             rendersTotal += renders[index];
             updateAverage();
         }

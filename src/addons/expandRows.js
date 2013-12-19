@@ -49,8 +49,8 @@ angular.module('ux').factory('expandRows', function () {
 
         function setup(item) {
             item.template = item.template || exp.templateModel.defaultName;
-            if (!item.expandClass) {
-                throw new Error("expandRows will not work without an expandClass property");
+            if (!item.cls && !item.style) {
+                throw new Error("expandRows will not work without an cls property");
             }
             cache[item.template] = item;
         }
@@ -87,15 +87,39 @@ angular.module('ux').factory('expandRows', function () {
         }
 
         function setState(index, state) {
-            var template = exp.templateModel.getTemplate(exp.data[index]), elm;
+            var template = exp.templateModel.getTemplate(exp.data[index]), elm, tpl;
             if (cache[template.name]) {
                 elm = exp.getRowElm(index);
                 elm.scope().$state = state;
-                elm[0].addEventListener(TRNEND_EV, onTransitionEnd);
-                elm[(state === states.opened ? "addClass" : "removeClass")](cache[template.name].expandClass);
+                tpl = cache[template.name];
+                if (tpl.transition !== false) {
+                    elm[0].addEventListener(TRNEND_EV, onTransitionEnd);
+                }
+                if (tpl.style) {
+                    if (!tpl.reverse) {
+                        tpl.reverse = makeReverseStyle(elm, tpl.style);
+                    }
+                    elm.css(state === states.opened ? tpl.style : tpl.reverse);
+                }
+                if (tpl.cls) {
+                    elm[(state === states.opened ? "addClass" : "removeClass")](tpl.cls);
+                }
+                if (tpl.transition === false) {
+                    onTransitionEnd({target: elm[0]});
+                }
             } else {
-                throw new Error("unable to toggle template. expandClass for template %s was not set.", template.name);
+                throw new Error("unable to toggle template. cls for template %s was not set.", template.name);
             }
+        }
+
+        function makeReverseStyle(elm, style) {
+            var params = {elm: elm, style: style, reverse: {}};
+            ux.each(style, reverseStyle, params);
+            return params.reverse;
+        }
+
+        function reverseStyle(value, key, list, params) {
+            params.reverse[key] = params.elm.css(key);
         }
 
         function onTransitionEnd(event) {
@@ -107,8 +131,11 @@ angular.module('ux').factory('expandRows', function () {
             if (state === states.opened) {
                 opened[index] = {
                     index: index,
-                    height: elm[0].offsetHeight
+                    height: parseInt(elm.css("height") || 0, 10)
                 };
+                if (isNaN(opened[index].height)) {
+                    throw new Error("Invalid Height");
+                }
             } else {
                 delete opened[index];
             }

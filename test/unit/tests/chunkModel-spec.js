@@ -99,16 +99,39 @@ describe("chunkModel", function () {
     createTests();
 
     describe("changing row template", function () {
-        it("should swap the template for the row", function() {
+        var scope, element, grid,
+            template = '<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10, async:false}" style="width:100px;height:400px;">' +
+                            '<script type="template/html" data-template-name="default" data-template-item="item">' +
+                                '<div class="mock-row" style="height:10px;">{{item.id}}</div>' +
+                            '</script>' +
+                            '<script type="template/html" data-template-name="alternate" data-template-item="item">' +
+                                '<div class="mock-row" style="height:15px;">{{item.id}}</div>' +
+                            '</script>' +
+                        '</div>';
+        beforeEach(function () {
+            var inject = angular.injector(['ng','ux']).invoke;
+            inject(function ($compile, $rootScope) {
+                scope = $rootScope.$new();
+                scope.items = [];
+                for (var i = 0; i < 100; i += 1) {
+                    scope.items.push({id: i.toString()});
+                }
+                element = angular.element(template);
+                $compile(element)(scope);
+                $rootScope.$digest();
+                grid = scope.datagrid;
+            });
+        });
 
+        it("should swap the template for the row", function() {
+            var height = grid.getContentHeight();
+            grid.templateModel.setTemplate(0, 'alternate');
+            expect(grid.getContentHeight()).toBe(height + 5);
         });
 
         it("should update all of the chunks above it to the correct style heights.", function() {
-
-        });
-
-        it("should store a custom height for an individual row", function() {
-
+            grid.templateModel.setTemplate(0, 'alternate');
+            expect(grid.getContent().css("height")).toBe("1005px");
         });
     });
 

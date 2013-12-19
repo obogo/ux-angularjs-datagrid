@@ -92,21 +92,23 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
     /**
      * Scroll to the normalized index.
      * @param index
+     * @param {Boolean=} immediately
      */
-    result.scrollToIndex = function scrollToIndex(index) {
+    result.scrollToIndex = function scrollToIndex(index, immediately) {
         var offset = exp.getRowOffset(index);
-        result.scrollTo(offset);
+        result.scrollTo(offset, immediately);
         return offset;
     };
 
     /**
      * Scroll to an item by finding it's normalized index.
      * @param item
+     * @param {Boolean=} immediately
      */
-    result.scrollToItem = function scrollToItem(item) {
+    result.scrollToItem = function scrollToItem(item, immediately) {
         var index = exp.getNormalizedIndex(item);
         if (index !== -1) {
-            return result.scrollToIndex(index);
+            return result.scrollToIndex(index, immediately);
         }
         return exp.values.scroll;
     };

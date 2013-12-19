@@ -3,7 +3,8 @@
 angular.module('ux').factory('iosScroll', function () {
 
     return function iosScroll(exp) {
-        if (!navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+        // do not let escape if in unit tests. exp.flow.async is false in unit tests.
+        if (exp.flow.async && !navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
             return exp;
         }
         //TODO: this needs to be updated later so that x is used to scroll horizontally.
@@ -118,6 +119,9 @@ angular.module('ux').factory('iosScroll', function () {
             clearRender();
             originalScrollModel.scrollTo(Math.abs(value), true);
         };
+
+        result.scrollToIndex = originalScrollModel.scrollToIndex;
+        result.scrollToItem = originalScrollModel.scrollToItem;
 
         function destroy() {
             clearIntv();

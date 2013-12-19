@@ -24,7 +24,7 @@ exports.datagrid = {
         AFTER_DATA_CHANGE: 'datagrid:afterDataChange',
         BEFORE_RENDER_AFTER_DATA_CHANGE: 'datagrid:beforeRenderAfterDataChange',
         RENDER_AFTER_DATA_CHANGE: 'datagrid:renderAfterDataChange',
-        ROW_TEMPLATE_CHANGE: 'datagrid:rowTemplateChange',
+        ON_ROW_TEMPLATE_CHANGE: 'datagrid:onRowTemplateChange',
         ON_SCROLL: 'datagrid:onScroll'
     },
     options: {

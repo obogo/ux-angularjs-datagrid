@@ -63,9 +63,9 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
          * Use the data object from each item in the array to determine the template for that item.
          * @param data
          */
-        function getTemplate(data) {
-            return getTemplateByName(data._template);
-        }
+        result.getTemplate = function getTemplate(data) {
+            return result.getTemplateByName(data._template);
+        };
 
         //TODO: need to make this method so it can be overwritten to look up templates a different way.
 
@@ -109,7 +109,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
         }
 
         function getTemplateHeight(item) {
-            return getTemplate(item).height;
+            return result.getTemplate(item).height;
         }
 
         function getHeight(list, startRowIndex, endRowIndex) {
@@ -124,11 +124,15 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             return height;
         }
 
+        function setTemplateName(item, templateName) {
+            item._template = templateName;
+        }
+
         function setTemplate(itemOrIndex, newTemplateName) {
             var item = typeof itemOrIndex === "number" ? exp.data[itemOrIndex] : itemOrIndex;
-            var oldTemplate = item._template;
-            item._template = newTemplateName;
-            exp.dispatch(exports.datagrid.events.ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName);
+            var oldTemplate = result.getTemplate(item).name;
+            result.setTemplateName(item, newTemplateName);
+            exp.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName);
         }
 
         function destroy() {
@@ -136,21 +140,19 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             templates = null;
         }
 
-        result = {
-            defaultName: defaultName,
-            createTemplates: createTemplates,
-            getTemplates: getTemplates,
-            getTemplate: getTemplate,
-            getTemplateName: getTemplateName,
-            getTemplateByName: getTemplateByName,
-            templateCount: countTemplates,
-            dynamicHeights: dynamicHeights,
-            averageTemplateHeight: averageTemplateHeight,
-            getHeight: getHeight,
-            getTemplateHeight: getTemplateHeight,
-            setTemplate: setTemplate,
-            destroy: destroy
-        };
+        result.defaultName = defaultName;
+        result.createTemplates = createTemplates;
+        result.getTemplates = getTemplates;
+        result.getTemplateName = getTemplateName;
+        result.getTemplateByName = getTemplateByName;
+        result.templateCount = countTemplates;
+        result.dynamicHeights = dynamicHeights;
+        result.averageTemplateHeight = averageTemplateHeight;
+        result.getHeight = getHeight;
+        result.getTemplateHeight = getTemplateHeight;
+        result.setTemplate = setTemplate;
+        result.setTemplateName = setTemplateName;
+        result.destroy = destroy;
 
         return result;
     }();

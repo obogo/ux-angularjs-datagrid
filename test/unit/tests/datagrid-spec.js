@@ -179,9 +179,10 @@ describe('datagrid', function () {
             expect(scope.datagrid.scrollModel.scrollToItem(item)).toBe(440);
         });
 
-        xit("getNormalizedIndex should get the index in the normalized array of the item that is passed", function () {
-            var nIndex = scope.datagrid.getNormalizedIndex(scope.items[10]);
-            expect(scope.datagrid.data[nIndex]).toBe(scope.items[10]);
+        it("getNormalizedIndex should get the index in the normalized array of the item that is passed", function () {
+            var nIndex = scope.datagrid.getNormalizedIndex(scope.items[1].children[0]);
+            expect(scope.datagrid.data[nIndex]).toBe(scope.items[1].children[0]);
+            expect(nIndex).toBe(12); // one header for each group.
         });
     });
 });

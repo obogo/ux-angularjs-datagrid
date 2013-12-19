@@ -15,7 +15,7 @@ angular.module('ux').factory('disableHoverWhileScrolling', function () {
         }
 
         function scrollStart() {
-            clearTimeout(timer);
+            exp.flow.stopTimeout(timer);
             exp.flow.log("scrollStart");
             if (!exp.element[0].classList.contains(name)) {
                 exp.element[0].classList.add(name);
@@ -23,10 +23,16 @@ angular.module('ux').factory('disableHoverWhileScrolling', function () {
         }
 
         function scrollStop() {
-            timer = setTimeout(function () {
-                exp.flow.log("scrollStop");
-                exp.element[0].classList.remove(name);
-            }, 500);
+            if (exp.flow.async) {
+                timer = exp.flow.timeout(waitAfterScrollStopToDisableHover, 500);
+            } else {
+                waitAfterScrollStopToDisableHover();
+            }
+        }
+
+        function waitAfterScrollStopToDisableHover() {
+            exp.flow.log("scrollStop");
+            exp.element[0].classList.remove(name);
         }
 
         exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.SCROLL_START, scrollStart));

@@ -1,21 +1,32 @@
 <!DOCTYPE html>
-<html ng-app="app">
+<html data-ng-app="app">
 <head>
     <title>Runner Unit Tests.</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="YES">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="shortcut icon" href="unit/lib/jasmine_favicon.png">
+
     <link rel="stylesheet" type="text/css" href="unit/lib/jasmine.css">
     <script src="unit/lib/jasmine.js"></script>
     <script src="unit/lib/json2.js"></script>
     <script src="unit/lib/jasmine-html.js"></script>
+    <script src="unit/lib/console.js"></script>
     <script src="unit/lib/boot.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular-mocks.js"></script>
-    <!--<script src="../lib/angular.js"></script>-->
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.js"></script>-->
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular-mocks.js"></script>-->
+    <script src="../lib/angular.js"></script>
 
     <!-- modules to test -->
     <script src="../build/angular-ux-datagrid.js"></script>
 
     <!-- addons -->
     <script src="../src/addons/infiniteScroll.js"></script>
+    <script src="../src/addons/touch/ios/iosScroll.js"></script>
+    <script src="../src/addons/desktop/disableHoverWhileScrolling.js"></script>
+    <script src="../src/addons/expandRows.js"></script>
+    <script src="../src/addons/statsModel.js"></script>
 
     <!-- setup -->
     <script src="unit/app.js"></script>
@@ -33,6 +44,7 @@
     <script src="unit/tests/addons/infiniteScroll-spec.js"></script>
     <script src="unit/tests/addons/iosScroll-spec.js"></script>
     <script src="unit/tests/addons/statsModel-spec.js"></script>
+    <script src="unit/tests/addons/expandRows-spec.js"></script>
 
 </head>
 <body>

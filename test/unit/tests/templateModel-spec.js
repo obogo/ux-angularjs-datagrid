@@ -90,6 +90,12 @@ describe("templateModel", function () {
     });
 
     it("should allow a custom getTemplate function", function() {
-
+        setup(html2);
+        var template;
+        model.getTemplate = function (item) {
+            return model.getTemplateByName("template1");
+        };
+        template = model.getTemplate({_template:"default"});
+        expect(template.name).toBe("template1");
     });
 });

@@ -842,8 +842,8 @@ function Datagrid(scope, element, attr, $compile) {
         for (var i in exp) {
             if (exp[i] && exp[i].hasOwnProperty("destroy")) {
                 exp[i].destroy();
+                exp[i] = null;
             }
-            exp[i] = null;
         }
         destroyScopes();
         element.remove();
@@ -1307,7 +1307,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         unwatchSetup();
         if (setup) {
             exp.element[0].removeEventListener("scroll", result.onUpdateScroll);
-            removeTouchEvents();
+            result.removeTouchEvents();
         }
     }
     unwatchSetup = exp.scope.$on(exports.datagrid.events.READY, setupScrolling);

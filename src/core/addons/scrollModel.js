@@ -117,7 +117,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         unwatchSetup();
         if (setup) {
             exp.element[0].removeEventListener('scroll', result.onUpdateScroll);
-            removeTouchEvents();
+            result.removeTouchEvents();
         }
     }
 

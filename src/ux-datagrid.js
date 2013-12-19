@@ -511,8 +511,8 @@ function Datagrid(scope, element, attr, $compile) {
         for (var i in exp) {
             if (exp[i] && exp[i].hasOwnProperty('destroy')) {
                 exp[i].destroy();
+                exp[i] = null;
             }
-            exp[i] = null;
         }
         //activate scopes so they can be destroyed by angular.
         destroyScopes();

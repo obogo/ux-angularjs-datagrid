@@ -32,6 +32,25 @@ ChunkArray.prototype.getChildrenStr = function (deep) {
     this.rendered = true;
     return str;
 };
+ChunkArray.prototype.updateHeight = function(templateModel, _rows) {
+    var i = 0, len, height = 0;
+    if (this[0] instanceof ChunkArray) {
+        len = this.length;
+        while (i < len) {
+            height += this[i].height;
+            i += 1;
+        }
+    } else {
+        height = templateModel.getHeight(_rows, this.min, this.max);
+    }
+    if (this.height !== height) {
+        this.dirtyHeight = true;
+    }
+    this.height = height;
+    if (this.dirtyHeight) {
+        if (this.parent) this.parent.updateHeight(templateModel, _rows);
+    }
+};
 /**
  * Perform proper cleanup.
  */
@@ -40,6 +59,7 @@ ChunkArray.prototype.destroy = function () {
     this.templateEnd = '';
     this.templateModel = null;
     this.rendered = false;
+    this.parent = null;
     this.length = 0;
 };
 
@@ -91,7 +111,12 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
                 childAry.templateModel = exp.templateModel;
                 childAry.templateStart = templateStart;
                 childAry.templateEnd = templateEnd;
+                childAry.parent = result;
+                childAry.index = result.length;
                 result.push(childAry);
+            }
+            if (item instanceof ChunkArray) {
+                item.parent = childAry;
             }
             childAry.push(item);
             childAry.max = item.max || i;
@@ -104,6 +129,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
             result.templateStart = templateStart;
             result.templateEnd = templateEnd;
             calculateHeight(result);
+            result.dirtyHeight = false;
         }
         return result.length > size ? chunkList(result, size, templateStart, templateEnd) : result;
     }
@@ -113,17 +139,34 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
      * @param ary {ChunkArray}
      */
     function calculateHeight(ary) {
-        if (ary[0] instanceof ChunkArray) {
-            var i = 0, len = ary.length, height = 0;
-            while (i < len) {
-                height += ary[i].height;
-                i += 1;
-            }
-            ary.height = height;
-        } else {
-            ary.height = exp.templateModel.getHeight(_rows, ary.min, ary.max);
+        ary.updateHeight(exp.templateModel, _rows);
+        if (!ary.rendered) {
+            ary.templateStart = ary.templateStart.substr(0, ary.templateStart.length - 1) + ' style="width:100%;height:' + ary.height + 'px;">';
         }
-        ary.templateStart = ary.templateStart.substr(0, ary.templateStart.length - 1) + ' style="width:100%;height:' + ary.height + 'px;">';
+    }
+
+    function updateAllChunkHeights(rowIndex) {
+        var indexes = getRowIndexes(rowIndex, _list), ary = _list, index;
+        while (indexes.length) {
+            index = indexes.shift();
+            if (ary[index] instanceof ChunkArray) {
+                ary = ary[index];
+            }
+        }
+        ary.updateHeight(exp.templateModel, _rows);
+        updateChunkHeights(_el, _list, indexes);
+    }
+
+    function updateChunkHeights(el, ary) {
+        var i = 0, len = ary.length;
+        while (i < len) {
+            if (ary.dirtyHeight) {
+                ary.dirtyHeight = false;
+                el.css({height: ary.height + 'px'});
+                updateChunkHeights(angular.element(el.children()[i]), ary[i]);
+            }
+            i += 1;
+        }
     }
 
     /**
@@ -222,6 +265,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
     };
     result.getRow = getRow;
     result.reset = reset;
+    result.updateAllChunkHeights = updateAllChunkHeights;
     result.destroy = destroy;
 
     // apply event dispatching.

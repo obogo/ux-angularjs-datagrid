@@ -19,6 +19,9 @@ describe("scrollModel", function () {
                 speed: 0,
                 absSpeed: 0
             },
+            getContentHeight: function () {
+                return 0;
+            },
             dispatch: function () {
 
             }

@@ -1,0 +1,12 @@
+.group, .row, .sub {
+    transition: height 0.5s;
+    -webkit-transition: height: 0.5s;
+}
+
+.expandDefault {
+    height: 80px;
+}
+
+.expandSub {
+    height: 50px;
+}

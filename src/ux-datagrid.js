@@ -28,6 +28,8 @@ function Datagrid(scope, element, attr, $compile) {
             scroll: 0,
             speed: 0,
             absSpeed: 0,
+            scrollPercent: 0,
+            touchDown: false,
             scrollingStopIntv: null,
             activeRange: {min: 0, max: 0}
         },
@@ -46,6 +48,10 @@ function Datagrid(scope, element, attr, $compile) {
         var cnt = angular.element('<div class="content"></div>');
         element.append(cnt);
         return cnt;
+    }
+
+    function getContent() {
+        return content;
     }
 
     function setupExports() {
@@ -75,6 +81,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     function addListeners() {
         window.addEventListener('resize', onResize);
+        unwatchers.push(scope.$on(exports.datagrid.events.ROW_TEMPLATE_CHANGE, onRowTemplateChange));
         unwatchers.push(scope.$on('$destroy', destroy));
         flow.add(setupChangeWatcher, [], 0);
     }
@@ -117,7 +124,7 @@ function Datagrid(scope, element, attr, $compile) {
         // TODO: may want to update heights through a hierarchy for expanding rows.
         if (rowOffsets[index] === undefined) {
             if (options.dynamicRowHeights) { // dynamicRowHeights should be set by the templates.
-                updateAllHeights();
+                updateHeightValues();
             } else {
                 rowOffsets[index] = index * options.rowHeight;
             }
@@ -131,6 +138,10 @@ function Datagrid(scope, element, attr, $compile) {
 
     function getViewportHeight() {
         return viewHeight;
+    }
+
+    function getContentHeight() {
+        return exp.chunkModel.getChunkList().height;
     }
 
     function createDom(list) {
@@ -155,6 +166,7 @@ function Datagrid(scope, element, attr, $compile) {
             }
             s.$status = 'compiled';
             s[tpl.item] = exp.data[index]; // set the data to the scope.
+            s.$index = index;
             unwatch = s.$watch(function () {
                 s.digested = true;
                 unwatch();
@@ -243,7 +255,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function getOffsetIndex(offset) {
-        // updateAllHeights must be called before this.
+        // updateHeightValues must be called before this.
         var est = Math.floor(offset / exp.templateModel.averageTemplateHeight()),
             i = 0;
         if (rowOffsets[est] && rowOffsets[est] <= offset) {
@@ -274,7 +286,7 @@ function Datagrid(scope, element, attr, $compile) {
         return result;
     }
 
-    function updateAllHeights() {
+    function updateHeightValues() {
         //TODO: this is going to be updated to use ChunkArray data to be faster.
         var height = 0, i = 0;
         while (i < exp.rowsLength) {
@@ -387,7 +399,7 @@ function Datagrid(scope, element, attr, $compile) {
             //flow.add(removeExtraRows, [exp.data]);// if our data updates we need to remove extra rows.
             viewHeight = element[0].offsetHeight;
             flow.add(buildRows, [exp.data], 0);
-            flow.add(updateAllHeights);
+            flow.add(updateHeightValues);
             flow.add(ready);
         } else if (state === states.READY) {
             flow.add(beforeRenderAfterDataChange);
@@ -440,6 +452,21 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
 
+    function onRowTemplateChange(evt, item, oldTemplate, newTemplate) {
+        var index = exp.getNormalizedIndex(item), el = getRowElm(index), s = el.scope();
+        s.$destroy();
+        scopes[index] = null;
+        el.replaceWith(exp.templateModel.getTemplate(item).template);
+        scopes[index] = compileRow(index);
+        updateHeightValues();
+    }
+
+    function updateHeights(rowIndex) {
+        flow.add(exp.chunkModel.updateAllChunkHeights, [rowIndex]);
+        flow.add(updateHeightValues);
+        flow.add(render);
+    }
+
     function dispatch() {
         scope.$emit.apply(scope, arguments);
     }
@@ -480,8 +507,6 @@ function Datagrid(scope, element, attr, $compile) {
         while (unwatchers.length) {
             unwatchers.pop()();
         }
-        //activate scopes so they can be destroyed by angular.
-        destroyScopes();
         // now remove every property on exports.
         for (var i in exp) {
             if (exp[i] && exp[i].hasOwnProperty('destroy')) {
@@ -489,6 +514,8 @@ function Datagrid(scope, element, attr, $compile) {
             }
             exp[i] = null;
         }
+        //activate scopes so they can be destroyed by angular.
+        destroyScopes();
         element.remove();// this seems to be the most memory efficient way to remove elements.
         exp = null;
         scope = null;
@@ -514,7 +541,7 @@ function Datagrid(scope, element, attr, $compile) {
     exp.render = function () {
         flow.add(render);
     };
-    exp.updateAllHeights = updateAllHeights;
+    exp.updateHeights = updateHeights;
     exp.getOffsetIndex = getOffsetIndex;
     exp.isActive = isActive;
     exp.getScope = getScope;
@@ -522,6 +549,8 @@ function Datagrid(scope, element, attr, $compile) {
     exp.getRowOffset = getRowOffset;
     exp.getRowHeight = getRowHeight;
     exp.getViewportHeight = getViewportHeight;
+    exp.getContentHeight = getContentHeight;
+    exp.getContent = getContent;
 
     // initialize core.
     exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});

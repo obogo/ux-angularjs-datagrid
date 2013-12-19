@@ -3,18 +3,36 @@ exports.datagrid.events.SCROLL_START = "datagrid:scrollStart";
 exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
 exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
 
-    var result = {};
+    var result = {}, setup = false, unwatchSetup;
 
     /**
      * Listen for scrollingEvents.
      */
     function setupScrolling() {
         exp.element[0].addEventListener('scroll', result.onUpdateScroll);
-        // make it auto destroy.
-        exp.unwatchers.push(function () {
-            exp.element[0].removeEventListener('scroll', result.onUpdateScroll);
-        });
+        addTouchEvents();
+        setup = true;
     }
+
+    function addTouchEvents() {
+        exp.getContent().on('touchstart', result.onTouchStart);
+        exp.getContent().on('touchend', result.onTouchEnd);
+    }
+
+    result.removeTouchEvents = function removeTouchEvents() {
+        if (setup) {
+            exp.getContent().off('touchstart', result.onTouchStart);
+            exp.getContent().off('touchend', result.onTouchEnd);
+        }
+    };
+
+    result.onTouchStart = function onTouchStart(event) {
+        exp.values.touchDown = true;
+    };
+
+    result.onTouchEnd = function onTouchEnd(event) {
+        exp.values.touchDown = false;
+    };
 
     /**
      * When a scrollEvent is fired, recalculate the values.
@@ -27,8 +45,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
             exp.values.speed = val - exp.values.scroll;
             exp.values.absSpeed = Math.abs(exp.values.speed);
             exp.values.scroll = val;
+            exp.values.scrollPercent = ((exp.values.scroll / exp.getContentHeight()) * 100).toFixed(2);
         }
         result.waitForStop();
+        exp.dispatch(exports.datagrid.events.ON_SCROLL, exp.values);
     };
 
     /**
@@ -51,7 +71,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * Wait for the datagrid to slow down enough to render.
      */
     result.waitForStop = function waitForStop() {
-        if (exp.flow.async) {
+        if (exp.flow.async || exp.values.touchDown) {
             clearTimeout(exp.values.scrollingStopIntv);
             exp.values.scrollingStopIntv = setTimeout(result.onScrollingStop, exp.options.updateDelay);
         } else {
@@ -92,13 +112,17 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
     };
 
     function destroy() {
-
+        unwatchSetup();
+        if (setup) {
+            exp.element[0].removeEventListener('scroll', result.onUpdateScroll);
+            removeTouchEvents();
+        }
     }
 
     /**
      * Wait till the grid is ready before we setup our listeners.
      */
-    exp.scope.$on(exports.datagrid.events.READY, setupScrolling);
+    unwatchSetup = exp.scope.$on(exports.datagrid.events.READY, setupScrolling);
 
     result.destroy = destroy;
 

@@ -26,7 +26,7 @@ function Flow(exp) {
         var i = 0, len = list.length;
         while (i < len) {
             if (list[i].label === item.label && list[i] !== current) {
-                exp.log("flow:clear duplicate item %c%s", consoleMethodStyle, item.label);
+                exp.info("flow:clear duplicate item %c%s", consoleMethodStyle, item.label);
                 list.splice(i, 1);
                 i -= 1;
                 len -= 1;
@@ -49,6 +49,10 @@ function Flow(exp) {
     // this puts it right after the one currently running.
     function insert(method, args, delay) {
         list.splice(1, 0, createItem(method, args, delay));
+    }
+
+    function remove(method) {
+        clearSimilarItemsFromList({label: getMethodName(method)});
     }
 
     function getArguments(fn) {
@@ -110,9 +114,15 @@ function Flow(exp) {
     exp.insert = insert;
     exp.add = add;
     exp.unique = unique;
+    exp.remove = remove;
     exp.run = run;
     exp.destroy = destroy;
     exp.log = function () {
+        if (exp.debug && exp.debug < 1) {
+            console.log.apply(console, arguments);
+        }
+    };
+    exp.info = function () {
         if (exp.debug) {
             console.log.apply(console, arguments);
         }

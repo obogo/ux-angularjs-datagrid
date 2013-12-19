@@ -2,7 +2,7 @@ exports.datagrid.events.RENDER_PROGRESS = "datagrid:renderProgress";
 exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
 
     var intv = 0,
-        percent = 0,
+        percent,
         creepCount = 0,
         model = {};
 
@@ -16,7 +16,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
     function calculatePercent() {
         var result = {count: 0};
         each(exp.scopes, calculateScopePercent, result);
-        return result.count / exp.rowsLength;
+        return {count: result.count, len: exp.rowsLength};
     }
 
     function calculateScopePercent(s, index, list, result) {
@@ -46,6 +46,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
 
     function stop() {
         intv = false;
+        exp.flow.remove(onInterval);
     }
 
     function resetInterval(started, ended) {
@@ -54,6 +55,11 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
             exp.flow.add(onInterval, [started, ended], exp.options.renderThreshold);
             intv = true;
         }
+    }
+
+    function onBeforeUpdateWatchers(event) {
+        stop();
+
     }
 
     function onAfterUpdateWatchers(event, loopData) {
@@ -69,6 +75,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
     };
 
     exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, stop));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, onBeforeUpdateWatchers));
     exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, onAfterUpdateWatchers));
 };
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.creepRenderModel);

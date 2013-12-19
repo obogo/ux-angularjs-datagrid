@@ -1,6 +1,6 @@
 <div class="stats">
     <div class="page-title">{{name}}</div>
-    <div progress-bar class="progress-bar"></div>
+    Click on a row to toggle expand/collapse.</br>
     <span>SCROLL TO:</span>
     <span data-ng-repeat="percent in percents"><a href="" data-ng-click="scrollToPercent(percent/100)">{{percent}}%</a> </span>
 </div>
@@ -11,9 +11,9 @@
     </div>
     <div class="listA">
         <!--// this is the datagrid //-->
-        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="statsModel,iosScroll" data-options="{debug:2}">
+        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="iosScroll expandRows" data-options="{expandRows:[{template:'default', expandClass:'expandDefault'},{template:'sub', expandClass:'expandSub'}]}">
             <script type="template/html" data-template-name="group" data-template-item="item">
-                <div class="group {{fake}}">
+                <div class="group {{fake}}" data-ng-click="datagrid.expandRows.toggle($index)">
                     <div class="col col1">{{item.id}}</div>
                     <div class="col col2">{{$id}}</div>
                     <div class="col col4">{{counter}}</div>
@@ -22,7 +22,7 @@
                 </div>
             </script>
             <script type="template/html" data-template-name="default" data-template-item="item">
-                <div class="row {{fake}}">
+                <div class="row {{fake}}" data-ng-click="datagrid.expandRows.toggle($index)">
                     <div class="col col1">{{item.id}}</div>
                     <div class="col col2">{{$id}}</div>
                     <div class="col col4">{{counter}}</div>
@@ -31,7 +31,7 @@
                 </div>
             </script>
             <script type="template/html" data-template-name="sub" data-template-item="item">
-                <div class="sub {{fake}}">
+                <div class="sub {{fake}}" data-ng-click="datagrid.expandRows.toggle($index)">
                     <div class="col col1">{{item.id}}</div>
                     <div class="col col2">{{$id}}</div>
                     <div class="col col4">{{counter}}</div>

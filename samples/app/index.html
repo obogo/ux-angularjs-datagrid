@@ -11,6 +11,7 @@
     <link type="text/css" rel="stylesheet" href="loader.css">
     <link type="text/css" rel="stylesheet" href="main.css">
     <link type="text/css" rel="stylesheet" href="columns.css">
+    <link type="text/css" rel="stylesheet" href="expandRow.css">
     <!--// Angular Files //-->
     <!--<script src="../../lib/angular.js"></script>-->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.js"></script>
@@ -21,12 +22,20 @@
 
     <!--// ADDONS //-->
     <script src="../../src/addons/desktop/disableHoverWhileScrolling.js"></script>
-    <script src="../../src/addons/touch/ios/iosScrollFriction.js"></script>
+    <script src="../../src/addons/touch/ios/iosScroll.js"></script>
     <script src="../../src/addons/infiniteScroll.js"></script>
     <script src="../../src/addons/statsModel.js"></script>
+    <script src="../../src/addons/expandRows.js"></script>
 
     <!--// Start the app //-->
     <script src="app.js"></script>
+
+    <!--// a little code to make it easy to test from the console //-->
+    <script>
+        function grid() {
+            return angular.element(document.getElementsByClassName("datagrid")).scope().datagrid;
+        }
+    </script>
 </head>
 <body ng-controller="root">
 <!-- We'll also add some navigation: -->

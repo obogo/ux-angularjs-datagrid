@@ -35,9 +35,26 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
     /**
      * Get the normalized index for an item.
      * @param item
+     * @param {Number=} startIndex
      */
-    exp.getNormalizedIndex = function getNormalizedIndex(item) {
-        return exp.data.indexOf(item);
+    exp.getNormalizedIndex = function getNormalizedIndex(item, startIndex) {
+        var i = startIndex || 0;
+        while (i < exp.rowsLength) {
+            if (exp.data[i] === item) {
+                return i;
+            }
+            i += 1;
+        }
+        if (startIndex) {
+            i = startIndex;
+            while (i >= 0) {
+                if (exp.data[i] === item) {
+                    return i;
+                }
+                i -= 1;
+            }
+        }
+        return -1;
     };
 
     return exp;

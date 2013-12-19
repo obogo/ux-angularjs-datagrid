@@ -98,4 +98,18 @@ describe("chunkModel", function () {
 
     createTests();
 
+    describe("changing row template", function () {
+        it("should swap the template for the row", function() {
+
+        });
+
+        it("should update all of the chunks above it to the correct style heights.", function() {
+
+        });
+
+        it("should store a custom height for an individual row", function() {
+
+        });
+    });
+
 });

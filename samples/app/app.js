@@ -12,8 +12,9 @@ function createSimpleList(len, offset) {
     return items;
 }
 
-function createGroupedList() {
-    var i = 0, len = records, group, rand, items = [];
+function createGroupedList(len) {
+    var i = 0, group, rand, items = [];
+    len = len || records;
     while (i < len) {
         rand = Math.random();
         rand = rand >= 0.8 ? rand : 0;
@@ -25,7 +26,7 @@ function createGroupedList() {
                 children: []
             });
         }
-        group.children.push({id: 'I' + group.children.length + 1, children: [], _template: Math.round(Math.random()) ? 'sub' : 'default'});
+        group.children.push({id: group.id + '-I' + group.children.length + 1, children: [], _template: Math.round(Math.random()) ? 'sub' : 'default'});
         i += 1;
     }
     return items;
@@ -53,10 +54,10 @@ app.config(function ($routeProvider) {
                 $scope.items = createGroupedList();
             }
         })
-        .when('/addons/columns', {
-            templateUrl: "partials/addons/columns.html",
+        .when('/other/columns', {
+            templateUrl: "partials/other/columns.html",
             controller: function ($scope) {
-                $scope.name = "Addons >> Columns";
+                $scope.name = "Other >> Columns";
                 $scope.items = createSimpleList();
             }
         })
@@ -67,11 +68,18 @@ app.config(function ($routeProvider) {
                 $scope.items = createSimpleList();
             }
         })
-        .when('/addons/iosScrollFriction', {
-            templateUrl: "partials/addons/iosScrollFriction.html",
+        .when('/addons/iosScroll', {
+            templateUrl: "partials/addons/iosScroll.html",
             controller: function ($scope) {
                 $scope.name = "Addons >> Touch >> ISO >> Scroll Friction";
-                $scope.items = createSimpleList();
+                $scope.items = createSimpleList(100);
+            }
+        })
+        .when('/addons/expandRows', {
+            templateUrl: "partials/addons/expandRows.html",
+            controller: function ($scope) {
+                $scope.name = "Addons >> Expand Rows";
+                $scope.items = createGroupedList();
             }
         })
         .when('/addons/statsModel', {
@@ -118,8 +126,8 @@ app.controller('root', function root($scope) {
 
     $scope.scrollToPercent = function (percent) {
         var datagrid = document.getElementsByClassName('datagrid');
-        datagrid[0].scrollTop = angular.element(datagrid[0]).children()[0].offsetHeight * percent;
-    }
+        angular.element(datagrid).scope().datagrid.scrollModel.scrollTo(angular.element(datagrid[0]).children()[0].offsetHeight * percent);
+    };
 
     $scope.create = function () {
 
@@ -133,17 +141,29 @@ angular.module('progress', ['ng']).directive('progressBar', function () {
     return {
         restrict: 'A',
         scope: true,
-        template: '<div>{{percent}}%</div>',
+        template: '<div>{{count}} of {{len}} rows compiled ({{percent}}%) scroll {{scrollPercent}}%</div>',
         link: function (scope, element, attr) {
             scope.percent = 0;
             var onProgress = function (event, percent) {
-                scope.percent = Math.round(percent * 100);
+                scope.count = percent.count;
+                scope.len = percent.len;
+                scope.percent = Math.round((percent.count / percent.len) * 100);
+                safeDigest();
+                angular.element(element[0].childNodes[0]).css({width: scope.percent + '%', overflow: 'visible', whiteSpace:'nowrap'});
+            };
+
+            var onScroll = function () {
+                scope.scrollPercent = scope.scrollPercent = grid().values.scrollPercent;
+                safeDigest();
+            };
+
+            var safeDigest = function () {
                 if (!scope.$$phase) {
                     scope.$digest();
                 }
-                angular.element(element[0].childNodes[0]).css({width: (percent * 100) + '%', overflow: 'visible'});
             };
             scope.$root.$on(ux.datagrid.events.RENDER_PROGRESS, onProgress);
+            scope.$root.$on(ux.datagrid.events.ON_SCROLL, onScroll);
         }
     }
 });

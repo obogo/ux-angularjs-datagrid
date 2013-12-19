@@ -17,7 +17,7 @@
     <!--// optional addons //-->
     <script src="../../src/addons/statsModel.js"></script>
     <!--<script src="../../src/addons/desktop/disableHoverWhileScrolling.js"></script>-->
-    <script src="../../src/addons/touch/ios/iosScrollFriction.js"></script>
+    <script src="../../src/addons/touch/ios/iosScroll.js"></script>
     <script>
 
         var records = 50000;
@@ -112,7 +112,7 @@
     <!--// this is the controller for the datagrid //-->
     <div data-ng-controller="complexArray" class="listA">
         <!--// this is the datagrid //-->
-        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="statsModel,iosScrollFriction">
+        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="statsModel,iosScroll">
             <script type="template/html" data-template-name="group" data-template-item="item">
                 <div class="group {{fake}}">
                     <div class="text">{{item.id}} {{$id}} {{counter}} height: 20px</div>

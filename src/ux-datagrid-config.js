@@ -23,17 +23,19 @@ exports.datagrid = {
         BEFORE_DATA_CHANGE: 'datagrid:beforeDataChange',
         AFTER_DATA_CHANGE: 'datagrid:afterDataChange',
         BEFORE_RENDER_AFTER_DATA_CHANGE: 'datagrid:beforeRenderAfterDataChange',
-        RENDER_AFTER_DATA_CHANGE: 'datagrid:renderAfterDataChange'
+        RENDER_AFTER_DATA_CHANGE: 'datagrid:renderAfterDataChange',
+        ROW_TEMPLATE_CHANGE: 'datagrid:rowTemplateChange',
+        ON_SCROLL: 'datagrid:onScroll'
     },
     options: {
         compileAllRowsOnInit: false,// this can cause it to take a long time to initialize.
         updateDelay: 100, // if < 100ms this fires too often.
         cushion: -50,// debugging cushion about what is deactivated.
-        chunkSize: 100,
+        chunkSize: 50,
         uncompiledClass: 'uncompiled',
         dynamicRowHeights: false,//true,
-        renderThreshold: 50,
-        creepLimit: 20
+        renderThreshold: 25,
+        creepLimit: 10
         //TODO: need to create global addons object.
     },
     coreAddons: []

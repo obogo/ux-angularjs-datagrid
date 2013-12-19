@@ -88,4 +88,8 @@ describe("templateModel", function () {
         setup(html1);
         expect(model.averageTemplateHeight()).toBe(15);
     });
+
+    it("should allow a custom getTemplate function", function() {
+
+    });
 });

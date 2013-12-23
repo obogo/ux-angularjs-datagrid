@@ -1,4 +1,4 @@
-## Datagrid ##
+## AngularJS Datagrid ##
 ----------
 **Highly performant list and datagrid for AngularJS** designed for mobile devices which just makes it all the better on a desktop.
 

@@ -41,7 +41,8 @@ exports.datagrid = {
         uncompiledClass: "uncompiled",
         dynamicRowHeights: false,
         renderThreshold: 25,
-        creepLimit: 10
+        creepLimit: 10,
+        chunkClass: "ux-datagrid-chunk"
     },
     coreAddons: []
 };
@@ -238,6 +239,30 @@ function each(list, method, data) {
 }
 
 exports.each = each;
+
+function filter(list, method, data) {
+    var i = 0, len, result = [];
+    if (list && list.length) {
+        len = list.length;
+        while (i < len) {
+            if (method(list[i], i, list, data)) {
+                result.push(list[i]);
+            }
+            i += 1;
+        }
+    } else {
+        for (i in list) {
+            if (list.hasOwnProperty(i)) {
+                if (method(list[i], i, list, data)) {
+                    result.push(list[i]);
+                }
+            }
+        }
+    }
+    return result;
+}
+
+exports.filter = filter;
 
 function dispatcher(target, scope, map) {
     var listeners = {};
@@ -540,7 +565,7 @@ function Datagrid(scope, element, attr, $compile) {
     function createDom(list) {
         flow.log("OVERWRITE DOM!!!");
         var len = list.length;
-        flow.add(exp.chunkModel.chunkDom, [ list, options.chunkSize, '<div class="ux-datagrid-chunk">', "</div>", content ], 0);
+        flow.add(exp.chunkModel.chunkDom, [ list, options.chunkSize, '<div class="' + options.chunkClass + '">', "</div>", content ], 0);
         exp.rowsLength = len;
         rowHeights = {};
         flow.log("created %s dom elements", len);
@@ -721,8 +746,8 @@ function Datagrid(scope, element, attr, $compile) {
         values.activeRange.min = values.activeRange.max = -1;
     }
     function updateMinMax(activeIndex) {
-        values.activeRange.min = values.activeRange.min < activeIndex && values.activeRange.min > 0 ? values.activeRange.min : activeIndex;
-        values.activeRange.max = values.activeRange.max > activeIndex && values.activeRange.max > 0 ? values.activeRange.max : activeIndex;
+        values.activeRange.min = values.activeRange.min < activeIndex && values.activeRange.min >= 0 ? values.activeRange.min : activeIndex;
+        values.activeRange.max = values.activeRange.max > activeIndex && values.activeRange.max >= 0 ? values.activeRange.max : activeIndex;
     }
     function beforeRenderAfterDataChange() {
         if (values.dirty) {
@@ -1302,6 +1327,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
             return result.scrollToIndex(index, immediately);
         }
         return exp.values.scroll;
+    };
+    result.scrollToTop = function(immediately) {
+        result.scrollTo(0, immediately);
+    };
+    result.scrollToBottom = function(immediately) {
+        var value = exp.getContentHeight() - exp.getViewportHeight();
+        result.scrollTo(value >= 0 ? value : 0, immediately);
     };
     function destroy() {
         unwatchSetup();

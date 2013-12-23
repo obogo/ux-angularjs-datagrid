@@ -1,0 +1,30 @@
+<div class="stats">
+    <div class="page-title">{{name}}</div>
+    Desktop Focus handling. (ENTER, SHIFT+ENTER, TAB, SHIFT+TAB, UP ARROW, DOWN ARROW)</br>
+    <span>SCROLL TO:</span>
+    <span data-ng-repeat="percent in percents"><a href="" data-ng-click="scrollToPercent(percent/100)">{{percent}}%</a> </span>
+    <div progress-bar class="progress-bar"></div>
+</div>
+<div class="my-container">
+    <!--// This is the background loader //-->
+    <div class="spinningSquares">
+        <div data-ng-repeat="num in [1, 2, 3, 4, 5, 6, 7, 8]" class="spinningSquaresG spinningSquares_{{num}}"></div>
+    </div>
+    <div class="listA">
+        <!--// this is the datagrid //-->
+        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="gridFocusManager" data-options="{expandRows:[{template:'default', cls:'expandDefault'},{template:'sub', cls:'expandSub'}]}">
+            <script type="template/html" data-template-name="group" data-template-item="item">
+                <div class="group {{fake}}">
+                    <div class="col col1">{{item.id}}</div>
+                </div>
+            </script>
+            <script type="template/html" data-template-name="default" data-template-item="item">
+                <div class="row {{fake}}">
+                    <div class="col col1">{{item.id}}</div>
+                    <div class="col col1" data-ng-repeat="col in item.cols"><input type="text" data-ng-model="col.value"></div>
+                    <div class="col"></div>
+                </div>
+            </script>
+        </div>
+    </div>
+</div>

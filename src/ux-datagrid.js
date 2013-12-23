@@ -148,7 +148,7 @@ function Datagrid(scope, element, attr, $compile) {
         //TODO: if there is any dom. It needs destroyed first.
         flow.log("OVERWRITE DOM!!!");
         var len = list.length;
-        flow.add(exp.chunkModel.chunkDom, [list, options.chunkSize, '<div class="ux-datagrid-chunk">', '</div>', content], 0);
+        flow.add(exp.chunkModel.chunkDom, [list, options.chunkSize, '<div class="' + options.chunkClass + '">', '</div>', content], 0);
         exp.rowsLength = len;
         rowHeights = {};
         flow.log("created %s dom elements", len);
@@ -305,7 +305,7 @@ function Datagrid(scope, element, attr, $compile) {
             lastActiveIndex, s, prevS;
         exp.dispatch(events.BEFORE_UPDATE_WATCHERS, loop);
         // we only want to update stuff if we are scrolling slow.
-        resetMinMax();
+        resetMinMax();// this needs to always be set after the dispatch of before update watchers in case they need the before activeRange.
         active.length = 0; // make sure not to reset until after getStartingIndex.
         flow.log("\tvisibleScrollStart %s visibleScrollEnd %s", loop.visibleScrollStart, loop.visibleScrollEnd);
         while (loop.i < exp.rowsLength) {
@@ -372,8 +372,8 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function updateMinMax(activeIndex) {
-        values.activeRange.min = values.activeRange.min < activeIndex && values.activeRange.min > 0 ? values.activeRange.min : activeIndex;
-        values.activeRange.max = values.activeRange.max > activeIndex && values.activeRange.max > 0 ? values.activeRange.max : activeIndex;
+        values.activeRange.min = values.activeRange.min < activeIndex && values.activeRange.min >= 0 ? values.activeRange.min : activeIndex;
+        values.activeRange.max = values.activeRange.max > activeIndex && values.activeRange.max >= 0 ? values.activeRange.max : activeIndex;
     }
 
     function beforeRenderAfterDataChange() {

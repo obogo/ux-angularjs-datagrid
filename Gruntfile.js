@@ -19,6 +19,15 @@ module.exports = function (grunt) {
                 }
             }
         },
+        // automatically adds injections to angular for you.
+//        ngmin: {
+//            app: {
+//                src: [
+//                    "*.*"
+//                ],
+//                dest: "generated/angular-ux-datagrid.js"
+//            }
+//        },
         uglify: {
             build: {
                 options: {
@@ -36,6 +45,26 @@ module.exports = function (grunt) {
                         'src/core/Flow.js',
                         'src/ux-datagrid.js',
                         'src/core/addons/*.js'
+                    ],
+                    'build/addons/desktop/ux-<%= pkg.filename %>-focusManager.js': [
+                        'src/addons/libs/ux-visibility.js',
+                        'src/addons/libs/ux-selector.js',
+                        'src/addons/desktop/gridFocusManager.js'
+                    ],
+                    'build/addons/desktop/ux-<%= pkg.filename %>-disableHoverWhileScrolling.js': [
+                        'src/addons/desktop/disableHoverWhileScrolling.js'
+                    ],
+                    'build/addons/touch/ios/ux-<%= pkg.filename %>-iosScroll.js': [
+                        'src/addons/touch/ios/iosScroll.js'
+                    ],
+                    'build/addons/ux-<%= pkg.filename %>-expandRows.js': [
+                        'src/addons/expandRows.js'
+                    ],
+                    'build/addons/ux-<%= pkg.filename %>-infiniteScroll.js': [
+                        'src/addons/infiniteScroll.js'
+                    ],
+                    'build/addons/ux-<%= pkg.filename %>-statsModel.js': [
+                        'src/addons/statsModel.js'
                     ]
                 }
             },
@@ -46,6 +75,17 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'build/angular-ux-<%= pkg.filename %>.min.js': ['build/angular-ux-<%= pkg.filename %>.js']
+                }
+            }
+        },
+        //https://github.com/gruntjs/grunt-contrib-watch
+        watch: {
+            scripts: {
+                files: 'src/**/*.js',
+                tasks: ['jshint', 'uglify'],
+                options: {
+                    spawn: false,
+                    debounceDelay: 1000
                 }
             }
         },
@@ -64,7 +104,9 @@ module.exports = function (grunt) {
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-ngmin');
     grunt.loadNpmTasks('grunt-contrib-compress');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     // Default task(s).
 //    grunt.registerTask('default', ['jshint', 'uglify', 'compress']);

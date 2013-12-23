@@ -113,6 +113,23 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         return exp.values.scroll;
     };
 
+    /**
+     * Scroll to top.
+     * @param immediately
+     */
+    result.scrollToTop = function (immediately) {
+        result.scrollTo(0, immediately);
+    };
+
+    /**
+     * Scroll to bottom.
+     * @param immediately
+     */
+    result.scrollToBottom = function (immediately) {
+        var value = exp.getContentHeight() - exp.getViewportHeight();
+        result.scrollTo(value >= 0 ? value : 0, immediately);
+    };
+
     function destroy() {
         unwatchSetup();
         if (setup) {

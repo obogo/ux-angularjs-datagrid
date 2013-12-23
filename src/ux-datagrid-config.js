@@ -35,7 +35,8 @@ exports.datagrid = {
         uncompiledClass: 'uncompiled',
         dynamicRowHeights: false,//true,
         renderThreshold: 25,
-        creepLimit: 10
+        creepLimit: 10,
+        chunkClass: 'ux-datagrid-chunk'
         //TODO: need to create global addons object.
     },
     coreAddons: []

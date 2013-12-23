@@ -20,13 +20,35 @@ function createGroupedList(len) {
         rand = rand >= 0.8 ? rand : 0;
         if (!group || Math.round(rand)) {
             items.push(group = {
-                id: 'G' + (items.length + 1),
+                id: (items.length + 1) + '',
                 name: 'Group ' + (items.length + 1),
                 _template: 'group',
                 children: []
             });
         }
-        group.children.push({id: group.id + '-I' + group.children.length + 1, children: [], _template: Math.round(Math.random()) ? 'sub' : 'default'});
+        group.children.push({id: group.id + '.' + group.children.length, children: [], _template: Math.round(Math.random()) ? 'sub' : 'default'});
+        i += 1;
+    }
+    return items;
+}
+
+function createGroupedSpreadsheetData(len) {
+    var i = 0, group, rand, items = [];
+    len = len || records;
+    while (i < len) {
+        rand = Math.random();
+        rand = rand >= 0.8 ? rand : 0;
+        if (!group || Math.round(rand)) {
+            items.push(group = {
+                id: (items.length + 1) + '',
+                name: 'Group ' + (items.length + 1),
+                _template: 'group',
+                children: []
+            });
+        }
+        // note that if this "cols" property was children. It would be added like a regular row because normalization is recursive.
+        // it is added as cols because we want to repeat this last section differently.
+        group.children.push({id: group.id + '.' + group.children.length, cols: createSimpleList(Math.random() * 10)});
         i += 1;
     }
     return items;
@@ -66,6 +88,13 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Addons >> Desktop >> Disable Hover While Scrolling";
                 $scope.items = createSimpleList();
+            }
+        })
+        .when('/addons/gridFocusManager', {
+            templateUrl: "partials/addons/gridFocusManager.html",
+            controller: function ($scope) {
+                $scope.name = "Addons >> Desktop >> Grid Focus Manager";
+                $scope.items = createGroupedSpreadsheetData();
             }
         })
         .when('/addons/iosScroll', {

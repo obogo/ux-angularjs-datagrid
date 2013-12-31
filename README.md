@@ -6,8 +6,8 @@ Most lists work with recycled or just in time created rows for long lists in ang
 
 Of course since this is angular there is then the issue with a **digest being too expensive. This is not a problem** because all rows are disabled from the digest when out of view and enabled when in view. So they don't loose their scopes or have to create new ones constantly, but only once. Then **they are just enabled or disabled as they come into view**.
 
-- [Demos](https://rawgithub.com/webux/ux-datagrid/master/samples/index.html)
-- [Unit Tests](https://rawgithub.com/webux/ux-datagrid/master/test/index.html)
+- [Demos](https://rawgithub.com/webux/ux-angularjs-datagrid/master/samples/index.html)
+- [Unit Tests](https://rawgithub.com/webux/ux-angularjs-datagrid/master/test/index.html)
 
 ## What makes this list/datagrid different? ##
 Chunking is the concept of **grouping the dom elements in hierarchies** so that the browser does not calculate the position of every element when one changes, but only those in that container, it's parents in it's container, and so on up the chain. The smaller the groups the less the browser has to redraw, size, and position elements because it can just move the parent of necessary. **This works regardless of rows all having the same heights or dynamic heights as long as there is a template for each different height.**

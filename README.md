@@ -76,3 +76,14 @@ It is also handy to have addons that will update based on events. Here is an exa
 			}))
 		};
 	})
+
+## Running Unit Tests Locally ##
+You can run the unit tests and samples locally by running
+
+    npm install
+
+inside of the app directory. Then starting the server.
+
+    node server.js
+
+Then you can just pull it up in your browser on "http://localhost:4000/".

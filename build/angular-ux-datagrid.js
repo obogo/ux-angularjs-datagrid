@@ -13,6 +13,7 @@ try {
 }
 
 exports.datagrid = {
+    isIOS: navigator.userAgent.match(/(iPad|iPhone|iPod)/g),
     states: {
         BUILDING: "datagrid:building",
         APPENDING: "datagrid:appending",
@@ -532,6 +533,9 @@ function Datagrid(scope, element, attr, $compile) {
             safeDigest(scope);
         }
     }
+    exp.upateViewportHeight = function upateViewportHeight() {
+        viewHeight = exp.calculateViewportHeight();
+    };
     exp.calculateViewportHeight = function calculateViewportHeight() {
         return element[0].offsetHeight;
     };
@@ -771,8 +775,10 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
     function render() {
+        if (!viewHeight) {
+            exp.upateViewportHeight();
+        }
         if (state === states.BUILDING) {
-            viewHeight = exp.calculateViewportHeight();
             flow.add(buildRows, [ exp.data ], 0);
             flow.add(updateHeightValues);
             flow.add(ready);

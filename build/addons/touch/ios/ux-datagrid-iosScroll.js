@@ -66,18 +66,21 @@ ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callbac
         params.height += item.offsetHeight;
     }
     result.enable = function enable(value, speed) {
-        enabled = !!value;
-        if (!enabled) {
-            removeTouchEnd();
-        } else if (enabled && speed) {
-            updateBottom();
-            values.touchDown = false;
-            _y = element[0].offsetTop + element[0].offsetHeight * .5;
-            values.speed = speed;
-            values.absSpeed = Math.abs(speed);
-            clearIntv();
-            values.scrollingStopIntv = setTimeout(applyFriction);
+        if (value !== undefined) {
+            enabled = !!value;
+            if (!enabled) {
+                removeTouchEnd();
+            } else if (enabled && speed) {
+                updateBottom();
+                values.touchDown = false;
+                _y = element[0].offsetTop + element[0].offsetHeight * .5;
+                values.speed = speed;
+                values.absSpeed = Math.abs(speed);
+                clearIntv();
+                values.scrollingStopIntv = setTimeout(applyFriction);
+            }
         }
+        return enabled;
     };
     function addTouchEnd() {
         ux.each(result.content, function(el) {
@@ -184,7 +187,7 @@ ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callbac
 angular.module("ux").factory("iosScroll", function() {
     return function iosScroll(exp) {
         var vScroll, originalScrollModel = exp.scrollModel;
-        if (exp.flow.async && !navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+        if (!exports.datagrid.isIOS) {
             return exp;
         }
         vScroll = new ux.datagrid.VirtualScroll(exp.scope, exp.element, exp.values, function(value, immediately) {

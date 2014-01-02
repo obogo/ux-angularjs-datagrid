@@ -7,7 +7,9 @@
 <div class="my-container" style="overflow: auto;" data-ux-double-scroll="'.datagrid'">
     <div class="doubleScrollContent" style="position:absolute; width: 100%;">
         <div class="header">
-            A header to scroll out of view.
+            A header to scroll out of view. Double scroll will scroll a header content out of view and then
+            scroll inside of the grid. When the grid scrolls back up it brings it back into view.
+            So it makes the header act like part of the grid, but it is not to keep the data in the grid simple.
         </div>
         <div class="listA" style="position: relative;">
             <!--// This is the background loader //-->
@@ -16,7 +18,7 @@
                      class="spinningSquaresG spinningSquares_{{num}}"></div>
             </div>
             <!--// this is the datagrid //-->
-            <div data-ux-datagrid="items" class="datagrid" data-addons="iosScroll, infiniteScroll">
+            <div data-ux-datagrid="items" class="datagrid" data-addons="iosScroll">
                 <script type="template/html" data-template-name="default" data-template-item="item">
                     <div class="row {{fake}}">
                         <div class="text">{{item.id}} {{$id}} {{counter}} {{outerScrollTop}} {{innerScrollTop}}</div>

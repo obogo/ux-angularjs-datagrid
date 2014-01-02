@@ -6,6 +6,7 @@ try {
 }
 
 exports.datagrid = {
+    isIOS: navigator.userAgent.match(/(iPad|iPhone|iPod)/g),
     states: {
         BUILDING: 'datagrid:building',
         APPENDING: 'datagrid:appending',//TODO: deprecated.

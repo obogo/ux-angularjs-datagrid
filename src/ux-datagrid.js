@@ -107,6 +107,10 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
 
+    exp.upateViewportHeight = function upateViewportHeight() {
+        viewHeight = exp.calculateViewportHeight();
+    };
+
     /**
      * Be careful. This method is VERY expensive when there are lots of rows.
      */
@@ -404,10 +408,12 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function render() {
+        if (!viewHeight) {
+            exp.upateViewportHeight();
+        }
         if (state === states.BUILDING) {
             //TODO: removeExtraRows is not compatible. It needs removed. Only buildRows will work with chunking.
             //flow.add(removeExtraRows, [exp.data]);// if our data updates we need to remove extra rows.
-            viewHeight = exp.calculateViewportHeight();
             flow.add(buildRows, [exp.data], 0);
             flow.add(updateHeightValues);
             flow.add(ready);

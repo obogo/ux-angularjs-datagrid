@@ -67,18 +67,21 @@ ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callbac
     }
 
     result.enable = function enable(value, speed) {
-        enabled = !!value;
-        if (!enabled) {
-            removeTouchEnd();
-        } else if (enabled && speed) {
-            updateBottom();
-            values.touchDown = false;
-            _y = element[0].offsetTop + (element[0].offsetHeight * 0.5);
-            values.speed = speed;
-            values.absSpeed = Math.abs(speed);
-            clearIntv();
-            values.scrollingStopIntv = setTimeout(applyFriction);
+        if (value !== undefined) {
+            enabled = !!value;
+            if (!enabled) {
+                removeTouchEnd();
+            } else if (enabled && speed) {
+                updateBottom();
+                values.touchDown = false;
+                _y = element[0].offsetTop + (element[0].offsetHeight * 0.5);
+                values.speed = speed;
+                values.absSpeed = Math.abs(speed);
+                clearIntv();
+                values.scrollingStopIntv = setTimeout(applyFriction);
+            }
         }
+        return enabled;
     };
 
     function addTouchEnd() {

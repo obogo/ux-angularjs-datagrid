@@ -83,6 +83,13 @@ app.config(function ($routeProvider) {
                 $scope.items = createSimpleList();
             }
         })
+        .when('/other/doubleScroll', {
+            templateUrl: "partials/other/doubleScroll.html",
+            controller: function ($scope) {
+                $scope.name = "Other >> Double Scroll";
+                $scope.items = createSimpleList();
+            }
+        })
         .when('/addons/disableHoverWhileScrolling', {
             templateUrl: "partials/addons/disableHoverWhileScrolling.html",
             controller: function ($scope) {

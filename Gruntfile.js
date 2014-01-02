@@ -55,6 +55,7 @@ module.exports = function (grunt) {
                         'src/addons/desktop/disableHoverWhileScrolling.js'
                     ],
                     'build/addons/touch/ios/ux-<%= pkg.filename %>-iosScroll.js': [
+                        'src/addons/libs/VirtualScroll.js',
                         'src/addons/touch/ios/iosScroll.js'
                     ],
                     'build/addons/ux-<%= pkg.filename %>-expandRows.js': [
@@ -65,6 +66,9 @@ module.exports = function (grunt) {
                     ],
                     'build/addons/ux-<%= pkg.filename %>-statsModel.js': [
                         'src/addons/statsModel.js'
+                    ],
+                    'build/other/ux-doubleScroll.js': [
+                        'src/other/doubleScroll.js'
                     ]
                 }
             },

@@ -1,9 +1,11 @@
 /*
 * uxDatagrid v.0.1.0
-* (c) 2013, WebUX
+* (c) 2014, WebUX
 * License: MIT.
 */
 (function(exports, global){
+ux.datagrid.events.SCROLL_TO_TOP = "datagrid:scrollToTop";
+
 ux.datagrid.events.SCROLL_TO_BOTTOM = "datagrid:scrollToBottom";
 
 angular.module("ux").factory("infiniteScroll", function() {
@@ -27,6 +29,8 @@ angular.module("ux").factory("infiniteScroll", function() {
         result.onUpdateScroll = function onUpdateScroll(event, scroll) {
             if (scroll >= bottomOffset) {
                 exp.dispatch(ux.datagrid.events.SCROLL_TO_BOTTOM);
+            } else if (scroll <= 0) {
+                exp.dispatch(ux.datagrid.events.SCROLL_TO_TOP);
             }
         };
         exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.AFTER_DATA_CHANGE, result.beforeDataChange));

@@ -107,6 +107,13 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
 
+    /**
+     * Be careful. This method is VERY expensive when there are lots of rows.
+     */
+    function updateViewportHeight() {
+        viewHeight = element[0].offsetHeight;
+    }
+
     function onResize(event) {
         dispatch(exports.datagrid.events.RESIZE, {event:event});
     }
@@ -119,9 +126,9 @@ function Datagrid(scope, element, attr, $compile) {
         return angular.element(exp.chunkModel.getRow(index));
     }
 
-    function getRowOffset(index) {
 //TODO: need to reset row heights when a row is activated for the first time.... possibly every time for expanding rows.
-        // TODO: may want to update heights through a hierarchy for expanding rows.
+// TODO: may want to update heights through a hierarchy for expanding rows.
+    function getRowOffset(index) {
         if (rowOffsets[index] === undefined) {
             if (options.dynamicRowHeights) { // dynamicRowHeights should be set by the templates.
                 updateHeightValues();
@@ -551,6 +558,7 @@ function Datagrid(scope, element, attr, $compile) {
     exp.getViewportHeight = getViewportHeight;
     exp.getContentHeight = getContentHeight;
     exp.getContent = getContent;
+    exp.updateViewportHeight = updateViewportHeight;
 
     // initialize core.
     exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});

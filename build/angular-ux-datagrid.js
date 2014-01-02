@@ -1,6 +1,6 @@
 /*
 * uxDatagrid v.0.1.0
-* (c) 2013, WebUX
+* (c) 2014, WebUX
 * License: MIT.
 */
 (function(exports, global){
@@ -532,6 +532,9 @@ function Datagrid(scope, element, attr, $compile) {
             safeDigest(scope);
         }
     }
+    function updateViewportHeight() {
+        viewHeight = element[0].offsetHeight;
+    }
     function onResize(event) {
         dispatch(exports.datagrid.events.RESIZE, {
             event: event
@@ -904,6 +907,7 @@ function Datagrid(scope, element, attr, $compile) {
     exp.getViewportHeight = getViewportHeight;
     exp.getContentHeight = getContentHeight;
     exp.getContent = getContent;
+    exp.updateViewportHeight = updateViewportHeight;
     exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
     exp.flow = flow = new Flow({
         async: options.hasOwnProperty("async") ? !!options.async : true,
@@ -1378,9 +1382,10 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             template = angular.element(template)[0];
             template.className += " " + exp.options.uncompiledClass + " {{$status}}";
             template.setAttribute("template", name);
-            wrapper.appendChild(template);
             document.body.appendChild(wrapper);
+            wrapper.appendChild(template);
             template = trim(wrapper.innerHTML);
+            wrapper.childNodes[0].style.lineHeight = "0px";
             templateData = {
                 name: name,
                 item: scriptTemplate.attributes["data-template-item"].nodeValue,

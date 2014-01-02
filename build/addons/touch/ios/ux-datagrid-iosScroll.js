@@ -1,123 +1,203 @@
 /*
 * uxDatagrid v.0.1.0
-* (c) 2013, WebUX
+* (c) 2014, WebUX
 * License: MIT.
 */
 (function(exports, global){
-angular.module("ux").factory("iosScroll", function() {
-    return function iosScroll(exp) {
-        if (exp.flow.async && !navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
-            return exp;
+ux.datagrid.events.VIRTUAL_SCROLL_TOP = "virtualScroll:top";
+
+ux.datagrid.events.VIRTUAL_SCROLL_BOTTOM = "virtualScroll:bottom";
+
+ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callback) {
+    var friction = .95, stopThreshold = .05, result = {}, _x = 0, _y = 0, max, top = 0, bottom = 0, enabled = true, touchStart = "touchstart", touchEnd = "touchend", touchMove = "touchmove", touchCancel = "touchCancel", values = angular.extend({
+        scrollingStopIntv: null,
+        scroll: 0,
+        speed: 0,
+        absSpeed: 0,
+        touchDown: false
+    }, vals);
+    result.scope = scope;
+    result.element = element;
+    result.content = element.children();
+    result.values = values;
+    function setup() {
+        element.css({
+            overflow: "hidden"
+        });
+        result.content.on(touchStart, onTouchStart);
+    }
+    function clearIntv() {
+        clearTimeout(values.scrollingStopIntv);
+        values.scrollingStopIntv = 0;
+    }
+    function stopEvent(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+    }
+    function onTouchStart(e) {
+        if (!enabled) {
+            return;
         }
-        var originalScrollModel = exp.scrollModel, friction = .95, stopThreshold = .05, result = {}, _x = 0, _y = 0, max, touchStart = "touchstart", touchEnd = "touchend", touchMove = "touchmove", touchCancel = "touchCancel";
-        function setup() {
-            exp.element.css({
-                overflow: "hidden"
-            });
-            exp.getContent().on(touchStart, onTouchStart);
+        clearIntv();
+        if (e.touches[0] && e.touches[0].target && e.touches[0].target.tagName.match(/input|textarea|select/i)) {
+            return;
         }
-        function clearIntv() {
-            clearTimeout(exp.values.scrollingStopIntv);
-            exp.values.scrollingStopIntv = 0;
-        }
-        function onTouchStart(e) {
+        max = element[0].scrollHeight;
+        var touch = e.touches[0];
+        _x = touch.pageX;
+        _y = touch.pageY;
+        values.touchDown = true;
+        stopEvent(event);
+        bottom = getHeight(result.content) - element[0].offsetHeight;
+        addTouchEnd();
+    }
+    function getHeight(elms) {
+        var totals = {
+            height: 0
+        };
+        ux.each(elms, onGetHeight, totals);
+        return totals.height;
+    }
+    function onGetHeight(item, index, list, params) {
+        params.height += item.offsetHeight;
+    }
+    result.enable = function enable(value, speed) {
+        enabled = !!value;
+        if (!enabled) {
+            removeTouchEnd();
+        } else if (enabled && speed) {
+            values.touchDown = false;
+            _y = element[0].offsetTop + element[0].offsetHeight * .5;
+            values.speed = speed;
+            values.absSpeed = Math.abs(speed);
             clearIntv();
-            if (e.touches[0] && e.touches[0].target && e.touches[0].target.tagName.match(/input|textarea|select/i)) {
-                return;
-            }
-            max = exp.getContentHeight() - exp.getViewportHeight();
-            var touch = e.touches[0];
-            _x = touch.pageX;
-            _y = touch.pageY;
-            exp.values.touchDown = true;
-            e.preventDefault();
-            e.stopPropagation();
-            addTouchEnd();
+            values.scrollingStopIntv = setTimeout(applyFriction);
         }
-        function addTouchEnd() {
-            exp.getContent().on(touchMove, onTouchMove);
-            exp.getContent().on(touchEnd, onTouchEnd);
-            exp.getContent().on(touchCancel, onTouchEnd);
-        }
-        function removeTouchEnd() {
-            exp.getContent().off(touchMove, onTouchMove);
-            exp.getContent().off(touchEnd, onTouchEnd);
-            exp.getContent().off(touchCancel, onTouchEnd);
-        }
-        function onTouchEnd(event) {
-            exp.values.touchDown = false;
-            event.preventDefault();
-            event.stopPropagation();
+    };
+    function addTouchEnd() {
+        ux.each(result.content, function(el) {
+            el.addEventListener(touchMove, onTouchMove, true);
+            el.addEventListener(touchEnd, onTouchEnd, true);
+            el.addEventListener(touchCancel, onTouchEnd, true);
+        });
+    }
+    function removeTouchEnd() {
+        ux.each(result.content, function(el) {
+            el.removeEventListener(touchMove, onTouchMove, true);
+            el.removeEventListener(touchEnd, onTouchEnd, true);
+            el.removeEventListener(touchCancel, onTouchEnd, true);
+        });
+    }
+    function onTouchEnd(event) {
+        if (enabled) {
+            values.touchDown = false;
+            stopEvent(event);
             removeTouchEnd();
             applyFriction();
         }
-        function onTouchMove(event) {
-            event.preventDefault();
-            event.stopPropagation();
+    }
+    function onTouchMove(event) {
+        if (enabled) {
+            stopEvent(event);
             var touch = event.changedTouches[0];
             updateScroll(touch.pageX, touch.pageY);
         }
-        function updateScroll(x, y) {
-            var deltaX = _x + x, deltaY = _y - y;
-            if (exp.values.scroll + deltaY < 0) {
-                exp.values.scroll = deltaY = _y = y = 0;
+    }
+    function updateScroll(x, y) {
+        var deltaX = _x + x, deltaY = _y - y;
+        if (values.scroll + deltaY <= 0) {
+            if (values.scroll) {
+                result.dispatch(ux.datagrid.events.VIRTUAL_SCROLL_TOP, result, deltaY);
             }
-            if (exp.values.scroll + deltaY > max) {
-                exp.values.scroll = _y = y = max;
-                deltaY = 0;
+            values.speed = -values.scroll;
+            values.absSpeed = Math.abs(values.speed);
+            values.scroll = deltaY = 0;
+        } else if (values.scroll + deltaY >= bottom) {
+            if (values.scroll !== bottom) {
+                result.dispatch(ux.datagrid.events.VIRTUAL_SCROLL_BOTTOM, result, deltaY);
             }
-            exp.values.speed = deltaY;
-            exp.values.scroll += deltaY;
-            exp.values.absSpeed = Math.abs(deltaY);
-            _y = y;
-            _x = x;
-            render();
-            if (!exp.values.touchDown) {
-                clearIntv();
-                exp.values.scrollingStopIntv = setTimeout(applyFriction);
-            }
+            values.scroll = bottom;
+            values.speed = 0;
+            values.absSpeed = 0;
+        } else {
+            values.speed = deltaY;
+            values.scroll += deltaY;
+            values.absSpeed = Math.abs(deltaY);
         }
-        function applyFriction() {
-            if (exp.values.absSpeed >= stopThreshold) {
-                updateScroll(_x, _y - exp.values.speed * friction);
-            } else {
-                result.onScrollingStop();
-            }
-        }
-        function render() {
-            var value = exp.element[0].scrollTop - exp.values.scroll;
-            exp.getContent().css({
-                webkitTransform: "translate3d(0px, " + value + "px, 0px)"
-            });
-        }
-        function clearRender() {
-            exp.getContent().css({
-                webkitTransform: ""
-            });
-        }
-        result.onScrollingStop = function onScrollingStop() {
-            result.scrollTo(exp.values.scroll, true);
-        };
-        result.scrollTo = function scrollTo(value, immediately) {
-            console.log("updateScroll");
-            clearRender();
-            originalScrollModel.scrollTo(Math.abs(value), true);
-        };
-        result.scrollToIndex = originalScrollModel.scrollToIndex;
-        result.scrollToItem = originalScrollModel.scrollToItem;
-        function destroy() {
+        _y = y;
+        _x = x;
+        render();
+        if (!values.touchDown) {
             clearIntv();
-            exp.getContent().off(touchStart, onTouchStart);
-            removeTouchEnd();
-            originalScrollModel.destroy();
-            result = null;
-            exp = null;
-            originalScrollModel = null;
+            values.scrollingStopIntv = setTimeout(applyFriction);
         }
-        result.destory = destroy;
-        originalScrollModel.removeTouchEvents();
-        exp.scrollModel = result;
-        exp.scope.$on(ux.datagrid.events.READY, setup);
+    }
+    result.dispatch = function dispatch() {
+        scope.$emit.apply(scope, arguments);
+    };
+    result.cap = function cap(value) {
+        var v = Math.abs(value);
+        v = v > bottom ? bottom : v < top ? top : v;
+        return value < 0 ? -v : v;
+    };
+    function applyFriction() {
+        if (values.absSpeed >= stopThreshold) {
+            updateScroll(_x, _y - values.speed * friction);
+        } else {
+            result.onScrollingStop();
+        }
+    }
+    function render() {
+        var value = element[0].scrollTop - values.scroll;
+        result.content.css({
+            webkitTransform: "translate3d(0px, " + value + "px, 0px)"
+        });
+    }
+    result.getValues = function getValues() {
+        return values;
+    };
+    result.clear = function clearRender() {
+        result.content.css({
+            webkitTransform: ""
+        });
+    };
+    result.scrollTo = function scrollTo(value, immediately) {
+        callback(value, immediately);
+    };
+    result.onScrollingStop = function onScrollingStop() {
+        result.scrollTo(values.scroll, true);
+    };
+    result.destroy = function() {
+        removeTouchEnd();
+        element.off(touchStart, onTouchStart);
+        values = null;
+    };
+    result.setup = setup;
+    return result;
+};
+
+angular.module("ux").factory("iosScroll", function() {
+    return function iosScroll(exp) {
+        var vScroll, originalScrollModel = exp.scrollModel;
+        if (exp.flow.async && !navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+            return exp;
+        }
+        vScroll = new ux.datagrid.VirtualScroll(exp.scope, exp.element, exp.values, function(value, immediately) {
+            vScroll.clear();
+            exp.values.scroll = vScroll.values.scroll;
+            exp.values.speed = vScroll.values.speed;
+            exp.values.absSpeed = vScroll.values.absSpeed;
+            console.log("scrollTo %s", exp.values.scroll);
+            originalScrollModel.scrollTo(value, immediately);
+        });
+        exp.scope.$on(ux.datagrid.events.READY, function() {
+            vScroll.content = exp.getContent();
+            vScroll.setup();
+        });
+        vScroll.scrollToIndex = originalScrollModel.scrollToIndex;
+        vScroll.scrollToItem = originalScrollModel.scrollToItem;
+        exp.scrollModel = vScroll;
         return exp;
     };
 });

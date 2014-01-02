@@ -1,6 +1,6 @@
 /*
 * uxDatagrid v.0.1.0
-* (c) 2013, WebUX
+* (c) 2014, WebUX
 * License: MIT.
 */
 (function(exports, global){

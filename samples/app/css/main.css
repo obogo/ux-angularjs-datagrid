@@ -132,23 +132,23 @@ input[type="text"] {
 }
 
 .row.uncompiled {
-    background: url(images/row-loader.gif) no-repeat center #efefef !important;
+    background: url(../images/row-loader.gif) no-repeat center #efefef !important;
 }
 
 .row.uncompiled:nth-child(odd) {
-    background: url(images/row-loader.gif) no-repeat center #dfdfdf !important;
+    background: url(../images/row-loader.gif) no-repeat center #dfdfdf !important;
 }
 
 .sub.uncompiled {
-    background: url(images/row-loader.gif) no-repeat center #99CCFF !important;
+    background: url(../images/row-loader.gif) no-repeat center #99CCFF !important;
 }
 
 .sub.uncompiled:nth-child(odd) {
-    background: url(images/row-loader.gif) no-repeat center #AADDFF !important;
+    background: url(../images/row-loader.gif) no-repeat center #AADDFF !important;
 }
 
 .loadingRow {
-    background: url(images/row-loader.gif) no-repeat center #FFFFFF !important;
+    background: url(../images/row-loader.gif) no-repeat center #FFFFFF !important;
 }
 
 .uncompiled > * {

@@ -67,6 +67,9 @@ module.exports = function (grunt) {
                     'build/addons/ux-<%= pkg.filename %>-statsModel.js': [
                         'src/addons/statsModel.js'
                     ],
+                    'build/addons/ux-<%= pkg.filename %>-windowScroll.js': [
+                        'src/addons/windowScroll.js'
+                    ],
                     'build/other/ux-doubleScroll.js': [
                         'src/other/doubleScroll.js'
                     ]

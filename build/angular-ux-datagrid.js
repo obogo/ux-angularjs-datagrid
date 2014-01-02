@@ -532,9 +532,9 @@ function Datagrid(scope, element, attr, $compile) {
             safeDigest(scope);
         }
     }
-    function updateViewportHeight() {
-        viewHeight = element[0].offsetHeight;
-    }
+    exp.calculateViewportHeight = function calculateViewportHeight() {
+        return element[0].offsetHeight;
+    };
     function onResize(event) {
         dispatch(exports.datagrid.events.RESIZE, {
             event: event
@@ -688,6 +688,9 @@ function Datagrid(scope, element, attr, $compile) {
     }
     function updateRowWatchers() {
         var loop = getStartingIndex(), offset = loop.i * 40, lastActive = [].concat(active), lastActiveIndex, s, prevS;
+        if (loop.i < 0) {
+            return;
+        }
         exp.dispatch(events.BEFORE_UPDATE_WATCHERS, loop);
         resetMinMax();
         active.length = 0;
@@ -769,7 +772,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
     function render() {
         if (state === states.BUILDING) {
-            viewHeight = element[0].offsetHeight;
+            viewHeight = exp.calculateViewportHeight();
             flow.add(buildRows, [ exp.data ], 0);
             flow.add(updateHeightValues);
             flow.add(ready);
@@ -907,7 +910,6 @@ function Datagrid(scope, element, attr, $compile) {
     exp.getViewportHeight = getViewportHeight;
     exp.getContentHeight = getContentHeight;
     exp.getContent = getContent;
-    exp.updateViewportHeight = updateViewportHeight;
     exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
     exp.flow = flow = new Flow({
         async: options.hasOwnProperty("async") ? !!options.async : true,

@@ -42,7 +42,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                 content.children()[1].style.height = elHeight + 'px';
                 contentHeight = content.children()[0].offsetHeight + elHeight;
                 content[0].style.height = contentHeight + 'px';
-                scope.datagrid.updateViewportHeight();
+                scope.datagrid.calculateViewportHeight();
             }
 
             function onTargetScrollToTop(event, scroller, speed) {

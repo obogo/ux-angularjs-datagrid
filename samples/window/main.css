@@ -1,0 +1,117 @@
+html, body {
+    padding: 0px;
+    margin: 0px;
+}
+
+.stats {
+    font-size: 10px;
+    font-family: Arial;
+}
+
+input[type="text"] {
+    width: 40px;
+}
+
+.my-container {
+    position: absolute;
+    left: 1%;
+    right: 1%;
+    top: 80px;
+    bottom: 10%;
+    margin: auto;
+    border: 1px solid #000000;
+}
+
+.listA {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.datagrid {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+table {
+    width: 100%;
+}
+
+.content {
+    width: 100%;
+    height: auto;
+}
+
+.group {
+    background-color:#333333;
+    height: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #FFFFFF;
+    line-height: 20px;
+}
+
+.row {
+    background-color:#efefef;
+    height: 40px;
+    line-height: 40px;
+}
+.row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+
+.row > div {
+    display: inline-block;
+}
+
+.sub {
+    background-color:#99CCFF;
+    height: 30px;
+    line-height: 30px;
+}
+.sub:nth-child(odd) {
+    background-color:#AADDFF;
+}
+
+.sub > div {
+    display: inline-block;
+}
+
+.icon {
+    display: inline-block;
+    margin-left: 100px;
+}
+
+.progress-bar {
+    position: relative;
+    width: 100px;
+    height: 10px;
+    background: #FFFFFF;
+    border: 1px solid #333333;
+}
+
+.progress-bar > div {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    height: 100%;
+    background: #336699;
+}
+
+.uncompiled > * {
+    visibility: hidden;
+}
+
+.uncompiled.compiled > * {
+    visibility: visible;
+}
+
+.ux-datagrid-chunk {
+    /*outline: 4px #FF0000 solid;*/
+}

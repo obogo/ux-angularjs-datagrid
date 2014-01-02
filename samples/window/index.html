@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<head>
+    <title>Datagrid</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="YES">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="shortcut icon" href="images/favicon.ico">
+
+    <link type="text/css" rel="stylesheet" href="main.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.js"></script>
+    <!--<script src="../../lib/angular.js"></script>-->
+    <script src="../../build/angular-ux-datagrid.js"></script>
+    <script src="../../build/addons/touch/ios/ux-datagrid-iosScroll.js"></script>
+    <script>
+
+        /*global ux */
+        // we want to override the default scrolling if it is an IOS device.
+        angular.module('ux').factory('windowScroll', function () {
+
+            return function windowScroll(exp) {
+                var result = exp.scrollModel;
+                exp.calculateViewportHeight = function () {
+                    return window.screen.height;
+                };
+                result.onUpdateScroll = function onUpadateScroll(event) {
+                    var val = window.scrollY;
+                    if (exp.values.scroll !== val) {
+                        exp.dispatch(ux.datagrid.events.SCROLL_START, val);
+                        exp.values.speed = val - exp.values.scroll;
+                        exp.values.absSpeed = Math.abs(exp.values.speed);
+                        exp.values.scroll = val;
+                        exp.values.scrollPercent = ((exp.values.scroll / exp.getContentHeight()) * 100).toFixed(2);
+                    }
+                    result.waitForStop();
+                    exp.dispatch(ux.datagrid.events.ON_SCROLL, exp.values);
+                };
+                window.addEventListener('scroll', exp.scrollModel.onUpdateScroll);
+
+                function resetScroll() {
+                    // force browser to start at 0,0 on page reload.
+                    var intv = setTimeout(function () {
+                        window.scrollBy(1, 1);
+                        window.scrollBy(-1, -1);
+                    });
+                }
+
+                exp.scope.$on(ux.datagrid.events.READY, resetScroll);
+                return exp;
+            };
+        });
+
+        var records = 50000;
+
+        function root($scope) {
+            var i = 0;
+            $scope.items = [];
+            while (i < records) {
+                $scope.items.push({id: i});
+                i += 1;
+            }
+        }
+
+        angular.module('app', ['ux']);
+    </script>
+    <!--//
+        Note: {{fake}} below is to get angular to process the class attribute. This wipes out any css classes that were added by jquery.
+    //-->
+</head>
+<body data-ng-controller="root" class="listA datagrid" data-ux-datagrid="items" data-addons="windowScroll, iosScroll">
+    <script type="template/html" data-template-name="default" data-template-item="item">
+        <div class="row {{fake}}">
+            <div class="text">{{item.id}} {{$id}} {{counter}}</div>
+            <div random-icons="pencil droid trash"></div>
+            <input type="text">
+        </div>
+    </script>
+</body>
+</html>

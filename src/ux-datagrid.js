@@ -110,9 +110,9 @@ function Datagrid(scope, element, attr, $compile) {
     /**
      * Be careful. This method is VERY expensive when there are lots of rows.
      */
-    function updateViewportHeight() {
-        viewHeight = element[0].offsetHeight;
-    }
+    exp.calculateViewportHeight = function calculateViewportHeight() {
+        return element[0].offsetHeight;
+    };
 
     function onResize(event) {
         dispatch(exports.datagrid.events.RESIZE, {event:event});
@@ -310,6 +310,9 @@ function Datagrid(scope, element, attr, $compile) {
     function updateRowWatchers() {
         var loop = getStartingIndex(), offset = loop.i * 40, lastActive = [].concat(active),
             lastActiveIndex, s, prevS;
+        if (loop.i < 0) {// then scroll is negative. ignore it.
+            return;
+        }
         exp.dispatch(events.BEFORE_UPDATE_WATCHERS, loop);
         // we only want to update stuff if we are scrolling slow.
         resetMinMax();// this needs to always be set after the dispatch of before update watchers in case they need the before activeRange.
@@ -404,7 +407,7 @@ function Datagrid(scope, element, attr, $compile) {
         if (state === states.BUILDING) {
             //TODO: removeExtraRows is not compatible. It needs removed. Only buildRows will work with chunking.
             //flow.add(removeExtraRows, [exp.data]);// if our data updates we need to remove extra rows.
-            viewHeight = element[0].offsetHeight;
+            viewHeight = exp.calculateViewportHeight();
             flow.add(buildRows, [exp.data], 0);
             flow.add(updateHeightValues);
             flow.add(ready);
@@ -558,7 +561,6 @@ function Datagrid(scope, element, attr, $compile) {
     exp.getViewportHeight = getViewportHeight;
     exp.getContentHeight = getContentHeight;
     exp.getContent = getContent;
-    exp.updateViewportHeight = updateViewportHeight;
 
     // initialize core.
     exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});

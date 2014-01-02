@@ -49,8 +49,11 @@ ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callbac
         _y = touch.pageY;
         values.touchDown = true;
         stopEvent(event);
-        bottom = getHeight(result.content) - element[0].offsetHeight;
+        updateBottom();
         addTouchEnd();
+    }
+    function updateBottom() {
+        bottom = getHeight(result.content) - element[0].offsetHeight;
     }
     function getHeight(elms) {
         var totals = {
@@ -67,6 +70,7 @@ ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callbac
         if (!enabled) {
             removeTouchEnd();
         } else if (enabled && speed) {
+            updateBottom();
             values.touchDown = false;
             _y = element[0].offsetTop + element[0].offsetHeight * .5;
             values.speed = speed;
@@ -188,7 +192,6 @@ angular.module("ux").factory("iosScroll", function() {
             exp.values.scroll = vScroll.values.scroll;
             exp.values.speed = vScroll.values.speed;
             exp.values.absSpeed = vScroll.values.absSpeed;
-            console.log("scrollTo %s", exp.values.scroll);
             originalScrollModel.scrollTo(value, immediately);
         });
         exp.scope.$on(ux.datagrid.events.READY, function() {

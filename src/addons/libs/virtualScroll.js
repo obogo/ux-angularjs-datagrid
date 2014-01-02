@@ -48,8 +48,12 @@ ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callbac
         _y = touch.pageY;
         values.touchDown = true;
         stopEvent(event);
-        bottom = getHeight(result.content) - element[0].offsetHeight;
+        updateBottom();
         addTouchEnd();
+    }
+
+    function updateBottom() {
+        bottom = getHeight(result.content) - element[0].offsetHeight;
     }
 
     function getHeight(elms) {
@@ -67,6 +71,7 @@ ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callbac
         if (!enabled) {
             removeTouchEnd();
         } else if (enabled && speed) {
+            updateBottom();
             values.touchDown = false;
             _y = element[0].offsetTop + (element[0].offsetHeight * 0.5);
             values.speed = speed;

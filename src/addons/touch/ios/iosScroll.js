@@ -13,7 +13,6 @@ angular.module('ux').factory('iosScroll', function () {
             exp.values.scroll = vScroll.values.scroll;
             exp.values.speed = vScroll.values.speed;
             exp.values.absSpeed = vScroll.values.absSpeed;
-            console.log('scrollTo %s', exp.values.scroll);
             originalScrollModel.scrollTo(value, immediately);
         });
         exp.scope.$on(ux.datagrid.events.READY, function () {

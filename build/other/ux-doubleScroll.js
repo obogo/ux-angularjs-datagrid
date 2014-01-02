@@ -48,7 +48,7 @@ angular.module("ux").directive("uxDoubleScroll", function() {
             function onDoubleScrollBottom(event, scroller, speed) {
                 if (scroller.element[0] === element[0]) {
                     vScroll.enable(false);
-                    scrollModel.enable(true, vScroll.getValues().speed);
+                    scrollModel.enable(true, speed);
                     target.disabled = "";
                 }
             }
@@ -58,8 +58,8 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                 onSizeChange();
                 onIOScroll(0);
                 scope.$on(exports.datagrid.events.READY, function() {
+                    onTargetScrollToTop(null, scrollModel, .05);
                     onSizeChange();
-                    onTargetScrollToTop(null, scrollModel, 0);
                 });
                 scope.$on(exports.datagrid.events.VIRTUAL_SCROLL_TOP, onTargetScrollToTop);
                 scope.$on(exports.datagrid.events.VIRTUAL_SCROLL_BOTTOM, onDoubleScrollBottom);

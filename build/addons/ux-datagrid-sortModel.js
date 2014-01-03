@@ -51,11 +51,16 @@ angular.module("ux").factory("sortModel", function() {
         result.setCache = function setCache(key, value) {
             cache[key] = value;
         };
-        result.applySorts = function applySorts(ary) {
+        result.applySorts = function applySorts(ary, sortOptions) {
             original = ary;
             var combo = {
                 text: ""
-            };
+            }, i;
+            if (sortOptions) {
+                for (i in sortOptions) {
+                    applySort(i, sortOptions[i]);
+                }
+            }
             ux.each(sortList, getSortCombo, combo);
             exp.dispatch(exports.datagrid.events.BEFORE_SORT, combo.text);
             if (!result.getCache(combo.text)) {
@@ -77,7 +82,7 @@ angular.module("ux").factory("sortModel", function() {
         result.isApplied = function isApplied(name, methodName) {
             return !!(sorts[name] && sorts[name].$selected === methodName);
         };
-        result.getAppliedMethodName = function getAppliedMethodName(name) {
+        result.getSortStateOf = function getSortStateOf(name) {
             var methods = sorts[name];
             return methods && methods.$selected || "";
         };

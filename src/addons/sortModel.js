@@ -39,7 +39,6 @@ angular.module('ux').factory('sortModel', function () {
             sortList.push(methods);
         };
 
-        //TODO: need to implement server side sort.
         function applySort(name, methodName) {
             var methods = sorts[name];
             methods.$selected = methodName;
@@ -53,9 +52,14 @@ angular.module('ux').factory('sortModel', function () {
             cache[key] = value;
         };
 
-        result.applySorts = function applySorts(ary) {
+        result.applySorts = function applySorts(ary, sortOptions) {
             original = ary;
-            var combo = {text:''};
+            var combo = {text:''}, i;
+            if (sortOptions) {
+                for (i in sortOptions) {
+                    applySort(i, sortOptions[i]);
+                }
+            }
             ux.each(sortList, getSortCombo, combo);
             exp.dispatch(exports.datagrid.events.BEFORE_SORT, combo.text);
             if (!result.getCache(combo.text)) {
@@ -81,7 +85,7 @@ angular.module('ux').factory('sortModel', function () {
             return !!(sorts[name] && sorts[name].$selected === methodName);
         };
 
-        result.getAppliedMethodName = function getAppliedMethodName(name) {
+        result.getSortStateOf = function getSortStateOf(name) {
             var methods = sorts[name];
             return methods && methods.$selected || '';
         };

@@ -5,11 +5,11 @@
 </div>
 <div class="header">
     <div class="row">
-        <div class="col sortCol1" data-ng-click="datagrid.sortModel.toggleSort('id')"><div class="{{datagrid.sortModel.getAppliedMethodName('id')}}">ID</div></div>
-        <div class="col sortCol2" data-ng-click="datagrid.sortModel.toggleSort('name')"><div class="{{datagrid.sortModel.getAppliedMethodName('name')}}">Name</div></div>
-        <div class="col sortCol3" data-ng-click="datagrid.sortModel.toggleSort('description')"><div class="{{datagrid.sortModel.getAppliedMethodName('description')}}">Description</div></div>
-        <div class="col sortCol4" data-ng-click="datagrid.sortModel.toggleSort('type')"><div class="{{datagrid.sortModel.getAppliedMethodName('type')}}">Type</div></div>
-        <div class="col sortCol5" data-ng-click="datagrid.sortModel.toggleSort('weight')"><div class="{{datagrid.sortModel.getAppliedMethodName('weight')}}">oz</div></div>
+        <div class="col sortCol1" data-ng-click="datagrid.sortModel.toggleSort('id')"><div class="{{datagrid.sortModel.getSortStateOf('id')}}">ID</div></div>
+        <div class="col sortCol2" data-ng-click="datagrid.sortModel.toggleSort('name')"><div class="{{datagrid.sortModel.getSortStateOf('name')}}">Name</div></div>
+        <div class="col sortCol3" data-ng-click="datagrid.sortModel.toggleSort('description')"><div class="{{datagrid.sortModel.getSortStateOf('description')}}">Description</div></div>
+        <div class="col sortCol4" data-ng-click="datagrid.sortModel.toggleSort('type')"><div class="{{datagrid.sortModel.getSortStateOf('type')}}">Type</div></div>
+        <div class="col sortCol5" data-ng-click="datagrid.sortModel.toggleSort('weight')"><div class="{{datagrid.sortModel.getSortStateOf('weight')}}">oz</div></div>
     </div>
 </div>
 <div class="my-container">

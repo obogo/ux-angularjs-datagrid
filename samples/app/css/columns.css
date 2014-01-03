@@ -1,10 +1,12 @@
 .group, .row, .sub {
     display: table;
+    table-layout: fixed;
     width: 100%;
 }
 
 .col {
     display: table-cell !important;
+    position: relative;
     text-align: center;
     border-bottom: 1px solid #000000;
     border-right: 1px solid #000000;
@@ -31,4 +33,87 @@
 
 .col5 {
     width: 40px;
+}
+
+/* Sorting Below */
+.header {
+    color: #FFFFFF;
+    border: 1px solid #999999;
+}
+
+.header .row {
+    height: 20px;
+    line-height: 20px;
+    background-color: #000000;
+}
+
+.header .col {
+    border-color: #999999;
+}
+
+.sortCol1 {
+    width: 40px;
+}
+
+.sortCol2 {
+    padding-left: 2px;
+    text-align: left;
+    width: 50px;
+}
+
+.sortCol3 {
+    padding-left: 2px;
+    width: 100%;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sortCol4 {
+    width: 40px;
+}
+
+.sortCol5 {
+    width: 40px;
+}
+
+.col .asc::after {
+    display: block;
+    position: absolute;
+    top: 6px;
+    right: 2px;
+    bottom: 0px;
+    margin: auto;
+    width: 1px;
+    height: 1px;
+    content: '';
+    border: 6px solid #FFFFFF;
+    border-left-width: 4px;
+    border-right-width: 4px;
+    border-left-color: transparent;
+    border-bottom-color: transparent;
+    border-right-color: transparent;
+}
+
+.col .desc::after {
+    display: block;
+    position: absolute;
+    top: 0px;
+    right: 2px;
+    bottom: 6px;
+    margin: auto;
+    width: 1px;
+    height: 1px;
+    content: '';
+    border: 6px solid #FFFFFF;
+    border-left-width: 4px;
+    border-right-width: 4px;
+    border-left-color: transparent;
+    border-top-color: transparent;
+    border-right-color: transparent;
+}
+
+.col .none::after {
+    display: block;
+    float: right;
 }

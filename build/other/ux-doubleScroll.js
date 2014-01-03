@@ -62,7 +62,6 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                 scope.$on(exports.datagrid.events.VIRTUAL_SCROLL_TOP, onTargetScrollToTop);
                 scope.$on(exports.datagrid.events.VIRTUAL_SCROLL_BOTTOM, onDoubleScrollBottom);
             } else {
-                console.log("setup doublescroll");
                 element[0].addEventListener("scroll", onScroll, true);
                 onSizeChange();
                 onScroll(null);

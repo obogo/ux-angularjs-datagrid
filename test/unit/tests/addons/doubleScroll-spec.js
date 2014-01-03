@@ -144,7 +144,7 @@ describe("doubleScroll", function () {
                 expect(scope.datagrid.scrollModel.getValues().scroll).toBe(150);
                 trigger(el, 'touchend', {});
                 done();
-            }, 100);
+            }, 500);
         });
 
         it("should enable the main container when the target container scrolls back to the top.", function (done) {
@@ -180,7 +180,7 @@ describe("doubleScroll", function () {
                 expect(scope.datagrid.scrollModel.enable()).toBe(false);
                 expect(scope.datagrid.scrollModel.getValues().scroll).toBe(0);
                 done();
-            }, 100);
+            }, 500);
         });
     });
 });

@@ -7,7 +7,9 @@ function Flow(exp) {
         execStartTime,
         execEndTime,
         timeouts = {},
-        consoleMethodStyle = "font-weight: bold;color:#3399FF;";
+        flowStyle = "color: #999999;",
+        consoleMethodStyle = "color:#009900;",
+        consoleInfoMethodStyle = "font-weight: bold;color:#3399FF;";
 
     function getMethodName(method) {
         // TODO: there might be a faster way to get the function name.
@@ -27,7 +29,7 @@ function Flow(exp) {
         var i = 0, len = list.length;
         while (i < len) {
             if (list[i].label === item.label && list[i] !== current) {
-                exp.info("flow:clear duplicate item %c%s", consoleMethodStyle, item.label);
+                exp.info("%cflow:clear duplicate item %c%s", flowStyle, consoleMethodStyle, item.label);
                 list.splice(i, 1);
                 i -= 1;
                 len -= 1;
@@ -59,10 +61,10 @@ function Flow(exp) {
     function timeout(method, time) {
         var intv, item = createItem(method, [], time), startTime = Date.now(),
             timeoutCall = function () {
-                exp.log("flow:exec timeout method %c%s %sms", consoleMethodStyle, item.label, Date.now() - startTime);
+                exp.log("%cflow:exec timeout method %c%s %sms", flowStyle, consoleMethodStyle, item.label, Date.now() - startTime);
                 method();
             };
-        exp.log("flow:wait for timeout method %c%s", consoleMethodStyle, item.label);
+        exp.log("%cflow:wait for timeout method %c%s", flowStyle, consoleMethodStyle, item.label);
         intv = setTimeout(timeoutCall, time);
         timeouts[intv] = function () {
             clearTimeout(intv);
@@ -87,7 +89,7 @@ function Flow(exp) {
 
     function done() {
         execEndTime = Date.now();
-        exp.log("flow:finish %c%s took %dms", consoleMethodStyle, current.label, execEndTime - execStartTime);
+        exp.log("%cflow:finish %c%s took %dms", flowStyle, consoleMethodStyle, current.label, execEndTime - execStartTime);
         current = null;
         list.shift();
         if (list.length) {
@@ -100,7 +102,7 @@ function Flow(exp) {
         if (!current && list.length) {
             current = list[0];
             if (exp.async && current.delay !== undefined) {
-                exp.log("\tflow:delay for %c%s %sms", consoleMethodStyle, current.label, current.delay);
+                exp.log("\t%cflow:delay for %c%s %sms", flowStyle, consoleMethodStyle, current.label, current.delay);
                 clearTimeout(intv);
                 intv = setTimeout(exec, current.delay);
             } else {
@@ -110,7 +112,7 @@ function Flow(exp) {
     }
 
     function exec() {
-        exp.log("flow:start method %c%s", consoleMethodStyle, current.label);
+        exp.log("%cflow:start method %c%s", flowStyle, consoleMethodStyle, current.label);
         var methodHasDoneArg = hasDoneArg(current.method);
         if (methodHasDoneArg) current.args.push(done);
         execStartTime = Date.now();
@@ -131,7 +133,7 @@ function Flow(exp) {
 
     exp = exp || {};
     exp.async = exp.hasOwnProperty('async') ? exp.async : true;
-    exp.debug = exp.hasOwnProperty('debug') ? exp.debug : false;
+    exp.debug = exp.hasOwnProperty('debug') ? exp.debug : 0;
     exp.insert = insert;
     exp.add = add;
     exp.unique = unique;
@@ -141,13 +143,23 @@ function Flow(exp) {
     exp.run = run;
     exp.destroy = destroy;
     exp.log = function () {
-        if (exp.debug && exp.debug < 1) {
-            console.log.apply(console, arguments);
+        var args;
+        if (exp.debug && exp.debug <= 1) {
+            args = ux.util.array.toArray(arguments);
+            if (args[0].indexOf('%c') === -1) {
+                args[0] = '%c' + args[0];
+                args.splice(1, 0, consoleMethodStyle);
+            }
+            console.log.apply(console, args);
         }
     };
     exp.info = function () {
-        if (exp.debug) {
-            console.log.apply(console, arguments);
+        var args;
+        if (exp.debug && exp.debug <= 2) {
+            args = ux.util.array.toArray(arguments);
+            args[0] = '%c' + args[0];
+            args.splice(1, 0, consoleInfoMethodStyle);
+            console.info.apply(console, args);
         }
     };
 

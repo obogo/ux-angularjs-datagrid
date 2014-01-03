@@ -571,7 +571,7 @@ function Datagrid(scope, element, attr, $compile) {
     // initialize core.
     exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
     // add variables that can be modified externally.
-    exp.flow = flow = new Flow({async: options.hasOwnProperty('async') ? !!options.async : true, debug: options.hasOwnProperty('debug') ? !!options.debug : false});
+    exp.flow = flow = new Flow({async: options.hasOwnProperty('async') ? !!options.async : true, debug: options.hasOwnProperty('debug') ? options.debug : 0});
     flow.add(init);
     flow.run();
 

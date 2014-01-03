@@ -12,6 +12,33 @@ function createSimpleList(len, offset) {
     return items;
 }
 
+function createSimpleFieldList(len, offset, fields) {
+    var i = 0, j, items = createSimpleList(len, offset);
+    function makeWord(len) {
+        var r = '', s = 'abcdefghijklmnopqrstuvwxyz', slen = s.length;
+        len = len || 1;// no 0 length words.
+        while (r.length < len) {
+            r += s.charAt(Math.floor(Math.random() * slen));
+        }
+        return r;
+    }
+    function createWords(numOfWords) {
+        var words = [];
+        while (words.length < numOfWords) {
+            words.push(makeWord(Math.floor(Math.random() * 10)));
+        }
+        return words.join(' ');
+    }
+    // now we go through each one and add fields.
+    while (i < len) {
+        for (j in fields) {
+            items[i][j] = typeof fields[j] === 'object' ? fields[j][Math.floor(Math.random() * fields[j].length)] : createWords(fields[j]);
+        }
+        i += 1;
+    }
+    return items;
+}
+
 function createGroupedList(len) {
     var i = 0, group, rand, items = [];
     len = len || records;
@@ -116,6 +143,43 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Addons >> Expand Rows";
                 $scope.items = createGroupedList();
+            }
+        })
+        .when('/addons/sortModel', {
+            templateUrl: "partials/addons/sortModel.html",
+            controller: function ($scope) {
+                $scope.name = "Addons >> Sort Model";
+                $scope.items = createSimpleFieldList(100, 0, {name: 1, description: 10, type:['red','green','blue'], weight: [0.1, 0.2, 0.3, 0.4, 0.5]});
+            }
+        })
+        .when('/addons/sortModelServer', {
+            templateUrl: "partials/addons/sortModelServer.html",
+            controller: function ($scope) {
+                $scope.name = "Addons >> Sort Model Server";
+                $scope.items = createSimpleFieldList(100, 0, {name: 1, description: 10, type:['red','green','blue'], weight: [0.1, 0.2, 0.3, 0.4, 0.5]});
+                $scope.$on(ux.datagrid.events.BEFORE_SORT, function (event, key) {
+                    if (!$scope.datagrid.sortModel.getCache(key)) {
+                        $scope.datagrid.sortModel.setCache(key, []);
+                        // let's wait to simulate a server call. Then let's change the color of the data
+                        // to verify that it works.
+                        setTimeout(function () {
+                            var colors = ['red','green','blue'];
+                            if (key.indexOf('name') !== -1) {
+                                colors = ['orange','yellow','red'];
+                            } else if (key.indexOf('description') !== -1) {
+                                colors = ['sky blue','teal','blue'];
+                            } else if (key.indexOf('id') !== -1) {
+                                colors = ['light green','green','dark green'];
+                            } else if (key.indexOf('type') !== -1) {
+                                colors = ['white','grey','black'];
+                            } else if (key.indexOf('weight') !== -1) {
+                                colors = ['purple','violet','lavender'];
+                            }
+                            $scope.datagrid.sortModel.setCache(key, createSimpleFieldList(100, 0, {name: 1, description: 10, type:colors, weight: [0.1, 0.2, 0.3, 0.4, 0.5]}))
+                            $scope.$apply();
+                        }, 1000);
+                    }
+                });
             }
         })
         .when('/addons/statsModel', {

@@ -10,10 +10,7 @@ exports.datagrid = {
     states: {
         BUILDING: 'datagrid:building',
         APPENDING: 'datagrid:appending',//TODO: deprecated.
-        READY: 'datagrid:ready',
-        //TODO: Are these redundant?
-        DEACTIVATED: 'datagrid:deactivated', // only broadcast from row being deactivated.
-        ACTIVATED: 'datagrid:activated' // only broadcast from row being active.
+        READY: 'datagrid:ready'
     },
     events: {
         INIT: 'datagrid:init',

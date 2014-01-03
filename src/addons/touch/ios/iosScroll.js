@@ -10,11 +10,20 @@ angular.module('ux').factory('iosScroll', function () {
         }
         vScroll = new ux.datagrid.VirtualScroll(exp.scope, exp.element, exp.values, function (value, immediately) {
             vScroll.clear();
-            exp.values.scroll = vScroll.values.scroll;
-            exp.values.speed = vScroll.values.speed;
-            exp.values.absSpeed = vScroll.values.absSpeed;
+            var values = vScroll.getValues();
+            exp.values.scroll = values.scroll;
+            exp.values.speed = values.speed;
+            exp.values.absSpeed = values.absSpeed;
             originalScrollModel.scrollTo(value, immediately);
         });
+        function onBeforeVirtualScrollStart(event) {
+            // update the virtual scroll values to reflect what is in the datagrid.
+            var values = vScroll.getValues();
+            ux.each(exp.values, function (value, key) {
+                values[key] = value;
+            });
+        }
+        exp.scope.$on(ux.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeVirtualScrollStart);
         exp.scope.$on(ux.datagrid.events.READY, function () {
             vScroll.content = exp.getContent();
             vScroll.setup();

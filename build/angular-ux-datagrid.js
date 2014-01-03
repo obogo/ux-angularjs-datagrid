@@ -17,9 +17,7 @@ exports.datagrid = {
     states: {
         BUILDING: "datagrid:building",
         APPENDING: "datagrid:appending",
-        READY: "datagrid:ready",
-        DEACTIVATED: "datagrid:deactivated",
-        ACTIVATED: "datagrid:activated"
+        READY: "datagrid:ready"
     },
     events: {
         INIT: "datagrid:init",

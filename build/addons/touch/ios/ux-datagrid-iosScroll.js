@@ -4,6 +4,8 @@
 * License: MIT.
 */
 (function(exports, global){
+ux.datagrid.events.BEFORE_VIRTUAL_SCROLL_START = "virtualScroll:beforeScrollStart";
+
 ux.datagrid.events.VIRTUAL_SCROLL_TOP = "virtualScroll:top";
 
 ux.datagrid.events.VIRTUAL_SCROLL_BOTTOM = "virtualScroll:bottom";
@@ -19,7 +21,6 @@ ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callbac
     result.scope = scope;
     result.element = element;
     result.content = element.children();
-    result.values = values;
     function setup() {
         element.css({
             overflow: "hidden"
@@ -40,6 +41,7 @@ ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callbac
             return;
         }
         clearIntv();
+        result.dispatch(ux.datagrid.events.BEFORE_VIRTUAL_SCROLL_START);
         if (e.touches[0] && e.touches[0].target && e.touches[0].target.tagName.match(/input|textarea|select/i)) {
             return;
         }
@@ -192,11 +194,19 @@ angular.module("ux").factory("iosScroll", function() {
         }
         vScroll = new ux.datagrid.VirtualScroll(exp.scope, exp.element, exp.values, function(value, immediately) {
             vScroll.clear();
-            exp.values.scroll = vScroll.values.scroll;
-            exp.values.speed = vScroll.values.speed;
-            exp.values.absSpeed = vScroll.values.absSpeed;
+            var values = vScroll.getValues();
+            exp.values.scroll = values.scroll;
+            exp.values.speed = values.speed;
+            exp.values.absSpeed = values.absSpeed;
             originalScrollModel.scrollTo(value, immediately);
         });
+        function onBeforeVirtualScrollStart(event) {
+            var values = vScroll.getValues();
+            ux.each(exp.values, function(value, key) {
+                values[key] = value;
+            });
+        }
+        exp.scope.$on(ux.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeVirtualScrollStart);
         exp.scope.$on(ux.datagrid.events.READY, function() {
             vScroll.content = exp.getContent();
             vScroll.setup();

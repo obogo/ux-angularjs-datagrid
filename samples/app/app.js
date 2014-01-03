@@ -145,6 +145,13 @@ app.config(function ($routeProvider) {
                 $scope.items = createGroupedList();
             }
         })
+        .when('/addons/scrollHistory', {
+            templateUrl: "partials/addons/scrollHistory.html",
+            controller: function ($scope) {
+                $scope.name = "Addons >> Scroll History Model";
+                $scope.items = createGroupedList();
+            }
+        })
         .when('/addons/sortModel', {
             templateUrl: "partials/addons/sortModel.html",
             controller: function ($scope) {

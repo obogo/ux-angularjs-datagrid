@@ -111,6 +111,14 @@ angular.module("ux").factory("sortModel", function() {
         result.clear = function clear() {
             cache = {};
         };
+        result.destroy = function destroy() {
+            result = null;
+            sorts = null;
+            sortList = null;
+            cache = null;
+            original = null;
+            exp = null;
+        };
         exp.sortModel = result;
         addSortsFromOptions();
         return exp;

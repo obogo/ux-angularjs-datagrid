@@ -1,6 +1,6 @@
 describe("sortModel", function () {
 
-    var injector, sorter, scope;
+    var sorter, scope;
 
     beforeEach(function () {
         var inject = angular.injector(['ng', 'ux']).invoke;

@@ -168,13 +168,15 @@ describe("doubleScroll", function () {
                 ]});
                 trigger(el, 'touchend', {});
                 // now scroll back up.
-                trigger(el, 'touchstart', {touches: [
-                    {pageX: 200, pageY: 200}
-                ]});
-                trigger(el, 'touchmove', {changedTouches: [
-                    {pageX: 200, pageY: 500}
-                ]});
-                trigger(el, 'touchend', {});
+                setTimeout(function () {
+                    trigger(el, 'touchstart', {touches: [
+                        {pageX: 200, pageY: 200}
+                    ]});
+                    trigger(el, 'touchmove', {changedTouches: [
+                        {pageX: 200, pageY: 500}
+                    ]});
+                    trigger(el, 'touchend', {});
+                },100);
             }, 100);
             setTimeout(function () {
                 expect(scope.datagrid.scrollModel.enable()).toBe(false);

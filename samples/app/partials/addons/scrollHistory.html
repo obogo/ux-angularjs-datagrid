@@ -1,0 +1,44 @@
+<div class="stats">
+    <div class="page-title">{{name}}</div>
+    <div>Scroll the list down. Click on the home button. Then click back on the link for scroll history. It should be scrolled to the same position.</div>
+    <span>SCROLL TO:</span>
+    <span data-ng-repeat="percent in percents"><a href="" data-ng-click="scrollToPercent(percent/100)">{{percent}}%</a> </span>
+</div>
+<div class="my-container">
+    <!--// This is the background loader //-->
+    <div class="spinningSquares">
+        <div data-ng-repeat="num in [1, 2, 3, 4, 5, 6, 7, 8]" class="spinningSquaresG spinningSquares_{{num}}"></div>
+    </div>
+    <div class="listA">
+        <!--// this is the datagrid //-->
+        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="iosScroll, scrollHistory">
+            <script type="template/html" data-template-name="group" data-template-item="item">
+                <div class="group {{fake}}">
+                    <div class="col col1">{{item.id}}</div>
+                    <div class="col col2">{{$id}}</div>
+                    <div class="col col4">{{counter}}</div>
+                    <div class="col col3">height 20px</div>
+                    <div class="col col5"></div>
+                </div>
+            </script>
+            <script type="template/html" data-template-name="default" data-template-item="item">
+                <div class="row {{fake}}">
+                    <div class="col col1">{{item.id}}</div>
+                    <div class="col col2">{{$id}}</div>
+                    <div class="col col4">{{counter}}</div>
+                    <div class="col col3">height 40px</div>
+                    <div class="col col5"><input type="text"></div>
+                </div>
+            </script>
+            <script type="template/html" data-template-name="sub" data-template-item="item">
+                <div class="sub {{fake}}">
+                    <div class="col col1">{{item.id}}</div>
+                    <div class="col col2">{{$id}}</div>
+                    <div class="col col4">{{counter}}</div>
+                    <div class="col col3">height 30px</div>
+                    <div class="col col5"><input type="text"></div>
+                </div>
+            </script>
+        </div>
+    </div>
+</div>

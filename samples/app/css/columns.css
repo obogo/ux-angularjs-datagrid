@@ -2,6 +2,7 @@
     display: table;
     table-layout: fixed;
     width: 100%;
+    border-collapse: collapse; /** THIS IS VERY IMPORTANT OR CHUNKS WITH BORDERS WILL OVERLAP EACH OTHER **/
 }
 
 .col {

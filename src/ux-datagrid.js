@@ -221,7 +221,6 @@ function Datagrid(scope, element, attr, $compile) {
         var child;
         // if the scope is not created yet. just skip.
         if (s && !isActive(s)) { // do not deactivate one that is already deactivated.
-//            s.$broadcast(events.DEACTIVATED); // can use to turn off jquery listeners.
             s.$$$watchers = s.$$watchers;
             s.$$watchers = [];
             // recursively go through children and deactivate them.
@@ -254,7 +253,6 @@ function Datagrid(scope, element, attr, $compile) {
                     child = child.$$nextSibling;
                 }
             }
-//            s.$broadcast(events.ACTIVATED); // can use to turn on jquery listeners.
             return true;
         }
         return !!(s && !s.$$$watchers); // if it is active or not.

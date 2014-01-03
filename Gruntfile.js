@@ -64,6 +64,9 @@ module.exports = function (grunt) {
                     'build/addons/ux-<%= pkg.filename %>-infiniteScroll.js': [
                         'src/addons/infiniteScroll.js'
                     ],
+                    'build/addons/ux-<%= pkg.filename %>-scrollHistory.js': [
+                        'src/addons/scrollHistory.js'
+                    ],
                     'build/addons/ux-<%= pkg.filename %>-sortModel.js': [
                         'src/addons/sortModel.js'
                     ],

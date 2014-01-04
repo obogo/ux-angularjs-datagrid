@@ -1262,7 +1262,7 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
         if (grouped) {
             normalizedData = normalize(data, grouped);
         } else {
-            normalizedData = data.slice(0);
+            normalizedData = data ? data.slice(0) : [];
         }
         return normalizedData;
     };
@@ -1308,13 +1308,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         setup = true;
     }
     function addTouchEvents() {
-        exp.getContent().on("touchstart", result.onTouchStart);
-        exp.getContent().on("touchend", result.onTouchEnd);
+        var content = exp.getContent();
+        content.bind("touchstart", result.onTouchStart);
+        content.bind("touchend", result.onTouchEnd);
     }
     result.removeTouchEvents = function removeTouchEvents() {
         if (setup) {
-            exp.getContent().off("touchstart", result.onTouchStart);
-            exp.getContent().off("touchend", result.onTouchEnd);
+            exp.getContent().unbind("touchstart", result.onTouchStart);
+            exp.getContent().unbind("touchend", result.onTouchEnd);
         }
     };
     result.onTouchStart = function onTouchStart(event) {

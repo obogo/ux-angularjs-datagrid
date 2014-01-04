@@ -1,7 +1,8 @@
-ux.datagrid.events.VIRTUAL_SCROLL_TOP = 'virtualScroll:top';
-ux.datagrid.events.VIRTUAL_SCROLL_BOTTOM = 'virtualScroll:bottom';
+exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START = 'virtualScroll:beforeScrollStart';
+exports.datagrid.events.VIRTUAL_SCROLL_TOP = 'virtualScroll:top';
+exports.datagrid.events.VIRTUAL_SCROLL_BOTTOM = 'virtualScroll:bottom';
 // For simulating the scroll in IOS that doesn't have a smooth scroll natively.
-ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callback) {
+exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callback) {
     var friction = 0.95, stopThreshold = 0.05, result = {}, _x = 0, _y = 0, max, top = 0, bottom = 0,
         enabled = true,
         touchStart = 'touchstart', touchEnd = 'touchend', touchMove = 'touchmove', touchCancel = 'touchCancel',
@@ -16,11 +17,10 @@ ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callbac
     result.scope = scope;
     result.element = element;
     result.content = element.children();
-    result.values = values;
 
     function setup() {
         element.css({overflow: 'hidden'});
-        result.content.on(touchStart, onTouchStart);
+        result.content.bind(touchStart, onTouchStart);
     }
 
     function clearIntv() {
@@ -39,6 +39,7 @@ ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callbac
             return;
         }
         clearIntv();
+        result.dispatch(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START);
         if (e.touches[0] && e.touches[0].target && e.touches[0].target.tagName.match(/input|textarea|select/i)) {
             return;
         }
@@ -121,14 +122,14 @@ ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callbac
         var deltaX = _x + x, deltaY = _y - y;
         if (values.scroll + deltaY <= 0) {
             if (values.scroll) {
-                result.dispatch(ux.datagrid.events.VIRTUAL_SCROLL_TOP, result, deltaY);
+                result.dispatch(exports.datagrid.events.VIRTUAL_SCROLL_TOP, result, deltaY);
             }
             values.speed = -values.scroll;
             values.absSpeed = Math.abs(values.speed);
             values.scroll = deltaY = 0;
         } else if (values.scroll + deltaY >= bottom) {
             if (values.scroll !== bottom) {
-                result.dispatch(ux.datagrid.events.VIRTUAL_SCROLL_BOTTOM, result, deltaY);
+                result.dispatch(exports.datagrid.events.VIRTUAL_SCROLL_BOTTOM, result, deltaY);
             }
             values.scroll = bottom;
             values.speed = 0;
@@ -196,7 +197,7 @@ ux.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callbac
 
     result.destroy = function () {
         removeTouchEnd();
-        element.off(touchStart, onTouchStart);
+        element.unbind(touchStart, onTouchStart);
         values = null;
     };
 

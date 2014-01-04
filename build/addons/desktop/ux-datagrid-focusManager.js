@@ -176,14 +176,14 @@ angular.module("ux").factory("gridFocusManager", function() {
             var focusable = getFocusableElements(rowElm);
             if (focusable.length) {
                 focusable = angular.element(focusable);
-                focusable.on("keydown", onKeyDown);
+                focusable.bind("keydown", onKeyDown);
             }
         }
         function removeListenersToRow(rowElm) {
             var focusable = getFocusableElements(rowElm);
             if (focusable.length) {
                 focusable = angular.element(focusable);
-                focusable.off("keydown", onKeyDown);
+                focusable.unbind("keydown", onKeyDown);
             }
         }
         function onKeyDown(event) {

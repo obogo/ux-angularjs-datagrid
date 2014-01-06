@@ -149,7 +149,7 @@ app.config(function ($routeProvider) {
             templateUrl: "partials/addons/scrollHistory.html",
             controller: function ($scope) {
                 $scope.name = "Addons >> Scroll History Model";
-                $scope.items = createGroupedList();
+                $scope.items = createSimpleList();
             }
         })
         .when('/addons/sortModel', {

@@ -4,6 +4,7 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
     var originalData, normalizedData;
 
     function normalize(data, grouped, normalized) {
+        data = data || [];
         var i = 0, len = data.length;
         normalized = normalized || [];
         while (i < len) {

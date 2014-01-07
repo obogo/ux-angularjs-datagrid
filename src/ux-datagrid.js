@@ -45,7 +45,11 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function createContent() {
-        var cnt = angular.element('<div class="content"></div>');
+        var cnt = element[0].getElementsByClassName('content')[0], classes = 'content';
+        if (cnt) { // if there is an old one. Pull the classes from it.
+            classes = cnt.className || 'content';
+        }
+        cnt = angular.element('<div class="' + classes + '"></div>');
         element.append(cnt);
         return cnt;
     }
@@ -428,7 +432,8 @@ function Datagrid(scope, element, attr, $compile) {
         dispatch(exports.datagrid.events.BEFORE_DATA_CHANGE);
         values.dirty = true;
         flow.log("dataChanged");
-        exp.data = exp.setData(scope.$eval(attr.uxDatagrid || attr.list), scope.$eval(attr.grouped)) || [];
+        exp.grouped = scope.$eval(attr.grouped);
+        exp.data = exp.setData(scope.$eval(attr.uxDatagrid || attr.list), exp.grouped) || [];
         dispatch(exports.datagrid.events.AFTER_DATA_CHANGE);
         flow.add(reset);
     }

@@ -7,21 +7,31 @@ angular.module('ux').directive('uxDoubleScroll', function () {
 
             var el = element[0], lastValue = 0,
                 selector = scope.$eval(attr.uxDoubleScroll),
-                target = element[0].querySelector(selector),
+                target,
                 vScroll, contentHeight = 0, elHeight = 0,
                 scrollModel = scope.datagrid && scope.datagrid.scrollModel || {};
 
+            element[0].style.overflow = 'auto';
+
 //            element.css({webkitOverflowScrolling: 'touch'});
+            updateTarget();
+
+            function updateTarget() {
+                if (!target) {
+                    target = element[0].querySelector(selector);
+                }
+            }
 
             function onScroll(event) {
+                updateTarget();
                 if (target) {
-                    if (el.scrollTop + el.offsetHeight <= el.scrollHeight) {
+                    if (el.scrollTop + el.offsetHeight < el.scrollHeight) {
                         target.style.overflow = 'hidden';
                     } else {
                         target.style.overflow = 'auto';
                     }
                 } else {
-                    throw new Error("double scroll requires a selector.");
+                    throw new Error(selector ? "selector \"" + selector + "\" did not select any objects" : "double scroll requires a selector.");
                 }
             }
 
@@ -60,7 +70,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                 }
             }
 
-            if (ux.datagrid.isIOS) {
+            if (exports.datagrid.isIOS) {
                 vScroll = ux.datagrid.VirtualScroll(scope, element, {}, onIOScroll);
                 vScroll.setup();
                 onSizeChange();
@@ -74,14 +84,23 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                 scope.$on(exports.datagrid.events.VIRTUAL_SCROLL_BOTTOM, onDoubleScrollBottom);
             } else {
                 element[0].addEventListener('scroll', onScroll, true);
-                onSizeChange();
-                onScroll(null);
+                if (target) {// if this exists the ready event should have already been fired.
+                    onSizeChange();
+                    onScroll(null);
+                } else {
+                    var unwatchRender = scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, function () {
+                        unwatchRender();
+                        updateTarget();
+                        onSizeChange();
+                        onScroll(null);
+                    });
+                }
             }
 
             scope.$on(exports.datagrid.events.RESIZE, onSizeChange);
 
             scope.$on('$destroy', function () {
-                if (isIOS) {
+                if (exports.datagrid.isIOS) {
                     vScroll.destroy();
                     vScroll = null;
                 } else {

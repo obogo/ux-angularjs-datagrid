@@ -61,6 +61,9 @@ module.exports = function (grunt) {
                     'build/addons/ux-<%= pkg.filename %>-expandRows.js': [
                         'src/addons/expandRows.js'
                     ],
+                    'build/addons/ux-<%= pkg.filename %>-findInList.js': [
+                        'src/addons/findInList.js'
+                    ],
                     'build/addons/ux-<%= pkg.filename %>-infiniteScroll.js': [
                         'src/addons/infiniteScroll.js'
                     ],

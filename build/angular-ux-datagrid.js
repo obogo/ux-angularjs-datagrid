@@ -60,7 +60,7 @@ module.factory("addons", [ "$injector", function($injector) {
         }
     }
     return function(instance, addons) {
-        addons = addons instanceof Array ? addons : addons && addons.replace(/,/, " ").replace(/\s+/g, " ").split(" ") || [];
+        addons = addons instanceof Array ? addons : addons && addons.replace(/,/g, " ").replace(/\s+/g, " ").split(" ") || [];
         if (instance.addons) {
             addons = instance.addons = instance.addons.concat(addons);
         }
@@ -513,7 +513,11 @@ function Datagrid(scope, element, attr, $compile) {
         flow.unique(updateRowWatchers);
     }
     function createContent() {
-        var cnt = angular.element('<div class="content"></div>');
+        var cnt = element[0].getElementsByClassName("content")[0], classes = "content";
+        if (cnt) {
+            classes = cnt.className || "content";
+        }
+        cnt = angular.element('<div class="' + classes + '"></div>');
         element.append(cnt);
         return cnt;
     }
@@ -825,7 +829,8 @@ function Datagrid(scope, element, attr, $compile) {
         dispatch(exports.datagrid.events.BEFORE_DATA_CHANGE);
         values.dirty = true;
         flow.log("dataChanged");
-        exp.data = exp.setData(scope.$eval(attr.uxDatagrid || attr.list), scope.$eval(attr.grouped)) || [];
+        exp.grouped = scope.$eval(attr.grouped);
+        exp.data = exp.setData(scope.$eval(attr.uxDatagrid || attr.list), exp.grouped) || [];
         dispatch(exports.datagrid.events.AFTER_DATA_CHANGE);
         flow.add(reset);
     }
@@ -1246,6 +1251,7 @@ exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.creepRenderModel);
 exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
     var originalData, normalizedData;
     function normalize(data, grouped, normalized) {
+        data = data || [];
         var i = 0, len = data.length;
         normalized = normalized || [];
         while (i < len) {

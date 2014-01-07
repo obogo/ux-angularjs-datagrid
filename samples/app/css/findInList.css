@@ -1,0 +1,42 @@
+.findInList {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background-color: #333333;
+    border: 1px solid #000000;
+    -webkit-border-bottom-left-radius: 6px;
+    -moz-border-bottom-left-radius: 6px;
+    -ms-border-bottom-left-radius: 6px;
+    -o-border-bottom-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    -webkit-border-bottom-right-radius: 6px;
+    -moz-border-bottom-right-radius: 6px;
+    -ms-border-bottom-right-radius: 6px;
+    -o-border-bottom-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    line-height: 30px;
+    box-shadow: 4px 4px 2px #666666;
+}
+
+.findInList > * {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.findInListInput {
+    border: 1px solid #000000;
+    margin: 0px;
+    width: 40px !important;
+}
+
+.findInListButton {
+    background-color: #FFFFFF;
+    border: 1px solid #000000;
+    width: 25px;
+    height: 24px;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    -ms-border-radius: 6px;
+    -o-border-radius: 6px;
+    border-radius: 6px;
+}

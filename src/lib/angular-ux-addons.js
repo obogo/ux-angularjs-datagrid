@@ -16,7 +16,7 @@ module.factory('addons', ['$injector', function ($injector) {
     }
 
     return function (instance, addons) {
-        addons = addons instanceof Array ? addons : (addons && addons.replace(/,/, ' ').replace(/\s+/g, ' ').split(' ') || []);
+        addons = addons instanceof Array ? addons : (addons && addons.replace(/,/g, ' ').replace(/\s+/g, ' ').split(' ') || []);
         if (instance.addons) {
             addons = instance.addons = instance.addons.concat(addons);
         }

@@ -145,6 +145,13 @@ app.config(function ($routeProvider) {
                 $scope.items = createGroupedList();
             }
         })
+        .when('/addons/findInList', {
+            templateUrl: "partials/addons/findInList.html",
+            controller: function ($scope) {
+                $scope.name = "Addons >> Find In List";
+                $scope.items = createGroupedList();
+            }
+        })
         .when('/addons/scrollHistory', {
             templateUrl: "partials/addons/scrollHistory.html",
             controller: function ($scope) {

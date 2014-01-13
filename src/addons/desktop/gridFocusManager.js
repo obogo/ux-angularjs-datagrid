@@ -226,12 +226,16 @@ angular.module('ux').factory('gridFocusManager', function () {
             if (!exp.element[0].contains(focusedEl[0])) {
                 return; // the focusedEl is not inside the datagrid.
             }
-            var rowEl = getRowElmFromChildElm(focusedEl), nextIndex = exp.getRowIndexFromElement(focusedEl) + dir, selector;
+            var resultEl,
+                rowEl = getRowElmFromChildElm(focusedEl),
+                currentIndex = exp.getRowIndexFromElement(focusedEl),
+                nextIndex = currentIndex + dir, selector;
             if (nextIndex < 0 || nextIndex >= exp.rowsLength) {
                 return focusedEl;
             }
             selector = ux.selector.getSelector(focusedEl[0], rowEl[0], filterClasses);
-            return findNextRowWithSelection(nextIndex, dir, selector);
+            resultEl = findNextRowWithSelection(nextIndex, dir, selector);
+            return resultEl && resultEl.length ? resultEl : focusedEl;// if the result cannot be found. return the current one.
         }
 
         /**
@@ -245,6 +249,8 @@ angular.module('ux').factory('gridFocusManager', function () {
             if (focusEl[0]) {
                 focusEl[0].focus();
             }
+            // we now need to scroll the row into view if it is not.
+            exp.scrollModel.scrollIntoView(exp.getRowIndexFromElement(focusEl), true);
         }
 
         /**

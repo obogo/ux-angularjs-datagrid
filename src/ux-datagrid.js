@@ -12,7 +12,6 @@ function Datagrid(scope, element, attr, $compile) {
     // compiling
         active = [],
         lastVisibleScrollStart = 0,
-        rowHeights = {},
         rowOffsets = {},
         viewHeight = 0,
     // convenience
@@ -75,6 +74,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function start() {
         exp.dispatch(exports.datagrid.events.INIT);
+        content = createContent();
         flow.add(exp.templateModel.createTemplates);
         // if the templates have different heights. Then they are dynamic.
         flow.add(function updateDynamicRowHeights() {
@@ -134,6 +134,15 @@ function Datagrid(scope, element, attr, $compile) {
         return angular.element(exp.chunkModel.getRow(index));
     }
 
+    function getRowIndexFromElement(el) {
+        var s = el.scope ? el.scope() : angular.element(el).scope();
+        // make sure we get the right scope to grab the index from. We need to get it from a row.
+        while (s && s.$parent !== exp.scope) {
+            s = s.$parent;
+        }
+        return s.$index;
+    }
+
 //TODO: need to reset row heights when a row is activated for the first time.... possibly every time for expanding rows.
 // TODO: may want to update heights through a hierarchy for expanding rows.
     function getRowOffset(index) {
@@ -165,7 +174,6 @@ function Datagrid(scope, element, attr, $compile) {
         var len = list.length;
         flow.add(exp.chunkModel.chunkDom, [list, options.chunkSize, '<div class="' + options.chunkClass + '">', '</div>', content], 0);
         exp.rowsLength = len;
-        rowHeights = {};
         flow.log("created %s dom elements", len);
     }
 
@@ -443,7 +451,6 @@ function Datagrid(scope, element, attr, $compile) {
         destroyScopes();
         // now destroy all of the dom.
         rowOffsets = {};
-        rowHeights = {};
         active.length = 0;
         scopes.length = 0;
         if (content) {
@@ -472,12 +479,15 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function onRowTemplateChange(evt, item, oldTemplate, newTemplate) {
-        var index = exp.getNormalizedIndex(item), el = getRowElm(index), s = el.scope();
-        s.$destroy();
-        scopes[index] = null;
-        el.replaceWith(exp.templateModel.getTemplate(item).template);
-        scopes[index] = compileRow(index);
-        updateHeights(index);
+        var index = exp.getNormalizedIndex(item),
+            el = getRowElm(index), s = el.hasClass('uncompiled') ? compileRow(index) : el.scope();
+        if (s !== scope) {
+            s.$destroy();
+            scopes[index] = null;
+            el.replaceWith(exp.templateModel.getTemplate(item).template);
+            scopes[index] = compileRow(index);
+            updateHeights(index);
+        }
     }
 
     function updateHeights(rowIndex) {
@@ -570,6 +580,8 @@ function Datagrid(scope, element, attr, $compile) {
     exp.getViewportHeight = getViewportHeight;
     exp.getContentHeight = getContentHeight;
     exp.getContent = getContent;
+    exp.safeDigest = safeDigest;
+    exp.getRowIndexFromElement = getRowIndexFromElement;
 
     // initialize core.
     exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});

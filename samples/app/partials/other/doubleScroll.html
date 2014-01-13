@@ -4,7 +4,7 @@
     <span>SCROLL TO:</span>
     <span data-ng-repeat="p in percents"><a href="" data-ng-click="scrollToPercent(p/100)">{{p}}%</a> </span>
 </div>
-<div class="my-container" data-ux-double-scroll="'.datagrid'">
+<div class="my-container" data-ux-double-scroll="'.datagrid'" data-target-offset="20">
     <div class="doubleScrollContent" style="position:absolute; width: 100%;">
         <div class="header">
             A header to scroll out of view. Double scroll will scroll a header content out of view and then

@@ -16,24 +16,7 @@ exports.visibility = function() {
         if ("0" === _getStyle(el, "opacity") || "none" === _getStyle(el, "display") || "hidden" === _getStyle(el, "visibility")) {
             return false;
         }
-        if ("undefined" === typeof t || "undefined" === typeof r || "undefined" === typeof b || "undefined" === typeof l || "undefined" === typeof w || "undefined" === typeof h) {
-            t = el.offsetTop;
-            l = el.offsetLeft;
-            b = t + el.offsetHeight;
-            r = l + el.offsetWidth;
-            w = el.offsetWidth;
-            h = el.offsetHeight;
-        }
         if (p) {
-            if ("hidden" === _getStyle(p, "overflow") || "scroll" === _getStyle(p, "overflow")) {
-                if (l + VISIBLE_PADDING > p.offsetLeft + p.offsetWidth + p.scrollLeft || l + w - VISIBLE_PADDING < p.scrollLeft || t + VISIBLE_PADDING > p.offsetTop + p.offsetHeight + p.scrollTop || t + h - VISIBLE_PADDING < p.scrollTop) {
-                    return false;
-                }
-            }
-            if (el.offsetParent === p) {
-                l += p.offsetLeft;
-                t += p.offsetTop;
-            }
             return _isVisible(p, t, r, b, l, w, h);
         }
         return true;
@@ -65,7 +48,7 @@ exports.selector = function() {
     var $ = $ || angular.element;
     function getSelector(element, maxParent, ignoreClass) {
         var selector = getSelectorData(element, maxParent, ignoreClass);
-        return selectorToString(selector);
+        return selectorToString(selector) + ":visible";
     }
     function getSelectorData(element, maxParent, ignoreClass) {
         if (!element) {
@@ -120,9 +103,19 @@ exports.selector = function() {
     };
 }();
 
+exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME = "ux-datagrid:focusToPrevElementOfSame";
+
+exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME = "ux-datagrid:focusToNextElementOfSame";
+
 angular.module("ux").factory("gridFocusManager", function() {
     return function(exp) {
         var result = {}, unwatchers = [];
+        function wrap(el) {
+            if (el.length === undefined) {
+                el = angular.element(el);
+            }
+            return el;
+        }
         function addListeners() {
             applyToListeners(addListenersToRow);
         }
@@ -162,15 +155,27 @@ angular.module("ux").factory("gridFocusManager", function() {
         function filterSelection(filterStr, elements) {
             if (filterStr.substr(0, 3) === "eq(") {
                 return filterEq(filterStr, elements);
+            } else if (filterStr.substr(0, 7) === "visible") {
+                return ux.filter(elements, filterVisible);
             }
-            return params;
+            return elements;
         }
         function filterEq(filterStr, elements) {
             var index = filterStr.match(/\d+/)[0];
             return elements[index] ? [ elements[index] ] : [];
         }
-        function filterNg(cls) {
-            return !!(cls && cls.substr(0, 3) !== "ng-");
+        function isNgClass(cls) {
+            return !!(cls && cls.substr(0, 3) === "ng-");
+        }
+        function filterClasses(cls) {
+            var isToBeFiltered = cls ? false : true;
+            if (!isToBeFiltered && exp.options.gridFocusManager && exp.options.gridFocusManager.filterClasses) {
+                isToBeFiltered = exp.options.gridFocusManager.filterClasses.indexOf(cls) !== -1;
+            }
+            if (!isToBeFiltered) {
+                isToBeFiltered = isNgClass(cls);
+            }
+            return !isToBeFiltered;
         }
         function addListenersToRow(rowElm) {
             var focusable = getFocusableElements(rowElm);
@@ -195,20 +200,42 @@ angular.module("ux").factory("gridFocusManager", function() {
             }
         }
         function focusToPrevRowElement(focusedEl) {
-            focusToRowElement(focusedEl, -1);
+            var focusEl = getPrevRowFocusElement(focusedEl, -1);
+            performFocus(focusEl);
         }
         function focusToNextRowElement(focusedEl) {
-            focusToRowElement(focusedEl, 1);
+            var focusEl = getNextRowFocusElement(focusedEl);
+            performFocus(focusEl);
+        }
+        function hasPrevRowFocusElement(focusedEl) {
+            var el = getPrevRowFocusElement(focusedEl);
+            return !!(el && el.length);
+        }
+        function hasNextRowFocusElement(focusedEl) {
+            var el = getNextRowFocusElement(focusedEl);
+            return !!(el && el.length);
+        }
+        function getPrevRowFocusElement(focusedEl) {
+            return focusToRowElement(focusedEl, -1);
+        }
+        function getNextRowFocusElement(focusedEl) {
+            return focusToRowElement(focusedEl, 1);
         }
         function focusToRowElement(focusedEl, dir) {
-            var rowEl = getRowElmFromChildElm(focusedEl), nextIndex = rowEl.scope().$index + dir, selector, focusEl;
-            if (nextIndex < 0 || nextIndex >= exp.rowsLength) {
+            focusedEl = wrap(focusedEl);
+            if (!exp.element[0].contains(focusedEl[0])) {
                 return;
             }
-            selector = ux.selector.getSelector(focusedEl[0], rowEl[0], filterNg);
-            focusEl = findNextRowWithSelection(nextIndex, dir, selector);
-            if (focusEl.select) {
-                focusEl.select();
+            var rowEl = getRowElmFromChildElm(focusedEl), nextIndex = exp.getRowIndexFromElement(focusedEl) + dir, selector;
+            if (nextIndex < 0 || nextIndex >= exp.rowsLength) {
+                return focusedEl;
+            }
+            selector = ux.selector.getSelector(focusedEl[0], rowEl[0], filterClasses);
+            return findNextRowWithSelection(nextIndex, dir, selector);
+        }
+        function performFocus(focusEl) {
+            if (focusEl[0].select) {
+                focusEl[0].select();
             }
             if (focusEl[0]) {
                 focusEl[0].focus();
@@ -227,6 +254,10 @@ angular.module("ux").factory("gridFocusManager", function() {
             }
             return focusEl;
         }
+        result.hasPrevRowFocusElement = hasPrevRowFocusElement;
+        result.hasNextRowFocusElement = hasNextRowFocusElement;
+        result.focusToPrevRowElement = focusToPrevRowElement;
+        result.focusToNextRowElement = focusToNextRowElement;
         result.query = query;
         result.destroy = function destroy() {
             while (unwatchers.length) {
@@ -235,8 +266,14 @@ angular.module("ux").factory("gridFocusManager", function() {
             unwatchers = null;
             result = null;
         };
-        unwatchers.push(exp.scope.$on(ux.datagrid.events.BEFORE_UPDATE_WATCHERS, removeListeners));
-        unwatchers.push(exp.scope.$on(ux.datagrid.events.AFTER_UPDATE_WATCHERS, addListeners));
+        unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, removeListeners));
+        unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, addListeners));
+        unwatchers.push(exp.scope.$on(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME, function() {
+            focusToPrevRowElement(document.activeElement);
+        }));
+        unwatchers.push(exp.scope.$on(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME, function() {
+            focusToNextRowElement(document.activeElement);
+        }));
         exp.gridFocusManager = result;
         return exp;
     };

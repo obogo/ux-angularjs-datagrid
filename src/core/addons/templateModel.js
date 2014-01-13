@@ -39,7 +39,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             template = angular.element(template)[0];
             template.className += ' ' + exp.options.uncompiledClass + ' {{$status}}';
             template.setAttribute('template', name);
-            document.body.appendChild(wrapper);
+            exp.getContent()[0].appendChild(wrapper);
             wrapper.appendChild(template);
             template = trim(wrapper.innerHTML);
             wrapper.childNodes[0].style.lineHeight = '0px';// make so lineHeight doesn't wrap and affect template size.
@@ -51,7 +51,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             };
             templates[templateData.name] = templateData;
             templates.push(templateData);
-            document.body.removeChild(wrapper);
+            exp.getContent()[0].removeChild(wrapper);
             totalHeight = 0;// reset cached value.
             return templateData;
         }

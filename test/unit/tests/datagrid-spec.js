@@ -42,9 +42,14 @@ describe('datagrid', function () {
                     scope.items.push({id: i.toString()});
                 }
                 element = angular.element(template);
+                document.body.appendChild(element[0]);
                 $compile(element)(scope);
                 $rootScope.$digest();
             });
+        });
+
+        afterEach(function () {
+            element.remove();
         });
 
         it("should add a content div", function() {
@@ -125,9 +130,14 @@ describe('datagrid', function () {
                     scope.items.push(item);
                 }
                 element = angular.element(template);
+                document.body.appendChild(element[0]);
                 $compile(element)(scope);
                 $rootScope.$digest();
             });
+        });
+
+        afterEach(function () {
+            element.remove();
         });
 
         it("should add a content div", function() {

@@ -1,3 +1,6 @@
+/**
+ * ux.datagrid is a highly performant scrolling list for desktop and mobile devices.
+ */
 var module;
 try {
     module = angular.module('ux', ['ng']);

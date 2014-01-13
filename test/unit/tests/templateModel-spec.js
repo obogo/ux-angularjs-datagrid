@@ -1,5 +1,5 @@
 describe("templateModel", function () {
-    var model,
+    var model, element,
         html1 = '<div data-ux-datagrid="items" class="datagrid">' +
                 '<script type="template/html" data-template-name="default" data-template-item="item">' +
                     '<div class="row {{fake}}" style="height:10px;">' +
@@ -34,15 +34,28 @@ describe("templateModel", function () {
             '</div>';
 
     function setup(html) {
-        var ext = {
+        var content = document.createElement('div'), ext;
+        content.className = 'content';
+        content = angular.element(content);
+        element = angular.element(html);
+        ext = {
             options: {
                 uncompiledClass: 'uncompiled'
             },
-            element: angular.element(html)
+            element: element,
+            getContent: function () {
+                return content;
+            }
         };
+        ext.element.append(content);
+        document.body.appendChild(element[0]);
         model = ux.datagrid.coreAddons.templateModel(ext);
         model.createTemplates();
     }
+
+    afterEach(function () {
+        element.remove();
+    });
 
     it("should create a template from the html string", function() {
         setup(html1);

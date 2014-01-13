@@ -41,6 +41,7 @@ describe("gridFocusManager", function () {
 
     afterEach(function () {
         element.remove();
+        document.body.focus();
     });
 
     it("should handle enter key on keydown for an input", function() {
@@ -92,10 +93,9 @@ describe("gridFocusManager", function () {
         var q = grid.gridFocusManager.query, input, rows;
         grid.scrollModel.scrollToBottom(true);
         input = q(element, 'input')[295]; // remember row 3 doesn't have any inputs.
-        rows = q(element, '.mock-row');
         input.focus();
         fireKey(input, 13);
-        expect(document.activeElement).toBe(q(rows[99], 'input')[1]);
+        expect(document.activeElement).toBe(input);
     });
 
     it("should not loose focus when in the first row and shift enter key is pressed", function() {

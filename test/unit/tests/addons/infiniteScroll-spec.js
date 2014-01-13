@@ -31,20 +31,25 @@ describe("infiniteScrollModel", function () {
                 }
             });
             element = angular.element(tpl);
+            document.body.appendChild(element[0]);
             $compile(element)(scope);
             $rootScope.$digest();
         });
     }
 
+    afterEach(function () {
+        element.remove();
+    });
+
     it("should not fire scrollToBottom until it scrolls to it.", function() {
         setup(template);
-        scope.datagrid.scrollModel.scrollTo(200, true);
+        scope.datagrid.scrollModel.scrollTo(100, true);
         expect(scope.scrollToBottomFired).toBeUndefined();
     });
 
     it("should fire scrollToBottom event when it reaches the last row.", function() {
         setup(template);
-        scope.datagrid.scrollModel.scrollTo(210, true);
+        scope.datagrid.scrollModel.scrollTo(110, true);
         expect(scope.scrollToBottomFired).toBe(true);
     });
 
@@ -68,8 +73,8 @@ describe("infiniteScrollModel", function () {
                         '<div class="mock-row" style="height:10px;">{{item.id}}</div>' +
                     '</script>' +
                 '</div>');
-        scope.datagrid.scrollModel.scrollTo(210, true);// force first call
-        scope.datagrid.scrollModel.scrollTo(410, true);// force second call which should not fire.
+        scope.datagrid.scrollModel.scrollTo(110, true);// force first call
+        scope.datagrid.scrollModel.scrollTo(210, true);// force second call which should not fire.
         expect(scope.items.length).toBe(scope.datagrid.data.length);
     });
 });

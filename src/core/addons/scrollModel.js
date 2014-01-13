@@ -9,6 +9,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * Listen for scrollingEvents.
      */
     function setupScrolling() {
+        if (!exp.element.css('overflow')) {
+            exp.element.css({overflow: 'auto'});
+        }
         exp.element[0].addEventListener('scroll', result.onUpdateScroll);
         addTouchEvents();
         setup = true;
@@ -112,6 +115,26 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
             return result.scrollToIndex(index, immediately);
         }
         return exp.values.scroll;
+    };
+
+    /**
+     * If the item is above or below the viewable area, scroll till it is in view.
+     * @param itemOrIndex
+     * @param immediately
+     */
+    result.scrollIntoView = function scrollIntoView(itemOrIndex, immediately) {
+        var index = typeof itemOrIndex === 'number' ? itemOrIndex : exp.getNormalizedIndex(itemOrIndex),
+            offset = exp.getRowOffset(index), rowHeight, viewHeight;
+        if (offset < exp.values.scroll) { // it is above the view.
+            result.scrollTo(offset, immediately);
+            return;
+        }
+        viewHeight = exp.getViewportHeight();
+        rowHeight = exp.templateModel.getTemplateHeight(exp.getData()[index]);
+        if (offset >= exp.values.scroll + viewHeight - rowHeight) { // it is below the view.
+            result.scrollTo(offset - viewHeight + rowHeight);
+        }
+        // otherwise it is in view so do nothing.
     };
 
     /**

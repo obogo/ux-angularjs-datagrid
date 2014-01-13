@@ -6,9 +6,10 @@ angular.module('ux').directive('uxDoubleScroll', function () {
         link: function (scope, element, attr) {
 
             var el = element[0], lastValue = 0,
+                result = {},
                 selector = scope.$eval(attr.uxDoubleScroll),
                 target,
-                vScroll, contentHeight = 0, elHeight = 0,
+                vScroll, contentHeight = 0, elHeight = 0, targetOffset = scope.$eval(attr.targetOffset) || 0;
                 scrollModel = scope.datagrid && scope.datagrid.scrollModel || {};
 
             element[0].style.overflow = 'auto';
@@ -45,7 +46,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
             function onSizeChange() {
                 var content = element.children();
                 elHeight = element[0].offsetHeight;
-                target.style.height = elHeight + 'px';
+                target.style.height = elHeight - targetOffset + 'px';
                 content.children()[1].style.height = elHeight + 'px';
                 contentHeight = content.children()[0].offsetHeight + elHeight;
                 content[0].style.height = contentHeight + 'px';
@@ -96,6 +97,23 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                     });
                 }
             }
+
+            result.resize = function resize(height) {
+                if (height !== undefined) {
+                    element[0].style.height = height + "px";
+                }
+                onSizeChange();
+            };
+
+            result.scrollToBottom = function () {
+                if (vScroll) {
+                    vScroll.scrollToBottom();
+                } else {
+                    element[0].scrollTop = element.children().children()[0].offsetHeight;
+                }
+            };
+
+            scope.doubleScroll = result;
 
             scope.$on(exports.datagrid.events.RESIZE, onSizeChange);
 

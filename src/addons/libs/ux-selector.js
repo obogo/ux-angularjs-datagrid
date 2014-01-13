@@ -11,7 +11,7 @@ exports.selector = (function () {
      */
     function getSelector(element, maxParent, ignoreClass) {
         var selector = getSelectorData(element, maxParent, ignoreClass);
-        return selectorToString(selector);
+        return selectorToString(selector) + ':visible';
     }
 
 

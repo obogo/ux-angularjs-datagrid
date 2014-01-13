@@ -214,11 +214,15 @@ exports.css = function CSS() {
 }();
 
 function each(list, method, data) {
-    var i = 0, len, result;
+    var i = 0, len, result, extraArgs;
+    if (arguments.length > 2) {
+        extraArgs = exports.util.array.toArray(arguments);
+        extraArgs.splice(0, 2);
+    }
     if (list && list.length) {
         len = list.length;
         while (i < len) {
-            result = method(list[i], i, list, data);
+            result = method.apply(null, [ list[i], i, list ].concat(extraArgs));
             if (result !== undefined) {
                 return result;
             }
@@ -227,7 +231,7 @@ function each(list, method, data) {
     } else {
         for (i in list) {
             if (list.hasOwnProperty(i)) {
-                result = method(list[i], i, list, data);
+                result = method.apply(null, [ list[i], i, list ].concat(extraArgs));
                 if (result !== undefined) {
                     return result;
                 }
@@ -494,7 +498,7 @@ function Flow(exp) {
 exports.datagrid.Flow = Flow;
 
 function Datagrid(scope, element, attr, $compile) {
-    var flow, changeWatcherSet = false, unwatchers = [], content, oldContent, scopes = [], active = [], lastVisibleScrollStart = 0, rowHeights = {}, rowOffsets = {}, viewHeight = 0, options, states = exports.datagrid.states, events = exports.datagrid.events, state = states.BUILDING, values = {
+    var flow, changeWatcherSet = false, unwatchers = [], content, oldContent, scopes = [], active = [], lastVisibleScrollStart = 0, rowOffsets = {}, viewHeight = 0, options, states = exports.datagrid.states, events = exports.datagrid.events, state = states.BUILDING, values = {
         dirty: false,
         scroll: 0,
         speed: 0,
@@ -537,6 +541,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
     function start() {
         exp.dispatch(exports.datagrid.events.INIT);
+        content = createContent();
         flow.add(exp.templateModel.createTemplates);
         flow.add(function updateDynamicRowHeights() {
             options.dynamicRowHeights = exp.templateModel.dynamicHeights();
@@ -585,6 +590,13 @@ function Datagrid(scope, element, attr, $compile) {
     function getRowElm(index) {
         return angular.element(exp.chunkModel.getRow(index));
     }
+    function getRowIndexFromElement(el) {
+        var s = el.scope ? el.scope() : angular.element(el).scope();
+        while (s && s.$parent !== exp.scope) {
+            s = s.$parent;
+        }
+        return s.$index;
+    }
     function getRowOffset(index) {
         if (rowOffsets[index] === undefined) {
             if (options.dynamicRowHeights) {
@@ -609,7 +621,6 @@ function Datagrid(scope, element, attr, $compile) {
         var len = list.length;
         flow.add(exp.chunkModel.chunkDom, [ list, options.chunkSize, '<div class="' + options.chunkClass + '">', "</div>", content ], 0);
         exp.rowsLength = len;
-        rowHeights = {};
         flow.log("created %s dom elements", len);
     }
     function compileRow(index) {
@@ -837,7 +848,6 @@ function Datagrid(scope, element, attr, $compile) {
     function reset() {
         destroyScopes();
         rowOffsets = {};
-        rowHeights = {};
         active.length = 0;
         scopes.length = 0;
         if (content) {
@@ -868,12 +878,14 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
     function onRowTemplateChange(evt, item, oldTemplate, newTemplate) {
-        var index = exp.getNormalizedIndex(item), el = getRowElm(index), s = el.scope();
-        s.$destroy();
-        scopes[index] = null;
-        el.replaceWith(exp.templateModel.getTemplate(item).template);
-        scopes[index] = compileRow(index);
-        updateHeights(index);
+        var index = exp.getNormalizedIndex(item), el = getRowElm(index), s = el.hasClass("uncompiled") ? compileRow(index) : el.scope();
+        if (s !== scope) {
+            s.$destroy();
+            scopes[index] = null;
+            el.replaceWith(exp.templateModel.getTemplate(item).template);
+            scopes[index] = compileRow(index);
+            updateHeights(index);
+        }
     }
     function updateHeights(rowIndex) {
         flow.add(exp.chunkModel.updateAllChunkHeights, [ rowIndex ]);
@@ -952,6 +964,8 @@ function Datagrid(scope, element, attr, $compile) {
     exp.getViewportHeight = getViewportHeight;
     exp.getContentHeight = getContentHeight;
     exp.getContent = getContent;
+    exp.safeDigest = safeDigest;
+    exp.getRowIndexFromElement = getRowIndexFromElement;
     exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
     exp.flow = flow = new Flow({
         async: options.hasOwnProperty("async") ? !!options.async : true,
@@ -1309,6 +1323,11 @@ exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
 exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
     var result = {}, setup = false, unwatchSetup;
     function setupScrolling() {
+        if (!exp.element.css("overflow")) {
+            exp.element.css({
+                overflow: "auto"
+            });
+        }
         exp.element[0].addEventListener("scroll", result.onUpdateScroll);
         addTouchEvents();
         setup = true;
@@ -1378,6 +1397,18 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         }
         return exp.values.scroll;
     };
+    result.scrollIntoView = function scrollIntoView(itemOrIndex, immediately) {
+        var index = typeof itemOrIndex === "number" ? itemOrIndex : exp.getNormalizedIndex(itemOrIndex), offset = exp.getRowOffset(index), rowHeight, viewHeight;
+        if (offset < exp.values.scroll) {
+            result.scrollTo(offset, immediately);
+            return;
+        }
+        viewHeight = exp.getViewportHeight();
+        rowHeight = exp.templateModel.getTemplateHeight(exp.getData()[index]);
+        if (offset >= exp.values.scroll + viewHeight - rowHeight) {
+            result.scrollTo(offset - viewHeight + rowHeight);
+        }
+    };
     result.scrollToTop = function(immediately) {
         result.scrollTo(0, immediately);
     };
@@ -1428,7 +1459,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             template = angular.element(template)[0];
             template.className += " " + exp.options.uncompiledClass + " {{$status}}";
             template.setAttribute("template", name);
-            document.body.appendChild(wrapper);
+            exp.getContent()[0].appendChild(wrapper);
             wrapper.appendChild(template);
             template = trim(wrapper.innerHTML);
             wrapper.childNodes[0].style.lineHeight = "0px";
@@ -1440,7 +1471,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             };
             templates[templateData.name] = templateData;
             templates.push(templateData);
-            document.body.removeChild(wrapper);
+            exp.getContent()[0].removeChild(wrapper);
             totalHeight = 0;
             return templateData;
         }

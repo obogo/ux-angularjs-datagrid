@@ -1,9 +1,13 @@
 function each(list, method, data) {
-    var i = 0, len, result;
+    var i = 0, len, result, extraArgs;
+    if (arguments.length > 2) {
+        extraArgs = exports.util.array.toArray(arguments);
+        extraArgs.splice(0, 2);
+    }
     if (list && list.length) {
         len = list.length;
         while (i < len) {
-            result = method(list[i], i, list, data);
+            result = method.apply(null, [list[i], i, list].concat(extraArgs));
             if (result !== undefined) {
                 return result;
             }
@@ -12,7 +16,7 @@ function each(list, method, data) {
     } else {
         for (i in list) {
             if (list.hasOwnProperty(i)) {
-                result = method(list[i], i, list, data);
+                result = method.apply(null, [list[i], i, list].concat(extraArgs));
                 if (result !== undefined) {
                     return result;
                 }

@@ -4,10 +4,10 @@
 
 function Datagrid(scope, element, attr, $compile) {
     var flow,
+        waitCount = 0, // waiting to render. If it fails too many times. it will die.
         changeWatcherSet = false,
         unwatchers = [],
         content,// the dom element with all of the chunks.
-        oldContent,// the content being replaced.
         scopes = [],
     // compiling
         active = [],
@@ -48,8 +48,13 @@ function Datagrid(scope, element, attr, $compile) {
         if (cnt) { // if there is an old one. Pull the classes from it.
             classes = cnt.className || 'content';
         }
-        cnt = angular.element('<div class="' + classes + '"></div>');
-        element.append(cnt);
+        if (!cnt) {
+            cnt = angular.element('<div class="' + classes + '"></div>');
+            element.append(cnt);
+        }
+        if (!cnt[0]) {
+            cnt = angular.element(cnt);
+        }
         return cnt;
     }
 
@@ -75,7 +80,21 @@ function Datagrid(scope, element, attr, $compile) {
     function start() {
         exp.dispatch(exports.datagrid.events.INIT);
         content = createContent();
-        flow.add(exp.templateModel.createTemplates);
+        waitForElementReady(0);
+    }
+
+    function waitForElementReady(count) {
+        if (!exp.element[0].offsetHeight) {
+            if(count < 1) {
+                // if they are doing custom compiling. They may compile before addit it to the dom.
+                // allow a pass to happen just in case.
+                flow.add(waitForElementReady, [count + 1], 0);// retry.
+                return;
+            } else {
+                flow.warn("Datagrid: Dom Element does not have a height.");
+            }
+        }
+        flow.add(exp.templateModel.createTemplates, null, 0); // allow element to be added to dom.
         // if the templates have different heights. Then they are dynamic.
         flow.add(function updateDynamicRowHeights() {
             options.dynamicRowHeights = exp.templateModel.dynamicHeights();
@@ -88,6 +107,7 @@ function Datagrid(scope, element, attr, $compile) {
         unwatchers.push(scope.$on(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, onRowTemplateChange));
         unwatchers.push(scope.$on('$destroy', destroy));
         flow.add(setupChangeWatcher, [], 0);
+        exp.dispatch(exports.datagrid.events.LISTENERS_READY);
     }
 
     function setupChangeWatcher() {
@@ -135,12 +155,15 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function getRowIndexFromElement(el) {
-        var s = el.scope ? el.scope() : angular.element(el).scope();
-        // make sure we get the right scope to grab the index from. We need to get it from a row.
-        while (s && s.$parent !== exp.scope) {
-            s = s.$parent;
+        if (element[0].contains(el[0] || el)) {
+            var s = el.scope ? el.scope() : angular.element(el).scope();
+            // make sure we get the right scope to grab the index from. We need to get it from a row.
+            while (s && s.$parent !== exp.scope) {
+                s = s.$parent;
+            }
+            return s.$index;
         }
-        return s.$index;
+        return -1;
     }
 
 //TODO: need to reset row heights when a row is activated for the first time.... possibly every time for expanding rows.
@@ -408,32 +431,45 @@ function Datagrid(scope, element, attr, $compile) {
 
     function afterRenderAfterDataChange() {
         if (values.dirty) {
-            if (oldContent) {
-                oldContent.remove();
-                oldContent = null;
-            }
             values.dirty = false;
             dispatch(exports.datagrid.events.RENDER_AFTER_DATA_CHANGE);
         }
     }
 
-    function render() {
+    function readyToRender() {
         if (!viewHeight) {
             exp.upateViewportHeight();
+            waitCount += 1;
+            if (waitCount < 2) {
+                flow.info(exports + ".datagrid is waiting for element to have a height.");
+                flow.add(render, null, 0);// have it wait a moment for the height to change.
+            } else {
+                flow.warn("Datagrid: Unable to determine a height for the datagrid. Cannot render. Exiting.");
+            }
+            return false;
         }
-        if (state === states.BUILDING) {
-            //TODO: removeExtraRows is not compatible. It needs removed. Only buildRows will work with chunking.
-            //flow.add(removeExtraRows, [exp.data]);// if our data updates we need to remove extra rows.
-            flow.add(buildRows, [exp.data], 0);
-            flow.add(updateHeightValues);
-            flow.add(ready);
-        } else if (state === states.READY) {
-            flow.add(beforeRenderAfterDataChange);
-            flow.add(updateRowWatchers);
-            flow.add(afterRenderAfterDataChange);
-        } else {
-            throw new Error("RENDER STATE INVALID");
+        return true;
+    }
+
+    function render() {
+        exp.dispatch(exports.datagrid.events.BEFORE_RENDER);
+        if (readyToRender()) {
+            waitCount = 0;
+            if (state === states.BUILDING) {
+                //TODO: removeExtraRows is not compatible. It needs removed. Only buildRows will work with chunking.
+                //flow.add(removeExtraRows, [exp.data]);// if our data updates we need to remove extra rows.
+                flow.add(buildRows, [exp.data], 0);
+                flow.add(updateHeightValues);
+                flow.add(ready);
+            } else if (state === states.READY) {
+                flow.add(beforeRenderAfterDataChange);
+                flow.add(updateRowWatchers);
+                flow.add(afterRenderAfterDataChange);
+            } else {
+                throw new Error("RENDER STATE INVALID");
+            }
         }
+        flow.add(exp.dispatch, [exports.datagrid.events.AFTER_RENDER]);
     }
 
     function onDataChanged() {
@@ -453,11 +489,8 @@ function Datagrid(scope, element, attr, $compile) {
         rowOffsets = {};
         active.length = 0;
         scopes.length = 0;
-        if (content) {
-            oldContent = content;
-            oldContent.css({position:"absolute", top: 0, left: 0, zIndex: 1});
-        }
-        content = createContent();
+        content.children().unbind();
+        content.children().remove();
         viewHeight = 0; // force to recalculate heights.
         setupExports();
         // make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.

@@ -19,6 +19,9 @@ exports.datagrid = {
         INIT: 'datagrid:init',
         RESIZE: 'datagrid:resize',
         READY: 'datagrid:ready',
+        BEFORE_RENDER: 'datagrid:beforeRender',
+        AFTER_RENDER: 'datagrid:afterRender',
+        LISTENERS_READY: 'datagrid:listenersReady',
         BEFORE_UPDATE_WATCHERS: 'datagrid:beforeUpdateWatchers',
         AFTER_UPDATE_WATCHERS: 'datagrid:afterUpdateWatchers',
         BEFORE_DATA_CHANGE: 'datagrid:beforeDataChange',
@@ -29,6 +32,7 @@ exports.datagrid = {
         ON_SCROLL: 'datagrid:onScroll'
     },
     options: {
+        async: true,
         compileAllRowsOnInit: false,// this can cause it to take a long time to initialize.
         updateDelay: 100, // if < 100ms this fires too often.
         cushion: -50,// debugging cushion about what is deactivated.
@@ -36,7 +40,7 @@ exports.datagrid = {
         uncompiledClass: 'uncompiled',
         dynamicRowHeights: false,//true,
         renderThreshold: 25,
-        creepLimit: 10,
+        creepLimit: 50,
         chunkClass: 'ux-datagrid-chunk'
         //TODO: need to create global addons object.
     },

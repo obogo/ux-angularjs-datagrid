@@ -43,7 +43,7 @@ The script template has 3 properties.
 - **template-name** if this is not defined it will be changed to 'default'. So this one is not required if you only have one template, but if you have more than one the second will overwrite the first without this property.
 - **template-item** this is what you want the data to be referenced by on the row scope. Such as in angular if you do a repeat with "item in items" you then reference item in your template. This does the same thing with this property.
 
-## Addons ##
+## Addons / Plugins ##
 Addons are like a plugin to the datagrid. It actually becomes a behavior modifier of the datagrid object. Addons are created as factories and applied directly to the datagrid instance. The internals of the datagrid are constructed with addons as well.
 
 Because these addons assign themselves as behaviors to the instance behaviors can be overwritten. So if you need to modify core behavior then go right ahead and add an addon that overwrites those methods.

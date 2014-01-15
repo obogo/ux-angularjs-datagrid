@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.1.0
+* uxDatagrid v.0.2.0
 * (c) 2014, WebUX
 * License: MIT.
 */

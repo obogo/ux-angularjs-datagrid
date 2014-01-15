@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.1.0
+* uxDatagrid v.0.2.0
 * (c) 2014, WebUX
 * License: MIT.
 */
@@ -10,8 +10,10 @@ exports.datagrid.events.VIRTUAL_SCROLL_TOP = "virtualScroll:top";
 
 exports.datagrid.events.VIRTUAL_SCROLL_BOTTOM = "virtualScroll:bottom";
 
+exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE = "virtualScroll:onUpdate";
+
 exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callback) {
-    var friction = .95, stopThreshold = .05, result = {}, _x = 0, _y = 0, max, top = 0, bottom = 0, enabled = true, touchStart = "touchstart", touchEnd = "touchend", touchMove = "touchmove", touchCancel = "touchCancel", values = angular.extend({
+    var friction = .95, stopThreshold = .01, moved = false, result = {}, _x = 0, _y = 0, max, top = 0, bottom = 0, enabled = true, doubleTapTimer, touchStart = "touchstart", touchEnd = "touchend", touchMove = "touchmove", touchCancel = "touchCancel", values = angular.extend({
         scrollingStopIntv: null,
         scroll: 0,
         speed: 0,
@@ -40,19 +42,33 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
         if (!enabled) {
             return;
         }
+        stop();
+        var touches = e.touches || e.originalEvent.touches;
         clearIntv();
         result.dispatch(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START);
-        if (e.touches[0] && e.touches[0].target && e.touches[0].target.tagName.match(/input|textarea|select/i)) {
+        if (touches[0] && touches[0].target && touches[0].target.tagName.match(/input|textarea|select/i)) {
             return;
         }
         max = element[0].scrollHeight;
-        var touch = e.touches[0];
+        var touch = touches[0];
         _x = touch.pageX;
         _y = touch.pageY;
         values.touchDown = true;
-        stopEvent(event);
+        moved = false;
+        stopEvent(e);
+        stopCreep();
         updateBottom();
         addTouchEnd();
+    }
+    function stop() {
+        clearTimeout(values.scrollingStopIntv);
+        values.scrollingStopIntv = 0;
+        result.onScrollingStop();
+    }
+    function stopCreep() {
+        if (scope.datagrid) {
+            scope.datagrid.creepRenderModel.stop();
+        }
     }
     function updateBottom() {
         bottom = getHeight(result.content) - element[0].offsetHeight;
@@ -72,12 +88,14 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
             enabled = !!value;
             if (!enabled) {
                 removeTouchEnd();
-            } else if (enabled && speed) {
+            } else if (enabled) {
                 updateBottom();
                 values.touchDown = false;
                 _y = element[0].offsetTop + element[0].offsetHeight * .5;
-                values.speed = speed;
-                values.absSpeed = Math.abs(speed);
+                if (speed) {
+                    values.speed = speed;
+                    values.absSpeed = Math.abs(speed);
+                }
                 clearIntv();
                 values.scrollingStopIntv = setTimeout(applyFriction);
             }
@@ -102,12 +120,16 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
         if (enabled) {
             values.touchDown = false;
             stopEvent(event);
+            if (!moved) {
+                fireClick(event);
+            }
             removeTouchEnd();
             applyFriction();
         }
     }
     function onTouchMove(event) {
         if (enabled) {
+            moved = true;
             stopEvent(event);
             var touch = event.changedTouches[0];
             updateScroll(touch.pageX, touch.pageY);
@@ -142,6 +164,21 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
             values.scrollingStopIntv = setTimeout(applyFriction);
         }
     }
+    function fireClick(e) {
+        var point = e.changedTouches ? e.changedTouches[0] : e, target, ev;
+        clearTimeout(doubleTapTimer);
+        doubleTapTimer = setTimeout(function() {
+            doubleTapTimer = null;
+            target = point.target;
+            while (target.nodeType != 1) target = target.parentNode;
+            if (target.tagName != "SELECT" && target.tagName != "INPUT" && target.tagName != "TEXTAREA") {
+                ev = document.createEvent("MouseEvents");
+                ev.initMouseEvent("click", true, true, e.view, 1, point.screenX, point.screenY, point.clientX, point.clientY, e.ctrlKey, e.altKey, e.shiftKey, e.metaKey, 0, null);
+                ev._fake = true;
+                target.dispatchEvent(ev);
+            }
+        }, 250);
+    }
     result.dispatch = function dispatch() {
         scope.$emit.apply(scope, arguments);
     };
@@ -154,7 +191,7 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
         if (values.absSpeed >= stopThreshold) {
             updateScroll(_x, _y - values.speed * friction);
         } else {
-            result.onScrollingStop();
+            stop();
         }
     }
     function render() {
@@ -162,7 +199,12 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
         result.content.css({
             webkitTransform: "translate3d(0px, " + value + "px, 0px)"
         });
+        result.dispatch(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE);
     }
+    result.scrollToBottom = function(immediately) {
+        updateBottom();
+        result.scrollTo(bottom, immediately);
+    };
     result.getValues = function getValues() {
         return values;
     };
@@ -174,6 +216,7 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
     result.scrollTo = function scrollTo(value, immediately) {
         callback(value, immediately);
     };
+    result.scrollIntoView = scope.datagrid ? scope.datagrid.scrollModel.scrollIntoView : function() {};
     result.onScrollingStop = function onScrollingStop() {
         result.scrollTo(values.scroll, true);
     };

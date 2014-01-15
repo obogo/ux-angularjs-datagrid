@@ -17,9 +17,14 @@ describe('datagrid', function () {
                     scope.items.push({id: i.toString()});
                 }
                 element = angular.element(template);
+                document.body.appendChild(element[0]);
                 $compile(element)(scope);
                 $rootScope.$digest();
             });
+        });
+
+        afterEach(function() {
+            element.remove();
         });
 
         it("should read options from the html options attribute", function() {
@@ -28,7 +33,7 @@ describe('datagrid', function () {
     });
 
     describe("simple template", function () {
-        var template = '<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10, async:false}" style="width:100px;height:400px;">' +
+        var template = '<div data-ux-datagrid="items" class="datagrid" data-options="{debug:1, chunkSize:10, async:false}" style="width:100px;height:400px;">' +
                             '<script type="template/html" data-template-name="default" data-template-item="item">' +
                                 '<div class="mock-row" style="height:10px;">{{item.id}}</div>' +
                             '</script>' +
@@ -80,7 +85,7 @@ describe('datagrid', function () {
             firstChunk.beforeReset = true;
             expect(firstChunk.beforeReset).toBe(true);
             scope.datagrid.reset();
-            content = element[0].getElementsByClassName('content')[1];// oldContent is removing.
+            content = scope.datagrid.getContent()[0];
             expect(content.childNodes[0].beforeReset).toBe(undefined);
         });
 
@@ -176,7 +181,7 @@ describe('datagrid', function () {
             firstChunk.beforeReset = true;
             expect(firstChunk.beforeReset).toBe(true);
             scope.datagrid.reset();
-            content = element[0].getElementsByClassName('content')[1];// oldContent is removing.
+            content = scope.datagrid.getContent()[0];// oldContent is removing.
             expect(content.childNodes[0].beforeReset).toBe(undefined);
         });
 

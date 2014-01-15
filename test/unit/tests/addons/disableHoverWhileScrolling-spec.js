@@ -15,10 +15,15 @@ describe("disableHoverWhileScrolling", function () {
                 scope.items.push({id: i.toString()});
             }
             element = angular.element(template);
+            document.body.appendChild(element[0]);
             $compile(element)(scope);
             $rootScope.$digest();
             grid = scope.datagrid;
         });
+    });
+
+    afterEach(function () {
+        element.remove();
     });
 
     it("should disable hover while scrolling", function() {

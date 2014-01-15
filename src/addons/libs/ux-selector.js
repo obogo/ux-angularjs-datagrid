@@ -1,4 +1,4 @@
-/*global exports */
+    /*global exports */
 exports.selector = (function () {
     var $ = $ || angular.element;
 

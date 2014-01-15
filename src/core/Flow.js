@@ -162,6 +162,12 @@ function Flow(exp) {
             console.info.apply(console, args);
         }
     };
+    exp.warn = function () {
+        // output warnings. something is wrong.
+        if (window.console && console.warn) {
+            console.warn.apply(console, arguments);
+        }
+    };
 
     return exp;
 }

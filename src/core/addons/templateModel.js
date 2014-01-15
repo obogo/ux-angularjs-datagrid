@@ -49,6 +49,9 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
                 template: template,
                 height: wrapper.offsetHeight
             };
+            if (!templateData.height) {
+                throw new Error("Template height cannot be 0.");
+            }
             templates[templateData.name] = templateData;
             templates.push(templateData);
             exp.getContent()[0].removeChild(wrapper);

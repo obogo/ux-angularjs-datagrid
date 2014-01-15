@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.1.0
+* uxDatagrid v.0.2.0
 * (c) 2014, WebUX
 * License: MIT.
 */
@@ -23,6 +23,9 @@ exports.datagrid = {
         INIT: "datagrid:init",
         RESIZE: "datagrid:resize",
         READY: "datagrid:ready",
+        BEFORE_RENDER: "datagrid:beforeRender",
+        AFTER_RENDER: "datagrid:afterRender",
+        LISTENERS_READY: "datagrid:listenersReady",
         BEFORE_UPDATE_WATCHERS: "datagrid:beforeUpdateWatchers",
         AFTER_UPDATE_WATCHERS: "datagrid:afterUpdateWatchers",
         BEFORE_DATA_CHANGE: "datagrid:beforeDataChange",
@@ -33,6 +36,7 @@ exports.datagrid = {
         ON_SCROLL: "datagrid:onScroll"
     },
     options: {
+        async: true,
         compileAllRowsOnInit: false,
         updateDelay: 100,
         cushion: -50,
@@ -40,7 +44,7 @@ exports.datagrid = {
         uncompiledClass: "uncompiled",
         dynamicRowHeights: false,
         renderThreshold: 25,
-        creepLimit: 10,
+        creepLimit: 50,
         chunkClass: "ux-datagrid-chunk"
     },
     coreAddons: []
@@ -492,13 +496,18 @@ function Flow(exp) {
             console.info.apply(console, args);
         }
     };
+    exp.warn = function() {
+        if (window.console && console.warn) {
+            console.warn.apply(console, arguments);
+        }
+    };
     return exp;
 }
 
 exports.datagrid.Flow = Flow;
 
 function Datagrid(scope, element, attr, $compile) {
-    var flow, changeWatcherSet = false, unwatchers = [], content, oldContent, scopes = [], active = [], lastVisibleScrollStart = 0, rowOffsets = {}, viewHeight = 0, options, states = exports.datagrid.states, events = exports.datagrid.events, state = states.BUILDING, values = {
+    var flow, waitCount = 0, changeWatcherSet = false, unwatchers = [], content, scopes = [], active = [], lastVisibleScrollStart = 0, rowOffsets = {}, viewHeight = 0, options, states = exports.datagrid.states, events = exports.datagrid.events, state = states.BUILDING, values = {
         dirty: false,
         scroll: 0,
         speed: 0,
@@ -521,8 +530,13 @@ function Datagrid(scope, element, attr, $compile) {
         if (cnt) {
             classes = cnt.className || "content";
         }
-        cnt = angular.element('<div class="' + classes + '"></div>');
-        element.append(cnt);
+        if (!cnt) {
+            cnt = angular.element('<div class="' + classes + '"></div>');
+            element.append(cnt);
+        }
+        if (!cnt[0]) {
+            cnt = angular.element(cnt);
+        }
         return cnt;
     }
     function getContent() {
@@ -542,7 +556,18 @@ function Datagrid(scope, element, attr, $compile) {
     function start() {
         exp.dispatch(exports.datagrid.events.INIT);
         content = createContent();
-        flow.add(exp.templateModel.createTemplates);
+        waitForElementReady(0);
+    }
+    function waitForElementReady(count) {
+        if (!exp.element[0].offsetHeight) {
+            if (count < 1) {
+                flow.add(waitForElementReady, [ count + 1 ], 0);
+                return;
+            } else {
+                flow.warn("Datagrid: Dom Element does not have a height.");
+            }
+        }
+        flow.add(exp.templateModel.createTemplates, null, 0);
         flow.add(function updateDynamicRowHeights() {
             options.dynamicRowHeights = exp.templateModel.dynamicHeights();
         });
@@ -553,6 +578,7 @@ function Datagrid(scope, element, attr, $compile) {
         unwatchers.push(scope.$on(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, onRowTemplateChange));
         unwatchers.push(scope.$on("$destroy", destroy));
         flow.add(setupChangeWatcher, [], 0);
+        exp.dispatch(exports.datagrid.events.LISTENERS_READY);
     }
     function setupChangeWatcher() {
         if (!changeWatcherSet) {
@@ -591,11 +617,14 @@ function Datagrid(scope, element, attr, $compile) {
         return angular.element(exp.chunkModel.getRow(index));
     }
     function getRowIndexFromElement(el) {
-        var s = el.scope ? el.scope() : angular.element(el).scope();
-        while (s && s.$parent !== exp.scope) {
-            s = s.$parent;
+        if (element[0].contains(el[0] || el)) {
+            var s = el.scope ? el.scope() : angular.element(el).scope();
+            while (s && s.$parent !== exp.scope) {
+                s = s.$parent;
+            }
+            return s.$index;
         }
-        return s.$index;
+        return -1;
     }
     function getRowOffset(index) {
         if (rowOffsets[index] === undefined) {
@@ -812,29 +841,41 @@ function Datagrid(scope, element, attr, $compile) {
     }
     function afterRenderAfterDataChange() {
         if (values.dirty) {
-            if (oldContent) {
-                oldContent.remove();
-                oldContent = null;
-            }
             values.dirty = false;
             dispatch(exports.datagrid.events.RENDER_AFTER_DATA_CHANGE);
         }
     }
-    function render() {
+    function readyToRender() {
         if (!viewHeight) {
             exp.upateViewportHeight();
+            waitCount += 1;
+            if (waitCount < 2) {
+                flow.info(exports + ".datagrid is waiting for element to have a height.");
+                flow.add(render, null, 0);
+            } else {
+                flow.warn("Datagrid: Unable to determine a height for the datagrid. Cannot render. Exiting.");
+            }
+            return false;
         }
-        if (state === states.BUILDING) {
-            flow.add(buildRows, [ exp.data ], 0);
-            flow.add(updateHeightValues);
-            flow.add(ready);
-        } else if (state === states.READY) {
-            flow.add(beforeRenderAfterDataChange);
-            flow.add(updateRowWatchers);
-            flow.add(afterRenderAfterDataChange);
-        } else {
-            throw new Error("RENDER STATE INVALID");
+        return true;
+    }
+    function render() {
+        exp.dispatch(exports.datagrid.events.BEFORE_RENDER);
+        if (readyToRender()) {
+            waitCount = 0;
+            if (state === states.BUILDING) {
+                flow.add(buildRows, [ exp.data ], 0);
+                flow.add(updateHeightValues);
+                flow.add(ready);
+            } else if (state === states.READY) {
+                flow.add(beforeRenderAfterDataChange);
+                flow.add(updateRowWatchers);
+                flow.add(afterRenderAfterDataChange);
+            } else {
+                throw new Error("RENDER STATE INVALID");
+            }
         }
+        flow.add(exp.dispatch, [ exports.datagrid.events.AFTER_RENDER ]);
     }
     function onDataChanged() {
         dispatch(exports.datagrid.events.BEFORE_DATA_CHANGE);
@@ -850,16 +891,8 @@ function Datagrid(scope, element, attr, $compile) {
         rowOffsets = {};
         active.length = 0;
         scopes.length = 0;
-        if (content) {
-            oldContent = content;
-            oldContent.css({
-                position: "absolute",
-                top: 0,
-                left: 0,
-                zIndex: 1
-            });
-        }
-        content = createContent();
+        content.children().unbind();
+        content.children().remove();
         viewHeight = 0;
         setupExports();
         exp.chunkModel.reset();
@@ -1191,7 +1224,7 @@ exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);
 exports.datagrid.events.RENDER_PROGRESS = "datagrid:renderProgress";
 
 exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
-    var intv = 0, percent, creepCount = 0, model = {};
+    var intv = 0, renderIntv = 0, percent, creepCount = 0, model = {}, upIndex = 0, downIndex = 0, time;
     function digest(index) {
         var s = exp.getScope(index);
         if (!s || !s.digested) {
@@ -1212,8 +1245,23 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
         result.count += s ? 1 : 0;
     }
     function onInterval(started, ended) {
-        var upIndex = started, downIndex = ended, time = Date.now() + exp.options.renderThreshold;
-        while (time > Date.now() && (upIndex >= 0 || downIndex < exp.rowsLength)) {
+        time = Date.now() + exp.options.renderThreshold;
+        upIndex = started;
+        downIndex = ended;
+        render(onComplete);
+    }
+    function wait(method, time) {
+        var i, args = exports.util.array.toArray(arguments);
+        if (exp.options.async) {
+            i = setTimeout.apply(null, args);
+        } else {
+            args.splice(0, 2);
+            method.apply(this, args);
+        }
+        return i;
+    }
+    function render(complete) {
+        if (time > Date.now() && (upIndex >= 0 || downIndex < exp.rowsLength)) {
             if (upIndex >= 0) {
                 digest(upIndex);
                 upIndex -= 1;
@@ -1222,8 +1270,13 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
                 digest(downIndex);
                 downIndex += 1;
             }
+            percent = calculatePercent();
+            renderIntv = wait(render, 0, complete);
+        } else {
+            complete();
         }
-        percent = calculatePercent();
+    }
+    function onComplete() {
         stop();
         creepCount += 1;
         if (!exp.values.speed && exp.scopes.length < exp.rowsLength) {
@@ -1232,32 +1285,33 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
         exp.dispatch(exports.datagrid.events.RENDER_PROGRESS, percent);
     }
     function stop() {
-        intv = false;
-        exp.flow.remove(onInterval);
+        time = 0;
+        clearTimeout(intv);
+        intv = 0;
     }
-    function resetInterval(started, ended) {
+    function resetInterval(started, ended, waitTime) {
         stop();
         if (creepCount < exp.options.creepLimit) {
-            exp.flow.add(onInterval, [ started, ended ], exp.options.renderThreshold);
-            intv = true;
+            intv = wait(onInterval, waitTime || exp.options.renderThreshold, started, ended);
         }
     }
-    function onBeforeUpdateWatchers(event) {
+    function onBeforeRender(event) {
         stop();
     }
-    function onAfterUpdateWatchers(event, loopData) {
-        if (!intv) {
-            creepCount = 0;
-            resetInterval(loopData.started, loopData.ended);
-        }
+    function onAfterRender(event, loopData) {
+        creepCount = 0;
+        resetInterval(loopData.started, loopData.ended, 500);
     }
+    model.stop = stop;
     model.destroy = function destroy() {
         exp = null;
         model = null;
     };
-    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, stop));
-    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, onBeforeUpdateWatchers));
-    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, onAfterUpdateWatchers));
+    exp.creepRenderModel = model;
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, onAfterRender));
 };
 
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.creepRenderModel);
@@ -1469,6 +1523,9 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
                 template: template,
                 height: wrapper.offsetHeight
             };
+            if (!templateData.height) {
+                throw new Error("Template height cannot be 0.");
+            }
             templates[templateData.name] = templateData;
             templates.push(templateData);
             exp.getContent()[0].removeChild(wrapper);

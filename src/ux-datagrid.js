@@ -38,6 +38,7 @@ function Datagrid(scope, element, attr, $compile) {
      * init
      */
     function init() {
+        exports.logWrapper('datagrid', exp, 'green');
         setupExports();
         flow.unique(render);
         flow.unique(updateRowWatchers);
@@ -154,6 +155,10 @@ function Datagrid(scope, element, attr, $compile) {
         return angular.element(exp.chunkModel.getRow(index));
     }
 
+    function isCompiled(index) {
+        return !!scopes[index];
+    }
+
     function getRowIndexFromElement(el) {
         if (element[0].contains(el[0] || el)) {
             var s = el.scope ? el.scope() : angular.element(el).scope();
@@ -193,11 +198,11 @@ function Datagrid(scope, element, attr, $compile) {
 
     function createDom(list) {
         //TODO: if there is any dom. It needs destroyed first.
-        flow.log("OVERWRITE DOM!!!");
+        exp.log("OVERWRITE DOM!!!");
         var len = list.length;
         flow.add(exp.chunkModel.chunkDom, [list, options.chunkSize, '<div class="' + options.chunkClass + '">', '</div>', content], 0);
         exp.rowsLength = len;
-        flow.log("created %s dom elements", len);
+        exp.log("created %s dom elements", len);
     }
 
     function compileRow(index) {
@@ -354,12 +359,12 @@ function Datagrid(scope, element, attr, $compile) {
         // we only want to update stuff if we are scrolling slow.
         resetMinMax();// this needs to always be set after the dispatch of before update watchers in case they need the before activeRange.
         active.length = 0; // make sure not to reset until after getStartingIndex.
-        flow.log("\tvisibleScrollStart %s visibleScrollEnd %s", loop.visibleScrollStart, loop.visibleScrollEnd);
+        exp.log("\tvisibleScrollStart %s visibleScrollEnd %s", loop.visibleScrollStart, loop.visibleScrollEnd);
         while (loop.i < exp.rowsLength) {
             prevS = scope.$$childHead ? scopes[loop.i - 1] : null;
-            s = compileRow(loop.i); // only compiles if it is not already compiled. Still returns the scope.
             offset = getRowOffset(loop.i); // this is where the chunks and rows get created is when they are requested if they don't exist.
             if ((offset >= loop.visibleScrollStart && offset <= loop.visibleScrollEnd)) {
+                s = compileRow(loop.i); // only compiles if it is not already compiled. Still returns the scope.
                 if (loop.started === undefined) {
                     loop.started = loop.i;
                 }
@@ -381,10 +386,10 @@ function Datagrid(scope, element, attr, $compile) {
             }
         }
         loop.ended = loop.i - 1;
-        flow.log("\tstartIndex %s endIndex %s", loop.startIndex, loop.i);
+        exp.log("\tstartIndex %s endIndex %s", loop.startIndex, loop.i);
         deactivateList(lastActive);
         lastVisibleScrollStart = loop.visibleScrollStart;
-        flow.log("\tactivated %s", active.join(', '));
+        exp.log("\tactivated %s", active.join(', '));
         updateLinks();
         flow.add(safeDigest, [scope]);
         // this dispatch needs to be after the digest so that it doesn't cause {} to show up in the render.
@@ -398,7 +403,7 @@ function Datagrid(scope, element, attr, $compile) {
             deactivated.push(lastActiveIndex);
             deactivateScope(scopes[lastActiveIndex]);
         }
-        flow.log("\tdeactivated %s", deactivated.join(', '));
+        exp.log("\tdeactivated %s", deactivated.join(', '));
     }
 
     function updateLinks() {
@@ -441,7 +446,7 @@ function Datagrid(scope, element, attr, $compile) {
             exp.upateViewportHeight();
             waitCount += 1;
             if (waitCount < 2) {
-                flow.info(exports + ".datagrid is waiting for element to have a height.");
+                exp.info(exports + ".datagrid is waiting for element to have a height.");
                 flow.add(render, null, 0);// have it wait a moment for the height to change.
             } else {
                 flow.warn("Datagrid: Unable to determine a height for the datagrid. Cannot render. Exiting.");
@@ -475,7 +480,7 @@ function Datagrid(scope, element, attr, $compile) {
     function onDataChanged() {
         dispatch(exports.datagrid.events.BEFORE_DATA_CHANGE);
         values.dirty = true;
-        flow.log("dataChanged");
+        exp.log("dataChanged");
         exp.grouped = scope.$eval(attr.grouped);
         exp.data = exp.setData(scope.$eval(attr.uxDatagrid || attr.list), exp.grouped) || [];
         dispatch(exports.datagrid.events.AFTER_DATA_CHANGE);
@@ -501,6 +506,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     function forceRenderScope(index) {
         var s = scopes[index];
+//        exp.log("\tforceRenderScope %s", index);
         if (!s && index > 0 && index < exp.rowsLength) {
             s = compileRow(index);
         }
@@ -513,7 +519,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     function onRowTemplateChange(evt, item, oldTemplate, newTemplate) {
         var index = exp.getNormalizedIndex(item),
-            el = getRowElm(index), s = el.hasClass('uncompiled') ? compileRow(index) : el.scope();
+            el = getRowElm(index), s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope();
         if (s !== scope) {
             s.$destroy();
             scopes[index] = null;
@@ -559,7 +565,7 @@ function Datagrid(scope, element, attr, $compile) {
     // destroy needs to put all watcher back before destroying or it will not destroy child scopes, or remove watchers.
     function destroy() {
         scope.datagrid = null; // we have a circular reference. break it on destroy.
-        flow.log('destroying grid');
+        exp.log('destroying grid');
         clearTimeout(values.scrollingStopIntv);
         // destroy flow.
         flow.destroy();
@@ -569,6 +575,7 @@ function Datagrid(scope, element, attr, $compile) {
         while (unwatchers.length) {
             unwatchers.pop()();
         }
+        exp.destroyLogger();
         // now remove every property on exports.
         for (var i in exp) {
             if (exp[i] && exp[i].hasOwnProperty('destroy')) {
@@ -606,6 +613,7 @@ function Datagrid(scope, element, attr, $compile) {
     exp.updateHeights = updateHeights;
     exp.getOffsetIndex = getOffsetIndex;
     exp.isActive = isActive;
+    exp.isCompiled = isCompiled;
     exp.getScope = getScope;
     exp.getRowElm = getRowElm;
     exp.getRowOffset = getRowOffset;
@@ -619,7 +627,7 @@ function Datagrid(scope, element, attr, $compile) {
     // initialize core.
     exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
     // add variables that can be modified externally.
-    exp.flow = flow = new Flow({async: options.hasOwnProperty('async') ? !!options.async : true, debug: options.hasOwnProperty('debug') ? options.debug : 0});
+    exp.flow = flow = new Flow({async: options.hasOwnProperty('async') ? !!options.async : true, debug: options.hasOwnProperty('debug') ? options.debug : 0}, exp.dispatch);
     flow.add(init);
     flow.run();
 

@@ -3,7 +3,7 @@ describe("doubleScroll", function () {
         template = '<div style="overflow: auto;width:100%;height:300px;border:1px solid #FF0000;" data-ux-double-scroll="\'.datagrid\'">' +
                     '<div class="doubleScrollContent" style="width: 100%;">' +
                             '<div class="header" style="height: 100px;">header text</div>' +
-                            '<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10}" style="width:100%;height:400px; overflow: auto;" data-addons="iosScroll">' +
+                            '<div data-ux-datagrid="items" class="datagrid" data-options="{async:false,chunkSize:10}" style="width:100%;height:400px; overflow: auto;" data-addons="iosScroll">' +
                                 '<script type="template/html" data-template-name="default" data-template-item="item">' +
                                     '<div class="mock-row" style="height: 16px;outline: 1px solid #000000;">{{$id}}</div>' +
                                 '</script>' +
@@ -34,7 +34,7 @@ describe("doubleScroll", function () {
         element[0].scrollTop = 10;
         setTimeout(function () {
             expect(scope.datagrid.values.scroll).toBe(0);
-            expect(scope.datagrid.element[0].style.overflow).toBe("hidden");
+            expect(scope.datagrid.element[0].style.overflowY).toBe("hidden");
             done();
         }, 100);
     });
@@ -42,7 +42,7 @@ describe("doubleScroll", function () {
     it("should scroll the target container when the main container is disabled", function(done) {
         element[0].scrollTop = 400;
         setTimeout(function () {
-            expect(scope.datagrid.element[0].style.overflow).toBe("auto");
+            expect(scope.datagrid.element[0].style.overflowY).toBe("auto");
             done();
         }, 100);
     });
@@ -54,7 +54,7 @@ describe('iosDoubleScroll', function () {
         template = '<div style="overflow: auto;width:100%;height:300px;border:1px solid #FF0000;" data-ux-double-scroll="\'.datagrid\'">' +
                     '<div class="doubleScrollContent" style="width: 100%;">' +
                             '<div class="header" style="height: 100px;">header text</div>' +
-                            '<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10}" style="width:100%;height:400px; overflow: auto;" data-addons="iosScroll">' +
+                            '<div data-ux-datagrid="items" class="datagrid" data-options="{async: false, chunkSize:10, debug: {all:1, Flow:0}}" style="width:100%;height:400px; overflow: auto;" data-addons="iosScroll, gridLogger">' +
                                 '<script type="template/html" data-template-name="default" data-template-item="item">' +
                                     '<div class="mock-row" style="height: 16px;outline: 1px solid #000000;">{{$id}}</div>' +
                                 '</script>' +

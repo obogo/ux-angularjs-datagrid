@@ -78,7 +78,7 @@ ChunkArray.prototype.destroy = function () {
  */
 exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
 
-    var _list, _rows, _chunkSize, _el, result = {};
+    var _list, _rows, _chunkSize, _el, result = exports.logWrapper('chunkModel', {}, 'purple', exp.dispatch);
 
     /**
      * Return the list that was created.
@@ -180,6 +180,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
      * @returns {DomElement}
      */
     function chunkDom(list, size, templateStart, templateEnd, el) {
+        result.log('chunkDom');
         _el = el;
         _chunkSize = size;
         _rows = list;
@@ -246,6 +247,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
      * Remove all dom, and all other references.
      */
     function reset() {
+        result.log("reset");
         //TODO: this needs to make sure it destroys things properly
         if (_list) _list.destroy();
         _rows = null;
@@ -256,6 +258,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
 
     function destroy() {
         reset();
+        result.destroyLogger();
     }
 
     result.chunkDom = chunkDom;

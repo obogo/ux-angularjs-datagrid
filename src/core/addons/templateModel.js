@@ -16,9 +16,10 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
 
     exp.templateModel = function () {
 
-        var templates = [], totalHeight, defaultName = 'default', result = {};
+        var templates = [], totalHeight, defaultName = 'default', result = exports.logWrapper('templateModel', {}, 'teal', exp.dispatch);
 
         function createTemplates() {
+            result.log('createTemplates');
             var i, scriptTemplates = exp.element[0].getElementsByTagName('script'), len = scriptTemplates.length;
             if (!len) {
                 throw new Error("at least one template is required.");
@@ -49,6 +50,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
                 template: template,
                 height: wrapper.offsetHeight
             };
+            result.log('template: %s %o', name, templateData);
             if (!templateData.height) {
                 throw new Error("Template height cannot be 0.");
             }
@@ -133,6 +135,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
         }
 
         function setTemplate(itemOrIndex, newTemplateName) {
+            result.log('setTemplate %s %s', itemOrIndex, newTemplateName);
             var item = typeof itemOrIndex === "number" ? exp.data[itemOrIndex] : itemOrIndex;
             var oldTemplate = result.getTemplate(item).name;
             result.setTemplateName(item, newTemplateName);
@@ -140,6 +143,8 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
         }
 
         function destroy() {
+            result.destroyLogger();
+            result = null;
             templates.length = 0;
             templates = null;
         }

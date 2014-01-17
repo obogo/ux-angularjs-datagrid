@@ -76,6 +76,9 @@ input[type="text"] {
     font-weight: bold;
     color: #FFFFFF;
     line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .overlay {
@@ -91,6 +94,9 @@ input[type="text"] {
     background-color:#efefef;
     height: 40px;
     line-height: 40px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 .row:nth-child(odd) {
     background-color:#dfdfdf;
@@ -104,6 +110,9 @@ input[type="text"] {
     background-color:#99CCFF;
     height: 30px;
     line-height: 30px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 .sub:nth-child(odd) {
     background-color:#AADDFF;

@@ -42,6 +42,7 @@ module.exports = function (grunt) {
                     'build/angular-ux-<%= pkg.filename %>.js': [
                         'src/ux-datagrid-config.js',
                         'src/lib/*.js',
+                        'src/core/logWrapper.js',
                         'src/core/Flow.js',
                         'src/ux-datagrid.js',
                         'src/core/addons/*.js'
@@ -63,6 +64,9 @@ module.exports = function (grunt) {
                     ],
                     'build/addons/ux-<%= pkg.filename %>-findInList.js': [
                         'src/addons/findInList.js'
+                    ],
+                    'build/addons/ux-<%= pkg.filename %>-gridLogger.js': [
+                        'src/addons/gridLogger.js'
                     ],
                     'build/addons/ux-<%= pkg.filename %>-infiniteScroll.js': [
                         'src/addons/infiniteScroll.js'

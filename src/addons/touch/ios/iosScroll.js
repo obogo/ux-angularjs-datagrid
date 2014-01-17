@@ -11,6 +11,7 @@ angular.module('ux').factory('iosScroll', function () {
         vScroll = new ux.datagrid.VirtualScroll(exp.scope, exp.element, exp.values, function (value, immediately) {
             vScroll.clear();
             var values = vScroll.getValues();
+            originalScrollModel.removeScrollListener();
             exp.values.scroll = values.scroll;
             exp.values.speed = values.speed;
             exp.values.absSpeed = values.absSpeed;

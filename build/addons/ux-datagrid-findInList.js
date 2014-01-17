@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.1.0
+* uxDatagrid v.0.2.0
 * (c) 2014, WebUX
 * License: MIT.
 */
@@ -8,8 +8,9 @@ var finder, cmdKey;
 
 angular.module("ux").factory("findInList", [ "$window", "$compile", function($window, $compile) {
     return function(exp) {
-        var result = {}, term = "", input, findInListTemplate = '<div data-ux-datagrid-find-in-list="datagrid" class="findInList"></div>';
+        var result = {}, term = "", input, lowerCaseTerm, lastFiltered, searchIndex = 0, matchCount, searchIntv, scrollToItemActive = false, itemTexts = {}, findInListTemplate = '<div data-ux-datagrid-find-in-list="datagrid" class="findInList"></div>', templateTexts = {}, workingScope = exp.scope.$new();
         function onKeyDown(event) {
+            exp.flow.info("onKeyDown %s", event.keyCode);
             detectCmdKey(event);
             if (exp.element[0].contains(document.activeElement)) {
                 if (event.keyCode == 114 || (event.ctrlKey || cmdKey) && event.keyCode == 70) {
@@ -19,17 +20,19 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             }
         }
         function onKeyUp(event) {
+            exp.flow.info("onKeyUp %s", event.keyCode);
             if (cmdKey) {
                 detectCmdKey(event);
             }
         }
         function detectCmdKey(event) {
+            exp.flow.info("detectCmdKey");
             if (isCmdKey(event)) {
                 cmdKey = event.type === "keydown";
-                console.log("cmdKey %s", cmdKey ? "down" : "up");
             }
         }
         function isCmdKey(event) {
+            exp.flow.info("isCmdKey");
             if ($window.navigator.platform === "MacIntel") {
                 if ($window.navigator.userAgent.match(/(Chrome|Safari)/i) && event.keyCode === 91 || event.keyCode === 93) {
                     return true;
@@ -43,10 +46,45 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             }
             return false;
         }
+        function cloneTextNodes() {
+            var ary = [];
+            ux.each(this, cloneTextNodeProps, ary);
+            return ary;
+        }
+        function cloneTextNodeProps(textNode, index, list, ary) {
+            ary[index] = textNode.slice(0);
+            ary[index].text = textNode.text;
+        }
+        function onGetTemplate(template, index, list, res) {
+            var el, textNodes;
+            if (!res[template.name]) {
+                textNodes = [];
+                textNodes.clone = cloneTextNodes;
+                el = angular.element(template.template);
+                exports.each(el[0].childNodes, findTextNodes, {
+                    textNodes: textNodes
+                });
+                res[template.name] = textNodes;
+            }
+        }
+        function findTextNodes(el, index, childNodes, data) {
+            var indexes = data.indexes ? data.indexes.slice(0) : [];
+            indexes.push(index);
+            if (el.childNodes.length) {
+                exports.each(el.childNodes, findTextNodes, {
+                    indexes: indexes,
+                    textNodes: data.textNodes
+                });
+            } else if (el.nodeValue) {
+                indexes.text = el.nodeValue;
+                data.textNodes.push(indexes);
+            }
+        }
         function addFinder() {
+            exp.flow.info("addFinder");
             if (!finder) {
                 finder = angular.element(findInListTemplate);
-                exp.element.append(finder);
+                exp.element[0].parentNode.insertBefore(finder[0], exp.element[0]);
                 $compile(finder)(exp.scope);
                 input = finder[0].getElementsByClassName("findInListInput")[0];
                 if (input.select) {
@@ -54,37 +92,229 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
                 }
                 input.focus();
                 finder.scope().close = removeFinder;
-                finder.scope().$digest();
+                exp.safeDigest(finder.scope());
                 input.addEventListener("keyup", onInputKeyUp);
+                matchCount = finder[0].getElementsByClassName("findInListMatchCount")[0];
+                itemTexts = {};
+                ux.each(exp.templateModel.getTemplates(), onGetTemplate, templateTexts);
+                throttleDoSearch();
             } else {
                 removeFinder();
                 addFinder();
             }
         }
         function removeFinder() {
+            exp.flow.info("removeFinder");
             if (finder) {
                 var f = finder;
+                itemTexts = null;
+                clearHighlights();
                 finder = null;
                 input.removeEventListener("keyup", onInputKeyUp);
                 f.scope().$destroy();
                 f.remove();
             }
         }
-        function onInputKeyUp() {
-            var newTerm = input.value, filtered = [], searchList;
-            if (newTerm.indexOf(term) === 0) {
-                searchList = filtered;
-            } else {
-                searchList = exp.getData();
+        function onInputKeyUp(event) {
+            exp.flow.info("onInputKeyUp");
+            var newTerm = input.value;
+            if (event.keyCode === 13) {
+                (event.shiftKey ? result.up : result.down)();
             }
-            ux.each(searchList, onFilter, filtered);
-            term = input.value;
+            if (event.keyCode === 27) {
+                result.close();
+            }
+            if (newTerm === term) {
+                return;
+            }
+            throttleDoSearch();
         }
-        function onFilter() {}
+        function throttleDoSearch() {
+            clearTimeout(searchIntv);
+            searchIntv = setTimeout(doSearch, 250);
+        }
+        function doSearch() {
+            var searchList = exp.getData(), filtered = [];
+            term = input.value;
+            clearHighlights();
+            searchIndex = 0;
+            if (term.length) {
+                scrollToItemActive = true;
+                filtered.absCount = 0;
+                lowerCaseTerm = term.toLowerCase();
+                ux.each(searchList, onFilter, filtered);
+                if (filtered.length) {
+                    highlightMatches(filtered);
+                }
+                lastFiltered = filtered;
+                updateMatchCount();
+                scrollToItemActive = false;
+            }
+        }
+        function updateMatchCount() {
+            if (lastFiltered && lastFiltered.length) {
+                matchCount.innerText = searchIndex + 1 + " of " + lastFiltered.length;
+            } else {
+                matchCount.innerText = "0 of 0";
+            }
+        }
+        function evalTemplateText(item) {
+            var tpl = exp.templateModel.getTemplate(item), matches, uncompiledText = templateTexts[tpl.name].clone();
+            workingScope[tpl.item] = item;
+            exports.each(uncompiledText, replaceCompiled, workingScope);
+            return uncompiledText;
+        }
+        function replaceCompiled(textNode, index, list, workingScope) {
+            var matches = textNode.text.match(/{{(.*?)}}/g);
+            textNode.workingScope = workingScope;
+            exports.each(matches, evalMatches, textNode);
+            delete textNode.workingScope;
+        }
+        function evalMatches(value, index, list, textNode) {
+            var evalStr = textNode.workingScope.$eval(value.substr(2, value.length - 4));
+            textNode.text = textNode.text.replace(value, evalStr);
+            list[index] = evalStr;
+        }
+        function onFilter(item, index, list, filtered) {
+            var matches = [];
+            if (!itemTexts[index]) {
+                itemTexts[index] = evalTemplateText(item);
+            }
+            exports.each(itemTexts[index], getMatches, matches, filtered);
+            if (matches.length) {
+                matches.rowIndex = index;
+                filtered.push(matches);
+            }
+        }
+        function getMatches(itemText, index, list, itemTextMatches, filtered) {
+            var value = itemText.text.toLowerCase(), matchIndex = value.indexOf(lowerCaseTerm, 0), i = 0;
+            if (itemTextMatches.absIndex === undefined) {
+                itemTextMatches.absIndex = filtered.absCount;
+            }
+            while (matchIndex !== -1) {
+                itemTextMatches.push({
+                    matchIndex: matchIndex,
+                    itemText: itemText,
+                    absIndex: filtered.absCount
+                });
+                matchIndex = value.indexOf(lowerCaseTerm, matchIndex + 1);
+                filtered.absCount += 1;
+                i += 1;
+            }
+        }
+        function highlightMatches(filtered) {
+            var selected;
+            ux.each(filtered, highlight);
+            selected = filtered.selected;
+            if (scrollToItemActive && (selected.rowIndex < exp.values.activeRange.min + 2 || selected.rowIndex > exp.values.activeRange.max - 2)) {
+                exp.scrollModel.scrollIntoView(selected.rowIndex, true);
+            }
+        }
+        function highlight(match, index, list) {
+            if (match.rowIndex >= exp.values.activeRange.min && match.rowIndex <= exp.values.activeRange.max) {
+                var row = exp.getRowElm(match.rowIndex);
+                clearHighlightsForRow(match, true);
+                exports.each(match, highlightRowMatches, row[0]);
+            }
+            if (match.absIndex <= searchIndex && searchIndex - match.absIndex < match.length) {
+                list.selected = match;
+                list.selectedMatchIndex = searchIndex - match.absIndex;
+            }
+        }
+        function highlightRowMatches(match, index, list, row) {
+            var node = getNodeFromMatch(row, match);
+            highlightTextRange(node, match, index);
+        }
+        function getNodeFromMatch(el, match) {
+            var depth = 0, len = match.itemText.length, child = el;
+            while (depth < len) {
+                child = child.childNodes[match.itemText[depth]];
+                depth += 1;
+            }
+            return child;
+        }
+        function highlightTextRange(el, match, index) {
+            var range = document.createRange(), selectionContents, span = document.createElement("span"), i = 0, len = 0, startIndex = match.matchIndex, endIndex = match.matchIndex + term.length, siblings = el.parentNode.childNodes;
+            while (i < siblings.length - 1) {
+                el = siblings[i];
+                if (el.childNodes.length) {
+                    len = el.childNodes[0].nodeValue ? el.childNodes[0].nodeValue.length : 0;
+                } else {
+                    len = el.nodeValue ? el.nodeValue.length : 0;
+                }
+                startIndex -= len;
+                endIndex -= len;
+                i += 1;
+            }
+            el = siblings[siblings.length - 1];
+            try {
+                range.setStart(el, startIndex);
+                range.setEnd(el, endIndex);
+            } catch (e) {
+                throw new Error("OOPS! Something went wrong with the highlighting!");
+            }
+            selectionContents = range.extractContents();
+            span.appendChild(selectionContents);
+            span.className = "uxDatagridFindInListHighlight" + (match.absIndex === searchIndex ? " selectedHighlight" : "");
+            range.insertNode(span);
+        }
+        function clearHighlights() {
+            if (lastFiltered) {
+                ux.each(lastFiltered, clearHighlightsForRow);
+                lastFiltered = null;
+            }
+        }
+        function clearHighlightsForRow(match, force) {
+            if (force || match.rowIndex >= exp.values.activeRange.min + exp.options.cushion && match.rowIndex <= exp.values.activeRange.max - exp.options.cushion) {
+                var row = exp.getRowElm(match.rowIndex)[0];
+                exports.each(match, clearHighlightsForRowMatches, row);
+            }
+        }
+        function clearHighlightsForRowMatches(match, index, list, row) {
+            var node = getNodeFromMatch(row, match);
+            node.parentNode.innerText = match.itemText.text;
+        }
         function setup() {
+            exp.flow.info("setup");
             $window.addEventListener("keydown", onKeyDown);
             $window.addEventListener("keyup", onKeyUp);
+            exp.element.attr("tabindex", 999999);
         }
+        function updateSearchIndexHighlight() {
+            beforeRender();
+            afterRender();
+        }
+        function beforeRender() {
+            var filtered = lastFiltered;
+            clearHighlights();
+            lastFiltered = filtered;
+        }
+        function afterRender() {
+            if (finder && lastFiltered) {
+                highlightMatches(lastFiltered);
+                updateMatchCount();
+            }
+        }
+        result.up = function up() {
+            scrollToItemActive = true;
+            if (searchIndex > 0) {
+                searchIndex -= 1;
+            } else {
+                searchIndex = lastFiltered.length - 1;
+            }
+            updateSearchIndexHighlight();
+            scrollToItemActive = false;
+        };
+        result.down = function down() {
+            scrollToItemActive = true;
+            if (searchIndex < lastFiltered.length - 1) {
+                searchIndex += 1;
+            } else {
+                searchIndex = 0;
+            }
+            updateSearchIndexHighlight();
+            scrollToItemActive = false;
+        };
         result.destroy = function() {
             if (finder) {
                 removeFinder();
@@ -92,15 +322,27 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             $window.removeEventListener("keydown", onKeyDown);
             $window.removeEventListener("keyup", onKeyUp);
             input = null;
+            lastFiltered = null;
+            matchCount = null;
+            workingScope.$destroy();
+            workingScope = null;
             result = null;
         };
         setup();
+        result.open = addFinder;
+        result.close = function() {
+            removeFinder();
+            exp.element[0].focus();
+        };
         exp.findInList = result;
+        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, beforeRender));
+        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, afterRender));
         return exp;
     };
 } ]);
 
 angular.module("ux").directive("uxDatagridFindInList", function() {
+    var directiveTerm = "";
     function countFind(el, index, list, result) {
         if (el === document.activeElement) {
             result.count += 1;
@@ -109,17 +351,29 @@ angular.module("ux").directive("uxDatagridFindInList", function() {
     return {
         restrict: "A",
         scope: true,
-        template: '<input type="text" ng-model="terms" class="findInListInput"><input type="button" class="findInListButton findInListDown" value="&#x25BC;" ng-click="down()"><input type="button" class="findInListButton findInListUp" value="&#x25B2;" ng-click="up()"><input type="button" class="findInListButton findInListClose" value="X" ng-click="close()">',
+        template: '<input type="text" ng-model="term" class="findInListInput">' + '<span class="findInListMatchCount"></span>' + '<input type="button" class="findInListButton findInListDown" value="&#x25BC;" ng-click="down()">' + '<input type="button" class="findInListButton findInListUp" value="&#x25B2;" ng-click="up()">' + '<input type="button" class="findInListButton findInListClose" value="X" ng-click="close()">',
         link: function(scope, element, attr) {
             var children = element.children();
+            scope.term = directiveTerm;
             children.bind("blur", function(event) {
-                var result = {
-                    count: 0
-                };
-                ux.each(children, countFind, result);
-                if (!result.count) {
-                    scope.close();
-                }
+                setTimeout(function() {
+                    var result = {
+                        count: 0
+                    };
+                    ux.each(children, countFind, result);
+                    if (!result.count) {
+                        scope.close();
+                    }
+                });
+            });
+            scope.up = function() {
+                scope.datagrid.findInList.up();
+            };
+            scope.down = function() {
+                scope.datagrid.findInList.down();
+            };
+            scope.$watch(function() {
+                directiveTerm = scope.term;
             });
         }
     };

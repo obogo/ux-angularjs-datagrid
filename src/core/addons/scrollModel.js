@@ -1,9 +1,11 @@
 /*global ux */
 exports.datagrid.events.SCROLL_START = "datagrid:scrollStart";
 exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
+exports.datagrid.events.TOUCH_DOWN = "datagrid:touchDown";
+exports.datagrid.events.TOUCH_UP = "datagrid:touchUp";
 exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
 
-    var result = {}, setup = false, unwatchSetup;
+    var result = exports.logWrapper('scrollModel', {}, 'orange', exp.dispatch), setup = false, unwatchSetup;
 
     /**
      * Listen for scrollingEvents.
@@ -12,30 +14,52 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         if (!exp.element.css('overflow')) {
             exp.element.css({overflow: 'auto'});
         }
+        result.log('addScrollListener');
         exp.element[0].addEventListener('scroll', result.onUpdateScroll);
         addTouchEvents();
         setup = true;
+        exp.flow.unique(result.onScrollingStop);
     }
 
     function addTouchEvents() {
+        result.log('addTouchEvents');
         var content = exp.getContent();
         content.bind('touchstart', result.onTouchStart);
         content.bind('touchend', result.onTouchEnd);
+        content.bind('touchcancel', result.onTouchEnd);
     }
+
+    result.removeScrollListener = function removeScrollListener() {
+        result.log('removeScrollListener');
+        exp.element[0].removeEventListener('scroll', result.onUpdateScroll);
+    };
 
     result.removeTouchEvents = function removeTouchEvents() {
         if (setup) {
+            result.log('removeTouchEvents');
             exp.getContent().unbind('touchstart', result.onTouchStart);
             exp.getContent().unbind('touchend', result.onTouchEnd);
+            exp.getContent().unbind('touchcancel', result.onTouchEnd);
         }
     };
 
     result.onTouchStart = function onTouchStart(event) {
         exp.values.touchDown = true;
+        exp.dispatch(exports.datagrid.events.TOUCH_DOWN, event);
     };
 
     result.onTouchEnd = function onTouchEnd(event) {
         exp.values.touchDown = false;
+        exp.dispatch(exports.datagrid.events.TOUCH_UP, event);
+    };
+
+    result.getScroll = function getScroll(el) {
+        return (el || exp.element[0]).scrollTop;
+    };
+
+    result.setScroll = function setScroll(value) {
+        exp.element[0].scrollTop = value;
+        exp.values.scroll = value;
     };
 
     /**
@@ -43,7 +67,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * @param event
      */
     result.onUpdateScroll = function onUpdateScroll(event) {
-        var val = (event.target || event.srcElement || exp.element[0]).scrollTop;
+        var val = result.getScroll(event.target || event.srcElement);
         if (exp.values.scroll !== val) {
             exp.dispatch(exports.datagrid.events.SCROLL_START, val);
             exp.values.speed = val - exp.values.scroll;
@@ -61,14 +85,16 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * @param {Boolean=} immediately
      */
     result.scrollTo = function scrollTo(value, immediately) {
-        exp.element[0].scrollTop = value;
+        result.setScroll(value);
         if (immediately) {
-            exp.values.scroll = value;
-            clearTimeout(exp.values.scrollingStopIntv);
             result.onScrollingStop();
         } else {
             result.waitForStop();
         }
+    };
+
+    result.clearOnScrollingStop = function clearOnScrollingStop() {
+        exp.flow.remove(result.onScrollingStop);
     };
 
     /**
@@ -76,10 +102,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      */
     result.waitForStop = function waitForStop() {
         if (exp.flow.async || exp.values.touchDown) {
-            clearTimeout(exp.values.scrollingStopIntv);
-            exp.values.scrollingStopIntv = setTimeout(result.onScrollingStop, exp.options.updateDelay);
+            exp.flow.add(result.onScrollingStop, null, exp.options.updateDelay);
         } else {
-            result.onScrollingStop();
+            exp.flow.add(result.onScrollingStop);
         }
     };
 
@@ -99,6 +124,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * @param {Boolean=} immediately
      */
     result.scrollToIndex = function scrollToIndex(index, immediately) {
+        result.log('scrollToIndex');
         var offset = exp.getRowOffset(index);
         result.scrollTo(offset, immediately);
         return offset;
@@ -110,6 +136,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * @param {Boolean=} immediately
      */
     result.scrollToItem = function scrollToItem(item, immediately) {
+        result.log('scrollToItem');
         var index = exp.getNormalizedIndex(item);
         if (index !== -1) {
             return result.scrollToIndex(index, immediately);
@@ -123,6 +150,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * @param immediately
      */
     result.scrollIntoView = function scrollIntoView(itemOrIndex, immediately) {
+        result.log('scrollIntoView');
         var index = typeof itemOrIndex === 'number' ? itemOrIndex : exp.getNormalizedIndex(itemOrIndex),
             offset = exp.getRowOffset(index), rowHeight, viewHeight;
         if (offset < exp.values.scroll) { // it is above the view.
@@ -142,6 +170,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * @param immediately
      */
     result.scrollToTop = function (immediately) {
+        result.log('scrollToTop');
         result.scrollTo(0, immediately);
     };
 
@@ -150,14 +179,16 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * @param immediately
      */
     result.scrollToBottom = function (immediately) {
+        result.log('scrollToBottom');
         var value = exp.getContentHeight() - exp.getViewportHeight();
         result.scrollTo(value >= 0 ? value : 0, immediately);
     };
 
     function destroy() {
+        result.destroyLogger();
         unwatchSetup();
         if (setup) {
-            exp.element[0].removeEventListener('scroll', result.onUpdateScroll);
+            result.removeScrollListener();
             result.removeTouchEvents();
         }
     }

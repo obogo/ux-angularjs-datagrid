@@ -1,10 +1,14 @@
 exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START = 'virtualScroll:beforeScrollStart';
 exports.datagrid.events.VIRTUAL_SCROLL_TOP = 'virtualScroll:top';
 exports.datagrid.events.VIRTUAL_SCROLL_BOTTOM = 'virtualScroll:bottom';
+exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE = 'virtualScroll:onUpdate';
 // For simulating the scroll in IOS that doesn't have a smooth scroll natively.
 exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callback) {
-    var friction = 0.95, stopThreshold = 0.05, result = {}, _x = 0, _y = 0, max, top = 0, bottom = 0,
-        enabled = true,
+    var friction = 0.95, stopThreshold = 0.01, moved = false,
+        result = exports.logWrapper('VirtualScroll', {}, 'redOrange', function () {
+            scope.$emit.apply(scope, arguments);
+        }), _x = 0, _y = 0, max, top = 0, bottom = 0,
+        enabled = true, doubleTapTimer, offTouchEnd,
         touchStart = 'touchstart', touchEnd = 'touchend', touchMove = 'touchmove', touchCancel = 'touchCancel',
         values = angular.extend({
             scrollingStopIntv: null,
@@ -20,7 +24,11 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
 
     function setup() {
         element.css({overflow: 'hidden'});
-        result.content.bind(touchStart, onTouchStart);
+        if (scope.datagrid && element === scope.datagrid.element) {
+            scope.$on(exports.datagrid.events.TOUCH_DOWN, onTouchStartNg);
+        } else {
+            result.content.bind(touchStart, onTouchStart);
+        }
     }
 
     function clearIntv() {
@@ -34,23 +42,44 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
         e.stopImmediatePropagation();
     }
 
+    function onTouchStartNg(evtType, event) {
+        onTouchStart(event);
+    }
+
     function onTouchStart(e) {
         if (!enabled) {
             return;
         }
+        result.log('onTouchStart');
+        stop();
+        var touches = e.touches || e.originalEvent.touches;
         clearIntv();
         result.dispatch(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START);
-        if (e.touches[0] && e.touches[0].target && e.touches[0].target.tagName.match(/input|textarea|select/i)) {
+        if (touches[0] && touches[0].target && touches[0].target.tagName.match(/input|textarea|select/i)) {
             return;
         }
         max = element[0].scrollHeight;
-        var touch = e.touches[0];
+        var touch = touches[0];
         _x = touch.pageX;
         _y = touch.pageY;
         values.touchDown = true;
-        stopEvent(event);
+        moved = false;
+        stopEvent(e);
+        stopCreep();
         updateBottom();
         addTouchEnd();
+    }
+
+    function stop() {
+        clearTimeout(values.scrollingStopIntv);
+        values.scrollingStopIntv = 0;
+        result.onScrollingStop();
+    }
+
+    function stopCreep() {
+        if (scope.datagrid) {
+            scope.datagrid.creepRenderModel.stop();
+        }
     }
 
     function updateBottom() {
@@ -72,12 +101,14 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
             enabled = !!value;
             if (!enabled) {
                 removeTouchEnd();
-            } else if (enabled && speed) {
+            } else if (enabled) {
                 updateBottom();
                 values.touchDown = false;
                 _y = element[0].offsetTop + (element[0].offsetHeight * 0.5);
-                values.speed = speed;
-                values.absSpeed = Math.abs(speed);
+                if (speed) {
+                    values.speed = speed;
+                    values.absSpeed = Math.abs(speed);
+                }
                 clearIntv();
                 values.scrollingStopIntv = setTimeout(applyFriction);
             }
@@ -86,25 +117,48 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
     };
 
     function addTouchEnd() {
+        result.log('addTouchEnd');
         ux.each(result.content, function (el) {
             el.addEventListener(touchMove, onTouchMove, true);
-            el.addEventListener(touchEnd, onTouchEnd, true);
-            el.addEventListener(touchCancel, onTouchEnd, true);
+            if (scope.datagrid && element === scope.datagrid.element) {
+                result.log("\tlisten for TOUCH_UP");
+                offTouchEnd = scope.$on(exports.datagrid.events.TOUCH_UP, onTouchEndNg);
+            } else {
+                result.log("\tlisten for touchend");
+                el.addEventListener(touchEnd, onTouchEnd, true);
+                el.addEventListener(touchCancel, onTouchEnd, true);
+            }
         });
     }
 
     function removeTouchEnd() {
+        result.log('removeTouchEnd');
         ux.each(result.content, function (el) {
             el.removeEventListener(touchMove, onTouchMove, true);
-            el.removeEventListener(touchEnd, onTouchEnd, true);
-            el.removeEventListener(touchCancel, onTouchEnd, true);
+            if (offTouchEnd) {
+                result.log("\tremove TOUCH_UP");
+                offTouchEnd();
+                offTouchEnd = null;
+            } else {
+                result.log("\tremove touchend");
+                el.removeEventListener(touchEnd, onTouchEnd, true);
+                el.removeEventListener(touchCancel, onTouchEnd, true);
+            }
         });
     }
 
+    function onTouchEndNg(evtStr, event) {
+        onTouchEnd(event);
+    }
+
     function onTouchEnd(event) {
+        result.log('onTouchEnd');
         if (enabled) {
             values.touchDown = false;
             stopEvent(event);
+            if (!moved) {
+                fireClick(event);
+            }
             removeTouchEnd();
             applyFriction();
         }
@@ -112,6 +166,7 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
 
     function onTouchMove(event) {
         if (enabled) {
+            moved = true;
             stopEvent(event);
             var touch = event.changedTouches[0];
             updateScroll(touch.pageX, touch.pageY);
@@ -148,6 +203,29 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
         }
     }
 
+    function fireClick(e) {
+        result.log('fireClick');
+        var point = e.changedTouches ? e.changedTouches[0] : e, target, ev;
+        clearTimeout(doubleTapTimer);
+        doubleTapTimer = setTimeout(function () {
+            doubleTapTimer = null;
+
+            // Find the last touched element
+            target = point.target;
+            while (target.nodeType != 1) target = target.parentNode;
+
+            if (target.tagName != 'SELECT' && target.tagName != 'INPUT' && target.tagName != 'TEXTAREA') {
+                ev = document.createEvent('MouseEvents');
+                ev.initMouseEvent('click', true, true, e.view, 1,
+                    point.screenX, point.screenY, point.clientX, point.clientY,
+                    e.ctrlKey, e.altKey, e.shiftKey, e.metaKey,
+                    0, null);
+                ev._fake = true;
+                target.dispatchEvent(ev);
+            }
+        }, 250);
+    }
+
     result.dispatch = function dispatch() {
         scope.$emit.apply(scope, arguments);
     };
@@ -162,14 +240,31 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
         if (values.absSpeed >= stopThreshold) {
             updateScroll(_x, _y - values.speed * friction);
         } else {
-            result.onScrollingStop();
+            stop();
         }
     }
 
     function render() {
         var value = element[0].scrollTop - values.scroll;
         result.content.css({webkitTransform: "translate3d(0px, " + value + "px, 0px)"});
+        result.dispatch(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE);
     }
+
+    result.getScroll = function getScroll() {
+        return values.scroll;
+    };
+
+    result.setScroll = function setScroll(value) {
+        values.scroll = value;
+        if (scope.datagrid) {
+            scope.datagrid.values.scroll = value;
+        }
+    };
+
+    result.scrollToBottom = function (immediately) {
+        updateBottom();
+        result.scrollTo(bottom, immediately);
+    };
 
     result.getValues = function getValues() {
         return values;
@@ -188,6 +283,9 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
         callback(value, immediately);
     };
 
+    result.scrollIntoView = scope.datagrid ? scope.datagrid.scrollModel.scrollIntoView : function () {
+    };
+
     /**
      * When it stops render.
      */
@@ -198,6 +296,8 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
     result.destroy = function () {
         removeTouchEnd();
         element.unbind(touchStart, onTouchStart);
+        result.destroyLogger();
+        result = null;
         values = null;
     };
 

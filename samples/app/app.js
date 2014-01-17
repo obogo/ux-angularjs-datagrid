@@ -149,7 +149,14 @@ app.config(function ($routeProvider) {
             templateUrl: "partials/addons/findInList.html",
             controller: function ($scope) {
                 $scope.name = "Addons >> Find In List";
-                $scope.items = createGroupedList();
+                $scope.items = createSimpleFieldList(1000, 0, {name: 1, description: ['redish yellow grey','greenish orange','bluish blurbl'], type:['red','green','blue'], weight: [0.1, 0.2, 0.3, 0.4, 0.5]});
+            }
+        })
+        .when('/addons/logging', {
+            templateUrl: "partials/addons/logging.html",
+            controller: function ($scope) {
+                $scope.name = "Addons >> Grid Logger";
+                $scope.items = createSimpleList();
             }
         })
         .when('/addons/scrollHistory', {

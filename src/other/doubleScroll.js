@@ -8,13 +8,16 @@ angular.module('ux').directive('uxDoubleScroll', function () {
         link: function (scope, element, attr) {
 
             var el = element[0], lastValue = 0, unwatchRender,
-                result = {},
+                result = exports.logWrapper('doubleScroll', {}, 'red', function () {
+                    scope.$emit.apply(scope, arguments);
+                }),
                 selector = scope.$eval(attr.uxDoubleScroll),
                 target,
                 vScroll, contentHeight = 0, elHeight = 0, targetOffset = scope.$eval(attr.targetOffset) || 0,
                 scrollModel;
 
-            element[0].style.overflow = 'auto';
+            element[0].style.overflowY = 'auto';
+            element[0].style.overflowX = 'hidden';
 
 //            element.css({webkitOverflowScrolling: 'touch'});
             updateTarget();
@@ -31,19 +34,40 @@ angular.module('ux').directive('uxDoubleScroll', function () {
             }
 
             function onScroll(event) {
+                result.log("onScroll");
                 updateTarget();
                 if (target) {
                     if (el.scrollTop + el.offsetHeight < el.scrollHeight) {
-                        target.style.overflow = 'hidden';
-                    } else {
-                        target.style.overflow = 'auto';
+                        if (target.style.overflowY !== 'hidden') {
+                            result.log("\ttarget.overflowY = hidden");
+                            target.style.overflowY = 'hidden';
+                        }
+                    } else if (target.style.overflowY !== 'auto') {
+                        result.log("\ttarget.overflowY = auto");
+                        target.style.overflowY = 'auto';
                     }
                 } else {
                     throw new Error(selector ? "selector \"" + selector + "\" did not select any objects" : "double scroll requires a selector.");
                 }
             }
 
+            function onIOSScroll(value) {
+                result.log("onIOSScroll");
+                var s;
+                if (vScroll.enable() && value !== lastValue) {
+                    lastValue = value;
+                    vScroll.content.css({webkitTransform: "translate3d(0px, " + (element[0].scrollTop - value) + "px, 0px)"});
+                }
+                if (value === 0) {
+                    s = angular.element(target).scope();
+                    if (s) {
+                        onTargetScrollToTop(event, s.datagrid.scrollModel, 0);
+                    }
+                }
+            }
+
             function scrollToTop() {
+                result.log('scrollToTop');
                 var enabled;
                 if (exports.datagrid.isIOS) {
                     enabled = vScroll.enable();
@@ -56,6 +80,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
             }
 
             function scrollToBottom() {
+                result.log('scrollToBottom');
                 var enabled;
                 if (exports.datagrid.isIOS) {
                     enabled = vScroll.enable();
@@ -67,14 +92,8 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                 }
             }
 
-            function onIOScroll(value) {
-                if (vScroll.enable() && value !== lastValue) {
-                    lastValue = value;
-                    vScroll.content.css({webkitTransform: "translate3d(0px, " + (element[0].scrollTop - value) + "px, 0px)"});
-                }
-            }
-
             function onSizeChange() {
+                result.log('onSizeChange');
                 var content = element.children();
                 elHeight = element[0].offsetHeight;
                 target.style.height = elHeight - targetOffset + 'px';
@@ -85,6 +104,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
             }
 
             function onTargetScrollToTop(event, scroller, speed) {
+                result.log('onTargetScrollToTop');
                 // we only want the scroll event from the target.
                 if (scroller.element[0] === target) {
                     scrollModel.enable(false);
@@ -94,6 +114,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
             }
 
             function onDoubleScrollBottom(event, scroller, speed) {
+                result.log('onDoubleScrollBottom');
                 // we only want the double scroll bottom.
                 if (scroller.element[0] === element[0]) {
                     vScroll.enable(false);
@@ -103,7 +124,8 @@ angular.module('ux').directive('uxDoubleScroll', function () {
             }
 
             if (exports.datagrid.isIOS) {
-                vScroll = ux.datagrid.VirtualScroll(scope, element, {}, onIOScroll);
+                result.log('is iOS');
+                vScroll = ux.datagrid.VirtualScroll(scope, element, {}, onIOSScroll);
                 vScroll.setup();
                 unwatchRender = scope.$on(exports.datagrid.events.LISTENERS_READY, function () {
                     // it needs to start off with the target disabled.
@@ -111,7 +133,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                     updateScrollModel();
                     updateTarget();
                     onSizeChange();
-                    onIOScroll(0);
+                    onIOSScroll(0);
                     unwatchRender = scope.$on(exports.datagrid.events.AFTER_RENDER, function () {
                         unwatchRender();
                         onTargetScrollToTop(null, scrollModel, 0.05);
@@ -136,6 +158,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
             }
 
             result.resize = function resize(height) {
+                result.log('resize');
                 if (height !== undefined) {
                     element[0].style.height = height + "px";
                 }
@@ -143,6 +166,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
             };
 
             result.scrollToBottom = function () {
+                result.log('scrollToBottom');
                 if (vScroll) {
                     vScroll.scrollToBottom();
                 } else {
@@ -157,6 +181,8 @@ angular.module('ux').directive('uxDoubleScroll', function () {
             scope.$on(exports.datagrid.events.DOUBLE_SCROLL_SCROLL_TO_BOTTOM, scrollToBottom);
 
             scope.$on('$destroy', function () {
+                result.destroyLogger();
+                result = null;
                 if (exports.datagrid.isIOS) {
                     vScroll.destroy();
                     vScroll = null;

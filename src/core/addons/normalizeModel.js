@@ -1,7 +1,7 @@
 /*global ux */
 exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
 //TODO: this needs to be put on exp.normalizedModel
-    var originalData, normalizedData;
+    var originalData, normalizedData, result = exports.logWrapper('normalizeModel', {}, 'grey', exp.dispatch);
 
     function normalize(data, grouped, normalized) {
         data = data || [];
@@ -18,6 +18,7 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
     }
 
     exp.setData = function (data, grouped) {
+        result.log('setData');
         originalData = data;
         if (grouped) {
             normalizedData = normalize(data, grouped);
@@ -57,6 +58,13 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
         }
         return -1;
     };
+
+    result.destroy = function destroy() {
+        result.destroyLogger();
+        result = null;
+    };
+
+    exp.normalizeModel = result;
 
     return exp;
 };

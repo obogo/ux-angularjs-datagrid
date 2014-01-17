@@ -123,6 +123,9 @@ angular.module("ux").factory("gridFocusManager", function() {
             applyToListeners(removeListenersToRow);
         }
         function applyToListeners(method) {
+            if (!exp.values.activeRange.max) {
+                return;
+            }
             var i = exp.values.activeRange.min, row;
             while (i <= exp.values.activeRange.max) {
                 row = exp.getRowElm(i);
@@ -193,6 +196,7 @@ angular.module("ux").factory("gridFocusManager", function() {
         }
         function onKeyDown(event) {
             var target = angular.element(event.currentTarget);
+            exp.flow.log("FM: onKeyDown");
             if (event.shiftKey && event.keyCode === 13 || event.keyCode === 38) {
                 focusToPrevRowElement(target);
             } else if (event.keyCode === 13 || event.keyCode === 40) {
@@ -204,6 +208,7 @@ angular.module("ux").factory("gridFocusManager", function() {
             performFocus(focusEl);
         }
         function focusToNextRowElement(focusedEl) {
+            exp.flow.log("	FM: focusToNextRowElement");
             var focusEl = getNextRowFocusElement(focusedEl);
             performFocus(focusEl);
         }
@@ -219,9 +224,11 @@ angular.module("ux").factory("gridFocusManager", function() {
             return focusToRowElement(focusedEl, -1);
         }
         function getNextRowFocusElement(focusedEl) {
+            exp.flow.log("	FM: getNextRowFocusElement");
             return focusToRowElement(focusedEl, 1);
         }
         function focusToRowElement(focusedEl, dir) {
+            exp.flow.log("	FM: focusToRowElement");
             focusedEl = wrap(focusedEl);
             if (!exp.element[0].contains(focusedEl[0])) {
                 return;
@@ -231,10 +238,12 @@ angular.module("ux").factory("gridFocusManager", function() {
                 return focusedEl;
             }
             selector = ux.selector.getSelector(focusedEl[0], rowEl[0], filterClasses);
+            exp.flow.log("	FM: selector: %s", selector);
             resultEl = findNextRowWithSelection(nextIndex, dir, selector);
             return resultEl && resultEl.length ? resultEl : focusedEl;
         }
         function performFocus(focusEl) {
+            exp.flow.log("	FM: performFocus %o", focusEl[0]);
             if (focusEl[0].select) {
                 focusEl[0].select();
             }
@@ -244,6 +253,7 @@ angular.module("ux").factory("gridFocusManager", function() {
             exp.scrollModel.scrollIntoView(exp.getRowIndexFromElement(focusEl), true);
         }
         function findNextRowWithSelection(nextIndex, dir, selector) {
+            exp.flow.log("	FM: findNextRowWithSelection");
             var nextEl = exp.getRowElm(nextIndex), focusEl = query(nextEl[0], selector);
             var content = exp.getContent();
             while (!focusEl[0] && (dir > 0 && nextIndex < exp.rowsLength - 1 || dir < 0 && nextIndex > 0)) {

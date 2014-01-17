@@ -1,0 +1,3289 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>angular-ux-datagrid.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>angular-ux-datagrid.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*
+* uxDatagrid v.0.2.0
+* (c) 2014, WebUX
+* License: MIT.
+*/</span>
+(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(exports, global)</span>{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h2 id="configs">Configs</h2>
+<p>ux.datagrid is a highly performant scrolling list for desktop and mobile devices that leverages
+the browsers ability to gpu cache the dom structure with fast startup times and optimized rendering
+that allows the gpu to maintain its snapshots as long as possible.
+Create the default module of ux if it doesn&#39;t already exist.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> module;
+
+<span class="hljs-keyword">try</span> {
+    module = angular.module(<span class="hljs-string">"ux"</span>, [ <span class="hljs-string">"ng"</span> ]);
+} <span class="hljs-keyword">catch</span> (e) {
+    module = angular.module(<span class="hljs-string">"ux"</span>);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Create the datagrid namespace.
+add the default options for the datagrid. These can be overridden by passing your own options to each
+instance of the grid. In your HTML templates you can provide the object that will override these settings
+on a per grid basis.</p>
+<pre><code> &lt;div ux-datagrid=&quot;mylist&quot; options=&quot;{debug:{all:1, Flow:0}}&quot;&gt;...&lt;/div&gt;
+</code></pre><p>These options are then available to other addons to configure them.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.datagrid = {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p><strong><a name="isIOS">isIOS</a></strong>
+iOS does not natively support smooth scrolling without a css attribute. <code>-webkit-overflow-scrolling: touch</code>
+however with this attribute iOS would crash if you try to change the scroll with javascript, or turn it on and off.
+so a virtual scroll was implemented for iOS to make it scroll using translate3d.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    isIOS: navigator.userAgent.match(<span class="hljs-regexp">/(iPad|iPhone|iPod)/g</span>),</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>the <strong>states</strong> of the application.</p>
+<ul>
+<li><strong><a name="states.BUILDING">BUILDING</a></strong>: is the startup phase of the grid before it is ready to perform the first render. This may include
+waiting for the dom heights be available.</li>
+<li><strong><a name="states.READY">READY</a></strong>: this means that the grid is ready for rendering.</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    states: {
+        BUILDING: <span class="hljs-string">"datagrid:building"</span>,
+        READY: <span class="hljs-string">"datagrid:ready"</span>
+    },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p><strong><a name="events">Events</a></strong></p>
+<ul>
+<li><strong><a name="events.INIT">INIT</a></strong> when the datagrid has added the addons and is now starting.</li>
+<li><strong><a name="events.RESIZE">RESIZE</a></strong> tells the datagrid to resize. This will update all height calculations.</li>
+<li><strong><a name="events.READY">READY</a></strong> the datagrid is all setup with templates, viewHeight, and data and is ready to render.</li>
+<li><strong><a name="events.BEFORE_RENDER">BEFORE_RENDER</a></strong> the datagrid is just about to add needed chunks, perform compiling of uncompiled rows, and update and digest the active scopes.</li>
+<li><strong><a name="events.AFTER_RENDER">AFTER_RENDER</a></strong> chunked dome was added if needed, active rows are compiled, and active scopes are digested.</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    events: {
+        INIT: <span class="hljs-string">"datagrid:init"</span>,
+        RESIZE: <span class="hljs-string">"datagrid:resize"</span>,
+        READY: <span class="hljs-string">"datagrid:ready"</span>,
+        BEFORE_RENDER: <span class="hljs-string">"datagrid:beforeRender"</span>,
+        AFTER_RENDER: <span class="hljs-string">"datagrid:afterRender"</span>,
+        LISTENERS_READY: <span class="hljs-string">"datagrid:listenersReady"</span>,
+        BEFORE_UPDATE_WATCHERS: <span class="hljs-string">"datagrid:beforeUpdateWatchers"</span>,
+        AFTER_UPDATE_WATCHERS: <span class="hljs-string">"datagrid:afterUpdateWatchers"</span>,
+        BEFORE_DATA_CHANGE: <span class="hljs-string">"datagrid:beforeDataChange"</span>,
+        AFTER_DATA_CHANGE: <span class="hljs-string">"datagrid:afterDataChange"</span>,
+        BEFORE_RENDER_AFTER_DATA_CHANGE: <span class="hljs-string">"datagrid:beforeRenderAfterDataChange"</span>,
+        RENDER_AFTER_DATA_CHANGE: <span class="hljs-string">"datagrid:renderAfterDataChange"</span>,
+        ON_ROW_TEMPLATE_CHANGE: <span class="hljs-string">"datagrid:onRowTemplateChange"</span>,
+        ON_SCROLL: <span class="hljs-string">"datagrid:onScroll"</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>for logging.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        LOG: <span class="hljs-string">"datagrid:log"</span>,
+        INFO: <span class="hljs-string">"datagrid:info"</span>,
+        WARN: <span class="hljs-string">"datagrid:warn"</span>,
+        ERROR: <span class="hljs-string">"datagrid:error"</span>
+    },
+    options: {
+        async: <span class="hljs-literal">true</span>,
+        compileAllRowsOnInit: <span class="hljs-literal">false</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>this can cause it to take a long time to initialize.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        updateDelay: <span class="hljs-number">500</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>if &lt; 100ms this fires too often.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        cushion: -<span class="hljs-number">50</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>debugging cushion about what is deactivated.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        chunkSize: <span class="hljs-number">50</span>,
+        uncompiledClass: <span class="hljs-string">"uncompiled"</span>,
+        dynamicRowHeights: <span class="hljs-literal">false</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>true,</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        renderThreshold: <span class="hljs-number">10</span>,
+        renderThresholdWait: <span class="hljs-number">50</span>,
+        creepLimit: <span class="hljs-number">100</span>,
+        chunkClass: <span class="hljs-string">"ux-datagrid-chunk"</span>
+    },
+    coreAddons: []
+};
+
+<span class="hljs-comment">/*global module */</span>
+module.factory(<span class="hljs-string">"addons"</span>, [ <span class="hljs-string">"$injector"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">($injector)</span> {</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">applyAddons</span><span class="hljs-params">(addons, instance)</span> {</span>
+        <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, len = addons.length, result;
+        <span class="hljs-keyword">while</span> (i &lt; len) {
+            result = $injector.get(addons[i]);
+            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> result === <span class="hljs-string">"function"</span>) {
+                result(instance);
+            } <span class="hljs-keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>they must have returned a null? what was the point. Throw an error.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"Addons expect a function to pass the grid instance to."</span>);
+            }
+            i += <span class="hljs-number">1</span>;
+        }
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(instance, addons)</span> {</span>
+        addons = addons <span class="hljs-keyword">instanceof</span> <span class="hljs-built_in">Array</span> ? addons : addons &amp;&amp; addons.replace(<span class="hljs-regexp">/,/g</span>, <span class="hljs-string">" "</span>).replace(<span class="hljs-regexp">/\s+/g</span>, <span class="hljs-string">" "</span>).split(<span class="hljs-string">" "</span>) || [];
+        <span class="hljs-keyword">if</span> (instance.addons) {
+            addons = instance.addons = instance.addons.concat(addons);
+        }
+        applyAddons(addons, instance);
+    };
+} ]);
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">charPack</span><span class="hljs-params">(char, amount)</span> {</span>
+    <span class="hljs-keyword">var</span> str = <span class="hljs-string">""</span>;
+    <span class="hljs-keyword">while</span> (str.length &lt; amount) {
+        str += char;
+    }
+    <span class="hljs-keyword">return</span> str;
+}
+
+exports.css = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">CSS</span><span class="hljs-params">()</span> {</span>
+    <span class="hljs-keyword">var</span> customStyleSheets = {}, cache = {}, cnst = {
+        head: <span class="hljs-string">"head"</span>,
+        screen: <span class="hljs-string">"screen"</span>,
+        string: <span class="hljs-string">"string"</span>,
+        object: <span class="hljs-string">"object"</span>
+    };
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createCustomStyleSheet</span><span class="hljs-params">(name)</span> {</span>
+        <span class="hljs-keyword">if</span> (!getCustomSheet(name)) {
+            customStyleSheets[name] = createStyleSheet(name);
+        }
+        <span class="hljs-keyword">return</span> getCustomSheet(name);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getCustomSheet</span><span class="hljs-params">(name)</span> {</span>
+        <span class="hljs-keyword">return</span> customStyleSheets[name];
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createStyleSheet</span><span class="hljs-params">(name)</span> {</span>
+        <span class="hljs-keyword">if</span> (!document.styleSheets) {
+            <span class="hljs-keyword">return</span>;
+        }
+        <span class="hljs-keyword">if</span> (document.getElementsByTagName(cnst.head).length === <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">return</span>;
+        }
+        <span class="hljs-keyword">var</span> styleSheet, mediaType, i, media;
+        <span class="hljs-keyword">if</span> (document.styleSheets.length &gt; <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; document.styleSheets.length; i++) {
+                <span class="hljs-keyword">if</span> (document.styleSheets[i].disabled) {
+                    <span class="hljs-keyword">continue</span>;
+                }
+                media = document.styleSheets[i].media;
+                mediaType = <span class="hljs-keyword">typeof</span> media;
+                <span class="hljs-keyword">if</span> (mediaType === cnst.string) {
+                    <span class="hljs-keyword">if</span> (media === <span class="hljs-string">""</span> || media.indexOf(cnst.screen) !== -<span class="hljs-number">1</span>) {
+                        styleSheet = document.styleSheets[i];
+                    }
+                } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (mediaType === cnst.object) {
+                    <span class="hljs-keyword">if</span> (media.mediaText === <span class="hljs-string">""</span> || media.mediaText.indexOf(cnst.screen) !== -<span class="hljs-number">1</span>) {
+                        styleSheet = document.styleSheets[i];
+                    }
+                }
+                <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> styleSheet !== <span class="hljs-string">"undefined"</span>) {
+                    <span class="hljs-keyword">break</span>;
+                }
+            }
+        }
+        <span class="hljs-keyword">var</span> styleSheetElement = document.createElement(<span class="hljs-string">"style"</span>);
+        styleSheetElement.type = <span class="hljs-string">"text/css"</span>;
+        styleSheetElement.title = name;
+        document.getElementsByTagName(cnst.head)[<span class="hljs-number">0</span>].appendChild(styleSheetElement);
+        <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; document.styleSheets.length; i++) {
+            <span class="hljs-keyword">if</span> (document.styleSheets[i].disabled) {
+                <span class="hljs-keyword">continue</span>;
+            }
+            styleSheet = document.styleSheets[i];
+        }
+        <span class="hljs-keyword">return</span> {
+            name: name,
+            styleSheet: styleSheet
+        };
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createClass</span><span class="hljs-params">(sheetName, selector, style)</span> {</span>
+        <span class="hljs-keyword">var</span> sheet = getCustomSheet(sheetName) || createCustomStyleSheet(sheetName), styleSheet = sheet.styleSheet, i;
+        <span class="hljs-keyword">if</span> (styleSheet.addRule) {
+            <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; styleSheet.rules.length; i++) {
+                <span class="hljs-keyword">if</span> (styleSheet.rules[i].selectorText &amp;&amp; styleSheet.rules[i].selectorText.toLowerCase() === selector.toLowerCase()) {
+                    styleSheet.rules[i].style.cssText = style;
+                    <span class="hljs-keyword">return</span>;
+                }
+            }
+            styleSheet.addRule(selector, style);
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (styleSheet.insertRule) {
+            <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; styleSheet.cssRules.length; i++) {
+                <span class="hljs-keyword">if</span> (styleSheet.cssRules[i].selectorText &amp;&amp; styleSheet.cssRules[i].selectorText.toLowerCase() === selector.toLowerCase()) {
+                    styleSheet.cssRules[i].style.cssText = style;
+                    <span class="hljs-keyword">return</span>;
+                }
+            }
+            styleSheet.insertRule(selector + <span class="hljs-string">"{"</span> + style + <span class="hljs-string">"}"</span>, <span class="hljs-number">0</span>);
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSelector</span><span class="hljs-params">(selector)</span> {</span>
+        <span class="hljs-keyword">var</span> i, ilen, sheet, classes, result;
+        <span class="hljs-keyword">if</span> (selector.indexOf(<span class="hljs-string">"{"</span>) !== -<span class="hljs-number">1</span> || selector.indexOf(<span class="hljs-string">"}"</span>) !== -<span class="hljs-number">1</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+        }
+        <span class="hljs-keyword">if</span> (cache[selector]) {
+            <span class="hljs-keyword">return</span> cache[selector];
+        }
+        <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>, ilen = document.styleSheets.length; i &lt; ilen; i += <span class="hljs-number">1</span>) {
+            sheet = document.styleSheets[i];
+            classes = sheet.rules || sheet.cssRules;
+            result = getRules(classes, selector);
+            <span class="hljs-keyword">if</span> (result) {
+                <span class="hljs-keyword">return</span> result;
+            }
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRules</span><span class="hljs-params">(classes, selector)</span> {</span>
+        <span class="hljs-keyword">var</span> j, jlen, cls, result;
+        <span class="hljs-keyword">if</span> (classes) {
+            <span class="hljs-keyword">for</span> (j = <span class="hljs-number">0</span>, jlen = classes.length; j &lt; jlen; j += <span class="hljs-number">1</span>) {
+                cls = classes[j];
+                <span class="hljs-keyword">if</span> (cls.cssRules) {
+                    result = getRules(cls.cssRules, selector);
+                    <span class="hljs-keyword">if</span> (result) {
+                        <span class="hljs-keyword">return</span> result;
+                    }
+                }
+                <span class="hljs-keyword">if</span> (cls.selectorText) {
+                    <span class="hljs-keyword">var</span> expression = <span class="hljs-string">"(\b)*"</span> + selector.replace(<span class="hljs-string">"."</span>, <span class="hljs-string">"\\."</span>) + <span class="hljs-string">"([^-a-zA-Z0-9]|,|$)"</span>, matches = cls.selectorText.match(expression);
+                    <span class="hljs-keyword">if</span> (matches &amp;&amp; matches.indexOf(selector) !== -<span class="hljs-number">1</span>) {
+                        cache[selector] = cls.style;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>cache the value</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        <span class="hljs-keyword">return</span> cls.style;
+                    }
+                }
+            }
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getCSSValue</span><span class="hljs-params">(selector, property)</span> {</span>
+        <span class="hljs-keyword">var</span> cls = getSelector(selector);
+        <span class="hljs-keyword">return</span> cls &amp;&amp; cls[property] !== <span class="hljs-literal">undefined</span> ? cls[property] : <span class="hljs-literal">null</span>;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setCSSValue</span><span class="hljs-params">(selector, property, value)</span> {</span>
+        <span class="hljs-keyword">var</span> cls = getSelector(selector);
+        cls[property] = value;
+    }
+    <span class="hljs-keyword">return</span> {
+        createdStyleSheets: [],
+        createStyleSheet: createStyleSheet,
+        createClass: createClass,
+        getCSSValue: getCSSValue,
+        setCSSValue: setCSSValue
+    };
+}();
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">each</span><span class="hljs-params">(list, method, data)</span> {</span>
+    <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, len, result, extraArgs;
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">arguments</span>.length &gt; <span class="hljs-number">2</span>) {
+        extraArgs = exports.util.array.toArray(<span class="hljs-built_in">arguments</span>);
+        extraArgs.splice(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>);
+    }
+    <span class="hljs-keyword">if</span> (list &amp;&amp; list.length) {
+        len = list.length;
+        <span class="hljs-keyword">while</span> (i &lt; len) {
+            result = method.apply(<span class="hljs-literal">null</span>, [ list[i], i, list ].concat(extraArgs));
+            <span class="hljs-keyword">if</span> (result !== <span class="hljs-literal">undefined</span>) {
+                <span class="hljs-keyword">return</span> result;
+            }
+            i += <span class="hljs-number">1</span>;
+        }
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">for</span> (i <span class="hljs-keyword">in</span> list) {
+            <span class="hljs-keyword">if</span> (list.hasOwnProperty(i)) {
+                result = method.apply(<span class="hljs-literal">null</span>, [ list[i], i, list ].concat(extraArgs));
+                <span class="hljs-keyword">if</span> (result !== <span class="hljs-literal">undefined</span>) {
+                    <span class="hljs-keyword">return</span> result;
+                }
+            }
+        }
+    }
+    <span class="hljs-keyword">return</span> list;
+}
+
+exports.each = each;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">filter</span><span class="hljs-params">(list, method, data)</span> {</span>
+    <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, len, result = [];
+    <span class="hljs-keyword">if</span> (list &amp;&amp; list.length) {
+        len = list.length;
+        <span class="hljs-keyword">while</span> (i &lt; len) {
+            <span class="hljs-keyword">if</span> (method(list[i], i, list, data)) {
+                result.push(list[i]);
+            }
+            i += <span class="hljs-number">1</span>;
+        }
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">for</span> (i <span class="hljs-keyword">in</span> list) {
+            <span class="hljs-keyword">if</span> (list.hasOwnProperty(i)) {
+                <span class="hljs-keyword">if</span> (method(list[i], i, list, data)) {
+                    result.push(list[i]);
+                }
+            }
+        }
+    }
+    <span class="hljs-keyword">return</span> result;
+}
+
+exports.filter = filter;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatcher</span><span class="hljs-params">(target, scope, map)</span> {</span>
+    <span class="hljs-keyword">var</span> listeners = {};
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">off</span><span class="hljs-params">(event, callback)</span> {</span>
+        <span class="hljs-keyword">var</span> index, list;
+        list = listeners[event];
+        <span class="hljs-keyword">if</span> (list) {
+            <span class="hljs-keyword">if</span> (callback) {
+                index = list.indexOf(callback);
+                <span class="hljs-keyword">if</span> (index !== -<span class="hljs-number">1</span>) {
+                    list.splice(index, <span class="hljs-number">1</span>);
+                }
+            } <span class="hljs-keyword">else</span> {
+                list.length = <span class="hljs-number">0</span>;
+            }
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">on</span><span class="hljs-params">(event, callback)</span> {</span>
+        listeners[event] = listeners[event] || [];
+        listeners[event].push(callback);
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+            off(event, callback);
+        };
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fire</span><span class="hljs-params">(callback, args)</span> {</span>
+        <span class="hljs-keyword">return</span> callback &amp;&amp; callback.apply(target, args);
+    }
+    <span class="hljs-comment">/**
+     * @param event
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatch</span><span class="hljs-params">(event)</span> {</span>
+        <span class="hljs-keyword">if</span> (listeners[event]) {
+            <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, list = listeners[event], len = list.length;
+            <span class="hljs-keyword">while</span> (i &lt; len) {
+                fire(list[i], <span class="hljs-built_in">arguments</span>);
+                i += <span class="hljs-number">1</span>;
+            }
+        }
+    }
+    <span class="hljs-keyword">if</span> (scope &amp;&amp; map) {
+        target.on = scope[map.on] &amp;&amp; scope[map.on].bind(scope);
+        target.off = scope[map.off] &amp;&amp; scope[map.off].bind(scope);
+        target.dispatch = scope[map.dispatch].bind(scope);
+    } <span class="hljs-keyword">else</span> {
+        target.on = on;
+        target.off = off;
+        target.dispatch = dispatch;
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toArray</span><span class="hljs-params">(obj)</span> {</span>
+    <span class="hljs-keyword">var</span> result = [], i = <span class="hljs-number">0</span>, len = obj.length;
+    <span class="hljs-keyword">while</span> (i &lt; len) {
+        result.push(obj[i]);
+        i += <span class="hljs-number">1</span>;
+    }
+    <span class="hljs-keyword">return</span> result;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>The ECMAScript standard does not guarantee Array.sort is a stable sort.
+According to the ECMA spec, when two objects are determined to be equal in a custom sort,
+JavaScript is not required to leave those two objects in the same order.
+replace sort from ECMAScript with this bubble sort to make it accurate</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sort</span><span class="hljs-params">(ary, compareFn)</span> {</span>
+    <span class="hljs-keyword">var</span> c, len, v, rlen, holder;
+    <span class="hljs-keyword">if</span> (!compareFn) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>default compare function.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        compareFn = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(a, b)</span> {</span>
+            <span class="hljs-keyword">return</span> a &gt; b ? <span class="hljs-number">1</span> : a &lt; b ? -<span class="hljs-number">1</span> : <span class="hljs-number">0</span>;
+        };
+    }
+    len = ary.length;
+    rlen = len - <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">for</span> (c = <span class="hljs-number">0</span>; c &lt; len; c += <span class="hljs-number">1</span>) {
+        <span class="hljs-keyword">for</span> (v = <span class="hljs-number">0</span>; v &lt; rlen; v += <span class="hljs-number">1</span>) {
+            <span class="hljs-keyword">if</span> (compareFn(ary[v], ary[v + <span class="hljs-number">1</span>]) &gt; <span class="hljs-number">0</span>) {
+                holder = ary[v + <span class="hljs-number">1</span>];
+                ary[v + <span class="hljs-number">1</span>] = ary[v];
+                ary[v] = holder;
+            }
+        }
+    }
+    <span class="hljs-keyword">return</span> ary;
+}
+
+exports.util = exports.util || {};
+
+exports.util.array = exports.util.array || {};
+
+exports.util.array.toArray = toArray;
+
+exports.util.array.sort = sort;
+
+exports.logWrapper = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">LogWrapper</span><span class="hljs-params">(name, instance, theme, dispatch)</span> {</span>
+    theme = theme || <span class="hljs-string">"black"</span>;
+    dispatch = dispatch || instance.dispatch || <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>};
+    instance.$logName = name;
+    instance.log = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">log</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">var</span> args = [ exports.datagrid.events.LOG, name, theme ].concat(exports.util.array.toArray(<span class="hljs-built_in">arguments</span>));
+        dispatch.apply(instance, args);
+    };
+    instance.info = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">info</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">var</span> args = [ exports.datagrid.events.INFO, name, theme ].concat(exports.util.array.toArray(<span class="hljs-built_in">arguments</span>));
+        dispatch.apply(instance, args);
+    };
+    instance.warn = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">warn</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">var</span> args = [ exports.datagrid.events.WARN, name, theme ].concat(exports.util.array.toArray(<span class="hljs-built_in">arguments</span>));
+        dispatch.apply(instance, args);
+    };
+    instance.error = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">error</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">var</span> args = [ exports.datagrid.events.ERROR, name, theme ].concat(exports.util.array.toArray(<span class="hljs-built_in">arguments</span>));
+        dispatch.apply(instance, args);
+    };
+    instance.destroyLogger = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">if</span> (instance.logger) {
+            instance.log(<span class="hljs-string">"destroy"</span>);
+            instance.logger.destroy();
+            instance.logger = <span class="hljs-literal">null</span>;
+        }
+    };
+    <span class="hljs-keyword">return</span> instance;
+};
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Flow</span><span class="hljs-params">(exp, dispatch)</span> {</span>
+    <span class="hljs-keyword">var</span> running = <span class="hljs-literal">false</span>, intv, current = <span class="hljs-literal">null</span>, list = [], uniqueMethods = {}, execStartTime, execEndTime, timeouts = {}, consoleMethodStyle = <span class="hljs-string">"color:#666666;"</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getMethodName</span><span class="hljs-params">(method)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>TODO: there might be a faster way to get the function name.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">return</span> method.toString().split(<span class="hljs-regexp">/\b/</span>)[<span class="hljs-number">2</span>];
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createItem</span><span class="hljs-params">(method, args, delay)</span> {</span>
+        <span class="hljs-keyword">return</span> {
+            label: getMethodName(method),
+            method: method,
+            args: args || [],
+            delay: delay
+        };
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">unique</span><span class="hljs-params">(method)</span> {</span>
+        <span class="hljs-keyword">var</span> name = getMethodName(method);
+        uniqueMethods[name] = method;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">clearSimilarItemsFromList</span><span class="hljs-params">(item)</span> {</span>
+        <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, len = list.length;
+        <span class="hljs-keyword">while</span> (i &lt; len) {
+            <span class="hljs-keyword">if</span> (list[i].label === item.label &amp;&amp; list[i] !== current) {
+                exp.log(<span class="hljs-string">"clear duplicate item %c%s"</span>, consoleMethodStyle, item.label);
+                list.splice(i, <span class="hljs-number">1</span>);
+                i -= <span class="hljs-number">1</span>;
+                len -= <span class="hljs-number">1</span>;
+            }
+            i += <span class="hljs-number">1</span>;
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span><span class="hljs-params">(method, args, delay)</span> {</span>
+        <span class="hljs-keyword">var</span> item = createItem(method, args, delay), index = -<span class="hljs-number">1</span>;
+        <span class="hljs-keyword">if</span> (uniqueMethods[item.label]) {
+            clearSimilarItemsFromList(item);
+        }
+        list.push(item);
+        <span class="hljs-keyword">if</span> (running) {
+            next();
+        }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>this puts it right after the one currently running.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">insert</span><span class="hljs-params">(method, args, delay)</span> {</span>
+        list.splice(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, createItem(method, args, delay));
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">remove</span><span class="hljs-params">(method)</span> {</span>
+        clearSimilarItemsFromList({
+            label: getMethodName(method)
+        });
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">timeout</span><span class="hljs-params">(method, time)</span> {</span>
+        <span class="hljs-keyword">var</span> intv, item = createItem(method, [], time), startTime = <span class="hljs-built_in">Date</span>.now(), timeoutCall = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+            exp.log(<span class="hljs-string">"exec timeout method %c%s %sms"</span>, consoleMethodStyle, item.label, <span class="hljs-built_in">Date</span>.now() - startTime);
+            method();
+        };
+        exp.log(<span class="hljs-string">"wait for timeout method %c%s"</span>, consoleMethodStyle, item.label);
+        intv = setTimeout(timeoutCall, time);
+        timeouts[intv] = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+            clearTimeout(intv);
+            <span class="hljs-keyword">delete</span> timeouts[intv];
+        };
+        <span class="hljs-keyword">return</span> intv;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stopTimeout</span><span class="hljs-params">(intv)</span> {</span>
+        <span class="hljs-keyword">if</span> (timeouts[intv]) timeouts[intv]();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getArguments</span><span class="hljs-params">(fn)</span> {</span>
+        <span class="hljs-keyword">var</span> str = fn.toString(), match = str.match(<span class="hljs-regexp">/\(.*\)/</span>);
+        <span class="hljs-keyword">return</span> match[<span class="hljs-number">0</span>].match(<span class="hljs-regexp">/([\$\w])+/gm</span>);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hasDoneArg</span><span class="hljs-params">(fn)</span> {</span>
+        <span class="hljs-keyword">var</span> args = getArguments(fn);
+        <span class="hljs-keyword">return</span> !!(args &amp;&amp; args.indexOf(<span class="hljs-string">"done"</span>) !== -<span class="hljs-number">1</span>);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">done</span><span class="hljs-params">()</span> {</span>
+        execEndTime = <span class="hljs-built_in">Date</span>.now();
+        exp.log(<span class="hljs-string">"finish %c%s took %dms"</span>, consoleMethodStyle, current.label, execEndTime - execStartTime);
+        current = <span class="hljs-literal">null</span>;
+        list.shift();
+        <span class="hljs-keyword">if</span> (list.length) {
+            next();
+        }
+        <span class="hljs-keyword">return</span> execEndTime - execStartTime;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">next</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">if</span> (!current &amp;&amp; list.length) {
+            current = list[<span class="hljs-number">0</span>];
+            <span class="hljs-keyword">if</span> (exp.async &amp;&amp; current.delay !== <span class="hljs-literal">undefined</span>) {
+                exp.log(<span class="hljs-string">"	delay for %c%s %sms"</span>, consoleMethodStyle, current.label, current.delay);
+                clearTimeout(intv);
+                intv = setTimeout(exec, current.delay);
+            } <span class="hljs-keyword">else</span> {
+                exec();
+            }
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">exec</span><span class="hljs-params">()</span> {</span>
+        exp.log(<span class="hljs-string">"start method %c%s"</span>, consoleMethodStyle, current.label);
+        <span class="hljs-keyword">var</span> methodHasDoneArg = hasDoneArg(current.method);
+        <span class="hljs-keyword">if</span> (methodHasDoneArg) current.args.push(done);
+        execStartTime = <span class="hljs-built_in">Date</span>.now();
+        current.method.apply(<span class="hljs-literal">null</span>, current.args);
+        <span class="hljs-keyword">if</span> (!methodHasDoneArg) done();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> {</span>
+        running = <span class="hljs-literal">true</span>;
+        next();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destroy</span><span class="hljs-params">()</span> {</span>
+        clearTimeout(intv);
+        list.length = <span class="hljs-number">0</span>;
+        exp = <span class="hljs-literal">null</span>;
+    }
+    exp = exports.logWrapper(<span class="hljs-string">"Flow"</span>, exp || {}, <span class="hljs-string">"grey"</span>, dispatch);
+    exp.async = exp.hasOwnProperty(<span class="hljs-string">"async"</span>) ? exp.async : <span class="hljs-literal">true</span>;
+    exp.debug = exp.hasOwnProperty(<span class="hljs-string">"debug"</span>) ? exp.debug : <span class="hljs-number">0</span>;
+    exp.insert = insert;
+    exp.add = add;
+    exp.unique = unique;
+    exp.remove = remove;
+    exp.timeout = timeout;
+    exp.stopTimeout = stopTimeout;
+    exp.run = run;
+    exp.destroy = destroy;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>   exp.log = function () {
+       var args;
+       if (exp.debug &amp;&amp; exp.debug &lt;= 1) {
+           args = ux.util.array.toArray(arguments);
+           if (args[0].indexOf(&#39;%c&#39;) === -1) {
+               args[0] = &#39;%c&#39; + args[0];
+               args.splice(1, 0, consoleMethodStyle);
+           }
+           console.log.apply(console, args);
+       }
+   };
+   exp.info = function () {
+       var args;
+       if (exp.debug &amp;&amp; exp.debug &lt;= 2) {
+           args = ux.util.array.toArray(arguments);
+           args[0] = &#39;%c&#39; + args[0];
+           args.splice(1, 0, consoleInfoMethodStyle);
+           console.info.apply(console, args);
+       }
+   };
+   exp.warn = function () {
+       // output warnings. something is wrong.
+       if (window.console &amp;&amp; console.warn) {
+           console.warn.apply(console, arguments);
+       }
+   };</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">return</span> exp;
+}
+
+exports.datagrid.Flow = Flow;
+
+<span class="hljs-comment">/*global each, charPack, Flow, exports, module */</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <h2 id="datagrid-core">Datagrid Core</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>The datagrid manages the <code>core addons</code> to build the initial list and provide the public api necessary
+to communicate with other addons.
+Datagrid uses script templates inside of the dom to create your elements. Addons that are added to the addon
+attribute.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Datagrid</span><span class="hljs-params">(scope, element, attr, $compile)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>core variables</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> flow, <span class="hljs-comment">// flow management for methods of the datagrid. Keeping functions firing in the correct order especially if async methods are executed.</span>
+    waitCount = <span class="hljs-number">0</span>, <span class="hljs-comment">// waiting to render. If it fails too many times. it will die.</span>
+    changeWatcherSet = <span class="hljs-literal">false</span>, <span class="hljs-comment">//flag for change watchers.</span>
+    unwatchers = [], <span class="hljs-comment">// list of scope listeners that we want to clear on destroy</span>
+    content, <span class="hljs-comment">// the dom element with all of the chunks.</span>
+    scopes = [], <span class="hljs-comment">// the array of all scopes that have been compiled.</span>
+    active = [], <span class="hljs-comment">// the scopes that are currently active.</span>
+    lastVisibleScrollStart = <span class="hljs-number">0</span>, <span class="hljs-comment">// cached index to improve render loop by starting where it left off.</span>
+    rowOffsets = {}, <span class="hljs-comment">// cache for the heights of the rows for faster height calculations.</span>
+    viewHeight = <span class="hljs-number">0</span>, <span class="hljs-comment">// the visual area height.</span>
+    options, <span class="hljs-comment">// configs that are shared through the datagrid and addons.</span>
+    states = exports.datagrid.states, <span class="hljs-comment">// local reference to the states constants</span>
+    events = exports.datagrid.events, <span class="hljs-comment">// local reference to the events constants</span>
+    state = states.BUILDING, <span class="hljs-comment">// `state` of the app. Building || Ready.</span>
+    values = {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p><code>values</code> is the object that is used to share data for scrolling and other shared values.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        dirty: <span class="hljs-literal">false</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>if the data is dirty and a render has not happended since the data change.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        scroll: <span class="hljs-number">0</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>current scroll value of the grid</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        speed: <span class="hljs-number">0</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>current speed of the scroll</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        absSpeed: <span class="hljs-number">0</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>current absSpeed of the grid.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        scrollPercent: <span class="hljs-number">0</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>the current percent position of the scroll.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        touchDown: <span class="hljs-literal">false</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>if there is currently a touch start and not a touch end. Since touch is used for scrolling on a touch device. Ignored for desktop.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        scrollingStopIntv: <span class="hljs-literal">null</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>interval that allows waits for checks to know when the scrolling has stopped and a render is needed.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        activeRange: {
+            min: <span class="hljs-number">0</span>,
+            max: <span class="hljs-number">0</span>
+        }
+    }, exp = {};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>the datagrid public api
+Initialize the datagrid.
+add unique methods to the flow.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> {</span>
+        flow.unique(render);
+        flow.unique(updateRowWatchers);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>Build out the public api variables for the datagrid.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setupExports</span><span class="hljs-params">()</span> {</span>
+        exp.scope = scope;
+        exp.element = element;
+        exp.attr = attr;
+        exp.rowsLength = <span class="hljs-number">0</span>;
+        exp.scopes = scopes;
+        exp.data = exp.data || [];
+        exp.unwatchers = unwatchers;
+        exp.values = values;
+        exp.start = start;
+        exp.reset = reset;
+        exp.forceRenderScope = forceRenderScope;
+        exp.dispatch = dispatch;
+        exp.render = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+            flow.add(render);
+        };
+        exp.updateHeights = updateHeights;
+        exp.getOffsetIndex = getOffsetIndex;
+        exp.isActive = isActive;
+        exp.isCompiled = isCompiled;
+        exp.getScope = getScope;
+        exp.getRowElm = getRowElm;
+        exp.getRowOffset = getRowOffset;
+        exp.getRowHeight = getRowHeight;
+        exp.getViewportHeight = getViewportHeight;
+        exp.getContentHeight = getContentHeight;
+        exp.getContent = getContent;
+        exp.safeDigest = safeDigest;
+        exp.getRowIndexFromElement = getRowIndexFromElement;
+        exp.options = options = angular.extend({}, exports.datagrid.options, scope.$<span class="hljs-built_in">eval</span>(attr.options) || {});
+        exp.flow = flow = <span class="hljs-keyword">new</span> Flow({
+            async: options.hasOwnProperty(<span class="hljs-string">"async"</span>) ? !!options.async : <span class="hljs-literal">true</span>,
+            debug: options.hasOwnProperty(<span class="hljs-string">"debug"</span>) ? options.debug : <span class="hljs-number">0</span>
+        }, exp.dispatch);
+        flow.add(init);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>initialize core.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        flow.run();
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>The <code>content</code> dom element is the only direct child created by the datagrid.
+It is used so append all of the <code>chunks</code> so that the it can be scrolled.
+If the dom element is provided with the class <code>content</code> then that dom element will be used
+allowing the user to add custom classes directly tot he <code>content</code> dom element.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createContent</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">var</span> cnt = element[<span class="hljs-number">0</span>].getElementsByClassName(<span class="hljs-string">"content"</span>)[<span class="hljs-number">0</span>], classes = <span class="hljs-string">"content"</span>;
+        <span class="hljs-keyword">if</span> (cnt) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>if there is an old one. Pull the classes from it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            classes = cnt.className || <span class="hljs-string">"content"</span>;
+        }
+        <span class="hljs-keyword">if</span> (!cnt) {
+            cnt = angular.element(<span class="hljs-string">'&lt;div class="'</span> + classes + <span class="hljs-string">'"&gt;&lt;/div&gt;'</span>);
+            element.append(cnt);
+        }
+        <span class="hljs-keyword">if</span> (!cnt[<span class="hljs-number">0</span>]) {
+            cnt = angular.element(cnt);
+        }
+        <span class="hljs-keyword">return</span> cnt;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>return the reference to the content div.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getContent</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">return</span> content;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p><code>start</code> is called after the addons are added.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">start</span><span class="hljs-params">()</span> {</span>
+        exp.dispatch(exports.datagrid.events.INIT);
+        content = createContent();
+        waitForElementReady(<span class="hljs-number">0</span>);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p>this waits for the body element because if the grid has been constructed, but no heights are showing
+it is usually because the grid has not been attached to the document yet. So wait for the heights
+to be available, but only wait a little then exit.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">waitForElementReady</span><span class="hljs-params">(count)</span> {</span>
+        <span class="hljs-keyword">if</span> (!exp.element[<span class="hljs-number">0</span>].offsetHeight) {
+            <span class="hljs-keyword">if</span> (count &lt; <span class="hljs-number">1</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-38">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              <p>if they are doing custom compiling. They may compile before addit it to the dom.
+allow a pass to happen just in case.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                flow.add(waitForElementReady, [ count + <span class="hljs-number">1</span> ], <span class="hljs-number">0</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>retry.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="hljs-keyword">return</span>;
+            } <span class="hljs-keyword">else</span> {
+                flow.warn(<span class="hljs-string">"Datagrid: Dom Element does not have a height."</span>);
+            }
+        }
+        flow.add(exp.templateModel.createTemplates, <span class="hljs-literal">null</span>, <span class="hljs-number">0</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-40">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-40">&#182;</a>
+              </div>
+              <p>allow element to be added to dom.
+if the templates have different heights. Then they are dynamic.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        flow.add(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateDynamicRowHeights</span><span class="hljs-params">()</span> {</span>
+            options.dynamicRowHeights = exp.templateModel.dynamicHeights();
+        });
+        flow.add(addListeners);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addListeners</span><span class="hljs-params">()</span> {</span>
+        window.addEventListener(<span class="hljs-string">"resize"</span>, onResize);
+        unwatchers.push(scope.$on(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, onRowTemplateChange));
+        unwatchers.push(scope.$on(<span class="hljs-string">"$destroy"</span>, destroy));
+        flow.add(setupChangeWatcher, [], <span class="hljs-number">0</span>);
+        exp.dispatch(exports.datagrid.events.LISTENERS_READY);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setupChangeWatcher</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">if</span> (!changeWatcherSet) {
+            changeWatcherSet = <span class="hljs-literal">true</span>;
+            <span class="hljs-keyword">var</span> lastLength = <span class="hljs-number">0</span>, lastResult = <span class="hljs-literal">null</span>, len;
+            unwatchers.push(scope.$watch(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+                <span class="hljs-keyword">var</span> result = scope.$<span class="hljs-built_in">eval</span>(attr.uxDatagrid);
+                len = result &amp;&amp; result.length || <span class="hljs-number">0</span>;
+                <span class="hljs-keyword">if</span> (lastResult === result &amp;&amp; lastLength !== len) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-41">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              <p>TODO: this needs tested to make sure it calls if the length changes.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    flow.add(onDataChanged);
+                }
+                lastResult = result;
+                lastLength = len;
+                <span class="hljs-keyword">return</span> result;
+            }, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+                flow.add(onDataChanged);
+            }));
+            safeDigest(scope);
+        }
+    }
+    exp.upateViewportHeight = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">upateViewportHeight</span><span class="hljs-params">()</span> {</span>
+        viewHeight = exp.calculateViewportHeight();
+    };
+    <span class="hljs-comment">/**
+     * Be careful. This method is VERY expensive when there are lots of rows.
+     */</span>
+    exp.calculateViewportHeight = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">calculateViewportHeight</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">return</span> element[<span class="hljs-number">0</span>].offsetHeight;
+    };
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onResize</span><span class="hljs-params">(event)</span> {</span>
+        dispatch(exports.datagrid.events.RESIZE, {
+            event: event
+        });
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getScope</span><span class="hljs-params">(index)</span> {</span>
+        <span class="hljs-keyword">return</span> scopes[index];
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRowElm</span><span class="hljs-params">(index)</span> {</span>
+        <span class="hljs-keyword">return</span> angular.element(exp.chunkModel.getRow(index));
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isCompiled</span><span class="hljs-params">(index)</span> {</span>
+        <span class="hljs-keyword">return</span> !!scopes[index];
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRowIndexFromElement</span><span class="hljs-params">(el)</span> {</span>
+        <span class="hljs-keyword">if</span> (element[<span class="hljs-number">0</span>].contains(el[<span class="hljs-number">0</span>] || el)) {
+            <span class="hljs-keyword">var</span> s = el.scope ? el.scope() : angular.element(el).scope();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
+              </div>
+              <p>make sure we get the right scope to grab the index from. We need to get it from a row.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">while</span> (s &amp;&amp; s.$parent !== exp.scope) {
+                s = s.$parent;
+            }
+            <span class="hljs-keyword">return</span> s.$index;
+        }
+        <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p>TODO: need to reset row heights when a row is activated for the first time.... possibly every time for expanding rows.
+TODO: may want to update heights through a hierarchy for expanding rows.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRowOffset</span><span class="hljs-params">(index)</span> {</span>
+        <span class="hljs-keyword">if</span> (rowOffsets[index] === <span class="hljs-literal">undefined</span>) {
+            <span class="hljs-keyword">if</span> (options.dynamicRowHeights) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>dynamicRowHeights should be set by the templates.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                updateHeightValues();
+            } <span class="hljs-keyword">else</span> {
+                rowOffsets[index] = index * options.rowHeight;
+            }
+        }
+        <span class="hljs-keyword">return</span> rowOffsets[index];
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRowHeight</span><span class="hljs-params">(index)</span> {</span>
+        <span class="hljs-keyword">return</span> exp.templateModel.getTemplateHeight(exp.data[index]);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getViewportHeight</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">return</span> viewHeight;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getContentHeight</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">return</span> exp.chunkModel.getChunkList().height;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createDom</span><span class="hljs-params">(list)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>TODO: if there is any dom. It needs destroyed first.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        exp.log(<span class="hljs-string">"OVERWRITE DOM!!!"</span>);
+        <span class="hljs-keyword">var</span> len = list.length;
+        flow.add(exp.chunkModel.chunkDom, [ list, options.chunkSize, <span class="hljs-string">'&lt;div class="'</span> + options.chunkClass + <span class="hljs-string">'"&gt;'</span>, <span class="hljs-string">"&lt;/div&gt;"</span>, content ], <span class="hljs-number">0</span>);
+        exp.rowsLength = len;
+        exp.log(<span class="hljs-string">"created %s dom elements"</span>, len);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">compileRow</span><span class="hljs-params">(index)</span> {</span>
+        <span class="hljs-keyword">var</span> s = scopes[index], prev, tpl, el, unwatch;
+        <span class="hljs-keyword">if</span> (!s) {
+            s = scope.$<span class="hljs-keyword">new</span>();
+            prev = getScope(index - <span class="hljs-number">1</span>);
+            tpl = exp.templateModel.getTemplate(exp.data[index]);
+            <span class="hljs-keyword">if</span> (prev) {
+                prev.$$nextSibling = s;
+                s.$$prevSibling = prev;
+            }
+            s.$status = <span class="hljs-string">"compiled"</span>;
+            s[tpl.item] = exp.data[index];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
+              <p>set the data to the scope.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            s.$index = index;
+            unwatch = s.$watch(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+                s.digested = <span class="hljs-literal">true</span>;
+                unwatch();
+            });
+            scopes[index] = s;
+            el = getRowElm(index);
+            el.removeClass(options.uncompiledClass);
+            $compile(el)(s);
+            deactivateScope(s);
+        }
+        <span class="hljs-keyword">return</span> s;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildRows</span><span class="hljs-params">(list)</span> {</span>
+        state = states.BUILDING;
+        flow.insert(createDom, [ list ], <span class="hljs-number">0</span>);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ready</span><span class="hljs-params">()</span> {</span>
+        state = states.READY;
+        flow.add(render);
+        flow.add(fireReadyEvent);
+        flow.add(safeDigest, [ scope ]);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fireReadyEvent</span><span class="hljs-params">()</span> {</span>
+        scope.$emit(exports.datagrid.events.READY);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">safeDigest</span><span class="hljs-params">(s)</span> {</span>
+        <span class="hljs-keyword">if</span> (!s.$$phase) {
+            s.$digest();
+        }
+    }
+    <span class="hljs-comment">/**
+     * Turn off watchers for that index scope and any of it's children.
+     * @param s
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">deactivateScope</span><span class="hljs-params">(s)</span> {</span>
+        <span class="hljs-keyword">var</span> child;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p>if the scope is not created yet. just skip.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (s &amp;&amp; !isActive(s)) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <p>do not deactivate one that is already deactivated.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            s.$$$watchers = s.$$watchers;
+            s.$$watchers = [];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              <p>recursively go through children and deactivate them.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (s.$$childHead) {
+                child = s.$$childHead;
+                <span class="hljs-keyword">while</span> (child) {
+                    deactivateScope(child);
+                    child = child.$$nextSibling;
+                }
+            }
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+    <span class="hljs-comment">/**
+     * Turn on watchers for that index scope and any of it's children.
+     * @param s
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">activateScope</span><span class="hljs-params">(s)</span> {</span>
+        <span class="hljs-keyword">var</span> child;
+        <span class="hljs-keyword">if</span> (s &amp;&amp; s.$$$watchers) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
+              <p>do not activate one that is already active.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            s.$$watchers = s.$$$watchers;
+            s.$$$watchers = <span class="hljs-literal">null</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-51">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-51">&#182;</a>
+              </div>
+              <p>recursively go through children and activate them.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (s.$$childHead) {
+                child = s.$$childHead;
+                <span class="hljs-keyword">while</span> (child) {
+                    activateScope(child);
+                    child = child.$$nextSibling;
+                }
+            }
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        }
+        <span class="hljs-keyword">return</span> !!(s &amp;&amp; !s.$$$watchers);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isActive</span><span class="hljs-params">(index)</span> {</span>
+        <span class="hljs-keyword">var</span> s = scopes[index];
+        <span class="hljs-keyword">return</span> !!(s &amp;&amp; !s.$$$watchers);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getOffsetIndex</span><span class="hljs-params">(offset)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-52">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-52">&#182;</a>
+              </div>
+              <p>updateHeightValues must be called before this.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">var</span> est = <span class="hljs-built_in">Math</span>.floor(offset / exp.templateModel.averageTemplateHeight()), i = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">if</span> (rowOffsets[est] &amp;&amp; rowOffsets[est] &lt;= offset) {
+            i = est;
+        }
+        <span class="hljs-keyword">while</span> (i &lt; exp.rowsLength) {
+            <span class="hljs-keyword">if</span> (rowOffsets[i] &gt; offset) {
+                <span class="hljs-keyword">return</span> i - <span class="hljs-number">1</span>;
+            }
+            i += <span class="hljs-number">1</span>;
+        }
+        <span class="hljs-keyword">return</span> i;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getStartingIndex</span><span class="hljs-params">()</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-53">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-53">&#182;</a>
+              </div>
+              <p>we will take the last first active element. We will start counting from there till we get to the top
+of the start area. So we never have to loop the whole thing.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">var</span> height = viewHeight, result = {
+            startIndex: <span class="hljs-number">0</span>,
+            i: <span class="hljs-number">0</span>,
+            inc: <span class="hljs-number">1</span>,
+            end: exp.rowsLength,
+            visibleScrollStart: values.scroll + options.cushion,
+            visibleScrollEnd: values.scroll + height - options.cushion
+        };
+        result.startIndex = result.i = getOffsetIndex(values.scroll);
+        <span class="hljs-keyword">return</span> result;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateHeightValues</span><span class="hljs-params">()</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-54">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-54">&#182;</a>
+              </div>
+              <p>TODO: this is going to be updated to use ChunkArray data to be faster.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">var</span> height = <span class="hljs-number">0</span>, i = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">while</span> (i &lt; exp.rowsLength) {
+            rowOffsets[i] = height;
+            height += exp.templateModel.getTemplateHeight(exp.data[i]);
+            i += <span class="hljs-number">1</span>;
+        }
+        options.rowHeight = exp.rowsLength ? exp.templateModel.getTemplateHeight(<span class="hljs-string">"default"</span>) : <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-comment">/**
+     * Activate or deactivate scopes that are within range.
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateRowWatchers</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">var</span> loop = getStartingIndex(), offset = loop.i * <span class="hljs-number">40</span>, lastActive = [].concat(active), lastActiveIndex, s, prevS;
+        <span class="hljs-keyword">if</span> (loop.i &lt; <span class="hljs-number">0</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-55">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-55">&#182;</a>
+              </div>
+              <p>then scroll is negative. ignore it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">return</span>;
+        }
+        exp.dispatch(events.BEFORE_UPDATE_WATCHERS, loop);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-56">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-56">&#182;</a>
+              </div>
+              <p>we only want to update stuff if we are scrolling slow.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        resetMinMax();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-57">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-57">&#182;</a>
+              </div>
+              <p>this needs to always be set after the dispatch of before update watchers in case they need the before activeRange.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        active.length = <span class="hljs-number">0</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-58">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-58">&#182;</a>
+              </div>
+              <p>make sure not to reset until after getStartingIndex.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        exp.log(<span class="hljs-string">"	visibleScrollStart %s visibleScrollEnd %s"</span>, loop.visibleScrollStart, loop.visibleScrollEnd);
+        <span class="hljs-keyword">while</span> (loop.i &lt; exp.rowsLength) {
+            prevS = scope.$$childHead ? scopes[loop.i - <span class="hljs-number">1</span>] : <span class="hljs-literal">null</span>;
+            offset = getRowOffset(loop.i);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-59">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-59">&#182;</a>
+              </div>
+              <p>this is where the chunks and rows get created is when they are requested if they don&#39;t exist.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (offset &gt;= loop.visibleScrollStart &amp;&amp; offset &lt;= loop.visibleScrollEnd) {
+                s = compileRow(loop.i);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-60">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-60">&#182;</a>
+              </div>
+              <p>only compiles if it is not already compiled. Still returns the scope.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="hljs-keyword">if</span> (loop.started === <span class="hljs-literal">undefined</span>) {
+                    loop.started = loop.i;
+                }
+                updateMinMax(loop.i);
+                <span class="hljs-keyword">if</span> (activateScope(s)) {
+                    lastActiveIndex = lastActive.indexOf(loop.i);
+                    <span class="hljs-keyword">if</span> (lastActiveIndex !== -<span class="hljs-number">1</span>) {
+                        lastActive.splice(lastActiveIndex, <span class="hljs-number">1</span>);
+                    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-61">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-61">&#182;</a>
+              </div>
+              <p>make sure to put them into active in the right order.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    active.push(loop.i);
+                    safeDigest(s);
+                }
+            }
+            loop.i += loop.inc;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-62">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-62">&#182;</a>
+              </div>
+              <p>optimize the loop</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (loop.inc &gt; <span class="hljs-number">0</span> &amp;&amp; offset &gt; loop.visibleScrollEnd || loop.inc &lt; <span class="hljs-number">0</span> &amp;&amp; offset &lt; loop.visibleScrollStart) {
+                <span class="hljs-keyword">break</span>;
+            }
+        }
+        loop.ended = loop.i - <span class="hljs-number">1</span>;
+        exp.log(<span class="hljs-string">"	startIndex %s endIndex %s"</span>, loop.startIndex, loop.i);
+        deactivateList(lastActive);
+        lastVisibleScrollStart = loop.visibleScrollStart;
+        exp.log(<span class="hljs-string">"	activated %s"</span>, active.join(<span class="hljs-string">", "</span>));
+        updateLinks();
+        flow.add(safeDigest, [ scope ]);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-63">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-63">&#182;</a>
+              </div>
+              <p>this dispatch needs to be after the digest so that it doesn&#39;t cause {} to show up in the render.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        exp.dispatch(events.AFTER_UPDATE_WATCHERS, loop);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">deactivateList</span><span class="hljs-params">(lastActive)</span> {</span>
+        <span class="hljs-keyword">var</span> lastActiveIndex, deactivated = [];
+        <span class="hljs-keyword">while</span> (lastActive.length) {
+            lastActiveIndex = lastActive.pop();
+            deactivated.push(lastActiveIndex);
+            deactivateScope(scopes[lastActiveIndex]);
+        }
+        exp.log(<span class="hljs-string">"	deactivated %s"</span>, deactivated.join(<span class="hljs-string">", "</span>));
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateLinks</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">if</span> (active.length) {
+            <span class="hljs-keyword">var</span> lastIndex = active[active.length - <span class="hljs-number">1</span>], i = <span class="hljs-number">0</span>, len = active.length;
+            scope.$$childHead = scopes[active[<span class="hljs-number">0</span>]];
+            scope.$$childTail = scopes[lastIndex];
+            <span class="hljs-keyword">while</span> (i &lt; len) {
+                scopes[active[i]].$$prevSibling = scopes[active[i - <span class="hljs-number">1</span>]];
+                scopes[active[i]].$$nextSibling = scopes[active[i + <span class="hljs-number">1</span>]];
+                i += <span class="hljs-number">1</span>;
+            }
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">resetMinMax</span><span class="hljs-params">()</span> {</span>
+        values.activeRange.min = values.activeRange.max = -<span class="hljs-number">1</span>;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateMinMax</span><span class="hljs-params">(activeIndex)</span> {</span>
+        values.activeRange.min = values.activeRange.min &lt; activeIndex &amp;&amp; values.activeRange.min &gt;= <span class="hljs-number">0</span> ? values.activeRange.min : activeIndex;
+        values.activeRange.max = values.activeRange.max &gt; activeIndex &amp;&amp; values.activeRange.max &gt;= <span class="hljs-number">0</span> ? values.activeRange.max : activeIndex;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">beforeRenderAfterDataChange</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">if</span> (values.dirty) {
+            dispatch(exports.datagrid.events.BEFORE_RENDER_AFTER_DATA_CHANGE);
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">afterRenderAfterDataChange</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">if</span> (values.dirty) {
+            values.dirty = <span class="hljs-literal">false</span>;
+            dispatch(exports.datagrid.events.RENDER_AFTER_DATA_CHANGE);
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">readyToRender</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">if</span> (!viewHeight) {
+            exp.upateViewportHeight();
+            waitCount += <span class="hljs-number">1</span>;
+            <span class="hljs-keyword">if</span> (waitCount &lt; <span class="hljs-number">2</span>) {
+                exp.info(exports + <span class="hljs-string">".datagrid is waiting for element to have a height."</span>);
+                flow.add(render, <span class="hljs-literal">null</span>, <span class="hljs-number">0</span>);
+            } <span class="hljs-keyword">else</span> {
+                flow.warn(<span class="hljs-string">"Datagrid: Unable to determine a height for the datagrid. Cannot render. Exiting."</span>);
+            }
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span><span class="hljs-params">()</span> {</span>
+        exp.dispatch(exports.datagrid.events.BEFORE_RENDER);
+        <span class="hljs-keyword">if</span> (readyToRender()) {
+            waitCount = <span class="hljs-number">0</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-64">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-64">&#182;</a>
+              </div>
+              <p>Where <a href="#states.BUILDING">states.BUILDING</a> is used</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (state === states.BUILDING) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-65">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-65">&#182;</a>
+              </div>
+              <p>TODO: removeExtraRows is not compatible. It needs removed. Only buildRows will work with chunking.
+flow.add(removeExtraRows, [exp.data]);// if our data updates we need to remove extra rows.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                flow.add(buildRows, [ exp.data ], <span class="hljs-number">0</span>);
+                flow.add(updateHeightValues);
+                flow.add(ready);
+            } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (state === states.READY) {
+                flow.add(beforeRenderAfterDataChange);
+                flow.add(updateRowWatchers);
+                flow.add(afterRenderAfterDataChange);
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"RENDER STATE INVALID"</span>);
+            }
+        }
+        flow.add(exp.dispatch, [ exports.datagrid.events.AFTER_RENDER ]);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onDataChanged</span><span class="hljs-params">()</span> {</span>
+        dispatch(exports.datagrid.events.BEFORE_DATA_CHANGE);
+        values.dirty = <span class="hljs-literal">true</span>;
+        exp.log(<span class="hljs-string">"dataChanged"</span>);
+        exp.grouped = scope.$<span class="hljs-built_in">eval</span>(attr.grouped);
+        exp.data = exp.setData(scope.$<span class="hljs-built_in">eval</span>(attr.uxDatagrid || attr.list), exp.grouped) || [];
+        dispatch(exports.datagrid.events.AFTER_DATA_CHANGE);
+        flow.add(reset);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-66">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-66">&#182;</a>
+              </div>
+              <p>reset = clear all and restart.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span><span class="hljs-params">()</span> {</span>
+        destroyScopes();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-67">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-67">&#182;</a>
+              </div>
+              <p>now destroy all of the dom.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        rowOffsets = {};
+        active.length = <span class="hljs-number">0</span>;
+        scopes.length = <span class="hljs-number">0</span>;
+        content.children().unbind();
+        content.children().remove();
+        viewHeight = <span class="hljs-number">0</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-68">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-68">&#182;</a>
+              </div>
+              <p>force to recalculate heights.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        setupExports();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-69">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-69">&#182;</a>
+              </div>
+              <p>make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        exp.chunkModel.reset();
+        state = states.BUILDING;
+        flow.add(render);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">forceRenderScope</span><span class="hljs-params">(index)</span> {</span>
+        <span class="hljs-keyword">var</span> s = scopes[index];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-70">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-70">&#182;</a>
+              </div>
+              <pre><code>   exp.log(&quot;\tforceRenderScope %s&quot;, index);
+</code></pre>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (!s &amp;&amp; index &gt; <span class="hljs-number">0</span> &amp;&amp; index &lt; exp.rowsLength) {
+            s = compileRow(index);
+        }
+        <span class="hljs-keyword">if</span> (s &amp;&amp; !scope.$$phase) {
+            activateScope(s);
+            s.$digest();
+            deactivateScope(s);
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onRowTemplateChange</span><span class="hljs-params">(evt, item, oldTemplate, newTemplate)</span> {</span>
+        <span class="hljs-keyword">var</span> index = exp.getNormalizedIndex(item), el = getRowElm(index), s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope();
+        <span class="hljs-keyword">if</span> (s !== scope) {
+            s.$destroy();
+            scopes[index] = <span class="hljs-literal">null</span>;
+            el.replaceWith(exp.templateModel.getTemplate(item).template);
+            scopes[index] = compileRow(index);
+            updateHeights(index);
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateHeights</span><span class="hljs-params">(rowIndex)</span> {</span>
+        flow.add(exp.chunkModel.updateAllChunkHeights, [ rowIndex ]);
+        flow.add(updateHeightValues);
+        flow.add(render);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatch</span><span class="hljs-params">()</span> {</span>
+        scope.$emit.apply(scope, <span class="hljs-built_in">arguments</span>);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destroyScopes</span><span class="hljs-params">()</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-71">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-71">&#182;</a>
+              </div>
+              <p>because child scopes may not be in order because of rendering techniques. We must loop through
+all scopes and destroy them manually.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">var</span> lastScope, nextScope, i = <span class="hljs-number">0</span>;
+        each(scopes, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(s, index)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-72">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-72">&#182;</a>
+              </div>
+              <p>listeners should be destroyed with the angular destroy.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (s) {
+                s.$$prevSibling = lastScope || <span class="hljs-literal">undefined</span>;
+                i = index;
+                <span class="hljs-keyword">while</span> (!nextScope &amp;&amp; i &lt; exp.rowsLength) {
+                    i += <span class="hljs-number">1</span>;
+                    nextScope = scopes[i] || <span class="hljs-literal">undefined</span>;
+                }
+                activateScope(s);
+                lastScope = s;
+                s.$destroy();
+            }
+        });
+        scope.$$childHead = <span class="hljs-literal">undefined</span>;
+        scope.$$childTail = <span class="hljs-literal">undefined</span>;
+        scopes.length = <span class="hljs-number">0</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-73">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-73">&#182;</a>
+              </div>
+              <p>destroy needs to put all watcher back before destroying or it will not destroy child scopes, or remove watchers.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destroy</span><span class="hljs-params">()</span> {</span>
+        scope.datagrid = <span class="hljs-literal">null</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-74">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-74">&#182;</a>
+              </div>
+              <p>we have a circular reference. break it on destroy.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        exp.log(<span class="hljs-string">"destroying grid"</span>);
+        clearTimeout(values.scrollingStopIntv);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-75">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-75">&#182;</a>
+              </div>
+              <p>destroy flow.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        flow.destroy();
+        exp.flow = <span class="hljs-literal">undefined</span>;
+        flow = <span class="hljs-literal">null</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-76">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-76">&#182;</a>
+              </div>
+              <p>destroy watchers.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">while</span> (unwatchers.length) {
+            unwatchers.pop()();
+        }
+        exp.destroyLogger();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-77">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-77">&#182;</a>
+              </div>
+              <p>now remove every property on exports.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i <span class="hljs-keyword">in</span> exp) {
+            <span class="hljs-keyword">if</span> (exp[i] &amp;&amp; exp[i].hasOwnProperty(<span class="hljs-string">"destroy"</span>)) {
+                exp[i].destroy();
+                exp[i] = <span class="hljs-literal">null</span>;
+            }
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-78">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-78">&#182;</a>
+              </div>
+              <p>activate scopes so they can be destroyed by angular.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        destroyScopes();
+        element.remove();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-79">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-79">&#182;</a>
+              </div>
+              <p>this seems to be the most memory efficient way to remove elements.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        exp = <span class="hljs-literal">null</span>;
+        scope = <span class="hljs-literal">null</span>;
+        element = <span class="hljs-literal">null</span>;
+        attr = <span class="hljs-literal">null</span>;
+        unwatchers = <span class="hljs-literal">null</span>;
+        content = <span class="hljs-literal">null</span>;
+        active.length = <span class="hljs-number">0</span>;
+        active = <span class="hljs-literal">null</span>;
+        scopes.length = <span class="hljs-number">0</span>;
+        scopes = <span class="hljs-literal">null</span>;
+        values = <span class="hljs-literal">null</span>;
+        states = <span class="hljs-literal">null</span>;
+        events = <span class="hljs-literal">null</span>;
+        $compile = <span class="hljs-literal">null</span>;
+    }
+    exports.logWrapper(<span class="hljs-string">"datagrid"</span>, exp, <span class="hljs-string">"green"</span>);
+    setupExports();
+    <span class="hljs-keyword">return</span> exp;
+}
+
+module.directive(<span class="hljs-string">"uxDatagrid"</span>, [ <span class="hljs-string">"$compile"</span>, <span class="hljs-string">"addons"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">($compile, addons)</span> {</span>
+    <span class="hljs-keyword">return</span> {
+        restrict: <span class="hljs-string">"AE"</span>,
+        link: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(scope, element, attr)</span> {</span>
+            <span class="hljs-keyword">var</span> inst = <span class="hljs-keyword">new</span> Datagrid(scope, element, attr, $compile);
+            scope.datagrid = inst;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-80">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-80">&#182;</a>
+              </div>
+              <p>expose to scope.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            each(exports.datagrid.coreAddons, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(method)</span> {</span>
+                method.apply(inst, [ inst ]);
+            });
+            addons(inst, attr.addons);
+            inst.start();
+        }
+    };
+} ]);
+
+<span class="hljs-comment">/**
+ * ChunkArray is an array with additional properties needed by the chunkModel to generate and access chunks
+ * of the dom with high performance.
+ * @constructor
+ */</span>
+<span class="hljs-keyword">var</span> ChunkArray = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>};
+
+ChunkArray.prototype = <span class="hljs-built_in">Array</span>.prototype;
+
+ChunkArray.prototype.min = <span class="hljs-number">0</span>;
+
+ChunkArray.prototype.max = <span class="hljs-number">0</span>;
+
+ChunkArray.prototype.templateStart = <span class="hljs-string">""</span>;
+
+ChunkArray.prototype.templateEnd = <span class="hljs-string">""</span>;
+
+ChunkArray.prototype.getStub = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getStub</span><span class="hljs-params">(str)</span> {</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.templateStart + str + <span class="hljs-keyword">this</span>.templateEnd;
+};
+
+<span class="hljs-comment">/**
+ * Get the HTML string representation of the children in this array.
+ * If deep then return this and all children down.
+ * @param deep
+ * @returns {string}
+ */</span>
+ChunkArray.prototype.getChildrenStr = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(deep)</span> {</span>
+    <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, len = <span class="hljs-keyword">this</span>.length, str = <span class="hljs-string">""</span>, ca = <span class="hljs-keyword">this</span>;
+    <span class="hljs-keyword">while</span> (i &lt; len) {
+        <span class="hljs-keyword">if</span> (ca[i] <span class="hljs-keyword">instanceof</span> ChunkArray) {
+            str += ca[i].getStub(deep ? ca[i].getChildrenStr(deep) : <span class="hljs-string">""</span>);
+        } <span class="hljs-keyword">else</span> {
+            str += <span class="hljs-keyword">this</span>.templateModel.getTemplate(ca[i]).template;
+        }
+        i += <span class="hljs-number">1</span>;
+    }
+    <span class="hljs-keyword">this</span>.rendered = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">return</span> str;
+};
+
+ChunkArray.prototype.updateHeight = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(templateModel, _rows)</span> {</span>
+    <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, len, height = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>[<span class="hljs-number">0</span>] <span class="hljs-keyword">instanceof</span> ChunkArray) {
+        len = <span class="hljs-keyword">this</span>.length;
+        <span class="hljs-keyword">while</span> (i &lt; len) {
+            height += <span class="hljs-keyword">this</span>[i].height;
+            i += <span class="hljs-number">1</span>;
+        }
+    } <span class="hljs-keyword">else</span> {
+        height = templateModel.getHeight(_rows, <span class="hljs-keyword">this</span>.min, <span class="hljs-keyword">this</span>.max);
+    }
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.height !== height) {
+        <span class="hljs-keyword">this</span>.dirtyHeight = <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-keyword">this</span>.height = height;
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.dirtyHeight) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.parent) <span class="hljs-keyword">this</span>.parent.updateHeight(templateModel, _rows);
+    }
+};
+
+<span class="hljs-comment">/**
+ * Perform proper cleanup.
+ */</span>
+ChunkArray.prototype.destroy = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+    <span class="hljs-keyword">this</span>.templateStart = <span class="hljs-string">""</span>;
+    <span class="hljs-keyword">this</span>.templateEnd = <span class="hljs-string">""</span>;
+    <span class="hljs-keyword">this</span>.templateModel = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">this</span>.rendered = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">this</span>.parent = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">this</span>.length = <span class="hljs-number">0</span>;
+};
+
+<span class="hljs-comment">/**
+ * chunkModel
+ * Because the browser has low performance on dom elements that exist in high numbers and are all
+ * siblings chunking is used to break them up into limits of their number and their parents and so on.
+ * So think of it as every chunk not having more than X number of children weather those children be
+ * chunks or they be rows.
+ *
+ * This speeds up the browser significantly because a resize event from a dom element will not affect
+ * all of them, but just those direct siblings and then it's parents siblings and so on up the chain.
+ *
+ * @param exp
+ * @returns {{}}
+ */</span>
+exports.datagrid.coreAddons.chunkModel = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">chunkModel</span><span class="hljs-params">(exp)</span> {</span>
+    <span class="hljs-keyword">var</span> _list, _rows, _chunkSize, _el, result = exports.logWrapper(<span class="hljs-string">"chunkModel"</span>, {}, <span class="hljs-string">"purple"</span>, exp.dispatch);
+    <span class="hljs-comment">/**
+     * Return the list that was created.
+     * @returns {ChunkArray}
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getChunkList</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">return</span> _list;
+    }
+    <span class="hljs-comment">/**
+     * Create a ChunkArray from the array of data that is passed.
+     * The array that is passed should not be multi-dimensional. This will only work with a single
+     * dimensional array.
+     * @param {Array} list
+     * @param {Number} size
+     * @param {String} templateStart
+     * @param {String} templateEnd
+     * @returns {ChunkArray}
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">chunkList</span><span class="hljs-params">(list, size, templateStart, templateEnd)</span> {</span>
+        <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, len = list.length, result = <span class="hljs-keyword">new</span> ChunkArray(), childAry, item;
+        <span class="hljs-keyword">while</span> (i &lt; len) {
+            item = list[i];
+            <span class="hljs-keyword">if</span> (i % size === <span class="hljs-number">0</span>) {
+                <span class="hljs-keyword">if</span> (childAry) {
+                    calculateHeight(childAry);
+                }
+                childAry = <span class="hljs-keyword">new</span> ChunkArray();
+                childAry.min = item.min || i;
+                childAry.templateModel = exp.templateModel;
+                childAry.templateStart = templateStart;
+                childAry.templateEnd = templateEnd;
+                childAry.parent = result;
+                childAry.index = result.length;
+                result.push(childAry);
+            }
+            <span class="hljs-keyword">if</span> (item <span class="hljs-keyword">instanceof</span> ChunkArray) {
+                item.parent = childAry;
+            }
+            childAry.push(item);
+            childAry.max = item.max || i;
+            i += <span class="hljs-number">1</span>;
+        }
+        <span class="hljs-keyword">if</span> (childAry) calculateHeight(childAry);
+        <span class="hljs-keyword">if</span> (!result.min) {
+            result.min = result[<span class="hljs-number">0</span>] ? result[<span class="hljs-number">0</span>].min : <span class="hljs-number">0</span>;
+            result.max = result[result.length - <span class="hljs-number">1</span>] ? result[result.length - <span class="hljs-number">1</span>].max : <span class="hljs-number">0</span>;
+            result.templateStart = templateStart;
+            result.templateEnd = templateEnd;
+            calculateHeight(result);
+            result.dirtyHeight = <span class="hljs-literal">false</span>;
+        }
+        <span class="hljs-keyword">return</span> result.length &gt; size ? chunkList(result, size, templateStart, templateEnd) : result;
+    }
+    <span class="hljs-comment">/**
+     * Using a ChunkArray calculate the heights of each array recursively.
+     * @param ary {ChunkArray}
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">calculateHeight</span><span class="hljs-params">(ary)</span> {</span>
+        ary.updateHeight(exp.templateModel, _rows);
+        <span class="hljs-keyword">if</span> (!ary.rendered) {
+            ary.templateStart = ary.templateStart.substr(<span class="hljs-number">0</span>, ary.templateStart.length - <span class="hljs-number">1</span>) + <span class="hljs-string">' style="width:100%;height:'</span> + ary.height + <span class="hljs-string">'px;"&gt;'</span>;
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateAllChunkHeights</span><span class="hljs-params">(rowIndex)</span> {</span>
+        <span class="hljs-keyword">var</span> indexes = getRowIndexes(rowIndex, _list), ary = _list, index;
+        <span class="hljs-keyword">while</span> (indexes.length) {
+            index = indexes.shift();
+            <span class="hljs-keyword">if</span> (ary[index] <span class="hljs-keyword">instanceof</span> ChunkArray) {
+                ary = ary[index];
+            }
+        }
+        ary.updateHeight(exp.templateModel, _rows);
+        updateChunkHeights(_el, _list, indexes);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateChunkHeights</span><span class="hljs-params">(el, ary)</span> {</span>
+        <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, len = ary.length;
+        <span class="hljs-keyword">while</span> (i &lt; len) {
+            <span class="hljs-keyword">if</span> (ary.dirtyHeight) {
+                ary.dirtyHeight = <span class="hljs-literal">false</span>;
+                el.css({
+                    height: ary.height + <span class="hljs-string">"px"</span>
+                });
+                updateChunkHeights(angular.element(el.children()[i]), ary[i]);
+            }
+            i += <span class="hljs-number">1</span>;
+        }
+    }
+    <span class="hljs-comment">/**
+     * Create the chunkList so that it is ready for dom. Set properties needed to create the dom.
+     * The dom gets created when the rows are accessed.
+     * @param {Array} list // single dimensional array only.
+     * @param {Number} size
+     * @param {String} templateStart
+     * @param {String} templateEnd
+     * @param {DomElement} el
+     * @returns {DomElement}
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">chunkDom</span><span class="hljs-params">(list, size, templateStart, templateEnd, el)</span> {</span>
+        result.log(<span class="hljs-string">"chunkDom"</span>);
+        _el = el;
+        _chunkSize = size;
+        _rows = list;
+        _list = chunkList(list, size, templateStart, templateEnd);
+        <span class="hljs-keyword">return</span> el;
+    }
+    <span class="hljs-comment">/**
+     * Generate an array of indexes that point to that row.
+     * @param rowIndex
+     * @param chunkList
+     * @param indexes
+     * @returns {Array}
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRowIndexes</span><span class="hljs-params">(rowIndex, chunkList, indexes)</span> {</span>
+        <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, len = chunkList.length, chunk;
+        indexes = indexes || [];
+        <span class="hljs-keyword">while</span> (i &lt; len) {
+            chunk = chunkList[i];
+            <span class="hljs-keyword">if</span> (chunk <span class="hljs-keyword">instanceof</span> ChunkArray) {
+                <span class="hljs-keyword">if</span> (rowIndex &gt;= chunk.min &amp;&amp; rowIndex &lt;= chunk.max) {
+                    indexes.push(i);
+                    getRowIndexes(rowIndex, chunk, indexes);
+                    <span class="hljs-keyword">break</span>;
+                }
+            } <span class="hljs-keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-81">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-81">&#182;</a>
+              </div>
+              <p>we are at the end. So we just need the last index.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                indexes.push(rowIndex % _chunkSize);
+                <span class="hljs-keyword">break</span>;
+            }
+            i += <span class="hljs-number">1</span>;
+        }
+        <span class="hljs-keyword">return</span> indexes;
+    }
+    <span class="hljs-comment">/**
+     * Get the dom row element.
+     * @param rowIndex {Number}
+     * @returns {*}
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRow</span><span class="hljs-params">(rowIndex)</span> {</span>
+        <span class="hljs-keyword">var</span> indexes = getRowIndexes(rowIndex, _list);
+        <span class="hljs-keyword">return</span> buildDomByIndexes(indexes);
+    }
+    <span class="hljs-comment">/**
+     * Get the domElement by indexes, create the dom if it doesn't exist.
+     * @param indexes {Number}
+     * @returns {*}
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildDomByIndexes</span><span class="hljs-params">(indexes)</span> {</span>
+        <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, index, indxs = indexes.slice(<span class="hljs-number">0</span>), ca = _list, el = _el;
+        <span class="hljs-keyword">while</span> (i &lt; indxs.length) {
+            index = indxs.shift();
+            <span class="hljs-keyword">if</span> (!ca.rendered) {
+                el.html(ca.getChildrenStr());
+            }
+            ca = ca[index];
+            el = angular.element(el.children()[index]);
+        }
+        <span class="hljs-keyword">return</span> el;
+    }
+    <span class="hljs-comment">/**
+     * Remove all dom, and all other references.
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span><span class="hljs-params">()</span> {</span>
+        result.log(<span class="hljs-string">"reset"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-82">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-82">&#182;</a>
+              </div>
+              <p>TODO: this needs to make sure it destroys things properly</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (_list) _list.destroy();
+        _rows = <span class="hljs-literal">null</span>;
+        _list = <span class="hljs-literal">null</span>;
+        _chunkSize = <span class="hljs-literal">null</span>;
+        _el = <span class="hljs-literal">null</span>;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destroy</span><span class="hljs-params">()</span> {</span>
+        reset();
+        result.destroyLogger();
+    }
+    result.chunkDom = chunkDom;
+    result.getChunkList = getChunkList;
+    result.getRowIndexes = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(rowIndex)</span> {</span>
+        <span class="hljs-keyword">return</span> getRowIndexes(rowIndex, _list);
+    };
+    result.getRow = getRow;
+    result.reset = reset;
+    result.updateAllChunkHeights = updateAllChunkHeights;
+    result.destroy = destroy;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-83">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-83">&#182;</a>
+              </div>
+              <p>apply event dispatching.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    dispatcher(result);
+    exp.chunkModel = result;
+    <span class="hljs-keyword">return</span> result;
+};
+
+exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);
+
+exports.datagrid.events.RENDER_PROGRESS = <span class="hljs-string">"datagrid:renderProgress"</span>;
+
+exports.datagrid.coreAddons.creepRenderModel = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">creepRenderModel</span><span class="hljs-params">(exp)</span> {</span>
+    <span class="hljs-keyword">var</span> intv = <span class="hljs-number">0</span>, creepCount = <span class="hljs-number">0</span>, model = {}, upIndex = <span class="hljs-number">0</span>, downIndex = <span class="hljs-number">0</span>, time;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">digest</span><span class="hljs-params">(index)</span> {</span>
+        <span class="hljs-keyword">var</span> s = exp.getScope(index);
+        <span class="hljs-keyword">if</span> (!s || !s.digested) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-84">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-84">&#182;</a>
+              </div>
+              <p>just skip if already digested.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            exp.forceRenderScope(index);
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">calculatePercent</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">var</span> result = {
+            count: <span class="hljs-number">0</span>
+        };
+        each(exp.scopes, calculateScopePercent, result);
+        <span class="hljs-keyword">return</span> {
+            count: result.count,
+            len: exp.rowsLength
+        };
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">calculateScopePercent</span><span class="hljs-params">(s, index, list, result)</span> {</span>
+        result.count += s ? <span class="hljs-number">1</span> : <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onInterval</span><span class="hljs-params">(started, ended, force)</span> {</span>
+        <span class="hljs-keyword">if</span> (!exp.values.touchDown) {
+            time = <span class="hljs-built_in">Date</span>.now() + exp.options.renderThreshold;
+            upIndex = started;
+            downIndex = ended;
+            render(onComplete, force);
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">wait</span><span class="hljs-params">(method, time)</span> {</span>
+        <span class="hljs-keyword">var</span> i, args = exports.util.array.toArray(<span class="hljs-built_in">arguments</span>);
+        args.splice(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>);
+        <span class="hljs-keyword">if</span> (exp.options.async) {
+            exp.flow.remove(method);
+            i = exp.flow.add(method, args, time);
+        } <span class="hljs-keyword">else</span> {
+            method.apply(<span class="hljs-keyword">this</span>, args);
+        }
+        <span class="hljs-keyword">return</span> i;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span><span class="hljs-params">(complete, force)</span> {</span>
+        <span class="hljs-keyword">var</span> changed = <span class="hljs-literal">false</span>, now = <span class="hljs-built_in">Date</span>.now();
+        <span class="hljs-keyword">if</span> (time &gt; now &amp;&amp; (upIndex &gt;= <span class="hljs-number">0</span> || downIndex &lt; exp.rowsLength)) {
+            <span class="hljs-keyword">if</span> (upIndex &gt;= <span class="hljs-number">0</span>) {
+                changed = force || !exp.isCompiled(upIndex);
+                <span class="hljs-keyword">if</span> (changed) digest(upIndex);
+                upIndex -= <span class="hljs-number">1</span>;
+            }
+            <span class="hljs-keyword">if</span> (downIndex &lt; exp.rowsLength) {
+                changed = force || changed || !exp.isCompiled(downIndex);
+                <span class="hljs-keyword">if</span> (changed) digest(downIndex);
+                downIndex += <span class="hljs-number">1</span>;
+            }
+            render(complete, force);
+        } <span class="hljs-keyword">else</span> {
+            complete();
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onComplete</span><span class="hljs-params">()</span> {</span>
+        stop();
+        creepCount += <span class="hljs-number">1</span>;
+        <span class="hljs-keyword">if</span> (!exp.values.speed &amp;&amp; exp.scopes.length &lt; exp.rowsLength) {
+            resetInterval(upIndex, downIndex);
+        }
+        exp.dispatch(exports.datagrid.events.RENDER_PROGRESS, calculatePercent());
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stop</span><span class="hljs-params">()</span> {</span>
+        time = <span class="hljs-number">0</span>;
+        clearTimeout(intv);
+        intv = <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">resetInterval</span><span class="hljs-params">(started, ended, waitTime, forceCompileRowRender)</span> {</span>
+        stop();
+        <span class="hljs-keyword">if</span> (creepCount &lt; exp.options.creepLimit) {
+            intv = wait(onInterval, waitTime || exp.options.renderThresholdWait, started, ended, forceCompileRowRender);
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderLater</span><span class="hljs-params">(event, forceCompileRowRender)</span> {</span>
+        resetInterval(upIndex, downIndex, <span class="hljs-number">500</span>, forceCompileRowRender);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onBeforeRender</span><span class="hljs-params">(event)</span> {</span>
+        creepCount = exp.options.creepLimit;
+        stop();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onAfterRender</span><span class="hljs-params">(event, loopData, forceCompileRowRender)</span> {</span>
+        creepCount = <span class="hljs-number">0</span>;
+        upIndex = loopData.started || <span class="hljs-number">0</span>;
+        downIndex = loopData.ended || <span class="hljs-number">0</span>;
+        renderLater(event, forceCompileRowRender);
+    }
+    model.stop = stop;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-85">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-85">&#182;</a>
+              </div>
+              <p>allow external stop of creep render.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    model.destroy = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destroy</span><span class="hljs-params">()</span> {</span>
+        stop();
+        exp = <span class="hljs-literal">null</span>;
+        model = <span class="hljs-literal">null</span>;
+    };
+    exp.creepRenderModel = model;
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, onAfterRender));
+};
+
+exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.creepRenderModel);
+
+<span class="hljs-comment">/*global ux */</span>
+exports.datagrid.coreAddons.normalizeModel = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">normalizeModel</span><span class="hljs-params">(exp)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-86">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-86">&#182;</a>
+              </div>
+              <p>TODO: this needs to be put on exp.normalizedModel</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> originalData, normalizedData, result = exports.logWrapper(<span class="hljs-string">"normalizeModel"</span>, {}, <span class="hljs-string">"grey"</span>, exp.dispatch);
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">normalize</span><span class="hljs-params">(data, grouped, normalized)</span> {</span>
+        data = data || [];
+        <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, len = data.length;
+        normalized = normalized || [];
+        <span class="hljs-keyword">while</span> (i &lt; len) {
+            normalized.push(data[i]);
+            <span class="hljs-keyword">if</span> (data[i] &amp;&amp; data[i][grouped]) {
+                normalize(data[i][grouped], grouped, normalized);
+            }
+            i += <span class="hljs-number">1</span>;
+        }
+        <span class="hljs-keyword">return</span> normalized;
+    }
+    exp.setData = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data, grouped)</span> {</span>
+        result.log(<span class="hljs-string">"setData"</span>);
+        originalData = data;
+        <span class="hljs-keyword">if</span> (grouped) {
+            normalizedData = normalize(data, grouped);
+        } <span class="hljs-keyword">else</span> {
+            normalizedData = data ? data.slice(<span class="hljs-number">0</span>) : [];
+        }
+        <span class="hljs-keyword">return</span> normalizedData;
+    };
+    exp.getData = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">return</span> normalizedData;
+    };
+    exp.getOriginalData = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">return</span> originalData;
+    };
+    <span class="hljs-comment">/**
+     * Get the normalized index for an item.
+     * @param item
+     * @param {Number=} startIndex
+     */</span>
+    exp.getNormalizedIndex = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getNormalizedIndex</span><span class="hljs-params">(item, startIndex)</span> {</span>
+        <span class="hljs-keyword">var</span> i = startIndex || <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">while</span> (i &lt; exp.rowsLength) {
+            <span class="hljs-keyword">if</span> (exp.data[i] === item) {
+                <span class="hljs-keyword">return</span> i;
+            }
+            i += <span class="hljs-number">1</span>;
+        }
+        <span class="hljs-keyword">if</span> (startIndex) {
+            i = startIndex;
+            <span class="hljs-keyword">while</span> (i &gt;= <span class="hljs-number">0</span>) {
+                <span class="hljs-keyword">if</span> (exp.data[i] === item) {
+                    <span class="hljs-keyword">return</span> i;
+                }
+                i -= <span class="hljs-number">1</span>;
+            }
+        }
+        <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;
+    };
+    result.destroy = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destroy</span><span class="hljs-params">()</span> {</span>
+        result.destroyLogger();
+        result = <span class="hljs-literal">null</span>;
+    };
+    exp.normalizeModel = result;
+    <span class="hljs-keyword">return</span> exp;
+};
+
+exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.normalizeModel);
+
+<span class="hljs-comment">/*global ux */</span>
+exports.datagrid.events.SCROLL_START = <span class="hljs-string">"datagrid:scrollStart"</span>;
+
+exports.datagrid.events.SCROLL_STOP = <span class="hljs-string">"datagrid:scrollStop"</span>;
+
+exports.datagrid.events.TOUCH_DOWN = <span class="hljs-string">"datagrid:touchDown"</span>;
+
+exports.datagrid.events.TOUCH_UP = <span class="hljs-string">"datagrid:touchUp"</span>;
+
+exports.datagrid.coreAddons.scrollModel = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">scrollModel</span><span class="hljs-params">(exp)</span> {</span>
+    <span class="hljs-keyword">var</span> result = exports.logWrapper(<span class="hljs-string">"scrollModel"</span>, {}, <span class="hljs-string">"orange"</span>, exp.dispatch), setup = <span class="hljs-literal">false</span>, unwatchSetup;
+    <span class="hljs-comment">/**
+     * Listen for scrollingEvents.
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setupScrolling</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">if</span> (!exp.element.css(<span class="hljs-string">"overflow"</span>)) {
+            exp.element.css({
+                overflow: <span class="hljs-string">"auto"</span>
+            });
+        }
+        result.log(<span class="hljs-string">"addScrollListener"</span>);
+        exp.element[<span class="hljs-number">0</span>].addEventListener(<span class="hljs-string">"scroll"</span>, result.onUpdateScroll);
+        addTouchEvents();
+        setup = <span class="hljs-literal">true</span>;
+        exp.flow.unique(result.onScrollingStop);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addTouchEvents</span><span class="hljs-params">()</span> {</span>
+        result.log(<span class="hljs-string">"addTouchEvents"</span>);
+        <span class="hljs-keyword">var</span> content = exp.getContent();
+        content.bind(<span class="hljs-string">"touchstart"</span>, result.onTouchStart);
+        content.bind(<span class="hljs-string">"touchend"</span>, result.onTouchEnd);
+        content.bind(<span class="hljs-string">"touchcancel"</span>, result.onTouchEnd);
+    }
+    result.removeScrollListener = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">removeScrollListener</span><span class="hljs-params">()</span> {</span>
+        result.log(<span class="hljs-string">"removeScrollListener"</span>);
+        exp.element[<span class="hljs-number">0</span>].removeEventListener(<span class="hljs-string">"scroll"</span>, result.onUpdateScroll);
+    };
+    result.removeTouchEvents = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">removeTouchEvents</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">if</span> (setup) {
+            result.log(<span class="hljs-string">"removeTouchEvents"</span>);
+            exp.getContent().unbind(<span class="hljs-string">"touchstart"</span>, result.onTouchStart);
+            exp.getContent().unbind(<span class="hljs-string">"touchend"</span>, result.onTouchEnd);
+            exp.getContent().unbind(<span class="hljs-string">"touchcancel"</span>, result.onTouchEnd);
+        }
+    };
+    result.onTouchStart = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onTouchStart</span><span class="hljs-params">(event)</span> {</span>
+        exp.values.touchDown = <span class="hljs-literal">true</span>;
+        exp.dispatch(exports.datagrid.events.TOUCH_DOWN, event);
+    };
+    result.onTouchEnd = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onTouchEnd</span><span class="hljs-params">(event)</span> {</span>
+        exp.values.touchDown = <span class="hljs-literal">false</span>;
+        exp.dispatch(exports.datagrid.events.TOUCH_UP, event);
+    };
+    result.getScroll = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getScroll</span><span class="hljs-params">(el)</span> {</span>
+        <span class="hljs-keyword">return</span> (el || exp.element[<span class="hljs-number">0</span>]).scrollTop;
+    };
+    result.setScroll = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setScroll</span><span class="hljs-params">(value)</span> {</span>
+        exp.element[<span class="hljs-number">0</span>].scrollTop = value;
+        exp.values.scroll = value;
+    };
+    <span class="hljs-comment">/**
+     * When a scrollEvent is fired, recalculate the values.
+     * @param event
+     */</span>
+    result.onUpdateScroll = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onUpdateScroll</span><span class="hljs-params">(event)</span> {</span>
+        <span class="hljs-keyword">var</span> val = result.getScroll(event.target || event.srcElement);
+        <span class="hljs-keyword">if</span> (exp.values.scroll !== val) {
+            exp.dispatch(exports.datagrid.events.SCROLL_START, val);
+            exp.values.speed = val - exp.values.scroll;
+            exp.values.absSpeed = <span class="hljs-built_in">Math</span>.abs(exp.values.speed);
+            exp.values.scroll = val;
+            exp.values.scrollPercent = (exp.values.scroll / exp.getContentHeight() * <span class="hljs-number">100</span>).toFixed(<span class="hljs-number">2</span>);
+        }
+        result.waitForStop();
+        exp.dispatch(exports.datagrid.events.ON_SCROLL, exp.values);
+    };
+    <span class="hljs-comment">/**
+     * Scroll to the numeric value.
+     * @param value
+     * @param {Boolean=} immediately
+     */</span>
+    result.scrollTo = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">scrollTo</span><span class="hljs-params">(value, immediately)</span> {</span>
+        result.setScroll(value);
+        <span class="hljs-keyword">if</span> (immediately) {
+            result.onScrollingStop();
+        } <span class="hljs-keyword">else</span> {
+            result.waitForStop();
+        }
+    };
+    result.clearOnScrollingStop = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">clearOnScrollingStop</span><span class="hljs-params">()</span> {</span>
+        exp.flow.remove(result.onScrollingStop);
+    };
+    <span class="hljs-comment">/**
+     * Wait for the datagrid to slow down enough to render.
+     */</span>
+    result.waitForStop = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">waitForStop</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">if</span> (exp.flow.async || exp.values.touchDown) {
+            exp.flow.add(result.onScrollingStop, <span class="hljs-literal">null</span>, exp.options.updateDelay);
+        } <span class="hljs-keyword">else</span> {
+            exp.flow.add(result.onScrollingStop);
+        }
+    };
+    <span class="hljs-comment">/**
+     * When it stops render.
+     */</span>
+    result.onScrollingStop = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onScrollingStop</span><span class="hljs-params">()</span> {</span>
+        exp.values.speed = <span class="hljs-number">0</span>;
+        exp.values.absSpeed = <span class="hljs-number">0</span>;
+        exp.flow.add(exp.render);
+        exp.dispatch(exports.datagrid.events.SCROLL_STOP, exp.values.scroll);
+    };
+    <span class="hljs-comment">/**
+     * Scroll to the normalized index.
+     * @param index
+     * @param {Boolean=} immediately
+     */</span>
+    result.scrollToIndex = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">scrollToIndex</span><span class="hljs-params">(index, immediately)</span> {</span>
+        result.log(<span class="hljs-string">"scrollToIndex"</span>);
+        <span class="hljs-keyword">var</span> offset = exp.getRowOffset(index);
+        result.scrollTo(offset, immediately);
+        <span class="hljs-keyword">return</span> offset;
+    };
+    <span class="hljs-comment">/**
+     * Scroll to an item by finding it's normalized index.
+     * @param item
+     * @param {Boolean=} immediately
+     */</span>
+    result.scrollToItem = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">scrollToItem</span><span class="hljs-params">(item, immediately)</span> {</span>
+        result.log(<span class="hljs-string">"scrollToItem"</span>);
+        <span class="hljs-keyword">var</span> index = exp.getNormalizedIndex(item);
+        <span class="hljs-keyword">if</span> (index !== -<span class="hljs-number">1</span>) {
+            <span class="hljs-keyword">return</span> result.scrollToIndex(index, immediately);
+        }
+        <span class="hljs-keyword">return</span> exp.values.scroll;
+    };
+    <span class="hljs-comment">/**
+     * If the item is above or below the viewable area, scroll till it is in view.
+     * @param itemOrIndex
+     * @param immediately
+     */</span>
+    result.scrollIntoView = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">scrollIntoView</span><span class="hljs-params">(itemOrIndex, immediately)</span> {</span>
+        result.log(<span class="hljs-string">"scrollIntoView"</span>);
+        <span class="hljs-keyword">var</span> index = <span class="hljs-keyword">typeof</span> itemOrIndex === <span class="hljs-string">"number"</span> ? itemOrIndex : exp.getNormalizedIndex(itemOrIndex), offset = exp.getRowOffset(index), rowHeight, viewHeight;
+        <span class="hljs-keyword">if</span> (offset &lt; exp.values.scroll) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-87">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-87">&#182;</a>
+              </div>
+              <p>it is above the view.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            result.scrollTo(offset, immediately);
+            <span class="hljs-keyword">return</span>;
+        }
+        viewHeight = exp.getViewportHeight();
+        rowHeight = exp.templateModel.getTemplateHeight(exp.getData()[index]);
+        <span class="hljs-keyword">if</span> (offset &gt;= exp.values.scroll + viewHeight - rowHeight) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-88">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-88">&#182;</a>
+              </div>
+              <p>it is below the view.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            result.scrollTo(offset - viewHeight + rowHeight);
+        }
+    };
+    <span class="hljs-comment">/**
+     * Scroll to top.
+     * @param immediately
+     */</span>
+    result.scrollToTop = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(immediately)</span> {</span>
+        result.log(<span class="hljs-string">"scrollToTop"</span>);
+        result.scrollTo(<span class="hljs-number">0</span>, immediately);
+    };
+    <span class="hljs-comment">/**
+     * Scroll to bottom.
+     * @param immediately
+     */</span>
+    result.scrollToBottom = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(immediately)</span> {</span>
+        result.log(<span class="hljs-string">"scrollToBottom"</span>);
+        <span class="hljs-keyword">var</span> value = exp.getContentHeight() - exp.getViewportHeight();
+        result.scrollTo(value &gt;= <span class="hljs-number">0</span> ? value : <span class="hljs-number">0</span>, immediately);
+    };
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destroy</span><span class="hljs-params">()</span> {</span>
+        result.destroyLogger();
+        unwatchSetup();
+        <span class="hljs-keyword">if</span> (setup) {
+            result.removeScrollListener();
+            result.removeTouchEvents();
+        }
+    }
+    <span class="hljs-comment">/**
+     * Wait till the grid is ready before we setup our listeners.
+     */</span>
+    unwatchSetup = exp.scope.$on(exports.datagrid.events.READY, setupScrolling);
+    result.destroy = destroy;
+    exp.scrollModel = result;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-89">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-89">&#182;</a>
+              </div>
+              <p>all models should try not to pollute the main model to keep it clean.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">return</span> exp;
+};
+
+exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.scrollModel);
+
+<span class="hljs-comment">/*global angular */</span>
+exports.datagrid.coreAddons.templateModel = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">templateModel</span><span class="hljs-params">(exp)</span> {</span>
+<span class="hljs-pi">    "use strict"</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">trim</span><span class="hljs-params">(str)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-90">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-90">&#182;</a>
+              </div>
+              <p>remove newline / carriage return</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        str = str.replace(<span class="hljs-regexp">/\n/g</span>, <span class="hljs-string">""</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-91">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-91">&#182;</a>
+              </div>
+              <p>remove whitespace (space and tabs) before tags</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        str = str.replace(<span class="hljs-regexp">/[\t ]+&lt;/g</span>, <span class="hljs-string">"&lt;"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-92">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-92">&#182;</a>
+              </div>
+              <p>remove whitespace between tags</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        str = str.replace(<span class="hljs-regexp">/&gt;[\t ]+&lt;/g</span>, <span class="hljs-string">"&gt;&lt;"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-93">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-93">&#182;</a>
+              </div>
+              <p>remove whitespace after tags</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        str = str.replace(<span class="hljs-regexp">/&gt;[\t ]+$/g</span>, <span class="hljs-string">"&gt;"</span>);
+        <span class="hljs-keyword">return</span> str;
+    }
+    exp.templateModel = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">var</span> templates = [], totalHeight, defaultName = <span class="hljs-string">"default"</span>, result = exports.logWrapper(<span class="hljs-string">"templateModel"</span>, {}, <span class="hljs-string">"teal"</span>, exp.dispatch);
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createTemplates</span><span class="hljs-params">()</span> {</span>
+            result.log(<span class="hljs-string">"createTemplates"</span>);
+            <span class="hljs-keyword">var</span> i, scriptTemplates = exp.element[<span class="hljs-number">0</span>].getElementsByTagName(<span class="hljs-string">"script"</span>), len = scriptTemplates.length;
+            <span class="hljs-keyword">if</span> (!len) {
+                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"at least one template is required."</span>);
+            }
+            <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; len; i += <span class="hljs-number">1</span>) {
+                createTemplate(scriptTemplates[i]);
+            }
+            <span class="hljs-keyword">while</span> (scriptTemplates.length) {
+                exp.element[<span class="hljs-number">0</span>].removeChild(scriptTemplates[<span class="hljs-number">0</span>]);
+            }
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createTemplate</span><span class="hljs-params">(scriptTemplate)</span> {</span>
+            <span class="hljs-keyword">var</span> template = trim(angular.element(scriptTemplate).html()), wrapper = document.createElement(<span class="hljs-string">"div"</span>), name = scriptTemplate.attributes[<span class="hljs-string">"data-template-name"</span>].nodeValue || defaultName, templateData;
+            template = angular.element(template)[<span class="hljs-number">0</span>];
+            template.className += <span class="hljs-string">" "</span> + exp.options.uncompiledClass + <span class="hljs-string">" {{$status}}"</span>;
+            template.setAttribute(<span class="hljs-string">"template"</span>, name);
+            exp.getContent()[<span class="hljs-number">0</span>].appendChild(wrapper);
+            wrapper.appendChild(template);
+            template = trim(wrapper.innerHTML);
+            wrapper.childNodes[<span class="hljs-number">0</span>].style.lineHeight = <span class="hljs-string">"0px"</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-94">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-94">&#182;</a>
+              </div>
+              <p>make so lineHeight doesn&#39;t wrap and affect template size.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            templateData = {
+                name: name,
+                item: scriptTemplate.attributes[<span class="hljs-string">"data-template-item"</span>].nodeValue,
+                template: template,
+                height: wrapper.offsetHeight
+            };
+            result.log(<span class="hljs-string">"template: %s %o"</span>, name, templateData);
+            <span class="hljs-keyword">if</span> (!templateData.height) {
+                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"Template height cannot be 0."</span>);
+            }
+            templates[templateData.name] = templateData;
+            templates.push(templateData);
+            exp.getContent()[<span class="hljs-number">0</span>].removeChild(wrapper);
+            totalHeight = <span class="hljs-number">0</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-95">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-95">&#182;</a>
+              </div>
+              <p>reset cached value.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">return</span> templateData;
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getTemplates</span><span class="hljs-params">()</span> {</span>
+            <span class="hljs-keyword">return</span> templates;
+        }
+        <span class="hljs-comment">/**
+         * Use the data object from each item in the array to determine the template for that item.
+         * @param data
+         */</span>
+        result.getTemplate = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getTemplate</span><span class="hljs-params">(data)</span> {</span>
+            <span class="hljs-keyword">return</span> result.getTemplateByName(data._template);
+        };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-96">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-96">&#182;</a>
+              </div>
+              <p>TODO: need to make this method so it can be overwritten to look up templates a different way.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getTemplateName</span><span class="hljs-params">(el)</span> {</span>
+            <span class="hljs-keyword">return</span> el.attr ? el.attr(<span class="hljs-string">"template"</span>) : el.getAttribute(<span class="hljs-string">"template"</span>);
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getTemplateByName</span><span class="hljs-params">(name)</span> {</span>
+            <span class="hljs-keyword">if</span> (templates[name]) {
+                <span class="hljs-keyword">return</span> templates[name];
+            }
+            <span class="hljs-keyword">return</span> templates[defaultName];
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dynamicHeights</span><span class="hljs-params">()</span> {</span>
+            <span class="hljs-keyword">var</span> i, h;
+            <span class="hljs-keyword">for</span> (i <span class="hljs-keyword">in</span> templates) {
+                <span class="hljs-keyword">if</span> (templates.hasOwnProperty(i)) {
+                    h = h || templates[i].height;
+                    <span class="hljs-keyword">if</span> (h !== templates[i].height) {
+                        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+                    }
+                }
+            }
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">averageTemplateHeight</span><span class="hljs-params">()</span> {</span>
+            <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, len = templates.length;
+            <span class="hljs-keyword">if</span> (!totalHeight) {
+                <span class="hljs-keyword">while</span> (i &lt; len) {
+                    totalHeight += templates[i].height;
+                    i += <span class="hljs-number">1</span>;
+                }
+            }
+            <span class="hljs-keyword">return</span> totalHeight / len;
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">countTemplates</span><span class="hljs-params">()</span> {</span>
+            <span class="hljs-keyword">return</span> templates.length;
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getTemplateHeight</span><span class="hljs-params">(item)</span> {</span>
+            <span class="hljs-keyword">return</span> result.getTemplate(item).height;
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getHeight</span><span class="hljs-params">(list, startRowIndex, endRowIndex)</span> {</span>
+            <span class="hljs-keyword">var</span> i = startRowIndex, height = <span class="hljs-number">0</span>;
+            <span class="hljs-keyword">if</span> (!list.length) {
+                <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+            }
+            <span class="hljs-keyword">while</span> (i &lt;= endRowIndex) {
+                height += result.getTemplateHeight(list[i]);
+                i += <span class="hljs-number">1</span>;
+            }
+            <span class="hljs-keyword">return</span> height;
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setTemplateName</span><span class="hljs-params">(item, templateName)</span> {</span>
+            item._template = templateName;
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setTemplate</span><span class="hljs-params">(itemOrIndex, newTemplateName)</span> {</span>
+            result.log(<span class="hljs-string">"setTemplate %s %s"</span>, itemOrIndex, newTemplateName);
+            <span class="hljs-keyword">var</span> item = <span class="hljs-keyword">typeof</span> itemOrIndex === <span class="hljs-string">"number"</span> ? exp.data[itemOrIndex] : itemOrIndex;
+            <span class="hljs-keyword">var</span> oldTemplate = result.getTemplate(item).name;
+            result.setTemplateName(item, newTemplateName);
+            exp.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName);
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destroy</span><span class="hljs-params">()</span> {</span>
+            result.destroyLogger();
+            result = <span class="hljs-literal">null</span>;
+            templates.length = <span class="hljs-number">0</span>;
+            templates = <span class="hljs-literal">null</span>;
+        }
+        result.defaultName = defaultName;
+        result.createTemplates = createTemplates;
+        result.getTemplates = getTemplates;
+        result.getTemplateName = getTemplateName;
+        result.getTemplateByName = getTemplateByName;
+        result.templateCount = countTemplates;
+        result.dynamicHeights = dynamicHeights;
+        result.averageTemplateHeight = averageTemplateHeight;
+        result.getHeight = getHeight;
+        result.getTemplateHeight = getTemplateHeight;
+        result.setTemplate = setTemplate;
+        result.setTemplateName = setTemplateName;
+        result.destroy = destroy;
+        <span class="hljs-keyword">return</span> result;
+    }();
+    <span class="hljs-keyword">return</span> exp.templateModel;
+};
+
+exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.templateModel);
+}(<span class="hljs-keyword">this</span>.ux = <span class="hljs-keyword">this</span>.ux || {}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span><span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;}()));</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

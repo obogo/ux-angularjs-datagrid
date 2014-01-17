@@ -8,6 +8,9 @@ exports.datagrid.events.DOUBLE_SCROLL_SCROLL_TO_TOP = "datagrid:doubleScrollScro
 
 exports.datagrid.events.DOUBLE_SCROLL_SCROLL_TO_BOTTOM = "datagrid:doubleScrollScrollToBottom";
 
+/**
+ * Allow a header to scroll out before scrolling the content. Nested scrollers.
+ */
 angular.module("ux").directive("uxDoubleScroll", function() {
     return {
         link: function(scope, element, attr) {
@@ -16,6 +19,7 @@ angular.module("ux").directive("uxDoubleScroll", function() {
             }), selector = scope.$eval(attr.uxDoubleScroll), target, vScroll, contentHeight = 0, elHeight = 0, targetOffset = scope.$eval(attr.targetOffset) || 0, scrollModel;
             element[0].style.overflowY = "auto";
             element[0].style.overflowX = "hidden";
+            //            element.css({webkitOverflowScrolling: 'touch'});
             updateTarget();
             updateScrollModel();
             function updateTarget() {
@@ -95,6 +99,7 @@ angular.module("ux").directive("uxDoubleScroll", function() {
             }
             function onTargetScrollToTop(event, scroller, speed) {
                 result.log("onTargetScrollToTop");
+                // we only want the scroll event from the target.
                 if (scroller.element[0] === target) {
                     scrollModel.enable(false);
                     vScroll.enable(true, speed);
@@ -103,6 +108,7 @@ angular.module("ux").directive("uxDoubleScroll", function() {
             }
             function onDoubleScrollBottom(event, scroller, speed) {
                 result.log("onDoubleScrollBottom");
+                // we only want the double scroll bottom.
                 if (scroller.element[0] === element[0]) {
                     vScroll.enable(false);
                     scrollModel.enable(true, speed);
@@ -114,6 +120,7 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                 vScroll = ux.datagrid.VirtualScroll(scope, element, {}, onIOSScroll);
                 vScroll.setup();
                 unwatchRender = scope.$on(exports.datagrid.events.LISTENERS_READY, function() {
+                    // it needs to start off with the target disabled.
                     unwatchRender();
                     updateScrollModel();
                     updateTarget();
@@ -130,6 +137,7 @@ angular.module("ux").directive("uxDoubleScroll", function() {
             } else {
                 element[0].addEventListener("scroll", onScroll, true);
                 if (target) {
+                    // if this exists the ready event should have already been fired.
                     onSizeChange();
                     onScroll(null);
                 } else {

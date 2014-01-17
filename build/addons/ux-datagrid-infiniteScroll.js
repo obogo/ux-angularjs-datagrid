@@ -4,6 +4,10 @@
 * License: MIT.
 */
 (function(exports, global){
+/**
+ * Datagrid infinite scroll adds more data when the list scrolls to the bottom.
+ * @type {string}
+ */
 ux.datagrid.events.SCROLL_TO_TOP = "datagrid:scrollToTop";
 
 ux.datagrid.events.SCROLL_TO_BOTTOM = "datagrid:scrollToBottom";

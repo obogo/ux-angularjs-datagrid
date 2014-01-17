@@ -4,6 +4,11 @@
 * License: MIT.
 */
 (function(exports, global){
+// ## Configs ##
+// ux.datagrid is a highly performant scrolling list for desktop and mobile devices that leverages
+// the browsers ability to gpu cache the dom structure with fast startup times and optimized rendering
+// that allows the gpu to maintain its snapshots as long as possible.
+// Create the default module of ux if it doesn't already exist.
 var module;
 
 try {
@@ -12,13 +17,34 @@ try {
     module = angular.module("ux");
 }
 
+// Create the datagrid namespace.
+// add the default options for the datagrid. These can be overridden by passing your own options to each
+// instance of the grid. In your HTML templates you can provide the object that will override these settings
+// on a per grid basis.
+//
+//      <div ux-datagrid="mylist" options="{debug:{all:1, Flow:0}}">...</div>
+//
+// These options are then available to other addons to configure them.
 exports.datagrid = {
+    // **<a name="isIOS">isIOS</a>**
+    // iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
+    // however with this attribute iOS would crash if you try to change the scroll with javascript, or turn it on and off.
+    // so a virtual scroll was implemented for iOS to make it scroll using translate3d.
     isIOS: navigator.userAgent.match(/(iPad|iPhone|iPod)/g),
+    // the **states** of the application.
+    //  - **<a name="states.BUILDING">BUILDING</a>**: is the startup phase of the grid before it is ready to perform the first render. This may include
+    // waiting for the dom heights be available.
+    //  - **<a name="states.READY">READY</a>**: this means that the grid is ready for rendering.
     states: {
         BUILDING: "datagrid:building",
-        APPENDING: "datagrid:appending",
         READY: "datagrid:ready"
     },
+    // **<a name="events">Events</a>**
+    // - **<a name="events.INIT">INIT</a>** when the datagrid has added the addons and is now starting.
+    // - **<a name="events.RESIZE">RESIZE</a>** tells the datagrid to resize. This will update all height calculations.
+    // - **<a name="events.READY">READY</a>** the datagrid is all setup with templates, viewHeight, and data and is ready to render.
+    // - **<a name="events.BEFORE_RENDER">BEFORE_RENDER</a>** the datagrid is just about to add needed chunks, perform compiling of uncompiled rows, and update and digest the active scopes.
+    // - **<a name="events.AFTER_RENDER">AFTER_RENDER</a>** chunked dome was added if needed, active rows are compiled, and active scopes are digested.
     events: {
         INIT: "datagrid:init",
         RESIZE: "datagrid:resize",
@@ -34,6 +60,7 @@ exports.datagrid = {
         RENDER_AFTER_DATA_CHANGE: "datagrid:renderAfterDataChange",
         ON_ROW_TEMPLATE_CHANGE: "datagrid:onRowTemplateChange",
         ON_SCROLL: "datagrid:onScroll",
+        // for logging.
         LOG: "datagrid:log",
         INFO: "datagrid:info",
         WARN: "datagrid:warn",
@@ -42,11 +69,15 @@ exports.datagrid = {
     options: {
         async: true,
         compileAllRowsOnInit: false,
+        // this can cause it to take a long time to initialize.
         updateDelay: 500,
+        // if < 100ms this fires too often.
         cushion: -50,
+        // debugging cushion about what is deactivated.
         chunkSize: 50,
         uncompiledClass: "uncompiled",
         dynamicRowHeights: false,
+        //true,
         renderThreshold: 10,
         renderThresholdWait: 50,
         creepLimit: 100,
@@ -55,6 +86,7 @@ exports.datagrid = {
     coreAddons: []
 };
 
+/*global module */
 module.factory("addons", [ "$injector", function($injector) {
     function applyAddons(addons, instance) {
         var i = 0, len = addons.length, result;
@@ -63,6 +95,7 @@ module.factory("addons", [ "$injector", function($injector) {
             if (typeof result === "function") {
                 result(instance);
             } else {
+                // they must have returned a null? what was the point. Throw an error.
                 throw new Error("Addons expect a function to pass the grid instance to.");
             }
             i += 1;
@@ -198,6 +231,7 @@ exports.css = function CSS() {
                     var expression = "(\b)*" + selector.replace(".", "\\.") + "([^-a-zA-Z0-9]|,|$)", matches = cls.selectorText.match(expression);
                     if (matches && matches.indexOf(selector) !== -1) {
                         cache[selector] = cls.style;
+                        // cache the value
                         return cls.style;
                     }
                 }
@@ -302,6 +336,9 @@ function dispatcher(target, scope, map) {
     function fire(callback, args) {
         return callback && callback.apply(target, args);
     }
+    /**
+     * @param event
+     */
     function dispatch(event) {
         if (listeners[event]) {
             var i = 0, list = listeners[event], len = list.length;
@@ -331,9 +368,14 @@ function toArray(obj) {
     return result;
 }
 
+//The ECMAScript standard does not guarantee Array.sort is a stable sort.
+// According to the ECMA spec, when two objects are determined to be equal in a custom sort,
+// JavaScript is not required to leave those two objects in the same order.
+// replace sort from ECMAScript with this bubble sort to make it accurate
 function sort(ary, compareFn) {
     var c, len, v, rlen, holder;
     if (!compareFn) {
+        // default compare function.
         compareFn = function(a, b) {
             return a > b ? 1 : a < b ? -1 : 0;
         };
@@ -393,6 +435,7 @@ exports.logWrapper = function LogWrapper(name, instance, theme, dispatch) {
 function Flow(exp, dispatch) {
     var running = false, intv, current = null, list = [], uniqueMethods = {}, execStartTime, execEndTime, timeouts = {}, consoleMethodStyle = "color:#666666;";
     function getMethodName(method) {
+        // TODO: there might be a faster way to get the function name.
         return method.toString().split(/\b/)[2];
     }
     function createItem(method, args, delay) {
@@ -429,6 +472,7 @@ function Flow(exp, dispatch) {
             next();
         }
     }
+    // this puts it right after the one currently running.
     function insert(method, args, delay) {
         list.splice(1, 0, createItem(method, args, delay));
     }
@@ -511,34 +555,135 @@ function Flow(exp, dispatch) {
     exp.stopTimeout = stopTimeout;
     exp.run = run;
     exp.destroy = destroy;
+    //    exp.log = function () {
+    //        var args;
+    //        if (exp.debug && exp.debug <= 1) {
+    //            args = ux.util.array.toArray(arguments);
+    //            if (args[0].indexOf('%c') === -1) {
+    //                args[0] = '%c' + args[0];
+    //                args.splice(1, 0, consoleMethodStyle);
+    //            }
+    //            console.log.apply(console, args);
+    //        }
+    //    };
+    //    exp.info = function () {
+    //        var args;
+    //        if (exp.debug && exp.debug <= 2) {
+    //            args = ux.util.array.toArray(arguments);
+    //            args[0] = '%c' + args[0];
+    //            args.splice(1, 0, consoleInfoMethodStyle);
+    //            console.info.apply(console, args);
+    //        }
+    //    };
+    //    exp.warn = function () {
+    //        // output warnings. something is wrong.
+    //        if (window.console && console.warn) {
+    //            console.warn.apply(console, arguments);
+    //        }
+    //    };
     return exp;
 }
 
 exports.datagrid.Flow = Flow;
 
+/*global each, charPack, Flow, exports, module */
+// Datagrid Core
+// -----------------
+// The datagrid manages the `core addons` to build the initial list and provide the public api necessary
+// to communicate with other addons.
+// Datagrid uses script templates inside of the dom to create your elements. Addons that are added to the addon
+// attribute.
 function Datagrid(scope, element, attr, $compile) {
-    var flow, waitCount = 0, changeWatcherSet = false, unwatchers = [], content, scopes = [], active = [], lastVisibleScrollStart = 0, rowOffsets = {}, viewHeight = 0, options, states = exports.datagrid.states, events = exports.datagrid.events, state = states.BUILDING, values = {
+    // core variables
+    var flow, // flow management for methods of the datagrid. Keeping functions firing in the correct order especially if async methods are executed.
+    waitCount = 0, // waiting to render. If it fails too many times. it will die.
+    changeWatcherSet = false, //flag for change watchers.
+    unwatchers = [], // list of scope listeners that we want to clear on destroy
+    content, // the dom element with all of the chunks.
+    scopes = [], // the array of all scopes that have been compiled.
+    active = [], // the scopes that are currently active.
+    lastVisibleScrollStart = 0, // cached index to improve render loop by starting where it left off.
+    rowOffsets = {}, // cache for the heights of the rows for faster height calculations.
+    viewHeight = 0, // the visual area height.
+    options, // configs that are shared through the datagrid and addons.
+    states = exports.datagrid.states, // local reference to the states constants
+    events = exports.datagrid.events, // local reference to the events constants
+    state = states.BUILDING, // `state` of the app. Building || Ready.
+    values = {
+        // `values` is the object that is used to share data for scrolling and other shared values.
         dirty: false,
+        // if the data is dirty and a render has not happended since the data change.
         scroll: 0,
+        // current scroll value of the grid
         speed: 0,
+        // current speed of the scroll
         absSpeed: 0,
+        // current absSpeed of the grid.
         scrollPercent: 0,
+        // the current percent position of the scroll.
         touchDown: false,
+        // if there is currently a touch start and not a touch end. Since touch is used for scrolling on a touch device. Ignored for desktop.
         scrollingStopIntv: null,
+        // interval that allows waits for checks to know when the scrolling has stopped and a render is needed.
         activeRange: {
             min: 0,
             max: 0
         }
     }, exp = {};
+    // the datagrid public api
+    // Initialize the datagrid.
+    // add unique methods to the flow.
     function init() {
-        exports.logWrapper("datagrid", exp, "green");
-        setupExports();
         flow.unique(render);
         flow.unique(updateRowWatchers);
     }
+    // Build out the public api variables for the datagrid.
+    function setupExports() {
+        exp.scope = scope;
+        exp.element = element;
+        exp.attr = attr;
+        exp.rowsLength = 0;
+        exp.scopes = scopes;
+        exp.data = exp.data || [];
+        exp.unwatchers = unwatchers;
+        exp.values = values;
+        exp.start = start;
+        exp.reset = reset;
+        exp.forceRenderScope = forceRenderScope;
+        exp.dispatch = dispatch;
+        exp.render = function() {
+            flow.add(render);
+        };
+        exp.updateHeights = updateHeights;
+        exp.getOffsetIndex = getOffsetIndex;
+        exp.isActive = isActive;
+        exp.isCompiled = isCompiled;
+        exp.getScope = getScope;
+        exp.getRowElm = getRowElm;
+        exp.getRowOffset = getRowOffset;
+        exp.getRowHeight = getRowHeight;
+        exp.getViewportHeight = getViewportHeight;
+        exp.getContentHeight = getContentHeight;
+        exp.getContent = getContent;
+        exp.safeDigest = safeDigest;
+        exp.getRowIndexFromElement = getRowIndexFromElement;
+        exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
+        exp.flow = flow = new Flow({
+            async: options.hasOwnProperty("async") ? !!options.async : true,
+            debug: options.hasOwnProperty("debug") ? options.debug : 0
+        }, exp.dispatch);
+        flow.add(init);
+        // initialize core.
+        flow.run();
+    }
+    // The `content` dom element is the only direct child created by the datagrid.
+    // It is used so append all of the `chunks` so that the it can be scrolled.
+    // If the dom element is provided with the class `content` then that dom element will be used
+    // allowing the user to add custom classes directly tot he `content` dom element.
     function createContent() {
         var cnt = element[0].getElementsByClassName("content")[0], classes = "content";
         if (cnt) {
+            // if there is an old one. Pull the classes from it.
             classes = cnt.className || "content";
         }
         if (!cnt) {
@@ -550,35 +695,34 @@ function Datagrid(scope, element, attr, $compile) {
         }
         return cnt;
     }
+    // return the reference to the content div.
     function getContent() {
         return content;
     }
-    function setupExports() {
-        exp.__name = "ux-datagrid";
-        exp.scope = scope;
-        exp.element = element;
-        exp.attr = attr;
-        exp.rowsLength = 0;
-        exp.scopes = scopes;
-        exp.data = exp.data || [];
-        exp.unwatchers = unwatchers;
-        exp.values = values;
-    }
+    // `start` is called after the addons are added.
     function start() {
         exp.dispatch(exports.datagrid.events.INIT);
         content = createContent();
         waitForElementReady(0);
     }
+    // this waits for the body element because if the grid has been constructed, but no heights are showing
+    // it is usually because the grid has not been attached to the document yet. So wait for the heights
+    // to be available, but only wait a little then exit.
     function waitForElementReady(count) {
         if (!exp.element[0].offsetHeight) {
             if (count < 1) {
+                // if they are doing custom compiling. They may compile before addit it to the dom.
+                // allow a pass to happen just in case.
                 flow.add(waitForElementReady, [ count + 1 ], 0);
+                // retry.
                 return;
             } else {
                 flow.warn("Datagrid: Dom Element does not have a height.");
             }
         }
         flow.add(exp.templateModel.createTemplates, null, 0);
+        // allow element to be added to dom.
+        // if the templates have different heights. Then they are dynamic.
         flow.add(function updateDynamicRowHeights() {
             options.dynamicRowHeights = exp.templateModel.dynamicHeights();
         });
@@ -599,6 +743,7 @@ function Datagrid(scope, element, attr, $compile) {
                 var result = scope.$eval(attr.uxDatagrid);
                 len = result && result.length || 0;
                 if (lastResult === result && lastLength !== len) {
+                    //TODO: this needs tested to make sure it calls if the length changes.
                     flow.add(onDataChanged);
                 }
                 lastResult = result;
@@ -613,6 +758,9 @@ function Datagrid(scope, element, attr, $compile) {
     exp.upateViewportHeight = function upateViewportHeight() {
         viewHeight = exp.calculateViewportHeight();
     };
+    /**
+     * Be careful. This method is VERY expensive when there are lots of rows.
+     */
     exp.calculateViewportHeight = function calculateViewportHeight() {
         return element[0].offsetHeight;
     };
@@ -633,6 +781,7 @@ function Datagrid(scope, element, attr, $compile) {
     function getRowIndexFromElement(el) {
         if (element[0].contains(el[0] || el)) {
             var s = el.scope ? el.scope() : angular.element(el).scope();
+            // make sure we get the right scope to grab the index from. We need to get it from a row.
             while (s && s.$parent !== exp.scope) {
                 s = s.$parent;
             }
@@ -640,9 +789,12 @@ function Datagrid(scope, element, attr, $compile) {
         }
         return -1;
     }
+    //TODO: need to reset row heights when a row is activated for the first time.... possibly every time for expanding rows.
+    // TODO: may want to update heights through a hierarchy for expanding rows.
     function getRowOffset(index) {
         if (rowOffsets[index] === undefined) {
             if (options.dynamicRowHeights) {
+                // dynamicRowHeights should be set by the templates.
                 updateHeightValues();
             } else {
                 rowOffsets[index] = index * options.rowHeight;
@@ -660,6 +812,7 @@ function Datagrid(scope, element, attr, $compile) {
         return exp.chunkModel.getChunkList().height;
     }
     function createDom(list) {
+        //TODO: if there is any dom. It needs destroyed first.
         exp.log("OVERWRITE DOM!!!");
         var len = list.length;
         flow.add(exp.chunkModel.chunkDom, [ list, options.chunkSize, '<div class="' + options.chunkClass + '">', "</div>", content ], 0);
@@ -678,6 +831,7 @@ function Datagrid(scope, element, attr, $compile) {
             }
             s.$status = "compiled";
             s[tpl.item] = exp.data[index];
+            // set the data to the scope.
             s.$index = index;
             unwatch = s.$watch(function() {
                 s.digested = true;
@@ -709,11 +863,18 @@ function Datagrid(scope, element, attr, $compile) {
             s.$digest();
         }
     }
+    /**
+     * Turn off watchers for that index scope and any of it's children.
+     * @param s
+     */
     function deactivateScope(s) {
         var child;
+        // if the scope is not created yet. just skip.
         if (s && !isActive(s)) {
+            // do not deactivate one that is already deactivated.
             s.$$$watchers = s.$$watchers;
             s.$$watchers = [];
+            // recursively go through children and deactivate them.
             if (s.$$childHead) {
                 child = s.$$childHead;
                 while (child) {
@@ -725,11 +886,17 @@ function Datagrid(scope, element, attr, $compile) {
         }
         return false;
     }
+    /**
+     * Turn on watchers for that index scope and any of it's children.
+     * @param s
+     */
     function activateScope(s) {
         var child;
         if (s && s.$$$watchers) {
+            // do not activate one that is already active.
             s.$$watchers = s.$$$watchers;
             s.$$$watchers = null;
+            // recursively go through children and activate them.
             if (s.$$childHead) {
                 child = s.$$childHead;
                 while (child) {
@@ -746,6 +913,7 @@ function Datagrid(scope, element, attr, $compile) {
         return !!(s && !s.$$$watchers);
     }
     function getOffsetIndex(offset) {
+        // updateHeightValues must be called before this.
         var est = Math.floor(offset / exp.templateModel.averageTemplateHeight()), i = 0;
         if (rowOffsets[est] && rowOffsets[est] <= offset) {
             i = est;
@@ -759,6 +927,8 @@ function Datagrid(scope, element, attr, $compile) {
         return i;
     }
     function getStartingIndex() {
+        // we will take the last first active element. We will start counting from there till we get to the top
+        // of the start area. So we never have to loop the whole thing.
         var height = viewHeight, result = {
             startIndex: 0,
             i: 0,
@@ -771,6 +941,7 @@ function Datagrid(scope, element, attr, $compile) {
         return result;
     }
     function updateHeightValues() {
+        //TODO: this is going to be updated to use ChunkArray data to be faster.
         var height = 0, i = 0;
         while (i < exp.rowsLength) {
             rowOffsets[i] = height;
@@ -779,20 +950,29 @@ function Datagrid(scope, element, attr, $compile) {
         }
         options.rowHeight = exp.rowsLength ? exp.templateModel.getTemplateHeight("default") : 0;
     }
+    /**
+     * Activate or deactivate scopes that are within range.
+     */
     function updateRowWatchers() {
         var loop = getStartingIndex(), offset = loop.i * 40, lastActive = [].concat(active), lastActiveIndex, s, prevS;
         if (loop.i < 0) {
+            // then scroll is negative. ignore it.
             return;
         }
         exp.dispatch(events.BEFORE_UPDATE_WATCHERS, loop);
+        // we only want to update stuff if we are scrolling slow.
         resetMinMax();
+        // this needs to always be set after the dispatch of before update watchers in case they need the before activeRange.
         active.length = 0;
+        // make sure not to reset until after getStartingIndex.
         exp.log("	visibleScrollStart %s visibleScrollEnd %s", loop.visibleScrollStart, loop.visibleScrollEnd);
         while (loop.i < exp.rowsLength) {
             prevS = scope.$$childHead ? scopes[loop.i - 1] : null;
             offset = getRowOffset(loop.i);
+            // this is where the chunks and rows get created is when they are requested if they don't exist.
             if (offset >= loop.visibleScrollStart && offset <= loop.visibleScrollEnd) {
                 s = compileRow(loop.i);
+                // only compiles if it is not already compiled. Still returns the scope.
                 if (loop.started === undefined) {
                     loop.started = loop.i;
                 }
@@ -802,11 +982,13 @@ function Datagrid(scope, element, attr, $compile) {
                     if (lastActiveIndex !== -1) {
                         lastActive.splice(lastActiveIndex, 1);
                     }
+                    // make sure to put them into active in the right order.
                     active.push(loop.i);
                     safeDigest(s);
                 }
             }
             loop.i += loop.inc;
+            // optimize the loop
             if (loop.inc > 0 && offset > loop.visibleScrollEnd || loop.inc < 0 && offset < loop.visibleScrollStart) {
                 break;
             }
@@ -818,6 +1000,7 @@ function Datagrid(scope, element, attr, $compile) {
         exp.log("	activated %s", active.join(", "));
         updateLinks();
         flow.add(safeDigest, [ scope ]);
+        // this dispatch needs to be after the digest so that it doesn't cause {} to show up in the render.
         exp.dispatch(events.AFTER_UPDATE_WATCHERS, loop);
     }
     function deactivateList(lastActive) {
@@ -877,7 +1060,10 @@ function Datagrid(scope, element, attr, $compile) {
         exp.dispatch(exports.datagrid.events.BEFORE_RENDER);
         if (readyToRender()) {
             waitCount = 0;
+            // Where [states.BUILDING](#states.BUILDING) is used
             if (state === states.BUILDING) {
+                //TODO: removeExtraRows is not compatible. It needs removed. Only buildRows will work with chunking.
+                //flow.add(removeExtraRows, [exp.data]);// if our data updates we need to remove extra rows.
                 flow.add(buildRows, [ exp.data ], 0);
                 flow.add(updateHeightValues);
                 flow.add(ready);
@@ -900,21 +1086,26 @@ function Datagrid(scope, element, attr, $compile) {
         dispatch(exports.datagrid.events.AFTER_DATA_CHANGE);
         flow.add(reset);
     }
+    //reset = clear all and restart.
     function reset() {
         destroyScopes();
+        // now destroy all of the dom.
         rowOffsets = {};
         active.length = 0;
         scopes.length = 0;
         content.children().unbind();
         content.children().remove();
         viewHeight = 0;
+        // force to recalculate heights.
         setupExports();
+        // make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.
         exp.chunkModel.reset();
         state = states.BUILDING;
         flow.add(render);
     }
     function forceRenderScope(index) {
         var s = scopes[index];
+        //        exp.log("\tforceRenderScope %s", index);
         if (!s && index > 0 && index < exp.rowsLength) {
             s = compileRow(index);
         }
@@ -943,8 +1134,11 @@ function Datagrid(scope, element, attr, $compile) {
         scope.$emit.apply(scope, arguments);
     }
     function destroyScopes() {
+        // because child scopes may not be in order because of rendering techniques. We must loop through
+        // all scopes and destroy them manually.
         var lastScope, nextScope, i = 0;
         each(scopes, function(s, index) {
+            // listeners should be destroyed with the angular destroy.
             if (s) {
                 s.$$prevSibling = lastScope || undefined;
                 i = index;
@@ -961,25 +1155,32 @@ function Datagrid(scope, element, attr, $compile) {
         scope.$$childTail = undefined;
         scopes.length = 0;
     }
+    // destroy needs to put all watcher back before destroying or it will not destroy child scopes, or remove watchers.
     function destroy() {
         scope.datagrid = null;
+        // we have a circular reference. break it on destroy.
         exp.log("destroying grid");
         clearTimeout(values.scrollingStopIntv);
+        // destroy flow.
         flow.destroy();
         exp.flow = undefined;
         flow = null;
+        // destroy watchers.
         while (unwatchers.length) {
             unwatchers.pop()();
         }
         exp.destroyLogger();
+        // now remove every property on exports.
         for (var i in exp) {
             if (exp[i] && exp[i].hasOwnProperty("destroy")) {
                 exp[i].destroy();
                 exp[i] = null;
             }
         }
+        //activate scopes so they can be destroyed by angular.
         destroyScopes();
         element.remove();
+        // this seems to be the most memory efficient way to remove elements.
         exp = null;
         scope = null;
         element = null;
@@ -995,33 +1196,8 @@ function Datagrid(scope, element, attr, $compile) {
         events = null;
         $compile = null;
     }
-    exp.start = start;
-    exp.reset = reset;
-    exp.forceRenderScope = forceRenderScope;
-    exp.dispatch = dispatch;
-    exp.render = function() {
-        flow.add(render);
-    };
-    exp.updateHeights = updateHeights;
-    exp.getOffsetIndex = getOffsetIndex;
-    exp.isActive = isActive;
-    exp.isCompiled = isCompiled;
-    exp.getScope = getScope;
-    exp.getRowElm = getRowElm;
-    exp.getRowOffset = getRowOffset;
-    exp.getRowHeight = getRowHeight;
-    exp.getViewportHeight = getViewportHeight;
-    exp.getContentHeight = getContentHeight;
-    exp.getContent = getContent;
-    exp.safeDigest = safeDigest;
-    exp.getRowIndexFromElement = getRowIndexFromElement;
-    exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
-    exp.flow = flow = new Flow({
-        async: options.hasOwnProperty("async") ? !!options.async : true,
-        debug: options.hasOwnProperty("debug") ? options.debug : 0
-    }, exp.dispatch);
-    flow.add(init);
-    flow.run();
+    exports.logWrapper("datagrid", exp, "green");
+    setupExports();
     return exp;
 }
 
@@ -1031,6 +1207,7 @@ module.directive("uxDatagrid", [ "$compile", "addons", function($compile, addons
         link: function(scope, element, attr) {
             var inst = new Datagrid(scope, element, attr, $compile);
             scope.datagrid = inst;
+            // expose to scope.
             each(exports.datagrid.coreAddons, function(method) {
                 method.apply(inst, [ inst ]);
             });
@@ -1040,6 +1217,11 @@ module.directive("uxDatagrid", [ "$compile", "addons", function($compile, addons
     };
 } ]);
 
+/**
+ * ChunkArray is an array with additional properties needed by the chunkModel to generate and access chunks
+ * of the dom with high performance.
+ * @constructor
+ */
 var ChunkArray = function() {};
 
 ChunkArray.prototype = Array.prototype;
@@ -1056,6 +1238,12 @@ ChunkArray.prototype.getStub = function getStub(str) {
     return this.templateStart + str + this.templateEnd;
 };
 
+/**
+ * Get the HTML string representation of the children in this array.
+ * If deep then return this and all children down.
+ * @param deep
+ * @returns {string}
+ */
 ChunkArray.prototype.getChildrenStr = function(deep) {
     var i = 0, len = this.length, str = "", ca = this;
     while (i < len) {
@@ -1090,6 +1278,9 @@ ChunkArray.prototype.updateHeight = function(templateModel, _rows) {
     }
 };
 
+/**
+ * Perform proper cleanup.
+ */
 ChunkArray.prototype.destroy = function() {
     this.templateStart = "";
     this.templateEnd = "";
@@ -1099,11 +1290,38 @@ ChunkArray.prototype.destroy = function() {
     this.length = 0;
 };
 
+/**
+ * chunkModel
+ * Because the browser has low performance on dom elements that exist in high numbers and are all
+ * siblings chunking is used to break them up into limits of their number and their parents and so on.
+ * So think of it as every chunk not having more than X number of children weather those children be
+ * chunks or they be rows.
+ *
+ * This speeds up the browser significantly because a resize event from a dom element will not affect
+ * all of them, but just those direct siblings and then it's parents siblings and so on up the chain.
+ *
+ * @param exp
+ * @returns {{}}
+ */
 exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
     var _list, _rows, _chunkSize, _el, result = exports.logWrapper("chunkModel", {}, "purple", exp.dispatch);
+    /**
+     * Return the list that was created.
+     * @returns {ChunkArray}
+     */
     function getChunkList() {
         return _list;
     }
+    /**
+     * Create a ChunkArray from the array of data that is passed.
+     * The array that is passed should not be multi-dimensional. This will only work with a single
+     * dimensional array.
+     * @param {Array} list
+     * @param {Number} size
+     * @param {String} templateStart
+     * @param {String} templateEnd
+     * @returns {ChunkArray}
+     */
     function chunkList(list, size, templateStart, templateEnd) {
         var i = 0, len = list.length, result = new ChunkArray(), childAry, item;
         while (i < len) {
@@ -1139,6 +1357,10 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
         }
         return result.length > size ? chunkList(result, size, templateStart, templateEnd) : result;
     }
+    /**
+     * Using a ChunkArray calculate the heights of each array recursively.
+     * @param ary {ChunkArray}
+     */
     function calculateHeight(ary) {
         ary.updateHeight(exp.templateModel, _rows);
         if (!ary.rendered) {
@@ -1169,6 +1391,16 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
             i += 1;
         }
     }
+    /**
+     * Create the chunkList so that it is ready for dom. Set properties needed to create the dom.
+     * The dom gets created when the rows are accessed.
+     * @param {Array} list // single dimensional array only.
+     * @param {Number} size
+     * @param {String} templateStart
+     * @param {String} templateEnd
+     * @param {DomElement} el
+     * @returns {DomElement}
+     */
     function chunkDom(list, size, templateStart, templateEnd, el) {
         result.log("chunkDom");
         _el = el;
@@ -1177,6 +1409,13 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
         _list = chunkList(list, size, templateStart, templateEnd);
         return el;
     }
+    /**
+     * Generate an array of indexes that point to that row.
+     * @param rowIndex
+     * @param chunkList
+     * @param indexes
+     * @returns {Array}
+     */
     function getRowIndexes(rowIndex, chunkList, indexes) {
         var i = 0, len = chunkList.length, chunk;
         indexes = indexes || [];
@@ -1189,6 +1428,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
                     break;
                 }
             } else {
+                // we are at the end. So we just need the last index.
                 indexes.push(rowIndex % _chunkSize);
                 break;
             }
@@ -1196,10 +1436,20 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
         }
         return indexes;
     }
+    /**
+     * Get the dom row element.
+     * @param rowIndex {Number}
+     * @returns {*}
+     */
     function getRow(rowIndex) {
         var indexes = getRowIndexes(rowIndex, _list);
         return buildDomByIndexes(indexes);
     }
+    /**
+     * Get the domElement by indexes, create the dom if it doesn't exist.
+     * @param indexes {Number}
+     * @returns {*}
+     */
     function buildDomByIndexes(indexes) {
         var i = 0, index, indxs = indexes.slice(0), ca = _list, el = _el;
         while (i < indxs.length) {
@@ -1212,8 +1462,12 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
         }
         return el;
     }
+    /**
+     * Remove all dom, and all other references.
+     */
     function reset() {
         result.log("reset");
+        //TODO: this needs to make sure it destroys things properly
         if (_list) _list.destroy();
         _rows = null;
         _list = null;
@@ -1233,6 +1487,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
     result.reset = reset;
     result.updateAllChunkHeights = updateAllChunkHeights;
     result.destroy = destroy;
+    // apply event dispatching.
     dispatcher(result);
     exp.chunkModel = result;
     return result;
@@ -1247,6 +1502,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
     function digest(index) {
         var s = exp.getScope(index);
         if (!s || !s.digested) {
+            // just skip if already digested.
             exp.forceRenderScope(index);
         }
     }
@@ -1333,6 +1589,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
         renderLater(event, forceCompileRowRender);
     }
     model.stop = stop;
+    // allow external stop of creep render.
     model.destroy = function destroy() {
         stop();
         exp = null;
@@ -1348,7 +1605,9 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
 
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.creepRenderModel);
 
+/*global ux */
 exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
+    //TODO: this needs to be put on exp.normalizedModel
     var originalData, normalizedData, result = exports.logWrapper("normalizeModel", {}, "grey", exp.dispatch);
     function normalize(data, grouped, normalized) {
         data = data || [];
@@ -1379,6 +1638,11 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
     exp.getOriginalData = function() {
         return originalData;
     };
+    /**
+     * Get the normalized index for an item.
+     * @param item
+     * @param {Number=} startIndex
+     */
     exp.getNormalizedIndex = function getNormalizedIndex(item, startIndex) {
         var i = startIndex || 0;
         while (i < exp.rowsLength) {
@@ -1408,6 +1672,7 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
 
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.normalizeModel);
 
+/*global ux */
 exports.datagrid.events.SCROLL_START = "datagrid:scrollStart";
 
 exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
@@ -1418,6 +1683,9 @@ exports.datagrid.events.TOUCH_UP = "datagrid:touchUp";
 
 exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
     var result = exports.logWrapper("scrollModel", {}, "orange", exp.dispatch), setup = false, unwatchSetup;
+    /**
+     * Listen for scrollingEvents.
+     */
     function setupScrolling() {
         if (!exp.element.css("overflow")) {
             exp.element.css({
@@ -1464,6 +1732,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         exp.element[0].scrollTop = value;
         exp.values.scroll = value;
     };
+    /**
+     * When a scrollEvent is fired, recalculate the values.
+     * @param event
+     */
     result.onUpdateScroll = function onUpdateScroll(event) {
         var val = result.getScroll(event.target || event.srcElement);
         if (exp.values.scroll !== val) {
@@ -1476,6 +1748,11 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         result.waitForStop();
         exp.dispatch(exports.datagrid.events.ON_SCROLL, exp.values);
     };
+    /**
+     * Scroll to the numeric value.
+     * @param value
+     * @param {Boolean=} immediately
+     */
     result.scrollTo = function scrollTo(value, immediately) {
         result.setScroll(value);
         if (immediately) {
@@ -1487,6 +1764,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
     result.clearOnScrollingStop = function clearOnScrollingStop() {
         exp.flow.remove(result.onScrollingStop);
     };
+    /**
+     * Wait for the datagrid to slow down enough to render.
+     */
     result.waitForStop = function waitForStop() {
         if (exp.flow.async || exp.values.touchDown) {
             exp.flow.add(result.onScrollingStop, null, exp.options.updateDelay);
@@ -1494,18 +1774,31 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
             exp.flow.add(result.onScrollingStop);
         }
     };
+    /**
+     * When it stops render.
+     */
     result.onScrollingStop = function onScrollingStop() {
         exp.values.speed = 0;
         exp.values.absSpeed = 0;
         exp.flow.add(exp.render);
         exp.dispatch(exports.datagrid.events.SCROLL_STOP, exp.values.scroll);
     };
+    /**
+     * Scroll to the normalized index.
+     * @param index
+     * @param {Boolean=} immediately
+     */
     result.scrollToIndex = function scrollToIndex(index, immediately) {
         result.log("scrollToIndex");
         var offset = exp.getRowOffset(index);
         result.scrollTo(offset, immediately);
         return offset;
     };
+    /**
+     * Scroll to an item by finding it's normalized index.
+     * @param item
+     * @param {Boolean=} immediately
+     */
     result.scrollToItem = function scrollToItem(item, immediately) {
         result.log("scrollToItem");
         var index = exp.getNormalizedIndex(item);
@@ -1514,23 +1807,38 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         }
         return exp.values.scroll;
     };
+    /**
+     * If the item is above or below the viewable area, scroll till it is in view.
+     * @param itemOrIndex
+     * @param immediately
+     */
     result.scrollIntoView = function scrollIntoView(itemOrIndex, immediately) {
         result.log("scrollIntoView");
         var index = typeof itemOrIndex === "number" ? itemOrIndex : exp.getNormalizedIndex(itemOrIndex), offset = exp.getRowOffset(index), rowHeight, viewHeight;
         if (offset < exp.values.scroll) {
+            // it is above the view.
             result.scrollTo(offset, immediately);
             return;
         }
         viewHeight = exp.getViewportHeight();
         rowHeight = exp.templateModel.getTemplateHeight(exp.getData()[index]);
         if (offset >= exp.values.scroll + viewHeight - rowHeight) {
+            // it is below the view.
             result.scrollTo(offset - viewHeight + rowHeight);
         }
     };
+    /**
+     * Scroll to top.
+     * @param immediately
+     */
     result.scrollToTop = function(immediately) {
         result.log("scrollToTop");
         result.scrollTo(0, immediately);
     };
+    /**
+     * Scroll to bottom.
+     * @param immediately
+     */
     result.scrollToBottom = function(immediately) {
         result.log("scrollToBottom");
         var value = exp.getContentHeight() - exp.getViewportHeight();
@@ -1544,20 +1852,29 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
             result.removeTouchEvents();
         }
     }
+    /**
+     * Wait till the grid is ready before we setup our listeners.
+     */
     unwatchSetup = exp.scope.$on(exports.datagrid.events.READY, setupScrolling);
     result.destroy = destroy;
     exp.scrollModel = result;
+    // all models should try not to pollute the main model to keep it clean.
     return exp;
 };
 
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.scrollModel);
 
+/*global angular */
 exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
     "use strict";
     function trim(str) {
+        // remove newline / carriage return
         str = str.replace(/\n/g, "");
+        // remove whitespace (space and tabs) before tags
         str = str.replace(/[\t ]+</g, "<");
+        // remove whitespace between tags
         str = str.replace(/>[\t ]+</g, "><");
+        // remove whitespace after tags
         str = str.replace(/>[\t ]+$/g, ">");
         return str;
     }
@@ -1585,6 +1902,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             wrapper.appendChild(template);
             template = trim(wrapper.innerHTML);
             wrapper.childNodes[0].style.lineHeight = "0px";
+            // make so lineHeight doesn't wrap and affect template size.
             templateData = {
                 name: name,
                 item: scriptTemplate.attributes["data-template-item"].nodeValue,
@@ -1599,14 +1917,20 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             templates.push(templateData);
             exp.getContent()[0].removeChild(wrapper);
             totalHeight = 0;
+            // reset cached value.
             return templateData;
         }
         function getTemplates() {
             return templates;
         }
+        /**
+         * Use the data object from each item in the array to determine the template for that item.
+         * @param data
+         */
         result.getTemplate = function getTemplate(data) {
             return result.getTemplateByName(data._template);
         };
+        //TODO: need to make this method so it can be overwritten to look up templates a different way.
         function getTemplateName(el) {
             return el.attr ? el.attr("template") : el.getAttribute("template");
         }

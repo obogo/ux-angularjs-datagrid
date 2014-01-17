@@ -30,6 +30,7 @@ angular.module("ux").factory("gridLogger", function() {
     }
     return function gridLogger(exp) {
         var result = {};
+        // listen to events and write them.
         function onLog(event) {
             output(level.LOG, arguments);
         }

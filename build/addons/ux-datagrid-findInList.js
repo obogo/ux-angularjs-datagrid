@@ -4,16 +4,20 @@
 * License: MIT.
 */
 (function(exports, global){
-var finder, cmdKey;
+var finder, // there can only be one at a time.
+cmdKey;
 
+// if the cmdKey is pressed on a mac.
 angular.module("ux").factory("findInList", [ "$window", "$compile", function($window, $compile) {
     return function(exp) {
         var result = {}, term = "", input, lowerCaseTerm, lastFiltered, searchIndex = 0, matchCount, searchIntv, scrollToItemActive = false, itemTexts = {}, findInListTemplate = '<div data-ux-datagrid-find-in-list="datagrid" class="findInList"></div>', templateTexts = {}, workingScope = exp.scope.$new();
         function onKeyDown(event) {
             exp.flow.info("onKeyDown %s", event.keyCode);
             detectCmdKey(event);
+            // we only want to do this if the grid has focus.
             if (exp.element[0].contains(document.activeElement)) {
                 if (event.keyCode == 114 || (event.ctrlKey || cmdKey) && event.keyCode == 70) {
+                    // Block CTRL + F event
                     event.preventDefault();
                     addFinder();
                 }
@@ -33,7 +37,9 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
         }
         function isCmdKey(event) {
             exp.flow.info("isCmdKey");
+            // if mac we need to check the command key based on each browser because the keycode is different.
             if ($window.navigator.platform === "MacIntel") {
+                // chrome/safari left cmd or right cmd key
                 if ($window.navigator.userAgent.match(/(Chrome|Safari)/i) && event.keyCode === 91 || event.keyCode === 93) {
                     return true;
                 }
@@ -110,6 +116,7 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
                 itemTexts = null;
                 clearHighlights();
                 finder = null;
+                // null this first to prevent recursive loop possibility.
                 input.removeEventListener("keyup", onInputKeyUp);
                 f.scope().$destroy();
                 f.remove();
@@ -118,10 +125,13 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
         function onInputKeyUp(event) {
             exp.flow.info("onInputKeyUp");
             var newTerm = input.value;
+            //TODO: iOS has different key for enter that needs to be added here.
             if (event.keyCode === 13) {
+                // enter
                 (event.shiftKey ? result.up : result.down)();
             }
             if (event.keyCode === 27) {
+                // esc
                 result.close();
             }
             if (newTerm === term) {
@@ -136,6 +146,8 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
         function doSearch() {
             var searchList = exp.getData(), filtered = [];
             term = input.value;
+            //TODO: need to ignore keys that are navigation or special characters.
+            //TODO: this needs to make sure to keep the indexes of the data in the original list to scroll to them.
             clearHighlights();
             searchIndex = 0;
             if (term.length) {
@@ -161,6 +173,7 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
         function evalTemplateText(item) {
             var tpl = exp.templateModel.getTemplate(item), matches, uncompiledText = templateTexts[tpl.name].clone();
             workingScope[tpl.item] = item;
+            //TODO: this can be optimized. Perhaps cache results for a time.
             exports.each(uncompiledText, replaceCompiled, workingScope);
             return uncompiledText;
         }
@@ -177,6 +190,7 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
         }
         function onFilter(item, index, list, filtered) {
             var matches = [];
+            // cache itemTexts on an open/close basis.
             if (!itemTexts[index]) {
                 itemTexts[index] = evalTemplateText(item);
             }
@@ -189,6 +203,7 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
         function getMatches(itemText, index, list, itemTextMatches, filtered) {
             var value = itemText.text.toLowerCase(), matchIndex = value.indexOf(lowerCaseTerm, 0), i = 0;
             if (itemTextMatches.absIndex === undefined) {
+                // only set it if it has not been. we don't want to overwrite it.
                 itemTextMatches.absIndex = filtered.absCount;
             }
             while (matchIndex !== -1) {
@@ -211,6 +226,7 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             }
         }
         function highlight(match, index, list) {
+            // we need to find all of the matches. And make a selected range. Then highlight those.
             if (match.rowIndex >= exp.values.activeRange.min && match.rowIndex <= exp.values.activeRange.max) {
                 var row = exp.getRowElm(match.rowIndex);
                 clearHighlightsForRow(match, true);
@@ -223,6 +239,8 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
         }
         function highlightRowMatches(match, index, list, row) {
             var node = getNodeFromMatch(row, match);
+            //TODO: this needs to check all matches.
+            // now we need to highlight the text range inside of the node
             highlightTextRange(node, match, index);
         }
         function getNodeFromMatch(el, match) {
@@ -234,10 +252,12 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             return child;
         }
         function highlightTextRange(el, match, index) {
+            //TODO: needs to be injected.
             var range = document.createRange(), selectionContents, span = document.createElement("span"), i = 0, len = 0, startIndex = match.matchIndex, endIndex = match.matchIndex + term.length, siblings = el.parentNode.childNodes;
             while (i < siblings.length - 1) {
                 el = siblings[i];
                 if (el.childNodes.length) {
+                    // these are already matches that have been turned into spans.
                     len = el.childNodes[0].nodeValue ? el.childNodes[0].nodeValue.length : 0;
                 } else {
                     len = el.nodeValue ? el.nodeValue.length : 0;
@@ -247,6 +267,7 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
                 i += 1;
             }
             el = siblings[siblings.length - 1];
+            //            if (startIndex >= 0) {
             try {
                 range.setStart(el, startIndex);
                 range.setEnd(el, endIndex);
@@ -260,11 +281,13 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
         }
         function clearHighlights() {
             if (lastFiltered) {
+                // we want to digest every row that had one.
                 ux.each(lastFiltered, clearHighlightsForRow);
                 lastFiltered = null;
             }
         }
         function clearHighlightsForRow(match, force) {
+            //TODO: We need to clear all. Not just the ones that are in view. or when out of view we need to clear them... maybe before a render we clear them.
             if (force || match.rowIndex >= exp.values.activeRange.min + exp.options.cushion && match.rowIndex <= exp.values.activeRange.max - exp.options.cushion) {
                 var row = exp.getRowElm(match.rowIndex)[0];
                 exports.each(match, clearHighlightsForRowMatches, row);
@@ -276,8 +299,10 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
         }
         function setup() {
             exp.flow.info("setup");
+            // listen for key events to open the find.
             $window.addEventListener("keydown", onKeyDown);
             $window.addEventListener("keyup", onKeyUp);
+            // make datagrid focusable so we can have focus in it to find.
             exp.element.attr("tabindex", 999999);
         }
         function updateSearchIndexHighlight() {
@@ -355,6 +380,7 @@ angular.module("ux").directive("uxDatagridFindInList", function() {
         link: function(scope, element, attr) {
             var children = element.children();
             scope.term = directiveTerm;
+            // we want this to wait and run after the element is there.
             children.bind("blur", function(event) {
                 setTimeout(function() {
                     var result = {

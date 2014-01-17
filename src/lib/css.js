@@ -153,7 +153,6 @@ exports.css = (function CSS() {
 
     function setCSSValue(selector, property, value) {
         var cls = getSelector(selector);
-//        cls.cssText = property + ":" + value + ";";
         cls[property] = value;
     }
 

@@ -8,6 +8,7 @@ exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL = "datagrid:afterScroll
 
 angular.module("ux").factory("scrollHistory", [ "$location", function($location) {
     var cache = {};
+    // cache is persistent until application reloads.
     return function scrollHistory(exp) {
         var result = {}, unwatch;
         function getPath() {
@@ -31,6 +32,7 @@ angular.module("ux").factory("scrollHistory", [ "$location", function($location)
         result.getScroll = getScroll;
         result.storeCurrentScroll = storeCurrentScroll;
         result.storeScroll = storeScroll;
+        // watch only once to have it start at that scrolling position on startup.
         unwatch = exp.scope.$on(exports.datagrid.events.RENDER_AFTER_DATA_CHANGE, function() {
             exp.scrollModel.scrollTo(result.getCurrentScroll(), true);
             unwatch();

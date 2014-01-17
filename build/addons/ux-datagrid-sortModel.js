@@ -10,6 +10,7 @@ exports.datagrid.events.AFTER_SORT = "datagrid:afterSort";
 
 angular.module("ux").factory("sortModel", function() {
     return function sortModel(exp) {
+        // cache is the stored sort values. It needs to be cleared if the data changes.
         var result = {}, sorts = {}, sortList = [], original, cache = {};
         function none(a, b) {
             return 0;

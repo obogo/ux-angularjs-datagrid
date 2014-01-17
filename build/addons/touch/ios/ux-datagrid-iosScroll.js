@@ -12,6 +12,7 @@ exports.datagrid.events.VIRTUAL_SCROLL_BOTTOM = "virtualScroll:bottom";
 
 exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE = "virtualScroll:onUpdate";
 
+// For simulating the scroll in IOS that doesn't have a smooth scroll natively.
 exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callback) {
     var friction = .95, stopThreshold = .01, moved = false, result = exports.logWrapper("VirtualScroll", {}, "redOrange", function() {
         scope.$emit.apply(scope, arguments);
@@ -183,6 +184,7 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
         } else {
             values.speed = deltaY;
             values.scroll += deltaY;
+            //result.cap(values.scroll + deltaY);
             values.absSpeed = Math.abs(deltaY);
         }
         _y = y;
@@ -199,6 +201,7 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
         clearTimeout(doubleTapTimer);
         doubleTapTimer = setTimeout(function() {
             doubleTapTimer = null;
+            // Find the last touched element
             target = point.target;
             while (target.nodeType != 1) target = target.parentNode;
             if (target.tagName != "SELECT" && target.tagName != "INPUT" && target.tagName != "TEXTAREA") {
@@ -252,10 +255,18 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
             webkitTransform: ""
         });
     };
+    /**
+     * Scroll to the numeric value.
+     * @param value
+     * @param {Boolean=} immediately
+     */
     result.scrollTo = function scrollTo(value, immediately) {
         callback(value, immediately);
     };
     result.scrollIntoView = scope.datagrid ? scope.datagrid.scrollModel.scrollIntoView : function() {};
+    /**
+     * When it stops render.
+     */
     result.onScrollingStop = function onScrollingStop() {
         result.scrollTo(values.scroll, true);
     };
@@ -270,8 +281,11 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, ca
     return result;
 };
 
+/*global ux */
+// we want to override the default scrolling if it is an IOS device.
 angular.module("ux").factory("iosScroll", function() {
     return function iosScroll(exp) {
+        // do not let escape if in unit tests. exp.flow.async is false in unit tests.
         var vScroll, originalScrollModel = exp.scrollModel;
         if (!exports.datagrid.isIOS) {
             return exp;
@@ -286,6 +300,7 @@ angular.module("ux").factory("iosScroll", function() {
             originalScrollModel.scrollTo(value, immediately);
         });
         function onBeforeVirtualScrollStart(event) {
+            // update the virtual scroll values to reflect what is in the datagrid.
             var values = vScroll.getValues();
             ux.each(exp.values, function(value, key) {
                 values[key] = value;

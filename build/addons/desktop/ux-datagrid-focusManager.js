@@ -4,23 +4,52 @@
 * License: MIT.
 */
 (function(exports, global){
+/*global exports */
+/**
+ * Author: Jason Farrell
+ * Author URI: http://useallfive.com/
+ *
+ * Description: Handles all things involving element visibility.
+ * Package URL: https://github.com/UseAllFive/ua5-js-utils
+ */
 exports.visibility = function() {
+    /**
+     * Checks if a DOM element is visible. Takes into
+     * consideration its parents and overflow.
+     *
+     * @param (el)      the DOM element to check if is visible
+     *
+     * These params are optional that are sent in recursively,
+     * you typically won't use these:
+     *
+     * @param (t)       Top corner position number
+     * @param (r)       Right corner position number
+     * @param (b)       Bottom corner position number
+     * @param (l)       Left corner position number
+     * @param (w)       Element width number
+     * @param (h)       Element height number
+     */
     function _isVisible(el, t, r, b, l, w, h) {
         var p = el.parentNode, VISIBLE_PADDING = 2;
         if (!_elementInDocument(el)) {
             return false;
         }
+        //-- Return true for document node
         if (9 === p.nodeType) {
             return true;
         }
+        //-- Return false if our element is invisible
         if ("0" === _getStyle(el, "opacity") || "none" === _getStyle(el, "display") || "hidden" === _getStyle(el, "visibility")) {
             return false;
         }
+        //-- If we have a parent, let's continue:
         if (p) {
+            //-- Let's recursively check upwards:
             return _isVisible(p, t, r, b, l, w, h);
         }
         return true;
     }
+    //-- Cross browser method to get style properties:
     function _getStyle(el, property) {
         if (window.getComputedStyle) {
             return document.defaultView.getComputedStyle(el, null)[property];
@@ -44,8 +73,16 @@ exports.visibility = function() {
     };
 }();
 
+/*global exports */
 exports.selector = function() {
     var $ = $ || angular.element;
+    /**
+     * build the string selector for the element.
+     * @param {DomElement} element
+     * @param {DomElement=} maxParent
+     * @param {Function=} ignoreClass
+     * @returns {string}
+     */
     function getSelector(element, maxParent, ignoreClass) {
         var selector = getSelectorData(element, maxParent, ignoreClass);
         return selectorToString(selector) + ":visible";
@@ -107,8 +144,14 @@ exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME = "ux-datagrid:focusToPrev
 
 exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME = "ux-datagrid:focusToNextElementOfSame";
 
+/**
+ * Handle focus for enterKey to move down the correct columns.
+ */
 angular.module("ux").factory("gridFocusManager", function() {
     return function(exp) {
+        /**
+         * We want to add and remove listeners only on the dom that is currently under watch.
+         */
         var result = {}, unwatchers = [];
         function wrap(el) {
             if (el.length === undefined) {
@@ -116,12 +159,23 @@ angular.module("ux").factory("gridFocusManager", function() {
             }
             return el;
         }
+        /**
+         * Add all of the listeners to the visible rows.
+         */
         function addListeners() {
             applyToListeners(addListenersToRow);
         }
+        /**
+         * remove all of the listeners from min to max.
+         */
         function removeListeners() {
+            // this needs executed before the activeRange changes.
             applyToListeners(removeListenersToRow);
         }
+        /**
+         * using the exp.activeRange.min/max apply methods to those rows.
+         * @param method
+         */
         function applyToListeners(method) {
             if (!exp.values.activeRange.max) {
                 return;
@@ -133,14 +187,30 @@ angular.module("ux").factory("gridFocusManager", function() {
                 i += 1;
             }
         }
+        /**
+         * Get all of the focusable elements within an element
+         * @param el
+         * @returns {Array}
+         */
         function getFocusableElements(el) {
             var focusable = [].slice.call(el[0].querySelectorAll("input,a,select"));
             return ux.filter(focusable, filterVisible);
         }
+        /**
+         * Filter the elements in the selection to only get those that are visible.
+         * @param item
+         * @returns {*}
+         */
         function filterVisible(item) {
             return ux.visibility.isVisible(item);
         }
+        /**
+         * Move up the dom to determine the row of an element.
+         * @param el
+         * @returns {*}
+         */
         function getRowElmFromChildElm(el) {
+            // keep moving up until the parent is a chunk.
             var parent = el.parent();
             while (parent && !parent.hasClass(exp.options.chunkClass)) {
                 el = parent;
@@ -148,6 +218,12 @@ angular.module("ux").factory("gridFocusManager", function() {
             }
             return el;
         }
+        /**
+         * Similar to jquery find.
+         * @param el
+         * @param selector
+         * @returns {element|*}
+         */
         function query(el, selector) {
             var filters = selector.split(":"), sel = filters.shift(), result = [].slice.call((el[0] || el).querySelectorAll(sel));
             while (filters.length) {
@@ -155,6 +231,12 @@ angular.module("ux").factory("gridFocusManager", function() {
             }
             return angular.element(result);
         }
+        /**
+         * Apply filters to the selection array.
+         * @param filterStr
+         * @param elements
+         * @returns {*}
+         */
         function filterSelection(filterStr, elements) {
             if (filterStr.substr(0, 3) === "eq(") {
                 return filterEq(filterStr, elements);
@@ -163,10 +245,21 @@ angular.module("ux").factory("gridFocusManager", function() {
             }
             return elements;
         }
+        /**
+         * Filter for eq.
+         * @param filterStr
+         * @param elements
+         * @returns {Array}
+         */
         function filterEq(filterStr, elements) {
             var index = filterStr.match(/\d+/)[0];
             return elements[index] ? [ elements[index] ] : [];
         }
+        /**
+         * Detect if is an ng-* class from the selectors.
+         * @param cls
+         * @returns {boolean}
+         */
         function isNgClass(cls) {
             return !!(cls && cls.substr(0, 3) === "ng-");
         }
@@ -180,6 +273,10 @@ angular.module("ux").factory("gridFocusManager", function() {
             }
             return !isToBeFiltered;
         }
+        /**
+         * Apply event listeners to the row.
+         * @param rowElm
+         */
         function addListenersToRow(rowElm) {
             var focusable = getFocusableElements(rowElm);
             if (focusable.length) {
@@ -187,6 +284,10 @@ angular.module("ux").factory("gridFocusManager", function() {
                 focusable.bind("keydown", onKeyDown);
             }
         }
+        /**
+         * Remove event listeners from that row.
+         * @param rowElm
+         */
         function removeListenersToRow(rowElm) {
             var focusable = getFocusableElements(rowElm);
             if (focusable.length) {
@@ -194,19 +295,33 @@ angular.module("ux").factory("gridFocusManager", function() {
                 focusable.unbind("keydown", onKeyDown);
             }
         }
+        /**
+         * Handle Enter, up/down key events.
+         * @param event
+         */
         function onKeyDown(event) {
             var target = angular.element(event.currentTarget);
             exp.flow.log("FM: onKeyDown");
             if (event.shiftKey && event.keyCode === 13 || event.keyCode === 38) {
+                // SHIFT+ENTER, UP ARROW
                 focusToPrevRowElement(target);
             } else if (event.keyCode === 13 || event.keyCode === 40) {
+                // ENTER, DOWN ARROW
                 focusToNextRowElement(target);
             }
         }
+        /**
+         * Focus to the previous row element from the current focused element.
+         * @param focusedEl
+         */
         function focusToPrevRowElement(focusedEl) {
             var focusEl = getPrevRowFocusElement(focusedEl, -1);
             performFocus(focusEl);
         }
+        /**
+         * Focus to the next row element from the current focused element.
+         * @param focusedEl
+         */
         function focusToNextRowElement(focusedEl) {
             exp.flow.log("	FM: focusToNextRowElement");
             var focusEl = getNextRowFocusElement(focusedEl);
@@ -227,7 +342,15 @@ angular.module("ux").factory("gridFocusManager", function() {
             exp.flow.log("	FM: getNextRowFocusElement");
             return focusToRowElement(focusedEl, 1);
         }
+        /**
+         * Do the heavy lifting for focusing from one row to the next and pulling the selector.
+         * Since it is the same going to previous or next it is all one method and just needs to know which direction
+         * to increment.
+         * @param focusedEl
+         * @param dir
+         */
         function focusToRowElement(focusedEl, dir) {
+            // dir should be 1 or -1
             exp.flow.log("	FM: focusToRowElement");
             focusedEl = wrap(focusedEl);
             if (!exp.element[0].contains(focusedEl[0])) {
@@ -242,16 +365,31 @@ angular.module("ux").factory("gridFocusManager", function() {
             resultEl = findNextRowWithSelection(nextIndex, dir, selector);
             return resultEl && resultEl.length ? resultEl : focusedEl;
         }
+        /**
+         * Do the actual focus. Select the text if select exists.
+         * @param focusEl
+         */
         function performFocus(focusEl) {
             exp.flow.log("	FM: performFocus %o", focusEl[0]);
             if (focusEl[0].select) {
+                // TODO: if no jquery. There may be no select.
                 focusEl[0].select();
             }
             if (focusEl[0]) {
                 focusEl[0].focus();
             }
+            // we now need to scroll the row into view if it is not.
             exp.scrollModel.scrollIntoView(exp.getRowIndexFromElement(focusEl), true);
         }
+        /**
+         * Find the next row that has a matching selection. If one is not found it will no focus.
+         * Since a creep render happens after every scroll it should not have difficulty finding a row.
+         * However, possible bug here if a selector similar to this one doesn't exist for a large distance.
+         * @param nextIndex
+         * @param dir
+         * @param selector
+         * @returns {element|*}
+         */
         function findNextRowWithSelection(nextIndex, dir, selector) {
             exp.flow.log("	FM: findNextRowWithSelection");
             var nextEl = exp.getRowElm(nextIndex), focusEl = query(nextEl[0], selector);

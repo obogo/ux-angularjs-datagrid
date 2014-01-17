@@ -1,49 +1,86 @@
 /*global each, charPack, Flow, exports, module */
 
-//TODO: The events or calls to the datagrid need to all be added to a queue. So if the grid is unable to do something then it will not loose it and can try it later. Even keep the last few that just went by so we know what just happened. This could ignore some updates if it knows there are more updates pending.
-
+// Datagrid Core
+// -----------------
+// The datagrid manages the `core addons` to build the initial list and provide the public api necessary
+// to communicate with other addons.
+// Datagrid uses script templates inside of the dom to create your elements. Addons that are added to the addon
+// attribute.
 function Datagrid(scope, element, attr, $compile) {
-    var flow,
+    // core variables
+    var flow, // flow management for methods of the datagrid. Keeping functions firing in the correct order especially if async methods are executed.
         waitCount = 0, // waiting to render. If it fails too many times. it will die.
-        changeWatcherSet = false,
-        unwatchers = [],
-        content,// the dom element with all of the chunks.
-        scopes = [],
-    // compiling
-        active = [],
-        lastVisibleScrollStart = 0,
-        rowOffsets = {},
-        viewHeight = 0,
-    // convenience
-        options,
-        states = exports.datagrid.states,
-        events = exports.datagrid.events,
-    // rendering
-        state = states.BUILDING, // ready is set to true after the initial digest.
-    // exports
-        values = {
-            // scrolling
-            dirty: false,
-            scroll: 0,
-            speed: 0,
-            absSpeed: 0,
-            scrollPercent: 0,
-            touchDown: false,
-            scrollingStopIntv: null,
-            activeRange: {min: 0, max: 0}
+        changeWatcherSet = false, //flag for change watchers.
+        unwatchers = [], // list of scope listeners that we want to clear on destroy
+        content, // the dom element with all of the chunks.
+        scopes = [], // the array of all scopes that have been compiled.
+        active = [], // the scopes that are currently active.
+        lastVisibleScrollStart = 0, // cached index to improve render loop by starting where it left off.
+        rowOffsets = {}, // cache for the heights of the rows for faster height calculations.
+        viewHeight = 0, // the visual area height.
+        options, // configs that are shared through the datagrid and addons.
+        states = exports.datagrid.states, // local reference to the states constants
+        events = exports.datagrid.events, // local reference to the events constants
+        state = states.BUILDING, // `state` of the app. Building || Ready.
+        values = { // `values` is the object that is used to share data for scrolling and other shared values.
+            dirty: false, // if the data is dirty and a render has not happended since the data change.
+            scroll: 0, // current scroll value of the grid
+            speed: 0, // current speed of the scroll
+            absSpeed: 0, // current absSpeed of the grid.
+            scrollPercent: 0, // the current percent position of the scroll.
+            touchDown: false, // if there is currently a touch start and not a touch end. Since touch is used for scrolling on a touch device. Ignored for desktop.
+            scrollingStopIntv: null, // interval that allows waits for checks to know when the scrolling has stopped and a render is needed.
+            activeRange: {min: 0, max: 0} // the current range of active scopes.
         },
-        exp = {};
+        exp = {}; // the datagrid public api
 
-    /**
-     * init
-     */
+    // Initialize the datagrid.
+    // add unique methods to the flow.
     function init() {
-        exports.logWrapper('datagrid', exp, 'green');
-        setupExports();
         flow.unique(render);
         flow.unique(updateRowWatchers);
     }
 
+    // Build out the public api variables for the datagrid.
+    function setupExports() {
+        exp.scope = scope;
+        exp.element = element;
+        exp.attr = attr;
+        exp.rowsLength = 0;
+        exp.scopes = scopes;
+        exp.data = exp.data || [];
+        exp.unwatchers = unwatchers;
+        exp.values = values;
+        exp.start = start;
+        exp.reset = reset;
+        exp.forceRenderScope = forceRenderScope;
+        exp.dispatch = dispatch;
+        exp.render = function () {
+            flow.add(render);
+        };
+        exp.updateHeights = updateHeights;
+        exp.getOffsetIndex = getOffsetIndex;
+        exp.isActive = isActive;
+        exp.isCompiled = isCompiled;
+        exp.getScope = getScope;
+        exp.getRowElm = getRowElm;
+        exp.getRowOffset = getRowOffset;
+        exp.getRowHeight = getRowHeight;
+        exp.getViewportHeight = getViewportHeight;
+        exp.getContentHeight = getContentHeight;
+        exp.getContent = getContent;
+        exp.safeDigest = safeDigest;
+        exp.getRowIndexFromElement = getRowIndexFromElement;
+        exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
+        exp.flow = flow = new Flow({async: options.hasOwnProperty('async') ? !!options.async : true, debug: options.hasOwnProperty('debug') ? options.debug : 0}, exp.dispatch);
+        flow.add(init);// initialize core.
+        flow.run();// start the flow manager.
+    }
+
+    // The `content` dom element is the only direct child created by the datagrid.
+    // It is used so append all of the `chunks` so that the it can be scrolled.
+    // If the dom element is provided with the class `content` then that dom element will be used
+    // allowing the user to add custom classes directly tot he `content` dom element.
     function createContent() {
         var cnt = element[0].getElementsByClassName('content')[0], classes = 'content';
         if (cnt) { // if there is an old one. Pull the classes from it.
@@ -59,31 +96,21 @@ function Datagrid(scope, element, attr, $compile) {
         return cnt;
     }
 
+    // return the reference to the content div.
     function getContent() {
         return content;
     }
 
-    function setupExports() {
-        exp.__name = 'ux-datagrid';
-        exp.scope = scope;
-        exp.element = element;
-        exp.attr = attr;
-        exp.rowsLength = 0;
-        exp.scopes = scopes;
-        exp.data = exp.data || [];
-        exp.unwatchers = unwatchers;
-        exp.values = values;
-    }
-
-    /**
-     * This is called after addons to allow overrides.
-     */
+    // `start` is called after the addons are added.
     function start() {
         exp.dispatch(exports.datagrid.events.INIT);
         content = createContent();
         waitForElementReady(0);
     }
 
+    // this waits for the body element because if the grid has been constructed, but no heights are showing
+    // it is usually because the grid has not been attached to the document yet. So wait for the heights
+    // to be available, but only wait a little then exit.
     function waitForElementReady(count) {
         if (!exp.element[0].offsetHeight) {
             if(count < 1) {
@@ -460,6 +487,7 @@ function Datagrid(scope, element, attr, $compile) {
         exp.dispatch(exports.datagrid.events.BEFORE_RENDER);
         if (readyToRender()) {
             waitCount = 0;
+            // Where [states.BUILDING](#states.BUILDING) is used
             if (state === states.BUILDING) {
                 //TODO: removeExtraRows is not compatible. It needs removed. Only buildRows will work with chunking.
                 //flow.add(removeExtraRows, [exp.data]);// if our data updates we need to remove extra rows.
@@ -602,34 +630,8 @@ function Datagrid(scope, element, attr, $compile) {
         $compile = null;
     }
 
-    // define public api.
-    exp.start = start;
-    exp.reset = reset;
-    exp.forceRenderScope = forceRenderScope;
-    exp.dispatch = dispatch;
-    exp.render = function () {
-        flow.add(render);
-    };
-    exp.updateHeights = updateHeights;
-    exp.getOffsetIndex = getOffsetIndex;
-    exp.isActive = isActive;
-    exp.isCompiled = isCompiled;
-    exp.getScope = getScope;
-    exp.getRowElm = getRowElm;
-    exp.getRowOffset = getRowOffset;
-    exp.getRowHeight = getRowHeight;
-    exp.getViewportHeight = getViewportHeight;
-    exp.getContentHeight = getContentHeight;
-    exp.getContent = getContent;
-    exp.safeDigest = safeDigest;
-    exp.getRowIndexFromElement = getRowIndexFromElement;
-
-    // initialize core.
-    exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
-    // add variables that can be modified externally.
-    exp.flow = flow = new Flow({async: options.hasOwnProperty('async') ? !!options.async : true, debug: options.hasOwnProperty('debug') ? options.debug : 0}, exp.dispatch);
-    flow.add(init);
-    flow.run();
+    exports.logWrapper('datagrid', exp, 'green');
+    setupExports();
 
     return exp;
 }

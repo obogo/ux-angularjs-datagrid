@@ -4,6 +4,8 @@
 * License: MIT.
 */
 (function(exports, global){
+/*global ux */
+// we want to override the default scrolling if it is an IOS device.
 angular.module("ux").factory("windowScroll", function() {
     return function windowScroll(exp) {
         var result = exp.scrollModel;
@@ -24,6 +26,7 @@ angular.module("ux").factory("windowScroll", function() {
         };
         window.addEventListener("scroll", exp.scrollModel.onUpdateScroll);
         function resetScroll() {
+            // force browser to start at 0,0 on page reload.
             var intv = setTimeout(function() {
                 window.scrollBy(1, 1);
                 window.scrollBy(-1, -1);

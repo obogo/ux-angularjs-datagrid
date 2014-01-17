@@ -4,6 +4,12 @@
 * License: MIT.
 */
 (function(exports, global){
+/**
+ * Based on the article here for a performance increase or prevention of performance degradation
+ * when hover elements are added to a grid. If your grid has lots of hover events this will keep
+ * them from reducing your fps.
+ * http://www.thecssninja.com/javascript/pointer-events-60fps
+ */
 angular.module("ux").factory("disableHoverWhileScrolling", function() {
     return function(exp) {
         var name = "disable-hover-while-scrolling", timer;

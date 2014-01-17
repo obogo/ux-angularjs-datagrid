@@ -9,7 +9,8 @@ angular.module("ux").factory("expandRows", function() {
         var result = {}, lastGetIndex, cache = {}, opened = {}, states = {
             opened: "opened",
             closed: "closed"
-        }, superGetTemplateHeight = exp.templateModel.getTemplateHeight, dummyStyle = document.createElement("div").style, vendor = function() {
+        }, superGetTemplateHeight = exp.templateModel.getTemplateHeight, // transition end lookup.
+        dummyStyle = document.createElement("div").style, vendor = function() {
             var vendors = "t,webkitT,MozT,msT,OT".split(","), t, i = 0, l = vendors.length;
             for (;i < l; i++) {
                 t = vendors[i] + "ransform";
@@ -139,6 +140,7 @@ angular.module("ux").factory("expandRows", function() {
             opened = null;
             states = null;
         }
+        // override the getTemplateHeight to return the result with the expanded height.
         exp.templateModel.getTemplateHeight = getTemplateHeight;
         result.states = states;
         result.toggle = toggle;

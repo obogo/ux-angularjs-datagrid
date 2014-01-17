@@ -33,7 +33,7 @@ module.exports = function (grunt) {
                 options: {
                     mangle: false,
                     compress: false,
-                    preserveComments: 'some',
+                    preserveComments: 'all',
                     beautify: true,
                     banner: '<%= banner %><%= wrapStart %>',
                     footer: '<%= wrapEnd %>'

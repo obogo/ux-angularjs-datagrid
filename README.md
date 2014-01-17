@@ -8,6 +8,7 @@ Of course since this is angular there is then the issue with a **digest being to
 
 - [Demos](https://rawgithub.com/webux/ux-angularjs-datagrid/master/samples/index.html)
 - [Unit Tests](https://rawgithub.com/webux/ux-angularjs-datagrid/master/test/index.html)
+- [Docs - in Progress](https://rawgithub.com/webux/ux-angularjs-datagrid/master/docs/angular-ux-datagrid.html)
 
 ## What makes this list/datagrid different? ##
 Chunking is the concept of **grouping the dom elements in hierarchies** so that the browser does not calculate the position of every element when one changes, but only those in that container, it's parents in it's container, and so on up the chain. The smaller the groups the less the browser has to redraw, size, and position elements because it can just move the parent of necessary. **This works regardless of rows all having the same heights or dynamic heights as long as there is a template for each different height.**

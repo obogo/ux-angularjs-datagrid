@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>ux-datagrid-iosScroll.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="ux-datagrid-disableHoverWhileScrolling.html">
+                ux-datagrid-disableHoverWhileScrolling.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-focusManager.html">
+                ux-datagrid-focusManager.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-iosScroll.html">
+                ux-datagrid-iosScroll.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-expandRows.html">
+                ux-datagrid-expandRows.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-findInList.html">
+                ux-datagrid-findInList.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-gridLogger.html">
+                ux-datagrid-gridLogger.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-infiniteScroll.html">
+                ux-datagrid-infiniteScroll.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-scrollHistory.html">
+                ux-datagrid-scrollHistory.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-sortModel.html">
+                ux-datagrid-sortModel.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-statsModel.html">
+                ux-datagrid-statsModel.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-windowScroll.html">
+                ux-datagrid-windowScroll.js
+              </a>
+            
+              
+              <a class="source" href="angular-ux-datagrid.html">
+                angular-ux-datagrid.js
+              </a>
+            
+              
+              <a class="source" href="ux-doubleScroll.html">
+                ux-doubleScroll.js
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>ux-datagrid-iosScroll.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*
+* uxDatagrid v.0.2.0
+* (c) 2014, WebUX
+* License: MIT.
+*/</span>
+(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(exports, global)</span>{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h2 id="-a-name-virtualscroll-virtualscroll-a-"><a name="virtualScroll">virtualScroll</a></h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START = <span class="hljs-string">"virtualScroll:beforeScrollStart"</span>;
+
+exports.datagrid.events.VIRTUAL_SCROLL_TOP = <span class="hljs-string">"virtualScroll:top"</span>;
+
+exports.datagrid.events.VIRTUAL_SCROLL_BOTTOM = <span class="hljs-string">"virtualScroll:bottom"</span>;
+
+exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE = <span class="hljs-string">"virtualScroll:onUpdate"</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>For simulating the scroll in IOS that doesn&#39;t have a smooth scroll natively using transform3d.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.datagrid.VirtualScroll = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">VirtualScroll</span><span class="hljs-params">(scope, element, vals, callback)</span> {</span>
+    <span class="hljs-keyword">var</span> friction = <span class="hljs-number">.95</span>, stopThreshold = <span class="hljs-number">.01</span>, moved = <span class="hljs-literal">false</span>, result = exports.logWrapper(<span class="hljs-string">"VirtualScroll"</span>, {}, <span class="hljs-string">"redOrange"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+        scope.$emit.apply(scope, <span class="hljs-built_in">arguments</span>);
+    }), _x = <span class="hljs-number">0</span>, _y = <span class="hljs-number">0</span>, max, top = <span class="hljs-number">0</span>, bottom = <span class="hljs-number">0</span>, enabled = <span class="hljs-literal">true</span>, doubleTapTimer, offTouchEnd, touchStart = <span class="hljs-string">"touchstart"</span>, touchEnd = <span class="hljs-string">"touchend"</span>, touchMove = <span class="hljs-string">"touchmove"</span>, touchCancel = <span class="hljs-string">"touchCancel"</span>, values = angular.extend({
+        scrollingStopIntv: <span class="hljs-literal">null</span>,
+        scroll: <span class="hljs-number">0</span>,
+        speed: <span class="hljs-number">0</span>,
+        absSpeed: <span class="hljs-number">0</span>,
+        touchDown: <span class="hljs-literal">false</span>
+    }, vals);
+    result.scope = scope;
+    result.element = element;
+    result.content = element.children();
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setup</span><span class="hljs-params">()</span> {</span>
+        element.css({
+            overflow: <span class="hljs-string">"hidden"</span>
+        });
+        <span class="hljs-keyword">if</span> (scope.datagrid &amp;&amp; element === scope.datagrid.element) {
+            scope.$on(exports.datagrid.events.TOUCH_DOWN, onTouchStartNg);
+        } <span class="hljs-keyword">else</span> {
+            result.content.bind(touchStart, onTouchStart);
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">clearIntv</span><span class="hljs-params">()</span> {</span>
+        clearTimeout(values.scrollingStopIntv);
+        values.scrollingStopIntv = <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stopEvent</span><span class="hljs-params">(e)</span> {</span>
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onTouchStartNg</span><span class="hljs-params">(evtType, event)</span> {</span>
+        onTouchStart(event);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onTouchStart</span><span class="hljs-params">(e)</span> {</span>
+        <span class="hljs-keyword">if</span> (!enabled) {
+            <span class="hljs-keyword">return</span>;
+        }
+        result.log(<span class="hljs-string">"onTouchStart"</span>);
+        stop();
+        <span class="hljs-keyword">var</span> touches = e.touches || e.originalEvent.touches;
+        clearIntv();
+        result.dispatch(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START);
+        <span class="hljs-keyword">if</span> (touches[<span class="hljs-number">0</span>] &amp;&amp; touches[<span class="hljs-number">0</span>].target &amp;&amp; touches[<span class="hljs-number">0</span>].target.tagName.match(<span class="hljs-regexp">/input|textarea|select/i</span>)) {
+            <span class="hljs-keyword">return</span>;
+        }
+        max = element[<span class="hljs-number">0</span>].scrollHeight;
+        <span class="hljs-keyword">var</span> touch = touches[<span class="hljs-number">0</span>];
+        _x = touch.pageX;
+        _y = touch.pageY;
+        values.touchDown = <span class="hljs-literal">true</span>;
+        moved = <span class="hljs-literal">false</span>;
+        stopEvent(e);
+        stopCreep();
+        updateBottom();
+        addTouchEnd();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stop</span><span class="hljs-params">()</span> {</span>
+        clearTimeout(values.scrollingStopIntv);
+        values.scrollingStopIntv = <span class="hljs-number">0</span>;
+        result.onScrollingStop();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stopCreep</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">if</span> (scope.datagrid) {
+            scope.datagrid.creepRenderModel.stop();
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateBottom</span><span class="hljs-params">()</span> {</span>
+        bottom = getHeight(result.content) - element[<span class="hljs-number">0</span>].offsetHeight;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getHeight</span><span class="hljs-params">(elms)</span> {</span>
+        <span class="hljs-keyword">var</span> totals = {
+            height: <span class="hljs-number">0</span>
+        };
+        ux.each(elms, onGetHeight, totals);
+        <span class="hljs-keyword">return</span> totals.height;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onGetHeight</span><span class="hljs-params">(item, index, list, params)</span> {</span>
+        params.height += item.offsetHeight;
+    }
+    result.enable = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">enable</span><span class="hljs-params">(value, speed)</span> {</span>
+        <span class="hljs-keyword">if</span> (value !== <span class="hljs-literal">undefined</span>) {
+            enabled = !!value;
+            <span class="hljs-keyword">if</span> (!enabled) {
+                removeTouchEnd();
+            } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (enabled) {
+                updateBottom();
+                values.touchDown = <span class="hljs-literal">false</span>;
+                _y = element[<span class="hljs-number">0</span>].offsetTop + element[<span class="hljs-number">0</span>].offsetHeight * <span class="hljs-number">.5</span>;
+                <span class="hljs-keyword">if</span> (speed) {
+                    values.speed = speed;
+                    values.absSpeed = <span class="hljs-built_in">Math</span>.abs(speed);
+                }
+                clearIntv();
+                values.scrollingStopIntv = setTimeout(applyFriction);
+            }
+        }
+        <span class="hljs-keyword">return</span> enabled;
+    };
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addTouchEnd</span><span class="hljs-params">()</span> {</span>
+        result.log(<span class="hljs-string">"addTouchEnd"</span>);
+        ux.each(result.content, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(el)</span> {</span>
+            el.addEventListener(touchMove, onTouchMove, <span class="hljs-literal">true</span>);
+            <span class="hljs-keyword">if</span> (scope.datagrid &amp;&amp; element === scope.datagrid.element) {
+                result.log(<span class="hljs-string">"	listen for TOUCH_UP"</span>);
+                offTouchEnd = scope.$on(exports.datagrid.events.TOUCH_UP, onTouchEndNg);
+            } <span class="hljs-keyword">else</span> {
+                result.log(<span class="hljs-string">"	listen for touchend"</span>);
+                el.addEventListener(touchEnd, onTouchEnd, <span class="hljs-literal">true</span>);
+                el.addEventListener(touchCancel, onTouchEnd, <span class="hljs-literal">true</span>);
+            }
+        });
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">removeTouchEnd</span><span class="hljs-params">()</span> {</span>
+        result.log(<span class="hljs-string">"removeTouchEnd"</span>);
+        ux.each(result.content, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(el)</span> {</span>
+            el.removeEventListener(touchMove, onTouchMove, <span class="hljs-literal">true</span>);
+            <span class="hljs-keyword">if</span> (offTouchEnd) {
+                result.log(<span class="hljs-string">"	remove TOUCH_UP"</span>);
+                offTouchEnd();
+                offTouchEnd = <span class="hljs-literal">null</span>;
+            } <span class="hljs-keyword">else</span> {
+                result.log(<span class="hljs-string">"	remove touchend"</span>);
+                el.removeEventListener(touchEnd, onTouchEnd, <span class="hljs-literal">true</span>);
+                el.removeEventListener(touchCancel, onTouchEnd, <span class="hljs-literal">true</span>);
+            }
+        });
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onTouchEndNg</span><span class="hljs-params">(evtStr, event)</span> {</span>
+        onTouchEnd(event);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onTouchEnd</span><span class="hljs-params">(event)</span> {</span>
+        result.log(<span class="hljs-string">"onTouchEnd"</span>);
+        <span class="hljs-keyword">if</span> (enabled) {
+            values.touchDown = <span class="hljs-literal">false</span>;
+            stopEvent(event);
+            <span class="hljs-keyword">if</span> (!moved) {
+                fireClick(event);
+            }
+            removeTouchEnd();
+            applyFriction();
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onTouchMove</span><span class="hljs-params">(event)</span> {</span>
+        <span class="hljs-keyword">if</span> (enabled) {
+            moved = <span class="hljs-literal">true</span>;
+            stopEvent(event);
+            <span class="hljs-keyword">var</span> touch = event.changedTouches[<span class="hljs-number">0</span>];
+            updateScroll(touch.pageX, touch.pageY);
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateScroll</span><span class="hljs-params">(x, y)</span> {</span>
+        <span class="hljs-keyword">var</span> deltaX = _x + x, deltaY = _y - y;
+        <span class="hljs-keyword">if</span> (values.scroll + deltaY &lt;= <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">if</span> (values.scroll) {
+                result.dispatch(exports.datagrid.events.VIRTUAL_SCROLL_TOP, result, deltaY);
+            }
+            values.speed = -values.scroll;
+            values.absSpeed = <span class="hljs-built_in">Math</span>.abs(values.speed);
+            values.scroll = deltaY = <span class="hljs-number">0</span>;
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (values.scroll + deltaY &gt;= bottom) {
+            <span class="hljs-keyword">if</span> (values.scroll !== bottom) {
+                result.dispatch(exports.datagrid.events.VIRTUAL_SCROLL_BOTTOM, result, deltaY);
+            }
+            values.scroll = bottom;
+            values.speed = <span class="hljs-number">0</span>;
+            values.absSpeed = <span class="hljs-number">0</span>;
+        } <span class="hljs-keyword">else</span> {
+            values.speed = deltaY;
+            values.scroll += deltaY;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>result.cap(values.scroll + deltaY);</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            values.absSpeed = <span class="hljs-built_in">Math</span>.abs(deltaY);
+        }
+        _y = y;
+        _x = x;
+        render();
+        <span class="hljs-keyword">if</span> (!values.touchDown) {
+            clearIntv();
+            values.scrollingStopIntv = setTimeout(applyFriction);
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fireClick</span><span class="hljs-params">(e)</span> {</span>
+        result.log(<span class="hljs-string">"fireClick"</span>);
+        <span class="hljs-keyword">var</span> point = e.changedTouches ? e.changedTouches[<span class="hljs-number">0</span>] : e, target, ev;
+        clearTimeout(doubleTapTimer);
+        doubleTapTimer = setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+            doubleTapTimer = <span class="hljs-literal">null</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Find the last touched element</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            target = point.target;
+            <span class="hljs-keyword">while</span> (target.nodeType != <span class="hljs-number">1</span>) target = target.parentNode;
+            <span class="hljs-keyword">if</span> (target.tagName != <span class="hljs-string">"SELECT"</span> &amp;&amp; target.tagName != <span class="hljs-string">"INPUT"</span> &amp;&amp; target.tagName != <span class="hljs-string">"TEXTAREA"</span>) {
+                ev = document.createEvent(<span class="hljs-string">"MouseEvents"</span>);
+                ev.initMouseEvent(<span class="hljs-string">"click"</span>, <span class="hljs-literal">true</span>, <span class="hljs-literal">true</span>, e.view, <span class="hljs-number">1</span>, point.screenX, point.screenY, point.clientX, point.clientY, e.ctrlKey, e.altKey, e.shiftKey, e.metaKey, <span class="hljs-number">0</span>, <span class="hljs-literal">null</span>);
+                ev._fake = <span class="hljs-literal">true</span>;
+                target.dispatchEvent(ev);
+            }
+        }, <span class="hljs-number">250</span>);
+    }
+    result.dispatch = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatch</span><span class="hljs-params">()</span> {</span>
+        scope.$emit.apply(scope, <span class="hljs-built_in">arguments</span>);
+    };
+    result.cap = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">cap</span><span class="hljs-params">(value)</span> {</span>
+        <span class="hljs-keyword">var</span> v = <span class="hljs-built_in">Math</span>.abs(value);
+        v = v &gt; bottom ? bottom : v &lt; top ? top : v;
+        <span class="hljs-keyword">return</span> value &lt; <span class="hljs-number">0</span> ? -v : v;
+    };
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">applyFriction</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">if</span> (values.absSpeed &gt;= stopThreshold) {
+            updateScroll(_x, _y - values.speed * friction);
+        } <span class="hljs-keyword">else</span> {
+            stop();
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">var</span> value = element[<span class="hljs-number">0</span>].scrollTop - values.scroll;
+        result.content.css({
+            webkitTransform: <span class="hljs-string">"translate3d(0px, "</span> + value + <span class="hljs-string">"px, 0px)"</span>
+        });
+        result.dispatch(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE);
+    }
+    result.getScroll = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getScroll</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">return</span> values.scroll;
+    };
+    result.setScroll = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setScroll</span><span class="hljs-params">(value)</span> {</span>
+        values.scroll = value;
+        <span class="hljs-keyword">if</span> (scope.datagrid) {
+            scope.datagrid.values.scroll = value;
+        }
+    };
+    result.scrollToBottom = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(immediately)</span> {</span>
+        updateBottom();
+        result.scrollTo(bottom, immediately);
+    };
+    result.getValues = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getValues</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">return</span> values;
+    };
+    result.clear = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">clearRender</span><span class="hljs-params">()</span> {</span>
+        result.content.css({
+            webkitTransform: <span class="hljs-string">""</span>
+        });
+    };
+    <span class="hljs-comment">/**
+     * Scroll to the numeric value.
+     * @param value
+     * @param {Boolean=} immediately
+     */</span>
+    result.scrollTo = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">scrollTo</span><span class="hljs-params">(value, immediately)</span> {</span>
+        callback(value, immediately);
+    };
+    result.scrollIntoView = scope.datagrid ? scope.datagrid.scrollModel.scrollIntoView : <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>};
+    <span class="hljs-comment">/**
+     * When it stops render.
+     */</span>
+    result.onScrollingStop = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onScrollingStop</span><span class="hljs-params">()</span> {</span>
+        result.scrollTo(values.scroll, <span class="hljs-literal">true</span>);
+    };
+    result.destroy = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+        removeTouchEnd();
+        element.unbind(touchStart, onTouchStart);
+        result.destroyLogger();
+        result = <span class="hljs-literal">null</span>;
+        values = <span class="hljs-literal">null</span>;
+    };
+    result.setup = setup;
+    <span class="hljs-keyword">return</span> result;
+};
+
+<span class="hljs-comment">/*global ux */</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>we want to override the default scrolling if it is an IOS device.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>angular.module(<span class="hljs-string">"ux"</span>).factory(<span class="hljs-string">"iosScroll"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">iosScroll</span><span class="hljs-params">(exp)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>do not let escape if in unit tests. exp.flow.async is false in unit tests.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">var</span> vScroll, originalScrollModel = exp.scrollModel;
+        <span class="hljs-keyword">if</span> (!exports.datagrid.isIOS) {
+            <span class="hljs-keyword">return</span> exp;
+        }
+        vScroll = <span class="hljs-keyword">new</span> ux.datagrid.VirtualScroll(exp.scope, exp.element, exp.values, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(value, immediately)</span> {</span>
+            vScroll.clear();
+            <span class="hljs-keyword">var</span> values = vScroll.getValues();
+            originalScrollModel.removeScrollListener();
+            exp.values.scroll = values.scroll;
+            exp.values.speed = values.speed;
+            exp.values.absSpeed = values.absSpeed;
+            originalScrollModel.scrollTo(value, immediately);
+        });
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onBeforeVirtualScrollStart</span><span class="hljs-params">(event)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>update the virtual scroll values to reflect what is in the datagrid.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">var</span> values = vScroll.getValues();
+            ux.each(exp.values, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(value, key)</span> {</span>
+                values[key] = value;
+            });
+        }
+        exp.scope.$on(ux.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeVirtualScrollStart);
+        exp.scope.$on(ux.datagrid.events.READY, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+            vScroll.content = exp.getContent();
+            vScroll.setup();
+        });
+        vScroll.scrollToIndex = originalScrollModel.scrollToIndex;
+        vScroll.scrollToItem = originalScrollModel.scrollToItem;
+        exp.scrollModel = vScroll;
+        <span class="hljs-keyword">return</span> exp;
+    };
+});
+}(<span class="hljs-keyword">this</span>.ux = <span class="hljs-keyword">this</span>.ux || {}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span><span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;}()));</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

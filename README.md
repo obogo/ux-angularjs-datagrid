@@ -81,6 +81,10 @@ It is also handy to have addons that will update based on events. Here is an exa
 ## No JQuery ##
 AngularJS Datagrid doesn't have any JQuery dependencies. This helps to keep your application light weight.
 
+## More Examples ##
+[Getting Started](https://github.com/webux/ux-angularjs-datagrid/wiki)
+[Multiple Row Templates](https://github.com/webux/ux-angularjs-datagrid/wiki/#multiple-row-templates)
+
 ## Running Unit Tests Locally ##
 You can run the unit tests and samples locally by running
 

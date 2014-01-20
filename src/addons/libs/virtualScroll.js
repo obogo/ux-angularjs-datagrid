@@ -1,8 +1,9 @@
+// ## <a name="virtualScroll">virtualScroll</a> ##
 exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START = 'virtualScroll:beforeScrollStart';
 exports.datagrid.events.VIRTUAL_SCROLL_TOP = 'virtualScroll:top';
 exports.datagrid.events.VIRTUAL_SCROLL_BOTTOM = 'virtualScroll:bottom';
 exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE = 'virtualScroll:onUpdate';
-// For simulating the scroll in IOS that doesn't have a smooth scroll natively.
+// For simulating the scroll in IOS that doesn't have a smooth scroll natively using transform3d.
 exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, callback) {
     var friction = 0.95, stopThreshold = 0.01, moved = false,
         result = exports.logWrapper('VirtualScroll', {}, 'redOrange', function () {

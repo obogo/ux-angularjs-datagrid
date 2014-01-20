@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>ux-datagrid-infiniteScroll.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="ux-datagrid-disableHoverWhileScrolling.html">
+                ux-datagrid-disableHoverWhileScrolling.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-focusManager.html">
+                ux-datagrid-focusManager.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-iosScroll.html">
+                ux-datagrid-iosScroll.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-expandRows.html">
+                ux-datagrid-expandRows.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-findInList.html">
+                ux-datagrid-findInList.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-gridLogger.html">
+                ux-datagrid-gridLogger.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-infiniteScroll.html">
+                ux-datagrid-infiniteScroll.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-scrollHistory.html">
+                ux-datagrid-scrollHistory.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-sortModel.html">
+                ux-datagrid-sortModel.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-statsModel.html">
+                ux-datagrid-statsModel.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-windowScroll.html">
+                ux-datagrid-windowScroll.js
+              </a>
+            
+              
+              <a class="source" href="angular-ux-datagrid.html">
+                angular-ux-datagrid.js
+              </a>
+            
+              
+              <a class="source" href="ux-doubleScroll.html">
+                ux-doubleScroll.js
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>ux-datagrid-infiniteScroll.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*
+* uxDatagrid v.0.2.0
+* (c) 2014, WebUX
+* License: MIT.
+*/</span>
+(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(exports, global)</span>{</span>
+<span class="hljs-comment">/**
+ * Datagrid infinite scroll adds more data when the list scrolls to the bottom.
+ * @type {string}
+ */</span>
+ux.datagrid.events.SCROLL_TO_TOP = <span class="hljs-string">"datagrid:scrollToTop"</span>;
+
+ux.datagrid.events.SCROLL_TO_BOTTOM = <span class="hljs-string">"datagrid:scrollToBottom"</span>;
+
+angular.module(<span class="hljs-string">"ux"</span>).factory(<span class="hljs-string">"infiniteScroll"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(exp)</span> {</span>
+        <span class="hljs-keyword">var</span> result = {}, bottomOffset = <span class="hljs-number">0</span>, scrollOffset = <span class="hljs-number">0</span>, loadingRow = {
+            _template: <span class="hljs-string">"loadingRow"</span>
+        };
+        result.beforeDataChange = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">beforeDataChange</span><span class="hljs-params">()</span> {</span>
+            scrollOffset = exp.values.scroll;
+            <span class="hljs-keyword">if</span> (exp.data[exp.data.length - <span class="hljs-number">1</span>] !== loadingRow &amp;&amp; (!exp.options.infiniteScrollLimit || exp.data.length &lt; exp.options.infiniteScrollLimit)) {
+                exp.data.push(loadingRow);
+            }
+        };
+        result.calculateBottomOffset = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">calculateBottomOffset</span><span class="hljs-params">()</span> {</span>
+            <span class="hljs-keyword">if</span> (exp.rowsLength) {
+                <span class="hljs-keyword">var</span> i = exp.rowsLength - <span class="hljs-number">1</span>;
+                bottomOffset = exp.getRowOffset(i) - exp.getViewportHeight() + exp.getRowHeight(i);
+                exp.scrollModel.scrollTo(scrollOffset, <span class="hljs-literal">true</span>);
+            }
+        };
+        result.onUpdateScroll = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onUpdateScroll</span><span class="hljs-params">(event, scroll)</span> {</span>
+            <span class="hljs-keyword">if</span> (scroll &gt;= bottomOffset) {
+                exp.dispatch(ux.datagrid.events.SCROLL_TO_BOTTOM);
+            } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (scroll &lt;= <span class="hljs-number">0</span>) {
+                exp.dispatch(ux.datagrid.events.SCROLL_TO_TOP);
+            }
+        };
+        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.AFTER_DATA_CHANGE, result.beforeDataChange));
+        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
+        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.SCROLL_STOP, result.onUpdateScroll));
+        exp.infiniteScroll = result;
+    };
+});
+}(<span class="hljs-keyword">this</span>.ux = <span class="hljs-keyword">this</span>.ux || {}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span><span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;}()));</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

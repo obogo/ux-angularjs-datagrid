@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>ux-datagrid-disableHoverWhileScrolling.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="ux-datagrid-disableHoverWhileScrolling.html">
+                ux-datagrid-disableHoverWhileScrolling.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-focusManager.html">
+                ux-datagrid-focusManager.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-iosScroll.html">
+                ux-datagrid-iosScroll.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-expandRows.html">
+                ux-datagrid-expandRows.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-findInList.html">
+                ux-datagrid-findInList.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-gridLogger.html">
+                ux-datagrid-gridLogger.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-infiniteScroll.html">
+                ux-datagrid-infiniteScroll.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-scrollHistory.html">
+                ux-datagrid-scrollHistory.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-sortModel.html">
+                ux-datagrid-sortModel.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-statsModel.html">
+                ux-datagrid-statsModel.js
+              </a>
+            
+              
+              <a class="source" href="ux-datagrid-windowScroll.html">
+                ux-datagrid-windowScroll.js
+              </a>
+            
+              
+              <a class="source" href="angular-ux-datagrid.html">
+                angular-ux-datagrid.js
+              </a>
+            
+              
+              <a class="source" href="ux-doubleScroll.html">
+                ux-doubleScroll.js
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>ux-datagrid-disableHoverWhileScrolling.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*
+* uxDatagrid v.0.2.0
+* (c) 2014, WebUX
+* License: MIT.
+*/</span>
+(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(exports, global)</span>{</span>
+<span class="hljs-comment">/**
+ * Based on the article here for a performance increase or prevention of performance degradation
+ * when hover elements are added to a grid. If your grid has lots of hover events this will keep
+ * them from reducing your fps.
+ * http://www.thecssninja.com/javascript/pointer-events-60fps
+ */</span>
+angular.module(<span class="hljs-string">"ux"</span>).factory(<span class="hljs-string">"disableHoverWhileScrolling"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(exp)</span> {</span>
+        <span class="hljs-keyword">var</span> name = <span class="hljs-string">"disable-hover-while-scrolling"</span>, timer;
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> {</span>
+            exp.flow.log(<span class="hljs-string">"init"</span>);
+            ux.css.createClass(<span class="hljs-string">"grid"</span>, <span class="hljs-string">"."</span> + name + <span class="hljs-string">" *"</span>, <span class="hljs-string">"pointer-events: none !important;"</span>);
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">scrollStart</span><span class="hljs-params">()</span> {</span>
+            exp.flow.stopTimeout(timer);
+            exp.flow.log(<span class="hljs-string">"scrollStart"</span>);
+            <span class="hljs-keyword">if</span> (!exp.element[<span class="hljs-number">0</span>].classList.contains(name)) {
+                exp.element[<span class="hljs-number">0</span>].classList.add(name);
+            }
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">scrollStop</span><span class="hljs-params">()</span> {</span>
+            <span class="hljs-keyword">if</span> (exp.flow.async) {
+                timer = exp.flow.timeout(waitAfterScrollStopToDisableHover, <span class="hljs-number">500</span>);
+            } <span class="hljs-keyword">else</span> {
+                waitAfterScrollStopToDisableHover();
+            }
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">waitAfterScrollStopToDisableHover</span><span class="hljs-params">()</span> {</span>
+            exp.flow.log(<span class="hljs-string">"scrollStop"</span>);
+            exp.element[<span class="hljs-number">0</span>].classList.remove(name);
+        }
+        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.SCROLL_START, scrollStart));
+        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.SCROLL_STOP, scrollStop));
+        init();
+        <span class="hljs-keyword">return</span> exp;
+    };
+});
+}(<span class="hljs-keyword">this</span>.ux = <span class="hljs-keyword">this</span>.ux || {}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span><span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;}()));</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

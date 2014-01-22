@@ -5,7 +5,7 @@ exports.datagrid.events.TOUCH_DOWN = "datagrid:touchDown";
 exports.datagrid.events.TOUCH_UP = "datagrid:touchUp";
 exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
 
-    var result = exports.logWrapper('scrollModel', {}, 'orange', exp.dispatch), setup = false, unwatchSetup;
+    var result = exports.logWrapper('scrollModel', {}, 'orange', exp.dispatch), setup = false, unwatchSetup, scrollListeners = [];
 
     /**
      * Listen for scrollingEvents.
@@ -15,7 +15,16 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
             exp.element.css({overflow: 'auto'});
         }
         result.log('addScrollListener');
-        exp.element[0].addEventListener('scroll', result.onUpdateScroll);
+        exp.element[0].addEventListener('scroll', onUpdateScrollHandler);
+        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_TO_INDEX, function (event, index) {
+            result.scrollToIndex(index);
+        }));
+        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_TO_ITEM, function (event, item) {
+            result.scrollToItem(item);
+        }));
+        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_INTO_VIEW, function (event, itemOrIndex) {
+            result.scrollIntoView(itemOrIndex);
+        }));
         addTouchEvents();
         setup = true;
         exp.flow.unique(result.onScrollingStop);
@@ -31,7 +40,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
 
     result.removeScrollListener = function removeScrollListener() {
         result.log('removeScrollListener');
-        exp.element[0].removeEventListener('scroll', result.onUpdateScroll);
+        exp.element[0].removeEventListener('scroll', onUpdateScrollHandler);
     };
 
     result.removeTouchEvents = function removeTouchEvents() {
@@ -61,6 +70,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         exp.element[0].scrollTop = value;
         exp.values.scroll = value;
     };
+
+    function onUpdateScrollHandler(event) {
+        exp.flow.add(result.onUpdateScroll, [event]);
+    }
 
     /**
      * When a scrollEvent is fired, recalculate the values.
@@ -191,12 +204,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
             result.removeScrollListener();
             result.removeTouchEvents();
         }
+        result = null;
+        exp = null;
     }
 
     /**
      * Wait till the grid is ready before we setup our listeners.
      */
-    unwatchSetup = exp.scope.$on(exports.datagrid.events.READY, setupScrolling);
+    unwatchSetup = exp.scope.$on(exports.datagrid.events.ON_READY, setupScrolling);
 
     result.destroy = destroy;
 

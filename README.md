@@ -1,4 +1,4 @@
-## AngularJS Datagrid ##
+## ux-datagrid : An Angular DataGrid ##
 ----------
 **Highly performant list and datagrid for AngularJS** designed for mobile devices which just makes it all the better on a desktop.
 
@@ -13,6 +13,7 @@ Of course since this is angular there is then the issue with a **digest being to
 ### More Examples ###
 - [Getting Started](https://github.com/webux/ux-angularjs-datagrid/wiki)
 - [Multiple Row Templates](https://github.com/webux/ux-angularjs-datagrid/wiki/#multiple-row-templates)
+- [Grouped Data](https://github.com/webux/ux-angularjs-datagrid/wiki/#grouped-data)
 
 ## What makes this list/datagrid different? ##
 Chunking is the concept of **grouping the dom elements in hierarchies** so that the browser does not calculate the position of every element when one changes, but only those in that container, it's parents in it's container, and so on up the chain. The smaller the groups the less the browser has to redraw, size, and position elements because it can just move the parent of necessary. **This works regardless of rows all having the same heights or dynamic heights as long as there is a template for each different height.**
@@ -74,7 +75,7 @@ It is also handy to have addons that will update based on events. Here is an exa
 
 	angular.module('ux').factory('listLoader', function () {
 		return function (datagrid) {
-			datagrid.unwatchers.push(datagrid.scope.$on(ux.datagrid.events.AFTER_UPDATE_WATCHERS, function () {
+			datagrid.unwatchers.push(datagrid.scope.$on(ux.datagrid.events.ON_AFTER_UPDATE_WATCHERS, function () {
 				if (datagrid.data.length) {
 					alert('loading is complete');
 				}

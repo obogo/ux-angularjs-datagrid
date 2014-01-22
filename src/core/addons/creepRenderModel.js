@@ -117,6 +117,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
     exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
     exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
     exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
-    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, onAfterRender));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_RESET, onBeforeRender));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
 };
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.creepRenderModel);

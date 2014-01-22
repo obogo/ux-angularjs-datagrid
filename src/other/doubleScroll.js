@@ -127,14 +127,14 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                 result.log('is iOS');
                 vScroll = ux.datagrid.VirtualScroll(scope, element, {}, onIOSScroll);
                 vScroll.setup();
-                unwatchRender = scope.$on(exports.datagrid.events.LISTENERS_READY, function () {
+                unwatchRender = scope.$on(exports.datagrid.events.ON_LISTENERS_READY, function () {
                     // it needs to start off with the target disabled.
                     unwatchRender();
                     updateScrollModel();
                     updateTarget();
                     onSizeChange();
                     onIOSScroll(0);
-                    unwatchRender = scope.$on(exports.datagrid.events.AFTER_RENDER, function () {
+                    unwatchRender = scope.$on(exports.datagrid.events.ON_AFTER_RENDER, function () {
                         unwatchRender();
                         onTargetScrollToTop(null, scrollModel, 0.05);
                         onSizeChange();
@@ -148,7 +148,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                     onSizeChange();
                     onScroll(null);
                 } else {
-                    unwatchRender = scope.$on(exports.datagrid.events.LISTENERS_READY, function () {
+                    unwatchRender = scope.$on(exports.datagrid.events.ON_LISTENERS_READY, function () {
                         unwatchRender();
                         updateTarget();
                         onSizeChange();

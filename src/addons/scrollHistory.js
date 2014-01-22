@@ -34,14 +34,14 @@ angular.module('ux').factory('scrollHistory', ['$location', function ($location)
         result.storeScroll = storeScroll;
 
         // watch only once to have it start at that scrolling position on startup.
-        unwatch = exp.scope.$on(exports.datagrid.events.RENDER_AFTER_DATA_CHANGE, function () {
+        unwatch = exp.scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, function () {
             exp.scrollModel.scrollTo(result.getCurrentScroll(), true);
             unwatch();
             unwatch = null;
             exp.dispatch(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL);
         });
 
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, function () {
+        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, function () {
             if (!unwatch) {
                 result.storeCurrentScroll();// just this can be overridden if necessary.
             }

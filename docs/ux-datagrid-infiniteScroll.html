@@ -109,6 +109,7 @@
             <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*
 * uxDatagrid v.0.2.0
 * (c) 2014, WebUX
+* https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */</span>
 (<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(exports, global)</span>{</span>
@@ -145,8 +146,8 @@ angular.module(<span class="hljs-string">"ux"</span>).factory(<span class="hljs-
                 exp.dispatch(ux.datagrid.events.SCROLL_TO_TOP);
             }
         };
-        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.AFTER_DATA_CHANGE, result.beforeDataChange));
-        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
+        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_AFTER_DATA_CHANGE, result.beforeDataChange));
+        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
         exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.SCROLL_STOP, result.onUpdateScroll));
         exp.infiniteScroll = result;
     };

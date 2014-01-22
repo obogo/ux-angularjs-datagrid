@@ -1,6 +1,7 @@
 /*
 * uxDatagrid v.0.2.0
 * (c) 2014, WebUX
+* https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */
 (function(exports, global){
@@ -148,7 +149,7 @@ angular.module("ux").factory("expandRows", function() {
         result.collapse = collapse;
         result.isExpanded = isExpanded;
         result.destroy = destroy;
-        exp.scope.$on(ux.datagrid.events.READY, setupTemplates);
+        exp.scope.$on(ux.datagrid.events.ON_READY, setupTemplates);
         exp.expandRows = result;
         return exp;
     };

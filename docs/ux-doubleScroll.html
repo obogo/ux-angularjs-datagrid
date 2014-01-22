@@ -109,6 +109,7 @@
             <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*
 * uxDatagrid v.0.2.0
 * (c) 2014, WebUX
+* https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */</span>
 (<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(exports, global)</span>{</span>
@@ -266,7 +267,7 @@ angular.module(<span class="hljs-string">"ux"</span>).directive(<span class="hlj
                 result.log(<span class="hljs-string">"is iOS"</span>);
                 vScroll = ux.datagrid.VirtualScroll(scope, element, {}, onIOSScroll);
                 vScroll.setup();
-                unwatchRender = scope.$on(exports.datagrid.events.LISTENERS_READY, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span></pre></div></div>
+                unwatchRender = scope.$on(exports.datagrid.events.ON_LISTENERS_READY, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span></pre></div></div>
             
         </li>
         
@@ -286,7 +287,7 @@ angular.module(<span class="hljs-string">"ux"</span>).directive(<span class="hlj
                     updateTarget();
                     onSizeChange();
                     onIOSScroll(<span class="hljs-number">0</span>);
-                    unwatchRender = scope.$on(exports.datagrid.events.AFTER_RENDER, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+                    unwatchRender = scope.$on(exports.datagrid.events.ON_AFTER_RENDER, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
                         unwatchRender();
                         onTargetScrollToTop(<span class="hljs-literal">null</span>, scrollModel, <span class="hljs-number">.05</span>);
                         onSizeChange();
@@ -314,7 +315,7 @@ angular.module(<span class="hljs-string">"ux"</span>).directive(<span class="hlj
             <div class="content"><div class='highlight'><pre>                    onSizeChange();
                     onScroll(<span class="hljs-literal">null</span>);
                 } <span class="hljs-keyword">else</span> {
-                    unwatchRender = scope.$on(exports.datagrid.events.LISTENERS_READY, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+                    unwatchRender = scope.$on(exports.datagrid.events.ON_LISTENERS_READY, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
                         unwatchRender();
                         updateTarget();
                         onSizeChange();

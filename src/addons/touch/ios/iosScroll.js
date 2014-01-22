@@ -25,7 +25,7 @@ angular.module('ux').factory('iosScroll', function () {
             });
         }
         exp.scope.$on(ux.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeVirtualScrollStart);
-        exp.scope.$on(ux.datagrid.events.READY, function () {
+        exp.scope.$on(ux.datagrid.events.ON_READY, function () {
             vScroll.content = exp.getContent();
             vScroll.setup();
         });

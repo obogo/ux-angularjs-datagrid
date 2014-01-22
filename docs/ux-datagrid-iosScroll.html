@@ -109,6 +109,7 @@
             <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*
 * uxDatagrid v.0.2.0
 * (c) 2014, WebUX
+* https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */</span>
 (<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(exports, global)</span>{</span></pre></div></div>
@@ -506,7 +507,7 @@ exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE = <span class="hljs-string">"vi
             });
         }
         exp.scope.$on(ux.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeVirtualScrollStart);
-        exp.scope.$on(ux.datagrid.events.READY, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+        exp.scope.$on(ux.datagrid.events.ON_READY, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
             vScroll.content = exp.getContent();
             vScroll.setup();
         });

@@ -46,11 +46,11 @@ angular.module('ux').factory('statsModel', function () {
             exp.dispatch(ux.datagrid.events.STATS_UPDATE, api);
         }
 
-        unwatchers.push(exp.scope.$on(ux.datagrid.events.INIT, startInit));
-        unwatchers.push(exp.scope.$on(ux.datagrid.events.READY, stopInit));
+        unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_INIT, startInit));
+        unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_READY, stopInit));
 
-        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.BEFORE_UPDATE_WATCHERS, renderStart));
-        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.AFTER_UPDATE_WATCHERS, renderStop));
+        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_BEFORE_UPDATE_WATCHERS, renderStart));
+        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_AFTER_UPDATE_WATCHERS, renderStop));
 
         exp.stats = api;
     };

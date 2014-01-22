@@ -29,7 +29,7 @@ angular.module('ux').factory('windowScroll', function () {
             });
         }
 
-        exp.scope.$on(ux.datagrid.events.READY, resetScroll);
+        exp.scope.$on(ux.datagrid.events.ON_READY, resetScroll);
         return exp;
     };
 });

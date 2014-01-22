@@ -31,8 +31,8 @@ angular.module('ux').factory('infiniteScroll', function () {
             }
         };
 
-        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.AFTER_DATA_CHANGE, result.beforeDataChange));
-        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
+        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_AFTER_DATA_CHANGE, result.beforeDataChange));
+        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
         exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.SCROLL_STOP, result.onUpdateScroll));
 
         exp.infiniteScroll = result;

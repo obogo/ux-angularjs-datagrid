@@ -3,6 +3,8 @@ function Flow(exp, dispatch) {
         intv,
         current = null,
         list = [],
+        history = [],
+        historyLimit = 10,
         uniqueMethods = {},
         execStartTime,
         execEndTime,
@@ -89,11 +91,19 @@ function Flow(exp, dispatch) {
         execEndTime = Date.now();
         exp.log("finish %c%s took %dms", consoleMethodStyle, current.label, execEndTime - execStartTime);
         current = null;
-        list.shift();
+        addToHistory(list.shift());
         if (list.length) {
             next();
         }
         return execEndTime - execStartTime;
+    }
+
+    // Keep a history of what methods were executed for debugging. Keep up to the limit.
+    function addToHistory(item) {
+        history.unshift(item);
+        while (history.length > historyLimit) {
+            history.pop();
+        }
     }
 
     function next() {
@@ -140,32 +150,6 @@ function Flow(exp, dispatch) {
     exp.stopTimeout = stopTimeout;
     exp.run = run;
     exp.destroy = destroy;
-//    exp.log = function () {
-//        var args;
-//        if (exp.debug && exp.debug <= 1) {
-//            args = ux.util.array.toArray(arguments);
-//            if (args[0].indexOf('%c') === -1) {
-//                args[0] = '%c' + args[0];
-//                args.splice(1, 0, consoleMethodStyle);
-//            }
-//            console.log.apply(console, args);
-//        }
-//    };
-//    exp.info = function () {
-//        var args;
-//        if (exp.debug && exp.debug <= 2) {
-//            args = ux.util.array.toArray(arguments);
-//            args[0] = '%c' + args[0];
-//            args.splice(1, 0, consoleInfoMethodStyle);
-//            console.info.apply(console, args);
-//        }
-//    };
-//    exp.warn = function () {
-//        // output warnings. something is wrong.
-//        if (window.console && console.warn) {
-//            console.warn.apply(console, arguments);
-//        }
-//    };
 
     return exp;
 }

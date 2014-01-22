@@ -32,40 +32,53 @@ exports.datagrid = {
     // the **states** of the datagrid.
     //  - **<a name="states.BUILDING">BUILDING</a>**: is the startup phase of the grid before it is ready to perform the first render. This may include
     // waiting for the dom heights be available.
-    //  - **<a name="states.READY">READY</a>**: this means that the grid is ready for rendering.
+    //  - **<a name="states.ON_READY">ON_READY</a>**: this means that the grid is ready for rendering.
     states: {
         BUILDING: 'datagrid:building',
-        READY: 'datagrid:ready'
+        ON_READY: 'datagrid:ready'
     },
     // ###<a name="events">events</a>###
-    // - **<a name="events.INIT">INIT</a>** when the datagrid has added the addons and is now starting.
-    // - **<a name="events.LISTENERS_READY">LISTENERS_READY</a>** Datagrid is now listening. Feel free to fire your events that direct it's behavior.
-    // - **<a name="events.RESIZE">RESIZE</a>** tells the datagrid to resize. This will update all height calculations.
-    // - **<a name="events.READY">READY</a>** the datagrid is all setup with templates, viewHeight, and data and is ready to render.
-    // - **<a name="events.BEFORE_RENDER">BEFORE_RENDER</a>** the datagrid is just about to add needed chunks, perform compiling of uncompiled rows, and update and digest the active scopes.
-    // - **<a name="events.AFTER_RENDER">AFTER_RENDER</a>** chunked dome was added if needed, active rows are compiled, and active scopes are digested.
-    // - **<a name="events.BEFORE_UPDATE_WATCHERS">BEFORE_UPDATE_WATCHERS</a>** Before the active set of watchers is changed.
-    // - **<a name="events.AFTER_UPDATE_WATCHERS">AFTER_UPDATE_WATCHERS</a>** After the active set of watchers is changed and digested and activeRange is updated.
-    // - **<a name="events.BEFORE_DATA_CHANGE">BEFORE_DATA_CHANGE</a>** A data change watcher has fired. The change has not happened yet.
-    // - **<a name="events.BEFORE_RENDER_AFTER_DATA_CHANGE">BEFORE_RENDER_AFTER_DATA_CHANGE</a>** When ever a data change is fired. Just before the render happens.
-    // - **<a name="events.RENDER_AFTER_DATA_CHANGE">RENDER_AFTER_DATA_CHANGE</a>** When a render finishes and a data change was what caused it.
+    // These events are reactive events for when the datagrid does something.
+    // - **<a name="events.ON_INIT">ON_INIT</a>** when the datagrid has added the addons and is now starting.
+    // - **<a name="events.ON_LISTENERS_READY">ON_LISTENERS_READY</a>** Datagrid is now listening. Feel free to fire your events that direct it's behavior.
+    // - **<a name="events.ON_READY">ON_READY</a>** the datagrid is all setup with templates, viewHeight, and data and is ready to render.
+    // - **<a name="events.ON_BEFORE_RENDER">ON_BEFORE_RENDER</a>** the datagrid is just about to add needed chunks, perform compiling of uncompiled rows, and update and digest the active scopes.
+    // - **<a name="events.ON_AFTER_RENDER">ON_AFTER_RENDER</a>** chunked dome was added if needed, active rows are compiled, and active scopes are digested.
+    // - **<a name="events.ON_BEFORE_UPDATE_WATCHERS">ON_BEFORE_UPDATE_WATCHERS</a>** Before the active set of watchers is changed.
+    // - **<a name="events.ON_AFTER_UPDATE_WATCHERS">ON_AFTER_UPDATE_WATCHERS</a>** After the active set of watchers is changed and digested and activeRange is updated.
+    // - **<a name="events.ON_BEFORE_DATA_CHANGE">ON_BEFORE_DATA_CHANGE</a>** A data change watcher has fired. The change has not happened yet.
+    // - **<a name="events.ON_BEFORE_RENDER_AFTER_DATA_CHANGE">ON_BEFORE_RENDER_AFTER_DATA_CHANGE</a>** When ever a data change is fired. Just before the render happens.
+    // - **<a name="events.ON_RENDER_AFTER_DATA_CHANGE">ON_RENDER_AFTER_DATA_CHANGE</a>** When a render finishes and a data change was what caused it.
     // - **<a name="events.ON_ROW_TEMPLATE_CHANGE">ON_ROW_TEMPLATE_CHANGE</a>** When we change the template that is matched with the row.
     // - **<a name="events.ON_SCROLL">ON_SCROLL</a>** When a scroll change is captured by the datagrid.
+    // - **<a name="events.ON_RESET">ON_RESET</a>** When the datagrid is going to clear all dom and rebuild.
     events: {
-        INIT: 'datagrid:init',
-        LISTENERS_READY: 'datagrid:listenersReady',
-        RESIZE: 'datagrid:resize',
-        READY: 'datagrid:ready',
-        BEFORE_RENDER: 'datagrid:beforeRender',
-        AFTER_RENDER: 'datagrid:afterRender',
-        BEFORE_UPDATE_WATCHERS: 'datagrid:beforeUpdateWatchers',
-        AFTER_UPDATE_WATCHERS: 'datagrid:afterUpdateWatchers',
-        BEFORE_DATA_CHANGE: 'datagrid:beforeDataChange',
-        AFTER_DATA_CHANGE: 'datagrid:afterDataChange',
-        BEFORE_RENDER_AFTER_DATA_CHANGE: 'datagrid:beforeRenderAfterDataChange',
-        RENDER_AFTER_DATA_CHANGE: 'datagrid:renderAfterDataChange',
+        ON_INIT: 'datagrid:init',
+        ON_LISTENERS_READY: 'datagrid:listenersReady',
+        ON_READY: 'datagrid:ready',
+        ON_BEFORE_RENDER: 'datagrid:beforeRender',
+        ON_AFTER_RENDER: 'datagrid:afterRender',
+        ON_BEFORE_UPDATE_WATCHERS: 'datagrid:beforeUpdateWatchers',
+        ON_AFTER_UPDATE_WATCHERS: 'datagrid:afterUpdateWatchers',
+        ON_BEFORE_DATA_CHANGE: 'datagrid:beforeDataChange',
+        ON_AFTER_DATA_CHANGE: 'datagrid:afterDataChange',
+        ON_BEFORE_RENDER_AFTER_DATA_CHANGE: 'datagrid:beforeRenderAfterDataChange',
+        ON_RENDER_AFTER_DATA_CHANGE: 'datagrid:renderAfterDataChange',
         ON_ROW_TEMPLATE_CHANGE: 'datagrid:onRowTemplateChange',
         ON_SCROLL: 'datagrid:onScroll',
+        ON_RESET: 'datagrid:onReset',
+        // ##### Driving Events #####
+        // These events are used to control the datagrid.
+        // - **<a name="events.RESIZE">RESIZE</a>** tells the datagrid to resize. This will update all height calculations.
+        // - **<a name="events.UPDATE">UPDATE</a>** force the datagrid to re-evaluate the data and render.
+        // - **<a name="events.SCROLL_TO_INDEX">SCROLL_TO_INDEX</a>** scroll the item at that index to the top.
+        // - **<a name="events.SCROLL_TO_ITEM">SCROLL_TO_ITEM</a>** scroll that item to the top.
+        // - **<a name="events.SCROLL_INTO_VIEW">SCROLL_INTO_VIEW</a>** if the item is above the scroll area, scroll it to the top. If is is below scroll it to the bottom. If it is in the middle, do nothing.
+        RESIZE: 'datagrid:resize',
+        UPDATE: 'datagrid:update',
+        SCROLL_TO_INDEX: 'datagrid:scrollToIndex',
+        SCROLL_TO_ITEM: 'datagrid:scrollToItem',
+        SCROLL_INTO_VIEW: 'datagrid:scrollIntoView',
         // ##### Log Events #####
         // - **<a name="events.LOG">LOG</a>** An event to be picked up if the gridLogger is added to the addons or any other listener for logging.
         // - **<a name="events.INFO">INFO</a>** An event to be picked up if the gridLogger is added to the addons or any other listener for logging.

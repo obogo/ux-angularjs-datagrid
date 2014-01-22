@@ -30,7 +30,7 @@ describe("creepRenderModel", function () {
                     this.forceRendered[index] = true;
                 },
                 afterUpdateWatchers: function (started, ended) {
-                    exp.scope.$emit(ux.datagrid.events.AFTER_UPDATE_WATCHERS, {started: started, ended: ended}, true);
+                    exp.scope.$emit(ux.datagrid.events.ON_AFTER_UPDATE_WATCHERS, {started: started, ended: ended}, true);
                 },
                 isCompiled: function () {
                     return true;

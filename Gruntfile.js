@@ -4,6 +4,7 @@ module.exports = function (grunt) {
         banner: '/*\n' +
             '* <%= pkg.name %> v.<%= pkg.version %>\n' +
             '* (c) ' + new Date().getFullYear() + ', WebUX\n' +
+            '* https://github.com/webux/ux-angularjs-datagrid\n' +
             '* License: MIT.\n' +
             '*/\n',
         wrapStart: '(function(exports, global){\n',

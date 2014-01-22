@@ -172,7 +172,7 @@ angular.module('ux').factory('expandRows', function () {
         result.isExpanded = isExpanded;
         result.destroy = destroy;
 
-        exp.scope.$on(ux.datagrid.events.READY, setupTemplates);
+        exp.scope.$on(ux.datagrid.events.ON_READY, setupTemplates);
 
         exp.expandRows = result;
 

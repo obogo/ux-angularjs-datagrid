@@ -1,6 +1,6 @@
 describe("gridFocusManager", function () {
-    var scope, element, grid,
-        template = '<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10, async:false}" style="width:100px;height:400px;overflow:auto;" data-addons="gridFocusManager">' +
+    var scope, element, grid, forceRenderAll,
+        template = '<div data-ux-datagrid="items" class="datagrid" data-options="{debug:{all:1}, chunkSize:10, async: false}" style="width:100px;height:400px;overflow:auto;" data-addons="gridFocusManager, gridLogger">' +
                         '<script type="template/html" data-template-name="default" data-template-item="item">' +
                             '<div class="mock-row">' +
                                 '<div class="col col1">{{item.id}}</div>' +
@@ -24,6 +24,7 @@ describe("gridFocusManager", function () {
     }
 
     beforeEach(function () {
+        console.clear();
         var inject = angular.injector(['ng','ux']).invoke;
         inject(function ($compile, $rootScope) {
             scope = $rootScope.$new();
@@ -37,14 +38,22 @@ describe("gridFocusManager", function () {
             $rootScope.$digest();
             grid = scope.datagrid;
         });
+
+        forceRenderAll = function () {
+            for (var i = 0; i < grid.scopes.length; i += 1) {
+                grid.forceRenderScope(i);
+            }
+        }
     });
 
     afterEach(function () {
         element.remove();
         document.body.focus();
+        forceRenderAll = null;
     });
 
     it("should handle enter key on keydown for an input", function() {
+        grid.render();
         var q = grid.gridFocusManager.query,
             input = q(element, 'input')[0],
             rows = q(element, '.mock-row');
@@ -54,6 +63,7 @@ describe("gridFocusManager", function () {
     });
 
     it("should focus to the same element in the next row on enter key", function() {
+        grid.render();
         var q = grid.gridFocusManager.query,
             input = q(element, 'input')[1],
             rows = q(element, '.mock-row');
@@ -63,6 +73,7 @@ describe("gridFocusManager", function () {
     });
 
     it("should focus to the same element in the prev row on shift enter key", function() {
+        grid.render();
         var q = grid.gridFocusManager.query,
             input = q(element, 'input')[4],
             rows = q(element, '.mock-row');
@@ -72,6 +83,7 @@ describe("gridFocusManager", function () {
     });
 
     it("should jump over a row that does not have a match for that element on enter key", function() {
+        grid.render();
         var q = grid.gridFocusManager.query,
             input = q(element, 'input')[0],
             rows = q(element, '.mock-row');
@@ -81,6 +93,7 @@ describe("gridFocusManager", function () {
     });
 
     it("should jump over a row that does not have a match for that element on shift enter key", function() {
+        grid.render();
         var q = grid.gridFocusManager.query,
             input = q(element, 'input')[4],
             rows = q(element, '.mock-row');
@@ -90,15 +103,20 @@ describe("gridFocusManager", function () {
     });
 
     it("should not loose focus when in the last row and enter key is pressed", function() {
-        var q = grid.gridFocusManager.query, input, rows;
+        grid.render();
+        var q = grid.gridFocusManager.query, input;
         grid.scrollModel.scrollToBottom(true);
-        input = q(element, 'input')[295]; // remember row 3 doesn't have any inputs.
+        // we need to wait until all are rendered or the count will be off.
+        forceRenderAll();
+        input = q(element, 'input')[295]; // 3 inputs per row and remember row 3 doesn't have any inputs.
         input.focus();
         fireKey(input, 13);
         expect(document.activeElement).toBe(input);
     });
 
     it("should not loose focus when in the first row and shift enter key is pressed", function() {
+        grid.render();
+        forceRenderAll();
         var q = grid.gridFocusManager.query,
             input = q(element, 'input')[1],
             rows = q(element, '.mock-row');

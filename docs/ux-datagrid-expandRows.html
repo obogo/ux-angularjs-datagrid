@@ -109,6 +109,7 @@
             <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*
 * uxDatagrid v.0.2.0
 * (c) 2014, WebUX
+* https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */</span>
 (<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(exports, global)</span>{</span>
@@ -269,7 +270,7 @@ angular.module(<span class="hljs-string">"ux"</span>).factory(<span class="hljs-
         result.collapse = collapse;
         result.isExpanded = isExpanded;
         result.destroy = destroy;
-        exp.scope.$on(ux.datagrid.events.READY, setupTemplates);
+        exp.scope.$on(ux.datagrid.events.ON_READY, setupTemplates);
         exp.expandRows = result;
         <span class="hljs-keyword">return</span> exp;
     };

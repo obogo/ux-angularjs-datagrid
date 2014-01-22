@@ -1,6 +1,7 @@
 /*
 * uxDatagrid v.0.2.0
 * (c) 2014, WebUX
+* https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */
 (function(exports, global){
@@ -360,8 +361,8 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             exp.element[0].focus();
         };
         exp.findInList = result;
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, beforeRender));
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, afterRender));
+        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_BEFORE_UPDATE_WATCHERS, beforeRender));
+        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, afterRender));
         return exp;
     };
 } ]);

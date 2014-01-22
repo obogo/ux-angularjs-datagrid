@@ -23,7 +23,7 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
         if (grouped) {
             normalizedData = normalize(data, grouped);
         } else {
-            normalizedData = data ? data.slice(0) : []; // no need to normalize it is it is not grouped.
+            normalizedData = data && data.slice(0) || []; // no need to normalize it is it is not grouped.
         }
         return normalizedData;
     };

@@ -1,6 +1,7 @@
 /*
 * uxDatagrid v.0.2.0
 * (c) 2014, WebUX
+* https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */
 (function(exports, global){
@@ -37,8 +38,8 @@ angular.module("ux").factory("infiniteScroll", function() {
                 exp.dispatch(ux.datagrid.events.SCROLL_TO_TOP);
             }
         };
-        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.AFTER_DATA_CHANGE, result.beforeDataChange));
-        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
+        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_AFTER_DATA_CHANGE, result.beforeDataChange));
+        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
         exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.SCROLL_STOP, result.onUpdateScroll));
         exp.infiniteScroll = result;
     };

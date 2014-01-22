@@ -1,6 +1,7 @@
 /*
 * uxDatagrid v.0.2.0
 * (c) 2014, WebUX
+* https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */
 (function(exports, global){
@@ -32,7 +33,7 @@ angular.module("ux").factory("windowScroll", function() {
                 window.scrollBy(-1, -1);
             });
         }
-        exp.scope.$on(ux.datagrid.events.READY, resetScroll);
+        exp.scope.$on(ux.datagrid.events.ON_READY, resetScroll);
         return exp;
     };
 });

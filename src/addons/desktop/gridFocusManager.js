@@ -299,8 +299,8 @@ angular.module('ux').factory('gridFocusManager', function () {
             result = null;
         };
 
-        unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_UPDATE_WATCHERS, removeListeners));
-        unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, addListeners));
+        unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_BEFORE_UPDATE_WATCHERS, removeListeners));
+        unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, addListeners));
         unwatchers.push(exp.scope.$on(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME, function () {
             focusToPrevRowElement(document.activeElement);
         }));

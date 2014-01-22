@@ -37,6 +37,7 @@ function Datagrid(scope, element, attr, $compile) {
     // Initialize the datagrid.
     // add unique methods to the flow.
     function init() {
+        flow.unique(reset);
         flow.unique(render);
         flow.unique(updateRowWatchers);
     }
@@ -52,7 +53,9 @@ function Datagrid(scope, element, attr, $compile) {
         exp.unwatchers = unwatchers;
         exp.values = values;
         exp.start = start;
+        exp.update = update;
         exp.reset = reset;
+        exp.isReady = isReady;
         exp.forceRenderScope = forceRenderScope;
         exp.dispatch = dispatch;
         exp.render = function () {
@@ -64,6 +67,7 @@ function Datagrid(scope, element, attr, $compile) {
         exp.isCompiled = isCompiled;
         exp.getScope = getScope;
         exp.getRowElm = getRowElm;
+        exp.getRowIndex = exp.getIndexOf = getRowIndex;
         exp.getRowOffset = getRowOffset;
         exp.getRowHeight = getRowHeight;
         exp.getViewportHeight = getViewportHeight;
@@ -71,6 +75,8 @@ function Datagrid(scope, element, attr, $compile) {
         exp.getContent = getContent;
         exp.safeDigest = safeDigest;
         exp.getRowIndexFromElement = getRowIndexFromElement;
+        exp.upateViewportHeight = updateViewportHeight;
+        exp.calculateViewportHeight = calculateViewportHeight;
         exp.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
         exp.flow = flow = new Flow({async: options.hasOwnProperty('async') ? !!options.async : true, debug: options.hasOwnProperty('debug') ? options.debug : 0}, exp.dispatch);
         flow.add(init);// initialize core.
@@ -103,7 +109,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     // <a name="start">start</a> `start` is called after the addons are added.
     function start() {
-        exp.dispatch(exports.datagrid.events.INIT);
+        exp.dispatch(exports.datagrid.events.ON_INIT);
         content = createContent();
         waitForElementReady(0);
     }
@@ -135,10 +141,11 @@ function Datagrid(scope, element, attr, $compile) {
     // being listened to while the destroy is happening.
     function addListeners() {
         window.addEventListener('resize', onResize);
+        unwatchers.push(scope.$on(exports.datagrid.events.UPDATE, update));
         unwatchers.push(scope.$on(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, onRowTemplateChange));
         unwatchers.push(scope.$on('$destroy', destroy));
         flow.add(setupChangeWatcher, [], 0);
-        exp.dispatch(exports.datagrid.events.LISTENERS_READY);
+        exp.dispatch(exports.datagrid.events.ON_LISTENERS_READY);
     }
 
     // <a name="setupChangeWatcher">setupChangeWatcher</a> The datagrid listens to array changes for the data that is passed to it. However, angular does not detect
@@ -146,35 +153,40 @@ function Datagrid(scope, element, attr, $compile) {
     // length changes. Because if the length changes, then the chunking needs to be redone.
     function setupChangeWatcher() {
         if (!changeWatcherSet) {
+            exp.log("setupChangeWatcher");
             changeWatcherSet = true;
-            var lastLength = 0, lastResult = null, len;
-            unwatchers.push(scope.$watch(function () {
-                var result = scope.$eval(attr.uxDatagrid);
-                len = result && result.length || 0;
-                if (lastResult === result && lastLength !== len) {
-                    flow.add(onDataChanged);// the length of the array changed.
-                }
-                lastResult = result;
-                lastLength = len;
-                return result;
-            }, function () {
-                flow.add(onDataChanged);
-            }));
-            safeDigest(scope);
+            unwatchers.push(scope.$watch(attr.uxDatagrid, onDataChangeFromWatcher));//, dataEquality));
         }
     }
 
+    function onDataChangeFromWatcher(newValue, oldValue, scope) {
+        flow.add(onDataChanged, [newValue, oldValue]);
+    }
+
+//    function dataEquality(newValue, oldValue) {
+//        var response = true, len = newValue && newValue.length || 0, lastLength = oldValue && oldValue.length || 0;
+//        if (lastLength !== len || oldValue[0] !== newValue[0] || oldValue[len] !== newValue[len]) {
+//            response = false;
+//        }
+//        return response;
+//    }
+
     // <a name="updateViewportHeight">updateViewportHeight</a> This function can be used to force update the viewHeigth.
-    exp.upateViewportHeight = function upateViewportHeight() {
+    function updateViewportHeight() {
         viewHeight = exp.calculateViewportHeight();
-    };
+    }
+
+    // <a name="isReady">isReady</a> return if grid state is <a href="#states.READY">states.READY</a>.
+    function isReady() {
+        return state === states.READY;
+    }
 
     // <a name="calculateViewportHeight">calculateViewportHeight</a> Calculate Viewport Height can be expensive. Depending on the number of dom elemnts.
     // so if you need to use this method, use it sparingly because you may experience performance
     // issues if overused.
-    exp.calculateViewportHeight = function calculateViewportHeight() {
+    function calculateViewportHeight() {
         return element[0].offsetHeight;
-    };
+    }
 
     // <a name="onResize">onResize</a> When a resize happens dispatch that event for addons to listen to so events happen after
     // the grid has performed it's changes.
@@ -195,6 +207,11 @@ function Datagrid(scope, element, attr, $compile) {
     // <a name="isCompiled">isCompiled</a> Return if the row is compiled or not.
     function isCompiled(index) {
         return !!scopes[index];
+    }
+
+    // <a name="getRowIndex">getRowIndex</a> Get the index of a row from a reference the data object of a row.
+    function getRowIndex(item) {
+        return this.getData().indexOf(item);
     }
 
     // <a name="getRowIndexFromElement">getRowIndexFromElement</a> Get the index of a row from a reference to a dom element that is contained within a row.
@@ -243,7 +260,8 @@ function Datagrid(scope, element, attr, $compile) {
         //TODO: if there is any dom. It needs destroyed first.
         exp.log("OVERWRITE DOM!!!");
         var len = list.length;
-        flow.add(exp.chunkModel.chunkDom, [list, options.chunkSize, '<div class="' + options.chunkClass + '">', '</div>', content], 0);
+        // this async is important because it allows the updateRowWatchers on first digest to escape the current digest.
+        flow.insert(exp.chunkModel.chunkDom, [list, options.chunkSize, '<div class="' + options.chunkClass + '">', '</div>', content], 0);
         exp.rowsLength = len;
         exp.log("created %s dom elements", len);
     }
@@ -273,21 +291,23 @@ function Datagrid(scope, element, attr, $compile) {
 
     // Set the state to <a name="states.BUILDING">states.BUILDING</a>. Then build the dom.
     function buildRows(list) {
+        exp.log("\tbuildRows %s", list.length);
         state = states.BUILDING;
         flow.insert(createDom, [list], 0);
     }
 
-    // Set the state to <a href="states.READY">states.READY</a> and start the first render.
+    // Set the state to <a href="states.ON_READY">states.ON_READY</a> and start the first render.
     function ready() {
-        state = states.READY;
+        exp.log("\tready");
+        state = states.ON_READY;
         flow.add(render);
         flow.add(fireReadyEvent);
         flow.add(safeDigest, [scope]);
     }
 
-    // Fire the <a name="events.READY">events.READY</a>
+    // Fire the <a name="events.ON_READY">events.ON_READY</a>
     function fireReadyEvent() {
-        scope.$emit(exports.datagrid.events.READY);
+        scope.$emit(exports.datagrid.events.ON_READY);
     }
 
     // SafeDigest by checking the render phase of the scope before rendering.
@@ -407,7 +427,7 @@ function Datagrid(scope, element, attr, $compile) {
         if (loop.i < 0) {// then scroll is negative. ignore it.
             return;
         }
-        exp.dispatch(events.BEFORE_UPDATE_WATCHERS, loop);
+        exp.dispatch(events.ON_BEFORE_UPDATE_WATCHERS, loop);
         // we only want to update stuff if we are scrolling slow.
         resetMinMax();// this needs to always be set after the dispatch of before update watchers in case they need the before activeRange.
         active.length = 0; // make sure not to reset until after getStartingIndex.
@@ -445,7 +465,7 @@ function Datagrid(scope, element, attr, $compile) {
         updateLinks(); // update the $$childHead and $$nextSibling values to keep digest loops at a minimum count.
         flow.add(safeDigest, [scope]);
         // this dispatch needs to be after the digest so that it doesn't cause {} to show up in the render.
-        exp.dispatch(events.AFTER_UPDATE_WATCHERS, loop);
+        exp.dispatch(events.ON_AFTER_UPDATE_WATCHERS, loop);
     }
 
     // <a name="deactivateList">deactivateList</a> Deactivate a list of scopes.
@@ -488,14 +508,14 @@ function Datagrid(scope, element, attr, $compile) {
 
     function beforeRenderAfterDataChange() {
         if (values.dirty) {
-            dispatch(exports.datagrid.events.BEFORE_RENDER_AFTER_DATA_CHANGE);
+            dispatch(exports.datagrid.events.ON_BEFORE_RENDER_AFTER_DATA_CHANGE);
         }
     }
 
     function afterRenderAfterDataChange() {
         if (values.dirty) {
             values.dirty = false;
-            dispatch(exports.datagrid.events.RENDER_AFTER_DATA_CHANGE);
+            dispatch(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE);
         }
     }
 
@@ -515,39 +535,48 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function render() {
-        exp.dispatch(exports.datagrid.events.BEFORE_RENDER);
+        exp.log("render");
         if (readyToRender()) {
             waitCount = 0;
+            exp.log("\trender %s", state);
             // Where [states.BUILDING](#states.BUILDING) is used
             if (state === states.BUILDING) {
-                //TODO: removeExtraRows is not compatible. It needs removed. Only buildRows will work with chunking.
-                //flow.add(removeExtraRows, [exp.data]);// if our data updates we need to remove extra rows.
                 flow.add(buildRows, [exp.data], 0);
                 flow.add(updateHeightValues);
                 flow.add(ready);
-            } else if (state === states.READY) {
+            } else if (state === states.ON_READY) {
+                exp.dispatch(exports.datagrid.events.ON_BEFORE_RENDER);
                 flow.add(beforeRenderAfterDataChange);
                 flow.add(updateRowWatchers);
                 flow.add(afterRenderAfterDataChange);
+                flow.add(exp.dispatch, [exports.datagrid.events.ON_AFTER_RENDER]);
             } else {
                 throw new Error("RENDER STATE INVALID");
             }
+        } else {
+            exp.log("\tnot ready to render.");
         }
-        flow.add(exp.dispatch, [exports.datagrid.events.AFTER_RENDER]);
     }
 
-    function onDataChanged() {
-        dispatch(exports.datagrid.events.BEFORE_DATA_CHANGE);
+    function update() {
+        exp.warn("force update");
+        onDataChanged(scope.$eval(attr.uxDatagrid), exp.data);
+    }
+
+    function onDataChanged(newVal, oldVal) {
+        dispatch(exports.datagrid.events.ON_BEFORE_DATA_CHANGE);
         values.dirty = true;
         exp.log("dataChanged");
         exp.grouped = scope.$eval(attr.grouped);
-        exp.data = exp.setData(scope.$eval(attr.uxDatagrid || attr.list), exp.grouped) || [];
-        dispatch(exports.datagrid.events.AFTER_DATA_CHANGE);
+        exp.data = exp.setData((newVal || attr.list), exp.grouped) || [];
+        dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE);
         flow.add(reset);
     }
 
-    //reset = clear all and restart.
+    // <a name="reset">reset</a> clear all and rebuild.
     function reset() {
+        dispatch(exports.datagrid.events.ON_RESET);
+        state = states.BUILDING;
         destroyScopes();
         // now destroy all of the dom.
         rowOffsets = {};
@@ -555,11 +584,9 @@ function Datagrid(scope, element, attr, $compile) {
         scopes.length = 0;
         content.children().unbind();
         content.children().remove();
-        viewHeight = 0; // force to recalculate heights.
-        setupExports();
         // make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.
         exp.chunkModel.reset();
-        state = states.BUILDING;
+        flow.add(updateViewportHeight);
         flow.add(render);
     }
 
@@ -595,7 +622,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function dispatch() {
-        scope.$emit.apply(scope, arguments);
+        scope.$root.$broadcast.apply(scope, arguments);
     }
 
     function destroyScopes() {
@@ -661,7 +688,7 @@ function Datagrid(scope, element, attr, $compile) {
         $compile = null;
     }
 
-    exports.logWrapper('datagrid', exp, 'green');
+    exports.logWrapper('datagrid', exp, 'green', dispatch);
     setupExports();
 
     return exp;

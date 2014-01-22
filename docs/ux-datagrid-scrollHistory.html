@@ -109,6 +109,7 @@
             <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*
 * uxDatagrid v.0.2.0
 * (c) 2014, WebUX
+* https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */</span>
 (<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(exports, global)</span>{</span>
@@ -167,13 +168,13 @@ angular.module(<span class="hljs-string">"ux"</span>).factory(<span class="hljs-
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        unwatch = exp.scope.$on(exports.datagrid.events.RENDER_AFTER_DATA_CHANGE, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+            <div class="content"><div class='highlight'><pre>        unwatch = exp.scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
             exp.scrollModel.scrollTo(result.getCurrentScroll(), <span class="hljs-literal">true</span>);
             unwatch();
             unwatch = <span class="hljs-literal">null</span>;
             exp.dispatch(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL);
         });
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.AFTER_UPDATE_WATCHERS, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
             <span class="hljs-keyword">if</span> (!unwatch) {
                 result.storeCurrentScroll();
             }

@@ -258,7 +258,7 @@ app.controller('root', function root($scope) {
 /**
  * this is the progress bar showing how many of the rows are rendered.
  */
-angular.module('progress', ['ng']).directive('progressBar', function () {
+angular.module('progress', ['ng']).directive('progressBar', function ($rootScope) {
     return {
         restrict: 'A',
         scope: true,
@@ -283,8 +283,8 @@ angular.module('progress', ['ng']).directive('progressBar', function () {
                     scope.$digest();
                 }
             };
-            scope.$root.$on(ux.datagrid.events.RENDER_PROGRESS, onProgress);
-            scope.$root.$on(ux.datagrid.events.ON_SCROLL, onScroll);
+            $rootScope.$on(ux.datagrid.events.ON_RENDER_PROGRESS, onProgress);
+            $rootScope.$on(ux.datagrid.events.ON_SCROLL, onScroll);
         }
     }
 });

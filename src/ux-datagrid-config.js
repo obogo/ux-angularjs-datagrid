@@ -42,6 +42,7 @@ exports.datagrid = {
     // - **<a name="events.ON_INIT">ON_INIT</a>** when the datagrid has added the addons and is now starting.
     // - **<a name="events.ON_LISTENERS_READY">ON_LISTENERS_READY</a>** Datagrid is now listening. Feel free to fire your events that direct it's behavior.
     // - **<a name="events.ON_READY">ON_READY</a>** the datagrid is all setup with templates, viewHeight, and data and is ready to render.
+    // - **<a name="events.ON_STARTUP_COMPLETE">ON_STARTUP_COMPLETE</a>** when the datagrid has finished its first render.
     // - **<a name="events.ON_BEFORE_RENDER">ON_BEFORE_RENDER</a>** the datagrid is just about to add needed chunks, perform compiling of uncompiled rows, and update and digest the active scopes.
     // - **<a name="events.ON_AFTER_RENDER">ON_AFTER_RENDER</a>** chunked dome was added if needed, active rows are compiled, and active scopes are digested.
     // - **<a name="events.ON_BEFORE_UPDATE_WATCHERS">ON_BEFORE_UPDATE_WATCHERS</a>** Before the active set of watchers is changed.
@@ -51,19 +52,20 @@ exports.datagrid = {
     // - **<a name="events.ON_RENDER_AFTER_DATA_CHANGE">ON_RENDER_AFTER_DATA_CHANGE</a>** When a render finishes and a data change was what caused it.
     // - **<a name="events.ON_ROW_TEMPLATE_CHANGE">ON_ROW_TEMPLATE_CHANGE</a>** When we change the template that is matched with the row.
     // - **<a name="events.ON_SCROLL">ON_SCROLL</a>** When a scroll change is captured by the datagrid.
-    // - **<a name="events.ON_RESET">ON_RESET</a>** When the datagrid is going to clear all dom and rebuild.
+    // - **<a name="events.ON_RESET">ON_RESET</a>** When a scroll change is captured by the datagrid.
     events: {
-        ON_INIT: 'datagrid:init',
-        ON_LISTENERS_READY: 'datagrid:listenersReady',
-        ON_READY: 'datagrid:ready',
-        ON_BEFORE_RENDER: 'datagrid:beforeRender',
-        ON_AFTER_RENDER: 'datagrid:afterRender',
-        ON_BEFORE_UPDATE_WATCHERS: 'datagrid:beforeUpdateWatchers',
-        ON_AFTER_UPDATE_WATCHERS: 'datagrid:afterUpdateWatchers',
-        ON_BEFORE_DATA_CHANGE: 'datagrid:beforeDataChange',
-        ON_AFTER_DATA_CHANGE: 'datagrid:afterDataChange',
-        ON_BEFORE_RENDER_AFTER_DATA_CHANGE: 'datagrid:beforeRenderAfterDataChange',
-        ON_RENDER_AFTER_DATA_CHANGE: 'datagrid:renderAfterDataChange',
+        ON_INIT: 'datagrid:onInit',
+        ON_LISTENERS_READY: 'datagrid:onListenersReady',
+        ON_READY: 'datagrid:onReady',
+        ON_STARTUP_COMPLETE: 'datagrid:onStartupComplete',
+        ON_BEFORE_RENDER: 'datagrid:onBeforeRender',
+        ON_AFTER_RENDER: 'datagrid:onAfterRender',
+        ON_BEFORE_UPDATE_WATCHERS: 'datagrid:onBeforeUpdateWatchers',
+        ON_AFTER_UPDATE_WATCHERS: 'datagrid:onAfterUpdateWatchers',
+        ON_BEFORE_DATA_CHANGE: 'datagrid:onBeforeDataChange',
+        ON_AFTER_DATA_CHANGE: 'datagrid:onAfterDataChange',
+        ON_BEFORE_RENDER_AFTER_DATA_CHANGE: 'datagrid:onBeforeRenderAfterDataChange',
+        ON_RENDER_AFTER_DATA_CHANGE: 'datagrid:onRenderAfterDataChange',
         ON_ROW_TEMPLATE_CHANGE: 'datagrid:onRowTemplateChange',
         ON_SCROLL: 'datagrid:onScroll',
         ON_RESET: 'datagrid:onReset',

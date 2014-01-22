@@ -32,6 +32,7 @@ function Datagrid(scope, element, attr, $compile) {
             scrollingStopIntv: null, // interval that allows waits for checks to know when the scrolling has stopped and a render is needed.
             activeRange: {min: 0, max: 0} // the current range of active scopes.
         },
+        logEvents = [exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR],
         exp = {}; // the datagrid public api
 
     // Initialize the datagrid.
@@ -140,6 +141,10 @@ function Datagrid(scope, element, attr, $compile) {
     // before references are removed to avoid memory leaks with circular references amd to prevent events from
     // being listened to while the destroy is happening.
     function addListeners() {
+        var unwatchFirstRender = scope.$on(exports.datagrid.events.ON_AFTER_RENDER, function () {
+            unwatchFirstRender();
+            flow.add(dispatch, [exports.datagrid.events.ON_STARTUP_COMPLETE]);
+        });
         window.addEventListener('resize', onResize);
         unwatchers.push(scope.$on(exports.datagrid.events.UPDATE, update));
         unwatchers.push(scope.$on(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, onRowTemplateChange));
@@ -148,28 +153,20 @@ function Datagrid(scope, element, attr, $compile) {
         exp.dispatch(exports.datagrid.events.ON_LISTENERS_READY);
     }
 
-    // <a name="setupChangeWatcher">setupChangeWatcher</a> The datagrid listens to array changes for the data that is passed to it. However, angular does not detect
-    // changes inside of an array, only changes to the reference itself. So this will also do a check to see if the
-    // length changes. Because if the length changes, then the chunking needs to be redone.
+    // <a name="setupChangeWatcher">setupChangeWatcher</a> When a change happens update the dom.
     function setupChangeWatcher() {
         if (!changeWatcherSet) {
             exp.log("setupChangeWatcher");
             changeWatcherSet = true;
-            unwatchers.push(scope.$watch(attr.uxDatagrid, onDataChangeFromWatcher));//, dataEquality));
+            unwatchers.push(scope.$watch(attr.uxDatagrid, onDataChangeFromWatcher));
+            // force intial watcher.
+            flow.add(render);
         }
     }
 
     function onDataChangeFromWatcher(newValue, oldValue, scope) {
         flow.add(onDataChanged, [newValue, oldValue]);
     }
-
-//    function dataEquality(newValue, oldValue) {
-//        var response = true, len = newValue && newValue.length || 0, lastLength = oldValue && oldValue.length || 0;
-//        if (lastLength !== len || oldValue[0] !== newValue[0] || oldValue[len] !== newValue[len]) {
-//            response = false;
-//        }
-//        return response;
-//    }
 
     // <a name="updateViewportHeight">updateViewportHeight</a> This function can be used to force update the viewHeigth.
     function updateViewportHeight() {
@@ -621,8 +618,13 @@ function Datagrid(scope, element, attr, $compile) {
         flow.add(render);
     }
 
-    function dispatch() {
-        scope.$root.$broadcast.apply(scope, arguments);
+    function isLogEvent(evt) {
+        return logEvents.indexOf(evt) !== -1;
+    }
+
+    function dispatch(event) {
+        if (!isLogEvent(event)) exp.info('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
+        scope.$emit.apply(scope, arguments);
     }
 
     function destroyScopes() {

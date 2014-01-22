@@ -1,4 +1,4 @@
-exports.datagrid.events.RENDER_PROGRESS = "datagrid:renderProgress";
+exports.datagrid.events.ON_RENDER_PROGRESS = "datagrid:onRenderProgress";
 exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
 
     var intv = 0,
@@ -71,7 +71,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
         if (!exp.values.speed && exp.scopes.length < exp.rowsLength) {
             resetInterval(upIndex, downIndex);
         }
-        exp.dispatch(exports.datagrid.events.RENDER_PROGRESS, calculatePercent());
+        exp.dispatch(exports.datagrid.events.ON_RENDER_PROGRESS, calculatePercent());
     }
 
     function stop() {

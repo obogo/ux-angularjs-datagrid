@@ -53,7 +53,6 @@ describe("gridFocusManager", function () {
     });
 
     it("should handle enter key on keydown for an input", function() {
-        grid.render();
         var q = grid.gridFocusManager.query,
             input = q(element, 'input')[0],
             rows = q(element, '.mock-row');
@@ -63,7 +62,6 @@ describe("gridFocusManager", function () {
     });
 
     it("should focus to the same element in the next row on enter key", function() {
-        grid.render();
         var q = grid.gridFocusManager.query,
             input = q(element, 'input')[1],
             rows = q(element, '.mock-row');
@@ -73,7 +71,6 @@ describe("gridFocusManager", function () {
     });
 
     it("should focus to the same element in the prev row on shift enter key", function() {
-        grid.render();
         var q = grid.gridFocusManager.query,
             input = q(element, 'input')[4],
             rows = q(element, '.mock-row');
@@ -83,7 +80,6 @@ describe("gridFocusManager", function () {
     });
 
     it("should jump over a row that does not have a match for that element on enter key", function() {
-        grid.render();
         var q = grid.gridFocusManager.query,
             input = q(element, 'input')[0],
             rows = q(element, '.mock-row');
@@ -93,7 +89,6 @@ describe("gridFocusManager", function () {
     });
 
     it("should jump over a row that does not have a match for that element on shift enter key", function() {
-        grid.render();
         var q = grid.gridFocusManager.query,
             input = q(element, 'input')[4],
             rows = q(element, '.mock-row');
@@ -103,7 +98,6 @@ describe("gridFocusManager", function () {
     });
 
     it("should not loose focus when in the last row and enter key is pressed", function() {
-        grid.render();
         var q = grid.gridFocusManager.query, input;
         grid.scrollModel.scrollToBottom(true);
         // we need to wait until all are rendered or the count will be off.
@@ -115,7 +109,6 @@ describe("gridFocusManager", function () {
     });
 
     it("should not loose focus when in the first row and shift enter key is pressed", function() {
-        grid.render();
         forceRenderAll();
         var q = grid.gridFocusManager.query,
             input = q(element, 'input')[1],

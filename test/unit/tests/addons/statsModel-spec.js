@@ -39,7 +39,7 @@ describe("statsModel", function () {
     });
 
     it("should keep track of how many renders have been done.", function() {
-        expect(grid.stats.renders).toBe(1);
+        expect(grid.stats.renders).toBe(2);// there is an initial render.
     });
 
 });

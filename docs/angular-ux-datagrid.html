@@ -218,6 +218,7 @@ waiting for the dom heights be available.</li>
 <li><strong><a name="events.ON_INIT">ON_INIT</a></strong> when the datagrid has added the addons and is now starting.</li>
 <li><strong><a name="events.ON_LISTENERS_READY">ON_LISTENERS_READY</a></strong> Datagrid is now listening. Feel free to fire your events that direct it&#39;s behavior.</li>
 <li><strong><a name="events.ON_READY">ON_READY</a></strong> the datagrid is all setup with templates, viewHeight, and data and is ready to render.</li>
+<li><strong><a name="events.ON_STARTUP_COMPLETE">ON_STARTUP_COMPLETE</a></strong> when the datagrid has finished its first render.</li>
 <li><strong><a name="events.ON_BEFORE_RENDER">ON_BEFORE_RENDER</a></strong> the datagrid is just about to add needed chunks, perform compiling of uncompiled rows, and update and digest the active scopes.</li>
 <li><strong><a name="events.ON_AFTER_RENDER">ON_AFTER_RENDER</a></strong> chunked dome was added if needed, active rows are compiled, and active scopes are digested.</li>
 <li><strong><a name="events.ON_BEFORE_UPDATE_WATCHERS">ON_BEFORE_UPDATE_WATCHERS</a></strong> Before the active set of watchers is changed.</li>
@@ -227,24 +228,27 @@ waiting for the dom heights be available.</li>
 <li><strong><a name="events.ON_RENDER_AFTER_DATA_CHANGE">ON_RENDER_AFTER_DATA_CHANGE</a></strong> When a render finishes and a data change was what caused it.</li>
 <li><strong><a name="events.ON_ROW_TEMPLATE_CHANGE">ON_ROW_TEMPLATE_CHANGE</a></strong> When we change the template that is matched with the row.</li>
 <li><strong><a name="events.ON_SCROLL">ON_SCROLL</a></strong> When a scroll change is captured by the datagrid.</li>
+<li><strong><a name="events.ON_RESET">ON_RESET</a></strong> When a scroll change is captured by the datagrid.</li>
 </ul>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>    events: {
-        ON_INIT: <span class="hljs-string">"datagrid:init"</span>,
-        ON_LISTENERS_READY: <span class="hljs-string">"datagrid:listenersReady"</span>,
-        ON_READY: <span class="hljs-string">"datagrid:ready"</span>,
-        ON_BEFORE_RENDER: <span class="hljs-string">"datagrid:beforeRender"</span>,
-        ON_AFTER_RENDER: <span class="hljs-string">"datagrid:afterRender"</span>,
-        ON_BEFORE_UPDATE_WATCHERS: <span class="hljs-string">"datagrid:beforeUpdateWatchers"</span>,
-        ON_AFTER_UPDATE_WATCHERS: <span class="hljs-string">"datagrid:afterUpdateWatchers"</span>,
-        ON_BEFORE_DATA_CHANGE: <span class="hljs-string">"datagrid:beforeDataChange"</span>,
-        ON_AFTER_DATA_CHANGE: <span class="hljs-string">"datagrid:afterDataChange"</span>,
-        ON_BEFORE_RENDER_AFTER_DATA_CHANGE: <span class="hljs-string">"datagrid:beforeRenderAfterDataChange"</span>,
-        ON_RENDER_AFTER_DATA_CHANGE: <span class="hljs-string">"datagrid:renderAfterDataChange"</span>,
+        ON_INIT: <span class="hljs-string">"datagrid:onInit"</span>,
+        ON_LISTENERS_READY: <span class="hljs-string">"datagrid:onListenersReady"</span>,
+        ON_READY: <span class="hljs-string">"datagrid:onReady"</span>,
+        ON_STARTUP_COMPLETE: <span class="hljs-string">"datagrid:onStartupComplete"</span>,
+        ON_BEFORE_RENDER: <span class="hljs-string">"datagrid:onBeforeRender"</span>,
+        ON_AFTER_RENDER: <span class="hljs-string">"datagrid:onAfterRender"</span>,
+        ON_BEFORE_UPDATE_WATCHERS: <span class="hljs-string">"datagrid:onBeforeUpdateWatchers"</span>,
+        ON_AFTER_UPDATE_WATCHERS: <span class="hljs-string">"datagrid:onAfterUpdateWatchers"</span>,
+        ON_BEFORE_DATA_CHANGE: <span class="hljs-string">"datagrid:onBeforeDataChange"</span>,
+        ON_AFTER_DATA_CHANGE: <span class="hljs-string">"datagrid:onAfterDataChange"</span>,
+        ON_BEFORE_RENDER_AFTER_DATA_CHANGE: <span class="hljs-string">"datagrid:onBeforeRenderAfterDataChange"</span>,
+        ON_RENDER_AFTER_DATA_CHANGE: <span class="hljs-string">"datagrid:onRenderAfterDataChange"</span>,
         ON_ROW_TEMPLATE_CHANGE: <span class="hljs-string">"datagrid:onRowTemplateChange"</span>,
-        ON_SCROLL: <span class="hljs-string">"datagrid:onScroll"</span>,</pre></div></div>
+        ON_SCROLL: <span class="hljs-string">"datagrid:onScroll"</span>,
+        ON_RESET: <span class="hljs-string">"datagrid:onReset"</span>,</pre></div></div>
             
         </li>
         
@@ -911,9 +915,9 @@ exports.logWrapper = <span class="hljs-function"><span class="hljs-keyword">func
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addToHistory</span><span class="hljs-params">(item)</span> {</span>
-        history.push(item);
+        history.unshift(item);
         <span class="hljs-keyword">while</span> (history.length &gt; historyLimit) {
-            history.shift();
+            history.pop();
         }
     }
     <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">next</span><span class="hljs-params">()</span> {</span>
@@ -955,7 +959,13 @@ exports.logWrapper = <span class="hljs-function"><span class="hljs-keyword">func
     exp.timeout = timeout;
     exp.stopTimeout = stopTimeout;
     exp.run = run;
-    exp.destroy = destroy;</pre></div></div>
+    exp.destroy = destroy;
+    <span class="hljs-keyword">return</span> exp;
+}
+
+exports.datagrid.Flow = Flow;
+
+<span class="hljs-comment">/*global each, charPack, Flow, exports, module */</span></pre></div></div>
             
         </li>
         
@@ -966,41 +976,9 @@ exports.logWrapper = <span class="hljs-function"><span class="hljs-keyword">func
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
-              <p>   exp.log = function () {
-       var args;
-       if (exp.debug &amp;&amp; exp.debug &lt;= 1) {
-           args = ux.util.array.toArray(arguments);
-           if (args[0].indexOf(&#39;%c&#39;) === -1) {
-               args[0] = &#39;%c&#39; + args[0];
-               args.splice(1, 0, consoleMethodStyle);
-           }
-           console.log.apply(console, args);
-       }
-   };
-   exp.info = function () {
-       var args;
-       if (exp.debug &amp;&amp; exp.debug &lt;= 2) {
-           args = ux.util.array.toArray(arguments);
-           args[0] = &#39;%c&#39; + args[0];
-           args.splice(1, 0, consoleInfoMethodStyle);
-           console.info.apply(console, args);
-       }
-   };
-   exp.warn = function () {
-       // output warnings. something is wrong.
-       if (window.console &amp;&amp; console.warn) {
-           console.warn.apply(console, arguments);
-       }
-   };</p>
+              <h2 id="datagrid-core">Datagrid Core</h2>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">return</span> exp;
-}
-
-exports.datagrid.Flow = Flow;
-
-<span class="hljs-comment">/*global each, charPack, Flow, exports, module */</span></pre></div></div>
             
         </li>
         
@@ -1010,19 +988,6 @@ exports.datagrid.Flow = Flow;
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-21">&#182;</a>
-              </div>
-              <h2 id="datagrid-core">Datagrid Core</h2>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-22">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>The datagrid manages the <code>core addons</code> to build the initial list and provide the public api necessary
 to communicate with other addons.
@@ -1036,11 +1001,11 @@ attribute.</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>core variables</p>
 
@@ -1065,11 +1030,11 @@ attribute.</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p><code>values</code> is the object that is used to share data for scrolling and other shared values.</p>
 
@@ -1080,11 +1045,11 @@ attribute.</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p>if the data is dirty and a render has not happended since the data change.</p>
 
@@ -1095,11 +1060,11 @@ attribute.</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>current scroll value of the grid</p>
 
@@ -1110,11 +1075,11 @@ attribute.</p>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>current speed of the scroll</p>
 
@@ -1125,11 +1090,11 @@ attribute.</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>current absSpeed of the grid.</p>
 
@@ -1140,11 +1105,11 @@ attribute.</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p>the current percent position of the scroll.</p>
 
@@ -1155,11 +1120,11 @@ attribute.</p>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>if there is currently a touch start and not a touch end. Since touch is used for scrolling on a touch device. Ignored for desktop.</p>
 
@@ -1170,11 +1135,11 @@ attribute.</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>interval that allows waits for checks to know when the scrolling has stopped and a render is needed.</p>
 
@@ -1184,7 +1149,28 @@ attribute.</p>
             min: <span class="hljs-number">0</span>,
             max: <span class="hljs-number">0</span>
         }
-    }, exp = {};</pre></div></div>
+    }, logEvents = [ exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR ], exp = {};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>the datagrid public api
+Initialize the datagrid.
+add unique methods to the flow.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> {</span>
+        flow.unique(reset);
+        flow.unique(render);
+        flow.unique(updateRowWatchers);
+    }</pre></div></div>
             
         </li>
         
@@ -1194,26 +1180,6 @@ attribute.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-32">&#182;</a>
-              </div>
-              <p>the datagrid public api
-Initialize the datagrid.
-add unique methods to the flow.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> {</span>
-        flow.unique(render);
-        flow.unique(updateRowWatchers);
-    }</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-33">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Build out the public api variables for the datagrid.</p>
 
@@ -1231,6 +1197,7 @@ add unique methods to the flow.</p>
         exp.start = start;
         exp.update = update;
         exp.reset = reset;
+        exp.isReady = isReady;
         exp.forceRenderScope = forceRenderScope;
         exp.dispatch = dispatch;
         exp.render = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
@@ -1250,6 +1217,8 @@ add unique methods to the flow.</p>
         exp.getContent = getContent;
         exp.safeDigest = safeDigest;
         exp.getRowIndexFromElement = getRowIndexFromElement;
+        exp.upateViewportHeight = updateViewportHeight;
+        exp.calculateViewportHeight = calculateViewportHeight;
         exp.options = options = angular.extend({}, exports.datagrid.options, scope.$<span class="hljs-built_in">eval</span>(attr.options) || {});
         exp.flow = flow = <span class="hljs-keyword">new</span> Flow({
             async: options.hasOwnProperty(<span class="hljs-string">"async"</span>) ? !!options.async : <span class="hljs-literal">true</span>,
@@ -1260,11 +1229,11 @@ add unique methods to the flow.</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>initialize core.</p>
 
@@ -1276,11 +1245,11 @@ add unique methods to the flow.</p>
         </li>
         
         
-        <li id="section-35">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p><a name="createContent">createConent</a> The <code>content</code> dom element is the only direct child created by the datagrid.
 It is used so append all of the <code>chunks</code> so that the it can be scrolled.
@@ -1296,11 +1265,11 @@ allowing the user to add custom classes directly tot he <code>content</code> dom
         </li>
         
         
-        <li id="section-36">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>if there is an old one. Pull the classes from it.</p>
 
@@ -1321,11 +1290,11 @@ allowing the user to add custom classes directly tot he <code>content</code> dom
         </li>
         
         
-        <li id="section-37">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p><a name="getContent">getContent</a> return the reference to the content div.</p>
 
@@ -1338,11 +1307,11 @@ allowing the user to add custom classes directly tot he <code>content</code> dom
         </li>
         
         
-        <li id="section-38">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p><a name="start">start</a> <code>start</code> is called after the addons are added.</p>
 
@@ -1357,11 +1326,11 @@ allowing the user to add custom classes directly tot he <code>content</code> dom
         </li>
         
         
-        <li id="section-39">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p><a name="waitForElementReady">waitForElementReady</a> this waits for the body element because if the grid has been constructed, but no heights are showing
 it is usually because the grid has not been attached to the document yet. So wait for the heights
@@ -1376,11 +1345,11 @@ to be available, but only wait a little then exit.</p>
         </li>
         
         
-        <li id="section-40">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>if they are doing custom compiling. They may compile before addit it to the dom.
 allow a pass to happen just in case.</p>
@@ -1392,11 +1361,11 @@ allow a pass to happen just in case.</p>
         </li>
         
         
-        <li id="section-41">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>retry.</p>
 
@@ -1412,11 +1381,11 @@ allow a pass to happen just in case.</p>
         </li>
         
         
-        <li id="section-42">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p>allow element to be added to dom.
 if the templates have different heights. Then they are dynamic.</p>
@@ -1432,11 +1401,11 @@ if the templates have different heights. Then they are dynamic.</p>
         </li>
         
         
-        <li id="section-43">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <p><a name="addListeners">addListeners</a> Adds listeners. Notice that all listeners are added to the unwatchers array so that they can be cleared
 before references are removed to avoid memory leaks with circular references amd to prevent events from
@@ -1445,6 +1414,10 @@ being listened to while the destroy is happening.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addListeners</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">var</span> unwatchFirstRender = scope.$on(exports.datagrid.events.ON_AFTER_RENDER, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+            unwatchFirstRender();
+            flow.add(dispatch, [ exports.datagrid.events.ON_STARTUP_COMPLETE ]);
+        });
         window.addEventListener(<span class="hljs-string">"resize"</span>, onResize);
         unwatchers.push(scope.$on(exports.datagrid.events.UPDATE, update));
         unwatchers.push(scope.$on(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, onRowTemplateChange));
@@ -1456,33 +1429,40 @@ being listened to while the destroy is happening.</p>
         </li>
         
         
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p><a name="setupChangeWatcher">setupChangeWatcher</a> When a change happens update the dom.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setupChangeWatcher</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">if</span> (!changeWatcherSet) {
+            exp.log(<span class="hljs-string">"setupChangeWatcher"</span>);
+            changeWatcherSet = <span class="hljs-literal">true</span>;
+            unwatchers.push(scope.$watch(attr.uxDatagrid, onDataChangeFromWatcher));</pre></div></div>
+            
+        </li>
+        
+        
         <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
-              <p><a name="setupChangeWatcher">setupChangeWatcher</a> The datagrid listens to array changes for the data that is passed to it. However, angular does not detect
-changes inside of an array, only changes to the reference itself. So this will also do a check to see if the
-length changes. Because if the length changes, then the chunking needs to be redone.</p>
+              <p>force intial watcher.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setupChangeWatcher</span><span class="hljs-params">()</span> {</span>
-        <span class="hljs-keyword">if</span> (!changeWatcherSet) {
-            changeWatcherSet = <span class="hljs-literal">true</span>;
-            unwatchers.push(scope.$watch(attr.uxDatagrid, onDataChangeFromWatcher));
+            <div class="content"><div class='highlight'><pre>            flow.add(render);
         }
     }
     <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onDataChangeFromWatcher</span><span class="hljs-params">(newValue, oldValue, scope)</span> {</span>
         flow.add(onDataChanged, [ newValue, oldValue ]);
-    }
-    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dataEquality</span><span class="hljs-params">(newValue, oldValue)</span> {</span>
-        <span class="hljs-keyword">var</span> response = <span class="hljs-literal">true</span>, len = newValue &amp;&amp; newValue.length || <span class="hljs-number">0</span>, lastLength = oldValue &amp;&amp; oldValue.length || <span class="hljs-number">0</span>;
-        <span class="hljs-keyword">if</span> (lastLength !== len || oldValue[<span class="hljs-number">0</span>] !== newValue[<span class="hljs-number">0</span>] || oldValue[len] !== newValue[len]) {
-            response = <span class="hljs-literal">false</span>;
-        }
-        <span class="hljs-keyword">return</span> response;
     }</pre></div></div>
             
         </li>
@@ -1498,9 +1478,9 @@ length changes. Because if the length changes, then the chunking needs to be red
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    exp.upateViewportHeight = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">upateViewportHeight</span><span class="hljs-params">()</span> {</span>
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateViewportHeight</span><span class="hljs-params">()</span> {</span>
         viewHeight = exp.calculateViewportHeight();
-    };</pre></div></div>
+    }</pre></div></div>
             
         </li>
         
@@ -1511,15 +1491,13 @@ length changes. Because if the length changes, then the chunking needs to be red
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
-              <p><a name="calculateViewportHeight">calculateViewportHeight</a> Calculate Viewport Height can be expensive. Depending on the number of dom elemnts.
-so if you need to use this method, use it sparingly because you may experience performance
-issues if overused.</p>
+              <p><a name="isReady">isReady</a> return if grid state is <a href="#states.READY">states.READY</a>.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    exp.calculateViewportHeight = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">calculateViewportHeight</span><span class="hljs-params">()</span> {</span>
-        <span class="hljs-keyword">return</span> element[<span class="hljs-number">0</span>].offsetHeight;
-    };</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isReady</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">return</span> state === states.READY;
+    }</pre></div></div>
             
         </li>
         
@@ -1529,6 +1507,25 @@ issues if overused.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p><a name="calculateViewportHeight">calculateViewportHeight</a> Calculate Viewport Height can be expensive. Depending on the number of dom elemnts.
+so if you need to use this method, use it sparingly because you may experience performance
+issues if overused.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">calculateViewportHeight</span><span class="hljs-params">()</span> {</span>
+        <span class="hljs-keyword">return</span> element[<span class="hljs-number">0</span>].offsetHeight;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
               <p><a name="onResize">onResize</a> When a resize happens dispatch that event for addons to listen to so events happen after
 the grid has performed it&#39;s changes.</p>
@@ -1544,11 +1541,11 @@ the grid has performed it&#39;s changes.</p>
         </li>
         
         
-        <li id="section-48">
+        <li id="section-49">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-48">&#182;</a>
+                <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
               <p><a name="getScope">getScope</a> Return the scope of the row at that index.</p>
 
@@ -1561,11 +1558,11 @@ the grid has performed it&#39;s changes.</p>
         </li>
         
         
-        <li id="section-49">
+        <li id="section-50">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-49">&#182;</a>
+                <a class="pilcrow" href="#section-50">&#182;</a>
               </div>
               <p><a name="getRowElm">getRowElm</a> Return the dom element at that row index.</p>
 
@@ -1578,11 +1575,11 @@ the grid has performed it&#39;s changes.</p>
         </li>
         
         
-        <li id="section-50">
+        <li id="section-51">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-50">&#182;</a>
+                <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
               <p><a name="isCompiled">isCompiled</a> Return if the row is compiled or not.</p>
 
@@ -1595,11 +1592,11 @@ the grid has performed it&#39;s changes.</p>
         </li>
         
         
-        <li id="section-51">
+        <li id="section-52">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-51">&#182;</a>
+                <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
               <p><a name="getRowIndex">getRowIndex</a> Get the index of a row from a reference the data object of a row.</p>
 
@@ -1612,11 +1609,11 @@ the grid has performed it&#39;s changes.</p>
         </li>
         
         
-        <li id="section-52">
+        <li id="section-53">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-52">&#182;</a>
+                <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
               <p><a name="getRowIndexFromElement">getRowIndexFromElement</a> Get the index of a row from a reference to a dom element that is contained within a row.</p>
 
@@ -1629,11 +1626,11 @@ the grid has performed it&#39;s changes.</p>
         </li>
         
         
-        <li id="section-53">
+        <li id="section-54">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-53">&#182;</a>
+                <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
               <p>make sure we get the right scope to grab the index from. We need to get it from a row.</p>
 
@@ -1650,11 +1647,11 @@ the grid has performed it&#39;s changes.</p>
         </li>
         
         
-        <li id="section-54">
+        <li id="section-55">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-54">&#182;</a>
+                <a class="pilcrow" href="#section-55">&#182;</a>
               </div>
               <p><a name="getRowOffset">getRowOffset</a> Return the scroll offset of a row by it&#39;s index. All offsets are cached, they get updated if
 a row template changes, because it may change it height as well.</p>
@@ -1668,11 +1665,11 @@ a row template changes, because it may change it height as well.</p>
         </li>
         
         
-        <li id="section-55">
+        <li id="section-56">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-55">&#182;</a>
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
               <p>dynamicRowHeights should be set by the templates.</p>
 
@@ -1689,11 +1686,11 @@ a row template changes, because it may change it height as well.</p>
         </li>
         
         
-        <li id="section-56">
+        <li id="section-57">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-56">&#182;</a>
+                <a class="pilcrow" href="#section-57">&#182;</a>
               </div>
               <p><a name="getRowHeight">getRowHeight</a> Return the cached height of a row by index.</p>
 
@@ -1706,11 +1703,11 @@ a row template changes, because it may change it height as well.</p>
         </li>
         
         
-        <li id="section-57">
+        <li id="section-58">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-57">&#182;</a>
+                <a class="pilcrow" href="#section-58">&#182;</a>
               </div>
               <p><a name="getViewportHeight">getViewportHeight</a> Return the height of the viewable area of the datagrid.</p>
 
@@ -1723,11 +1720,11 @@ a row template changes, because it may change it height as well.</p>
         </li>
         
         
-        <li id="section-58">
+        <li id="section-59">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-58">&#182;</a>
+                <a class="pilcrow" href="#section-59">&#182;</a>
               </div>
               <p><a name="getConentHeight">getContentHeight</a> Return the total height of the content of the datagrid.</p>
 
@@ -1740,11 +1737,11 @@ a row template changes, because it may change it height as well.</p>
         </li>
         
         
-        <li id="section-59">
+        <li id="section-60">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-59">&#182;</a>
+                <a class="pilcrow" href="#section-60">&#182;</a>
               </div>
               <p><a name="createDom">createDom</a> This starts off the chunking. It creates all of the dom chunks, rows, etc for the datagrid.</p>
 
@@ -1755,19 +1752,33 @@ a row template changes, because it may change it height as well.</p>
         </li>
         
         
-        <li id="section-60">
+        <li id="section-61">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-60">&#182;</a>
+                <a class="pilcrow" href="#section-61">&#182;</a>
               </div>
               <p>TODO: if there is any dom. It needs destroyed first.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>        exp.log(<span class="hljs-string">"OVERWRITE DOM!!!"</span>);
-        <span class="hljs-keyword">var</span> len = list.length;
-        flow.add(exp.chunkModel.chunkDom, [ list, options.chunkSize, <span class="hljs-string">'&lt;div class="'</span> + options.chunkClass + <span class="hljs-string">'"&gt;'</span>, <span class="hljs-string">"&lt;/div&gt;"</span>, content ], <span class="hljs-number">0</span>);
+        <span class="hljs-keyword">var</span> len = list.length;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-62">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-62">&#182;</a>
+              </div>
+              <p>this async is important because it allows the updateRowWatchers on first digest to escape the current digest.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        flow.insert(exp.chunkModel.chunkDom, [ list, options.chunkSize, <span class="hljs-string">'&lt;div class="'</span> + options.chunkClass + <span class="hljs-string">'"&gt;'</span>, <span class="hljs-string">"&lt;/div&gt;"</span>, content ], <span class="hljs-number">0</span>);
         exp.rowsLength = len;
         exp.log(<span class="hljs-string">"created %s dom elements"</span>, len);
     }</pre></div></div>
@@ -1775,11 +1786,11 @@ a row template changes, because it may change it height as well.</p>
         </li>
         
         
-        <li id="section-61">
+        <li id="section-63">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-61">&#182;</a>
+                <a class="pilcrow" href="#section-63">&#182;</a>
               </div>
               <p>Compile a row at that index. This creates the scope for that row when compiled. It does not perform a digest.</p>
 
@@ -1801,11 +1812,11 @@ a row template changes, because it may change it height as well.</p>
         </li>
         
         
-        <li id="section-62">
+        <li id="section-64">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-62">&#182;</a>
+                <a class="pilcrow" href="#section-64">&#182;</a>
               </div>
               <p>set the data to the scope.</p>
 
@@ -1824,17 +1835,18 @@ a row template changes, because it may change it height as well.</p>
         </li>
         
         
-        <li id="section-63">
+        <li id="section-65">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-63">&#182;</a>
+                <a class="pilcrow" href="#section-65">&#182;</a>
               </div>
               <p>Set the state to <a name="states.BUILDING">states.BUILDING</a>. Then build the dom.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildRows</span><span class="hljs-params">(list)</span> {</span>
+        exp.log(<span class="hljs-string">"	buildRows %s"</span>, list.length);
         state = states.BUILDING;
         flow.insert(createDom, [ list ], <span class="hljs-number">0</span>);
     }</pre></div></div>
@@ -1842,17 +1854,18 @@ a row template changes, because it may change it height as well.</p>
         </li>
         
         
-        <li id="section-64">
+        <li id="section-66">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-64">&#182;</a>
+                <a class="pilcrow" href="#section-66">&#182;</a>
               </div>
               <p>Set the state to <a href="states.ON_READY">states.ON_READY</a> and start the first render.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ready</span><span class="hljs-params">()</span> {</span>
+        exp.log(<span class="hljs-string">"	ready"</span>);
         state = states.ON_READY;
         flow.add(render);
         flow.add(fireReadyEvent);
@@ -1862,11 +1875,11 @@ a row template changes, because it may change it height as well.</p>
         </li>
         
         
-        <li id="section-65">
+        <li id="section-67">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-65">&#182;</a>
+                <a class="pilcrow" href="#section-67">&#182;</a>
               </div>
               <p>Fire the <a name="events.ON_READY">events.ON_READY</a></p>
 
@@ -1879,11 +1892,11 @@ a row template changes, because it may change it height as well.</p>
         </li>
         
         
-        <li id="section-66">
+        <li id="section-68">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-66">&#182;</a>
+                <a class="pilcrow" href="#section-68">&#182;</a>
               </div>
               <p>SafeDigest by checking the render phase of the scope before rendering.
 while this is not recommended by angular it is effective.</p>
@@ -1899,11 +1912,11 @@ while this is not recommended by angular it is effective.</p>
         </li>
         
         
-        <li id="section-67">
+        <li id="section-69">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-67">&#182;</a>
+                <a class="pilcrow" href="#section-69">&#182;</a>
               </div>
               <p>One of the core features to the datagrid&#39;s performance it the ability to make only the scopes
 that are in view to render. This deactivates a scope by removing it&#39;s $$watchers that angular
@@ -1921,11 +1934,11 @@ over a scope that is deactivated. It becomes completely hidden from the digest.<
         </li>
         
         
-        <li id="section-68">
+        <li id="section-70">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-68">&#182;</a>
+                <a class="pilcrow" href="#section-70">&#182;</a>
               </div>
               <p>if the scope is not created yet. just skip.</p>
 
@@ -1936,11 +1949,11 @@ over a scope that is deactivated. It becomes completely hidden from the digest.<
         </li>
         
         
-        <li id="section-69">
+        <li id="section-71">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-69">&#182;</a>
+                <a class="pilcrow" href="#section-71">&#182;</a>
               </div>
               <p>do not deactivate one that is already deactivated.</p>
 
@@ -1952,11 +1965,11 @@ over a scope that is deactivated. It becomes completely hidden from the digest.<
         </li>
         
         
-        <li id="section-70">
+        <li id="section-72">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-70">&#182;</a>
+                <a class="pilcrow" href="#section-72">&#182;</a>
               </div>
               <p>recursively go through children and deactivate them.</p>
 
@@ -1977,11 +1990,11 @@ over a scope that is deactivated. It becomes completely hidden from the digest.<
         </li>
         
         
-        <li id="section-71">
+        <li id="section-73">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-71">&#182;</a>
+                <a class="pilcrow" href="#section-73">&#182;</a>
               </div>
               <p>Taking a scope that is deactivated the watchers that it did have are now stored on $$$watchers and
 can be put back to $$watchers so angular will pick up this scope on a digest. This is done recursively
@@ -1997,11 +2010,11 @@ to fully make sure the scope is as if it was before it was deactivated.</p>
         </li>
         
         
-        <li id="section-72">
+        <li id="section-74">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-72">&#182;</a>
+                <a class="pilcrow" href="#section-74">&#182;</a>
               </div>
               <p>do not activate one that is already active.</p>
 
@@ -2013,11 +2026,11 @@ to fully make sure the scope is as if it was before it was deactivated.</p>
         </li>
         
         
-        <li id="section-73">
+        <li id="section-75">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-73">&#182;</a>
+                <a class="pilcrow" href="#section-75">&#182;</a>
               </div>
               <p>recursively go through children and activate them.</p>
 
@@ -2038,11 +2051,11 @@ to fully make sure the scope is as if it was before it was deactivated.</p>
         </li>
         
         
-        <li id="section-74">
+        <li id="section-76">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-74">&#182;</a>
+                <a class="pilcrow" href="#section-76">&#182;</a>
               </div>
               <p>Check a scope by index to see if it is active.</p>
 
@@ -2056,11 +2069,11 @@ to fully make sure the scope is as if it was before it was deactivated.</p>
         </li>
         
         
-        <li id="section-75">
+        <li id="section-77">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-75">&#182;</a>
+                <a class="pilcrow" href="#section-77">&#182;</a>
               </div>
               <p>Given a scroll offset, get the index that is closest to that scroll offset value.</p>
 
@@ -2071,11 +2084,11 @@ to fully make sure the scope is as if it was before it was deactivated.</p>
         </li>
         
         
-        <li id="section-76">
+        <li id="section-78">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-76">&#182;</a>
+                <a class="pilcrow" href="#section-78">&#182;</a>
               </div>
               <p>updateHeightValues must be called before this.</p>
 
@@ -2097,11 +2110,11 @@ to fully make sure the scope is as if it was before it was deactivated.</p>
         </li>
         
         
-        <li id="section-77">
+        <li id="section-79">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-77">&#182;</a>
+                <a class="pilcrow" href="#section-79">&#182;</a>
               </div>
               <p>Because the datagrid can render as many as 50k rows. It becomes necessary to optimize loops by
 determining the index to start checking for deactivated and activated scopes at instead of iterating
@@ -2128,11 +2141,11 @@ of the start area. So we never have to loop the whole thing.</p>
         </li>
         
         
-        <li id="section-78">
+        <li id="section-80">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-78">&#182;</a>
+                <a class="pilcrow" href="#section-80">&#182;</a>
               </div>
               <p>TODO: this is going to be updated to use ChunkArray data to be faster.</p>
 
@@ -2150,11 +2163,11 @@ of the start area. So we never have to loop the whole thing.</p>
         </li>
         
         
-        <li id="section-79">
+        <li id="section-81">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-79">&#182;</a>
+                <a class="pilcrow" href="#section-81">&#182;</a>
               </div>
               <p>This is the core of the datagird rendering. It determines the range of scopes to be activated and
 deactivates any scopes that were active before that are not still active.</p>
@@ -2168,11 +2181,11 @@ deactivates any scopes that were active before that are not still active.</p>
         </li>
         
         
-        <li id="section-80">
+        <li id="section-82">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-80">&#182;</a>
+                <a class="pilcrow" href="#section-82">&#182;</a>
               </div>
               <p>then scroll is negative. ignore it.</p>
 
@@ -2185,11 +2198,11 @@ deactivates any scopes that were active before that are not still active.</p>
         </li>
         
         
-        <li id="section-81">
+        <li id="section-83">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-81">&#182;</a>
+                <a class="pilcrow" href="#section-83">&#182;</a>
               </div>
               <p>we only want to update stuff if we are scrolling slow.</p>
 
@@ -2200,11 +2213,11 @@ deactivates any scopes that were active before that are not still active.</p>
         </li>
         
         
-        <li id="section-82">
+        <li id="section-84">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-82">&#182;</a>
+                <a class="pilcrow" href="#section-84">&#182;</a>
               </div>
               <p>this needs to always be set after the dispatch of before update watchers in case they need the before activeRange.</p>
 
@@ -2215,11 +2228,11 @@ deactivates any scopes that were active before that are not still active.</p>
         </li>
         
         
-        <li id="section-83">
+        <li id="section-85">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-83">&#182;</a>
+                <a class="pilcrow" href="#section-85">&#182;</a>
               </div>
               <p>make sure not to reset until after getStartingIndex.</p>
 
@@ -2233,11 +2246,11 @@ deactivates any scopes that were active before that are not still active.</p>
         </li>
         
         
-        <li id="section-84">
+        <li id="section-86">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-84">&#182;</a>
+                <a class="pilcrow" href="#section-86">&#182;</a>
               </div>
               <p>this is where the chunks and rows get created is when they are requested if they don&#39;t exist.</p>
 
@@ -2249,11 +2262,11 @@ deactivates any scopes that were active before that are not still active.</p>
         </li>
         
         
-        <li id="section-85">
+        <li id="section-87">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-85">&#182;</a>
+                <a class="pilcrow" href="#section-87">&#182;</a>
               </div>
               <p>only compiles if it is not already compiled. Still returns the scope.</p>
 
@@ -2272,11 +2285,11 @@ deactivates any scopes that were active before that are not still active.</p>
         </li>
         
         
-        <li id="section-86">
+        <li id="section-88">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-86">&#182;</a>
+                <a class="pilcrow" href="#section-88">&#182;</a>
               </div>
               <p>make sure to put them into active in the right order.</p>
 
@@ -2291,11 +2304,11 @@ deactivates any scopes that were active before that are not still active.</p>
         </li>
         
         
-        <li id="section-87">
+        <li id="section-89">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-87">&#182;</a>
+                <a class="pilcrow" href="#section-89">&#182;</a>
               </div>
               <p>optimize the loop</p>
 
@@ -2315,11 +2328,11 @@ deactivates any scopes that were active before that are not still active.</p>
         </li>
         
         
-        <li id="section-88">
+        <li id="section-90">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-88">&#182;</a>
+                <a class="pilcrow" href="#section-90">&#182;</a>
               </div>
               <p>update the $$childHead and $$nextSibling values to keep digest loops at a minimum count.</p>
 
@@ -2330,11 +2343,11 @@ deactivates any scopes that were active before that are not still active.</p>
         </li>
         
         
-        <li id="section-89">
+        <li id="section-91">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-89">&#182;</a>
+                <a class="pilcrow" href="#section-91">&#182;</a>
               </div>
               <p>this dispatch needs to be after the digest so that it doesn&#39;t cause {} to show up in the render.</p>
 
@@ -2346,11 +2359,11 @@ deactivates any scopes that were active before that are not still active.</p>
         </li>
         
         
-        <li id="section-90">
+        <li id="section-92">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-90">&#182;</a>
+                <a class="pilcrow" href="#section-92">&#182;</a>
               </div>
               <p><a name="deactivateList">deactivateList</a> Deactivate a list of scopes.</p>
 
@@ -2369,11 +2382,11 @@ deactivates any scopes that were active before that are not still active.</p>
         </li>
         
         
-        <li id="section-91">
+        <li id="section-93">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-91">&#182;</a>
+                <a class="pilcrow" href="#section-93">&#182;</a>
               </div>
               <p><a name="updateLinks">updateLinks</a> Updates the $$childHead, $$childTail, $$nextSibling, and $$prevSibling values from the parent scope to completely
 hide scopes that are deactivated from angular&#39;s knowledge so digest loops are as small as possible.</p>
@@ -2396,11 +2409,11 @@ hide scopes that are deactivated from angular&#39;s knowledge so digest loops ar
         </li>
         
         
-        <li id="section-92">
+        <li id="section-94">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-92">&#182;</a>
+                <a class="pilcrow" href="#section-94">&#182;</a>
               </div>
               <p><a name="resetMinMax">resetMinMax</a> resets the min and max of the activeRange for what is activated.</p>
 
@@ -2413,11 +2426,11 @@ hide scopes that are deactivated from angular&#39;s knowledge so digest loops ar
         </li>
         
         
-        <li id="section-93">
+        <li id="section-95">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-93">&#182;</a>
+                <a class="pilcrow" href="#section-95">&#182;</a>
               </div>
               <p><a name="updateMinMax">updateMinMax</a> takes an index that has just been activated and updates the min and max
 values for later calculations to know the range.</p>
@@ -2454,19 +2467,19 @@ values for later calculations to know the range.</p>
         <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
     }
     <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span><span class="hljs-params">()</span> {</span>
-        exp.dispatch(exports.datagrid.events.ON_BEFORE_RENDER);
+        exp.log(<span class="hljs-string">"render"</span>);
         <span class="hljs-keyword">if</span> (readyToRender()) {
             waitCount = <span class="hljs-number">0</span>;
-            exp.log(<span class="hljs-string">"render %s"</span>, state);</pre></div></div>
+            exp.log(<span class="hljs-string">"	render %s"</span>, state);</pre></div></div>
             
         </li>
         
         
-        <li id="section-94">
+        <li id="section-96">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-94">&#182;</a>
+                <a class="pilcrow" href="#section-96">&#182;</a>
               </div>
               <p>Where <a href="#states.BUILDING">states.BUILDING</a> is used</p>
 
@@ -2477,20 +2490,21 @@ values for later calculations to know the range.</p>
                 flow.add(updateHeightValues);
                 flow.add(ready);
             } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (state === states.ON_READY) {
+                exp.dispatch(exports.datagrid.events.ON_BEFORE_RENDER);
                 flow.add(beforeRenderAfterDataChange);
                 flow.add(updateRowWatchers);
                 flow.add(afterRenderAfterDataChange);
+                flow.add(exp.dispatch, [ exports.datagrid.events.ON_AFTER_RENDER ]);
             } <span class="hljs-keyword">else</span> {
                 <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"RENDER STATE INVALID"</span>);
             }
         } <span class="hljs-keyword">else</span> {
-            exp.log(<span class="hljs-string">"not ready to render."</span>);
+            exp.log(<span class="hljs-string">"	not ready to render."</span>);
         }
-        flow.add(exp.dispatch, [ exports.datagrid.events.ON_AFTER_RENDER ]);
     }
     <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update</span><span class="hljs-params">()</span> {</span>
         exp.warn(<span class="hljs-string">"force update"</span>);
-        onDataChanged(scope.$<span class="hljs-built_in">eval</span>(attr.uxDatagrid));
+        onDataChanged(scope.$<span class="hljs-built_in">eval</span>(attr.uxDatagrid), exp.data);
     }
     <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onDataChanged</span><span class="hljs-params">(newVal, oldVal)</span> {</span>
         dispatch(exports.datagrid.events.ON_BEFORE_DATA_CHANGE);
@@ -2505,53 +2519,20 @@ values for later calculations to know the range.</p>
         </li>
         
         
-        <li id="section-95">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-95">&#182;</a>
-              </div>
-              <p><a name="reset">reset</a> clear all and rebuild.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span><span class="hljs-params">()</span> {</span>
-        destroyScopes();</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-96">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-96">&#182;</a>
-              </div>
-              <p>now destroy all of the dom.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>        rowOffsets = {};
-        active.length = <span class="hljs-number">0</span>;
-        scopes.length = <span class="hljs-number">0</span>;
-        content.children().unbind();
-        content.children().remove();
-        viewHeight = <span class="hljs-number">0</span>;</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-97">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-97">&#182;</a>
               </div>
-              <p>force to recalculate heights.</p>
+              <p><a name="reset">reset</a> clear all and rebuild.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        setupExports();</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span><span class="hljs-params">()</span> {</span>
+        dispatch(exports.datagrid.events.ON_RESET);
+        state = states.BUILDING;
+        destroyScopes();</pre></div></div>
             
         </li>
         
@@ -2562,16 +2543,15 @@ values for later calculations to know the range.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-98">&#182;</a>
               </div>
-              <p>make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.</p>
+              <p>now destroy all of the dom.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        exp.chunkModel.reset();
-        state = states.BUILDING;
-        flow.add(render);
-    }
-    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">forceRenderScope</span><span class="hljs-params">(index)</span> {</span>
-        <span class="hljs-keyword">var</span> s = scopes[index];</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        rowOffsets = {};
+        active.length = <span class="hljs-number">0</span>;
+        scopes.length = <span class="hljs-number">0</span>;
+        content.children().unbind();
+        content.children().remove();</pre></div></div>
             
         </li>
         
@@ -2581,6 +2561,26 @@ values for later calculations to know the range.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-99">&#182;</a>
+              </div>
+              <p>make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        exp.chunkModel.reset();
+        flow.add(updateViewportHeight);
+        flow.add(render);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">forceRenderScope</span><span class="hljs-params">(index)</span> {</span>
+        <span class="hljs-keyword">var</span> s = scopes[index];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-100">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-100">&#182;</a>
               </div>
               <pre><code>   exp.log(&quot;\tforceRenderScope %s&quot;, index);
 </code></pre>
@@ -2610,19 +2610,37 @@ values for later calculations to know the range.</p>
         flow.add(updateHeightValues);
         flow.add(render);
     }
-    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatch</span><span class="hljs-params">()</span> {</span>
-        scope.$root.$broadcast.apply(scope, <span class="hljs-built_in">arguments</span>);
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isLogEvent</span><span class="hljs-params">(evt)</span> {</span>
+        <span class="hljs-keyword">return</span> logEvents.indexOf(evt) !== -<span class="hljs-number">1</span>;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatch</span><span class="hljs-params">(event)</span> {</span>
+        <span class="hljs-keyword">if</span> (!isLogEvent(event)) exp.info(<span class="hljs-string">"$emit %s"</span>, event);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-101">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-101">&#182;</a>
+              </div>
+              <p>THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        scope.$emit.apply(scope, <span class="hljs-built_in">arguments</span>);
     }
     <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destroyScopes</span><span class="hljs-params">()</span> {</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-100">
+        <li id="section-102">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-100">&#182;</a>
+                <a class="pilcrow" href="#section-102">&#182;</a>
               </div>
               <p>because child scopes may not be in order because of rendering techniques. We must loop through
 all scopes and destroy them manually.</p>
@@ -2635,11 +2653,11 @@ all scopes and destroy them manually.</p>
         </li>
         
         
-        <li id="section-101">
+        <li id="section-103">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-101">&#182;</a>
+                <a class="pilcrow" href="#section-103">&#182;</a>
               </div>
               <p>listeners should be destroyed with the angular destroy.</p>
 
@@ -2665,11 +2683,11 @@ all scopes and destroy them manually.</p>
         </li>
         
         
-        <li id="section-102">
+        <li id="section-104">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-102">&#182;</a>
+                <a class="pilcrow" href="#section-104">&#182;</a>
               </div>
               <p>destroy needs to put all watcher back before destroying or it will not destroy child scopes, or remove watchers.</p>
 
@@ -2681,11 +2699,11 @@ all scopes and destroy them manually.</p>
         </li>
         
         
-        <li id="section-103">
+        <li id="section-105">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-103">&#182;</a>
+                <a class="pilcrow" href="#section-105">&#182;</a>
               </div>
               <p>we have a circular reference. break it on destroy.</p>
 
@@ -2697,11 +2715,11 @@ all scopes and destroy them manually.</p>
         </li>
         
         
-        <li id="section-104">
+        <li id="section-106">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-104">&#182;</a>
+                <a class="pilcrow" href="#section-106">&#182;</a>
               </div>
               <p>destroy flow.</p>
 
@@ -2714,11 +2732,11 @@ all scopes and destroy them manually.</p>
         </li>
         
         
-        <li id="section-105">
+        <li id="section-107">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-105">&#182;</a>
+                <a class="pilcrow" href="#section-107">&#182;</a>
               </div>
               <p>destroy watchers.</p>
 
@@ -2732,11 +2750,11 @@ all scopes and destroy them manually.</p>
         </li>
         
         
-        <li id="section-106">
+        <li id="section-108">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-106">&#182;</a>
+                <a class="pilcrow" href="#section-108">&#182;</a>
               </div>
               <p>now remove every property on exports.</p>
 
@@ -2752,11 +2770,11 @@ all scopes and destroy them manually.</p>
         </li>
         
         
-        <li id="section-107">
+        <li id="section-109">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-107">&#182;</a>
+                <a class="pilcrow" href="#section-109">&#182;</a>
               </div>
               <p>activate scopes so they can be destroyed by angular.</p>
 
@@ -2768,11 +2786,11 @@ all scopes and destroy them manually.</p>
         </li>
         
         
-        <li id="section-108">
+        <li id="section-110">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-108">&#182;</a>
+                <a class="pilcrow" href="#section-110">&#182;</a>
               </div>
               <p>this seems to be the most memory efficient way to remove elements.</p>
 
@@ -2793,7 +2811,7 @@ all scopes and destroy them manually.</p>
         events = <span class="hljs-literal">null</span>;
         $compile = <span class="hljs-literal">null</span>;
     }
-    exports.logWrapper(<span class="hljs-string">"datagrid"</span>, exp, <span class="hljs-string">"green"</span>);
+    exports.logWrapper(<span class="hljs-string">"datagrid"</span>, exp, <span class="hljs-string">"green"</span>, dispatch);
     setupExports();
     <span class="hljs-keyword">return</span> exp;
 }
@@ -2808,11 +2826,11 @@ module.directive(<span class="hljs-string">"uxDatagrid"</span>, [ <span class="h
         </li>
         
         
-        <li id="section-109">
+        <li id="section-111">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-109">&#182;</a>
+                <a class="pilcrow" href="#section-111">&#182;</a>
               </div>
               <p>expose to scope.</p>
 
@@ -3042,11 +3060,11 @@ exports.datagrid.coreAddons.chunkModel = <span class="hljs-function"><span class
         </li>
         
         
-        <li id="section-110">
+        <li id="section-112">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-110">&#182;</a>
+                <a class="pilcrow" href="#section-112">&#182;</a>
               </div>
               <p>we are at the end. So we just need the last index.</p>
 
@@ -3094,11 +3112,11 @@ exports.datagrid.coreAddons.chunkModel = <span class="hljs-function"><span class
         </li>
         
         
-        <li id="section-111">
+        <li id="section-113">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-111">&#182;</a>
+                <a class="pilcrow" href="#section-113">&#182;</a>
               </div>
               <p>TODO: this needs to make sure it destroys things properly</p>
 
@@ -3127,11 +3145,11 @@ exports.datagrid.coreAddons.chunkModel = <span class="hljs-function"><span class
         </li>
         
         
-        <li id="section-112">
+        <li id="section-114">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-112">&#182;</a>
+                <a class="pilcrow" href="#section-114">&#182;</a>
               </div>
               <p>apply event dispatching.</p>
 
@@ -3144,7 +3162,7 @@ exports.datagrid.coreAddons.chunkModel = <span class="hljs-function"><span class
 
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);
 
-exports.datagrid.events.RENDER_PROGRESS = <span class="hljs-string">"datagrid:renderProgress"</span>;
+exports.datagrid.events.ON_RENDER_PROGRESS = <span class="hljs-string">"datagrid:onRenderProgress"</span>;
 
 exports.datagrid.coreAddons.creepRenderModel = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">creepRenderModel</span><span class="hljs-params">(exp)</span> {</span>
     <span class="hljs-keyword">var</span> intv = <span class="hljs-number">0</span>, creepCount = <span class="hljs-number">0</span>, model = {}, upIndex = <span class="hljs-number">0</span>, downIndex = <span class="hljs-number">0</span>, time;
@@ -3155,11 +3173,11 @@ exports.datagrid.coreAddons.creepRenderModel = <span class="hljs-function"><span
         </li>
         
         
-        <li id="section-113">
+        <li id="section-115">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-113">&#182;</a>
+                <a class="pilcrow" href="#section-115">&#182;</a>
               </div>
               <p>just skip if already digested.</p>
 
@@ -3224,7 +3242,7 @@ exports.datagrid.coreAddons.creepRenderModel = <span class="hljs-function"><span
         <span class="hljs-keyword">if</span> (!exp.values.speed &amp;&amp; exp.scopes.length &lt; exp.rowsLength) {
             resetInterval(upIndex, downIndex);
         }
-        exp.dispatch(exports.datagrid.events.RENDER_PROGRESS, calculatePercent());
+        exp.dispatch(exports.datagrid.events.ON_RENDER_PROGRESS, calculatePercent());
     }
     <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stop</span><span class="hljs-params">()</span> {</span>
         time = <span class="hljs-number">0</span>;
@@ -3255,11 +3273,11 @@ exports.datagrid.coreAddons.creepRenderModel = <span class="hljs-function"><span
         </li>
         
         
-        <li id="section-114">
+        <li id="section-116">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-114">&#182;</a>
+                <a class="pilcrow" href="#section-116">&#182;</a>
               </div>
               <p>allow external stop of creep render.</p>
 
@@ -3275,6 +3293,7 @@ exports.datagrid.coreAddons.creepRenderModel = <span class="hljs-function"><span
     exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
     exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
     exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
+    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_RESET, onBeforeRender));
     exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
 };
 
@@ -3286,11 +3305,11 @@ exports.datagrid.coreAddons.normalizeModel = <span class="hljs-function"><span c
         </li>
         
         
-        <li id="section-115">
+        <li id="section-117">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-115">&#182;</a>
+                <a class="pilcrow" href="#section-117">&#182;</a>
               </div>
               <p>TODO: this needs to be put on exp.normalizedModel</p>
 
@@ -3381,7 +3400,7 @@ exports.datagrid.coreAddons.scrollModel = <span class="hljs-function"><span clas
             });
         }
         result.log(<span class="hljs-string">"addScrollListener"</span>);
-        exp.element[<span class="hljs-number">0</span>].addEventListener(<span class="hljs-string">"scroll"</span>, result.onUpdateScroll);
+        exp.element[<span class="hljs-number">0</span>].addEventListener(<span class="hljs-string">"scroll"</span>, onUpdateScrollHandler);
         exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_TO_INDEX, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(event, index)</span> {</span>
             result.scrollToIndex(index);
         }));
@@ -3404,7 +3423,7 @@ exports.datagrid.coreAddons.scrollModel = <span class="hljs-function"><span clas
     }
     result.removeScrollListener = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">removeScrollListener</span><span class="hljs-params">()</span> {</span>
         result.log(<span class="hljs-string">"removeScrollListener"</span>);
-        exp.element[<span class="hljs-number">0</span>].removeEventListener(<span class="hljs-string">"scroll"</span>, result.onUpdateScroll);
+        exp.element[<span class="hljs-number">0</span>].removeEventListener(<span class="hljs-string">"scroll"</span>, onUpdateScrollHandler);
     };
     result.removeTouchEvents = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">removeTouchEvents</span><span class="hljs-params">()</span> {</span>
         <span class="hljs-keyword">if</span> (setup) {
@@ -3429,6 +3448,9 @@ exports.datagrid.coreAddons.scrollModel = <span class="hljs-function"><span clas
         exp.element[<span class="hljs-number">0</span>].scrollTop = value;
         exp.values.scroll = value;
     };
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onUpdateScrollHandler</span><span class="hljs-params">(event)</span> {</span>
+        exp.flow.add(result.onUpdateScroll, [ event ]);
+    }
     <span class="hljs-comment">/**
      * When a scrollEvent is fired, recalculate the values.
      * @param event
@@ -3517,11 +3539,11 @@ exports.datagrid.coreAddons.scrollModel = <span class="hljs-function"><span clas
         </li>
         
         
-        <li id="section-116">
+        <li id="section-118">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-116">&#182;</a>
+                <a class="pilcrow" href="#section-118">&#182;</a>
               </div>
               <p>it is above the view.</p>
 
@@ -3537,11 +3559,11 @@ exports.datagrid.coreAddons.scrollModel = <span class="hljs-function"><span clas
         </li>
         
         
-        <li id="section-117">
+        <li id="section-119">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-117">&#182;</a>
+                <a class="pilcrow" href="#section-119">&#182;</a>
               </div>
               <p>it is below the view.</p>
 
@@ -3587,11 +3609,11 @@ exports.datagrid.coreAddons.scrollModel = <span class="hljs-function"><span clas
         </li>
         
         
-        <li id="section-118">
+        <li id="section-120">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-118">&#182;</a>
+                <a class="pilcrow" href="#section-120">&#182;</a>
               </div>
               <p>all models should try not to pollute the main model to keep it clean.</p>
 
@@ -3610,11 +3632,11 @@ exports.datagrid.coreAddons.templateModel = <span class="hljs-function"><span cl
         </li>
         
         
-        <li id="section-119">
+        <li id="section-121">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-119">&#182;</a>
+                <a class="pilcrow" href="#section-121">&#182;</a>
               </div>
               <p>remove newline / carriage return</p>
 
@@ -3625,11 +3647,11 @@ exports.datagrid.coreAddons.templateModel = <span class="hljs-function"><span cl
         </li>
         
         
-        <li id="section-120">
+        <li id="section-122">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-120">&#182;</a>
+                <a class="pilcrow" href="#section-122">&#182;</a>
               </div>
               <p>remove whitespace (space and tabs) before tags</p>
 
@@ -3640,11 +3662,11 @@ exports.datagrid.coreAddons.templateModel = <span class="hljs-function"><span cl
         </li>
         
         
-        <li id="section-121">
+        <li id="section-123">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-121">&#182;</a>
+                <a class="pilcrow" href="#section-123">&#182;</a>
               </div>
               <p>remove whitespace between tags</p>
 
@@ -3655,11 +3677,11 @@ exports.datagrid.coreAddons.templateModel = <span class="hljs-function"><span cl
         </li>
         
         
-        <li id="section-122">
+        <li id="section-124">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-122">&#182;</a>
+                <a class="pilcrow" href="#section-124">&#182;</a>
               </div>
               <p>remove whitespace after tags</p>
 
@@ -3684,31 +3706,17 @@ exports.datagrid.coreAddons.templateModel = <span class="hljs-function"><span cl
             }
         }
         <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createTemplate</span><span class="hljs-params">(scriptTemplate)</span> {</span>
-            <span class="hljs-keyword">var</span> template = trim(angular.element(scriptTemplate).html()), wrapper = document.createElement(<span class="hljs-string">"div"</span>), name = scriptTemplate.attributes[<span class="hljs-string">"data-template-name"</span>].nodeValue || defaultName, templateData;
+            <span class="hljs-keyword">var</span> template = trim(angular.element(scriptTemplate).html()), wrapper = document.createElement(<span class="hljs-string">"div"</span>), name = getScriptTemplateAttribute(scriptTemplate, <span class="hljs-string">"template-name"</span>) || defaultName, templateData;
+            wrapper.className = <span class="hljs-string">"grid-template-wrapper"</span>;
             template = angular.element(template)[<span class="hljs-number">0</span>];
             template.className += <span class="hljs-string">" "</span> + exp.options.uncompiledClass + <span class="hljs-string">" {{$status}}"</span>;
             template.setAttribute(<span class="hljs-string">"template"</span>, name);
             exp.getContent()[<span class="hljs-number">0</span>].appendChild(wrapper);
             wrapper.appendChild(template);
             template = trim(wrapper.innerHTML);
-            wrapper.childNodes[<span class="hljs-number">0</span>].style.lineHeight = <span class="hljs-string">"0px"</span>;</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-123">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-123">&#182;</a>
-              </div>
-              <p>make so lineHeight doesn&#39;t wrap and affect template size.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>            templateData = {
+            templateData = {
                 name: name,
-                item: scriptTemplate.attributes[<span class="hljs-string">"data-template-item"</span>].nodeValue,
+                item: getScriptTemplateAttribute(scriptTemplate, <span class="hljs-string">"template-item"</span>),
                 template: template,
                 height: wrapper.offsetHeight
             };
@@ -3724,17 +3732,21 @@ exports.datagrid.coreAddons.templateModel = <span class="hljs-function"><span cl
         </li>
         
         
-        <li id="section-124">
+        <li id="section-125">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-124">&#182;</a>
+                <a class="pilcrow" href="#section-125">&#182;</a>
               </div>
               <p>reset cached value.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">return</span> templateData;
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getScriptTemplateAttribute</span><span class="hljs-params">(scriptTemplate, attrStr)</span> {</span>
+            <span class="hljs-keyword">var</span> node = scriptTemplate.attributes[<span class="hljs-string">"data-"</span> + attrStr] || scriptTemplate.attributes[attrStr];
+            <span class="hljs-keyword">return</span> node &amp;&amp; node.nodeValue || <span class="hljs-string">""</span>;
         }
         <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getTemplates</span><span class="hljs-params">()</span> {</span>
             <span class="hljs-keyword">return</span> templates;
@@ -3750,11 +3762,11 @@ exports.datagrid.coreAddons.templateModel = <span class="hljs-function"><span cl
         </li>
         
         
-        <li id="section-125">
+        <li id="section-126">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-125">&#182;</a>
+                <a class="pilcrow" href="#section-126">&#182;</a>
               </div>
               <p>TODO: need to make this method so it can be overwritten to look up templates a different way.</p>
 

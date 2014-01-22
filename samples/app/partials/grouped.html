@@ -11,7 +11,7 @@
     </div>
     <div class="listA">
         <!--// this is the datagrid //-->
-        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="statsModel,iosScroll" data-options="{debug:1}">
+        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="statsModel,iosScroll, gridLogger" data-options="{debug:{all:1, Flow:0}}">
             <script type="template/html" data-template-name="group" data-template-item="item">
                 <div class="group {{fake}}">
                     <div class="col col1">{{item.id}}</div>

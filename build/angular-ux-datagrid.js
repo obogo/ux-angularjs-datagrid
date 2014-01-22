@@ -49,6 +49,7 @@ exports.datagrid = {
     // - **<a name="events.ON_INIT">ON_INIT</a>** when the datagrid has added the addons and is now starting.
     // - **<a name="events.ON_LISTENERS_READY">ON_LISTENERS_READY</a>** Datagrid is now listening. Feel free to fire your events that direct it's behavior.
     // - **<a name="events.ON_READY">ON_READY</a>** the datagrid is all setup with templates, viewHeight, and data and is ready to render.
+    // - **<a name="events.ON_STARTUP_COMPLETE">ON_STARTUP_COMPLETE</a>** when the datagrid has finished its first render.
     // - **<a name="events.ON_BEFORE_RENDER">ON_BEFORE_RENDER</a>** the datagrid is just about to add needed chunks, perform compiling of uncompiled rows, and update and digest the active scopes.
     // - **<a name="events.ON_AFTER_RENDER">ON_AFTER_RENDER</a>** chunked dome was added if needed, active rows are compiled, and active scopes are digested.
     // - **<a name="events.ON_BEFORE_UPDATE_WATCHERS">ON_BEFORE_UPDATE_WATCHERS</a>** Before the active set of watchers is changed.
@@ -58,19 +59,20 @@ exports.datagrid = {
     // - **<a name="events.ON_RENDER_AFTER_DATA_CHANGE">ON_RENDER_AFTER_DATA_CHANGE</a>** When a render finishes and a data change was what caused it.
     // - **<a name="events.ON_ROW_TEMPLATE_CHANGE">ON_ROW_TEMPLATE_CHANGE</a>** When we change the template that is matched with the row.
     // - **<a name="events.ON_SCROLL">ON_SCROLL</a>** When a scroll change is captured by the datagrid.
-    // - **<a name="events.ON_RESET">ON_RESET</a>** When the datagrid is going to clear all dom and rebuild.
+    // - **<a name="events.ON_RESET">ON_RESET</a>** When a scroll change is captured by the datagrid.
     events: {
-        ON_INIT: "datagrid:init",
-        ON_LISTENERS_READY: "datagrid:listenersReady",
-        ON_READY: "datagrid:ready",
-        ON_BEFORE_RENDER: "datagrid:beforeRender",
-        ON_AFTER_RENDER: "datagrid:afterRender",
-        ON_BEFORE_UPDATE_WATCHERS: "datagrid:beforeUpdateWatchers",
-        ON_AFTER_UPDATE_WATCHERS: "datagrid:afterUpdateWatchers",
-        ON_BEFORE_DATA_CHANGE: "datagrid:beforeDataChange",
-        ON_AFTER_DATA_CHANGE: "datagrid:afterDataChange",
-        ON_BEFORE_RENDER_AFTER_DATA_CHANGE: "datagrid:beforeRenderAfterDataChange",
-        ON_RENDER_AFTER_DATA_CHANGE: "datagrid:renderAfterDataChange",
+        ON_INIT: "datagrid:onInit",
+        ON_LISTENERS_READY: "datagrid:onListenersReady",
+        ON_READY: "datagrid:onReady",
+        ON_STARTUP_COMPLETE: "datagrid:onStartupComplete",
+        ON_BEFORE_RENDER: "datagrid:onBeforeRender",
+        ON_AFTER_RENDER: "datagrid:onAfterRender",
+        ON_BEFORE_UPDATE_WATCHERS: "datagrid:onBeforeUpdateWatchers",
+        ON_AFTER_UPDATE_WATCHERS: "datagrid:onAfterUpdateWatchers",
+        ON_BEFORE_DATA_CHANGE: "datagrid:onBeforeDataChange",
+        ON_AFTER_DATA_CHANGE: "datagrid:onAfterDataChange",
+        ON_BEFORE_RENDER_AFTER_DATA_CHANGE: "datagrid:onBeforeRenderAfterDataChange",
+        ON_RENDER_AFTER_DATA_CHANGE: "datagrid:onRenderAfterDataChange",
         ON_ROW_TEMPLATE_CHANGE: "datagrid:onRowTemplateChange",
         ON_SCROLL: "datagrid:onScroll",
         ON_RESET: "datagrid:onReset",
@@ -659,7 +661,7 @@ function Datagrid(scope, element, attr, $compile) {
             min: 0,
             max: 0
         }
-    }, exp = {};
+    }, logEvents = [ exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR ], exp = {};
     // the datagrid public api
     // Initialize the datagrid.
     // add unique methods to the flow.
@@ -768,6 +770,10 @@ function Datagrid(scope, element, attr, $compile) {
     // before references are removed to avoid memory leaks with circular references amd to prevent events from
     // being listened to while the destroy is happening.
     function addListeners() {
+        var unwatchFirstRender = scope.$on(exports.datagrid.events.ON_AFTER_RENDER, function() {
+            unwatchFirstRender();
+            flow.add(dispatch, [ exports.datagrid.events.ON_STARTUP_COMPLETE ]);
+        });
         window.addEventListener("resize", onResize);
         unwatchers.push(scope.$on(exports.datagrid.events.UPDATE, update));
         unwatchers.push(scope.$on(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, onRowTemplateChange));
@@ -775,26 +781,19 @@ function Datagrid(scope, element, attr, $compile) {
         flow.add(setupChangeWatcher, [], 0);
         exp.dispatch(exports.datagrid.events.ON_LISTENERS_READY);
     }
-    // <a name="setupChangeWatcher">setupChangeWatcher</a> The datagrid listens to array changes for the data that is passed to it. However, angular does not detect
-    // changes inside of an array, only changes to the reference itself. So this will also do a check to see if the
-    // length changes. Because if the length changes, then the chunking needs to be redone.
+    // <a name="setupChangeWatcher">setupChangeWatcher</a> When a change happens update the dom.
     function setupChangeWatcher() {
         if (!changeWatcherSet) {
             exp.log("setupChangeWatcher");
             changeWatcherSet = true;
             unwatchers.push(scope.$watch(attr.uxDatagrid, onDataChangeFromWatcher));
+            // force intial watcher.
+            flow.add(render);
         }
     }
     function onDataChangeFromWatcher(newValue, oldValue, scope) {
         flow.add(onDataChanged, [ newValue, oldValue ]);
     }
-    //    function dataEquality(newValue, oldValue) {
-    //        var response = true, len = newValue && newValue.length || 0, lastLength = oldValue && oldValue.length || 0;
-    //        if (lastLength !== len || oldValue[0] !== newValue[0] || oldValue[len] !== newValue[len]) {
-    //            response = false;
-    //        }
-    //        return response;
-    //    }
     // <a name="updateViewportHeight">updateViewportHeight</a> This function can be used to force update the viewHeigth.
     function updateViewportHeight() {
         viewHeight = exp.calculateViewportHeight();
@@ -1213,8 +1212,13 @@ function Datagrid(scope, element, attr, $compile) {
         flow.add(updateHeightValues);
         flow.add(render);
     }
-    function dispatch() {
-        scope.$root.$broadcast.apply(scope, arguments);
+    function isLogEvent(evt) {
+        return logEvents.indexOf(evt) !== -1;
+    }
+    function dispatch(event) {
+        if (!isLogEvent(event)) exp.info("$emit %s", event);
+        // THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
+        scope.$emit.apply(scope, arguments);
     }
     function destroyScopes() {
         // because child scopes may not be in order because of rendering techniques. We must loop through
@@ -1578,7 +1582,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
 
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);
 
-exports.datagrid.events.RENDER_PROGRESS = "datagrid:renderProgress";
+exports.datagrid.events.ON_RENDER_PROGRESS = "datagrid:onRenderProgress";
 
 exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
     var intv = 0, creepCount = 0, model = {}, upIndex = 0, downIndex = 0, time;
@@ -1645,7 +1649,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
         if (!exp.values.speed && exp.scopes.length < exp.rowsLength) {
             resetInterval(upIndex, downIndex);
         }
-        exp.dispatch(exports.datagrid.events.RENDER_PROGRESS, calculatePercent());
+        exp.dispatch(exports.datagrid.events.ON_RENDER_PROGRESS, calculatePercent());
     }
     function stop() {
         time = 0;
@@ -1993,14 +1997,13 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
         }
         function createTemplate(scriptTemplate) {
             var template = trim(angular.element(scriptTemplate).html()), wrapper = document.createElement("div"), name = getScriptTemplateAttribute(scriptTemplate, "template-name") || defaultName, templateData;
+            wrapper.className = "grid-template-wrapper";
             template = angular.element(template)[0];
             template.className += " " + exp.options.uncompiledClass + " {{$status}}";
             template.setAttribute("template", name);
             exp.getContent()[0].appendChild(wrapper);
             wrapper.appendChild(template);
             template = trim(wrapper.innerHTML);
-            wrapper.childNodes[0].style.lineHeight = "0px";
-            // make so lineHeight doesn't wrap and affect template size.
             templateData = {
                 name: name,
                 item: getScriptTemplateAttribute(scriptTemplate, "template-item"),

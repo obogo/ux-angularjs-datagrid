@@ -37,13 +37,13 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
                 wrapper = document.createElement('div'),
                 name = getScriptTemplateAttribute(scriptTemplate, 'template-name') || defaultName,
                 templateData;
+            wrapper.className = 'grid-template-wrapper';
             template = angular.element(template)[0];
             template.className += ' ' + exp.options.uncompiledClass + ' {{$status}}';
             template.setAttribute('template', name);
             exp.getContent()[0].appendChild(wrapper);
             wrapper.appendChild(template);
             template = trim(wrapper.innerHTML);
-            wrapper.childNodes[0].style.lineHeight = '0px';// make so lineHeight doesn't wrap and affect template size.
             templateData = {
                 name: name,
                 item: getScriptTemplateAttribute(scriptTemplate, 'template-item'),

@@ -35,7 +35,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
         function createTemplate(scriptTemplate) {
             var template = trim(angular.element(scriptTemplate).html()),
                 wrapper = document.createElement('div'),
-                name = scriptTemplate.attributes['data-template-name'].nodeValue || defaultName,
+                name = getScriptTemplateAttribute(scriptTemplate, 'template-name') || defaultName,
                 templateData;
             template = angular.element(template)[0];
             template.className += ' ' + exp.options.uncompiledClass + ' {{$status}}';
@@ -46,7 +46,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             wrapper.childNodes[0].style.lineHeight = '0px';// make so lineHeight doesn't wrap and affect template size.
             templateData = {
                 name: name,
-                item: scriptTemplate.attributes['data-template-item'].nodeValue,
+                item: getScriptTemplateAttribute(scriptTemplate, 'template-item'),
                 template: template,
                 height: wrapper.offsetHeight
             };
@@ -59,6 +59,11 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             exp.getContent()[0].removeChild(wrapper);
             totalHeight = 0;// reset cached value.
             return templateData;
+        }
+
+        function getScriptTemplateAttribute(scriptTemplate, attrStr) {
+            var node = scriptTemplate.attributes['data-' + attrStr] || scriptTemplate.attributes[attrStr];
+            return node && node.nodeValue || '';
         }
 
         function getTemplates() {

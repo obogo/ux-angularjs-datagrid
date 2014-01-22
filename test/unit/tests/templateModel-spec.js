@@ -17,14 +17,14 @@ describe("templateModel", function () {
                 '</script>' +
             '</div>',
         html2 = '<div data-ux-datagrid="items" class="datagrid">' +
-                '<script type="template/html" data-template-name="default" data-template-item="item">' +
+                '<script type="template/html" template-name="default" template-item="item">' +
                     '<div class="row {{fake}}" style="height:10px;">' +
                         '<div class="text">{{item.id}} {{$id}} {{counter}}</div>' +
                         '<div random-icons="pencil droid trash"></div>' +
                         '<input type="text">' +
                     '</div>' +
                 '</script>' +
-                '<script type="template/html" data-template-name="template1" data-template-item="item">' +
+                '<script type="template/html" template-name="template1" template-item="item">' +
                     '<div class="row {{fake}}" style="height:10px;">' +
                         '<div class="text">{{item.id}} {{$id}} {{counter}}</div>' +
                         '<div random-icons="pencil droid trash"></div>' +
@@ -90,6 +90,11 @@ describe("templateModel", function () {
     it("dynamicHeights should return true if the templates have different heights", function() {
         setup(html1);
         expect(model.dynamicHeights()).toBe(true);
+    });
+
+    it("should work without the data- in front of the attributes", function() {
+        setup(html2);
+        expect(model.templateCount()).toBe(2);
     });
 
     it("dynamicHeights should return false if the templates have the same heights", function() {

@@ -11,7 +11,8 @@ Of course since this is angular there is then the issue with a **digest being to
 - [Docs - in Progress](https://rawgithub.com/webux/ux-angularjs-datagrid/master/docs/angular-ux-datagrid.html)
 
 ### More Examples ###
-- [Getting Started](https://github.com/webux/ux-angularjs-datagrid/wiki)
+- [Quick Start](https://github.com/webux/ux-angularjs-datagrid/wiki/#quick-start)
+- [Getting Started](https://github.com/webux/ux-angularjs-datagrid/wiki/#getting-started)
 - [Multiple Row Templates](https://github.com/webux/ux-angularjs-datagrid/wiki/#multiple-row-templates)
 - [Grouped Data](https://github.com/webux/ux-angularjs-datagrid/wiki/#grouped-data)
 

@@ -1,4 +1,4 @@
-angular.module('ux').factory('gridLogger', function () {
+angular.module('ux').factory('gridLogger', ['$rootScope', function ($rootScope) {
     var level = {
             LOG: 1,
             INFO: 2,
@@ -59,16 +59,16 @@ angular.module('ux').factory('gridLogger', function () {
         }
 
         function output(lvl, args) {
-            var logArgs, zl = lvl - 1;
+            var logArgs, zl = lvl - 1, event = args[0];
             if (hasPermissionToLog(lvl, args[1])) {
                 logArgs = getArgs(arguments[1], 1);
                 if (window.console && console[methods[zl]]) {
-                    console[methods[zl]].apply(console, result.format(logArgs, lvl));
+                    console[methods[zl]].apply(console, result.format(logArgs, lvl, event));
                 }
             }
         }
 
-        result.format = function format(args, lvl) {
+        result.format = function format(args, lvl, event) {
             var name = args.shift(), theme = args.shift() || 'grey', i = 0, len = args[0].length, indent = '', char = args[0].charAt(i);
             while (i < len && (char === ' ' || char === "\t")) {
                 indent += char;
@@ -76,20 +76,21 @@ angular.module('ux').factory('gridLogger', function () {
                 char = args[0].charAt(i);
             }
             args[0] = args[0].substr(indent.length, args[0].length);
-            args[0] = indent + '%c' + name + '::' + args[0];
+            args[0] = indent + '%c' + name + '[' + event.targetScope.$id + ']::' + args[0];
             args.splice(1, 0, (themes[theme] || theme)[lvl - 1]);
             return args;
         };
 
         result.destroy = function () {
             result = null;
+            $rootScope = null;
         };
 
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.LOG, onLog));
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.INFO, onInfo));
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.WARN, onWarn));
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ERROR, onError));
+        exp.unwatchers.push($rootScope.$on(exports.datagrid.events.LOG, onLog));
+        exp.unwatchers.push($rootScope.$on(exports.datagrid.events.INFO, onInfo));
+        exp.unwatchers.push($rootScope.$on(exports.datagrid.events.WARN, onWarn));
+        exp.unwatchers.push($rootScope.$on(exports.datagrid.events.ERROR, onError));
 
         exp.logger = result;
     };
-});
+}]);

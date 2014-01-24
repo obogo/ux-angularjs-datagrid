@@ -178,7 +178,7 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Addons >> Sort Model Server";
                 $scope.items = createSimpleFieldList(100, 0, {name: 1, description: 10, type:['red','green','blue'], weight: [0.1, 0.2, 0.3, 0.4, 0.5]});
-                $scope.$on(ux.datagrid.events.BEFORE_SORT, function (event, key) {
+                $scope.$on(ux.datagrid.events.ON_BEFORE_SORT, function (event, key) {
                     if (!$scope.datagrid.sortModel.getCache(key)) {
                         $scope.datagrid.sortModel.setCache(key, []);
                         // let's wait to simulate a server call. Then let's change the color of the data

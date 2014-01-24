@@ -3,10 +3,11 @@ describe("sortModel", function () {
     var sorter, scope;
 
     beforeEach(function () {
-        var inject = angular.injector(['ng', 'ux']).invoke;
-        inject(function ($compile, $rootScope, sortModel) {
+        var inject = angular.injector(['ng', 'ngMock', 'ux']).invoke;
+        inject(function ($compile, $rootScope, $location, sortModel) {
             scope = $rootScope.$new();
             scope.items = [];
+            $location.path('/test');
             for (var i = 0; i < 100; i += 1) {
                 scope.items.push({id: i.toString(), name: i.toString(36)});
             }
@@ -14,15 +15,19 @@ describe("sortModel", function () {
                 sortModel({
                     scope: scope,
                     options: {
-                        sorts: {name: 'asc'}
+                        sorts: {id:'none', name: 'asc'}
                     },
                     flow: {info: function () {}},
                     dispatch: function () {
-                        scope.$emit.apply(scope, arguments);
+                        return scope.$emit.apply(scope, arguments);
                     }
                 });
             sorter = exp.sortModel;
         });
+    });
+
+    afterEach(function () {
+        ux.datagrid.sortStatesModel.clearAll();
     });
 
     it("should sort the data asc by name", function () {
@@ -52,17 +57,20 @@ describe("sortModel", function () {
     });
 
     it("toggleSort should take asc to desc", function () {
+        sorter.applySorts(scope.items);
         sorter.toggleSort('name');
         expect(sorter.getSortStateOf('name')).toBe('desc');
     });
 
     it("toggleSort should take desc to none", function () {
+        sorter.applySorts(scope.items);
         sorter.toggleSort('name');
         sorter.toggleSort('name');
         expect(sorter.getSortStateOf('name')).toBe('none');
     });
 
     it("toggleSort should take none to asc", function () {
+        sorter.applySorts(scope.items);
         sorter.toggleSort('name');
         sorter.toggleSort('name');
         sorter.toggleSort('name');
@@ -70,7 +78,7 @@ describe("sortModel", function () {
     });
 
     it("should wait for the sort to be applied for an async sort", function (done) {
-        scope.$on(ux.datagrid.events.BEFORE_SORT, function (event, key) {
+        scope.$on(ux.datagrid.events.ON_BEFORE_SORT, function (event, key) {
             sorter.setCache(key, []);
             setTimeout(function () {
                 var list = [{name:'a-0'},{name:'a-1'},{name:'a-2'}];
@@ -80,5 +88,16 @@ describe("sortModel", function () {
             });
         });
         sorter.applySorts(scope.items, {name: 'desc'});
+    });
+
+    it("should only apply a single sort if multiple sorts is not enabled.", function() {
+        sorter.applySorts(scope.items, {id: 'asc'});
+        expect(sorter.getSortKey()).toBe('id:asc');
+    });
+
+    it("should apply multiple sorts in the correct order if multiple sorts is enabled", function() {
+        sorter.multipleSort(true);
+        sorter.applySorts(scope.items, {id: 'asc'});// default was set with name:asc
+        expect(sorter.getSortKey()).toBe('name:asc|id:asc');
     });
 });

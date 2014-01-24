@@ -661,7 +661,7 @@ function Datagrid(scope, element, attr, $compile) {
             min: 0,
             max: 0
         }
-    }, logEvents = [ exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR ], exp = {};
+    }, logEvents = [ exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR ], exp = {}, eventLogger = exports.logWrapper("datagrid event", {}, "grey", dispatch);
     // the datagrid public api
     // Initialize the datagrid.
     // add unique methods to the flow.
@@ -1216,9 +1216,9 @@ function Datagrid(scope, element, attr, $compile) {
         return logEvents.indexOf(evt) !== -1;
     }
     function dispatch(event) {
-        if (!isLogEvent(event)) exp.info("$emit %s", event);
+        if (!isLogEvent(event)) eventLogger.log("$emit %s", event);
         // THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
-        scope.$emit.apply(scope, arguments);
+        return scope.$emit.apply(scope, arguments);
     }
     function destroyScopes() {
         // because child scopes may not be in order because of rendering techniques. We must loop through

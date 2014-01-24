@@ -33,7 +33,8 @@ function Datagrid(scope, element, attr, $compile) {
             activeRange: {min: 0, max: 0} // the current range of active scopes.
         },
         logEvents = [exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR],
-        exp = {}; // the datagrid public api
+        exp = {},
+        eventLogger = exports.logWrapper('datagrid event', {}, 'grey', dispatch); // the datagrid public api
 
     // Initialize the datagrid.
     // add unique methods to the flow.
@@ -623,8 +624,8 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function dispatch(event) {
-        if (!isLogEvent(event)) exp.info('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
-        scope.$emit.apply(scope, arguments);
+        if (!isLogEvent(event)) eventLogger.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
+        return scope.$emit.apply(scope, arguments);
     }
 
     function destroyScopes() {

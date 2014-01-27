@@ -1,4 +1,4 @@
-angular.module('ux').factory('gridLogger', ['$rootScope', function ($rootScope) {
+angular.module('ux').factory('gridLogger', function () {
     var level = {
             LOG: 1,
             INFO: 2,
@@ -26,7 +26,7 @@ angular.module('ux').factory('gridLogger', ['$rootScope', function ($rootScope) 
         return ary;
     }
 
-    return function gridLogger(exp) {
+    return function gridLogger(exp, $rootScope) {
         var result = {};
         // listen to events and write them.
         function onLog(event) {
@@ -93,4 +93,4 @@ angular.module('ux').factory('gridLogger', ['$rootScope', function ($rootScope) 
 
         exp.logger = result;
     };
-}]);
+});

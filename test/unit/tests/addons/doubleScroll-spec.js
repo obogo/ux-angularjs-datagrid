@@ -76,6 +76,7 @@ describe('iosDoubleScroll', function () {
             $compile(element)(scope);
             $rootScope.$digest();
             grid = scope.datagrid;
+            scope.doubleScroll.virtualScroll.async = grid.options.async;
         });
     });
 
@@ -96,7 +97,7 @@ describe('iosDoubleScroll', function () {
     }
 
 
-    it("should disable the target container while scrolling the main container", function (done) {
+    it("should disable the target container while scrolling the main container", function () {
         var el = element.children()[0];
         trigger(el, 'touchstart', {touches: [
             {pageX: 200, pageY: 200}
@@ -104,57 +105,44 @@ describe('iosDoubleScroll', function () {
         trigger(el, 'touchmove', {changedTouches: [
             {pageX: 200, pageY: 190}
         ]});
-        setTimeout(function () {
-            expect(scope.datagrid.scrollModel.enable()).toBe(false);
-            trigger(el, 'touchend', {});
-            setTimeout(done, 100);
-        }, 100);
+        expect(scope.datagrid.scrollModel.enable()).toBe(false);
+        trigger(el, 'touchend', {});
     });
 
 
-    it("should enable the target container when the main container reaches the bottom", function (done) {
+    it("should enable the target container when the main container reaches the bottom", function () {
         var el = element.children()[0];
-        setTimeout(function () {
-            trigger(el, 'touchstart', {touches: [
-                {pageX: 200, pageY: 200}
-            ]});
-            trigger(el, 'touchmove', {changedTouches: [
-                {pageX: 200, pageY: 90}
-            ]});
-            trigger(el, 'touchend', {});
-        }, 100);
-        setTimeout(function () {
-            expect(scope.datagrid.scrollModel.enable()).toBe(true);
-            setTimeout(done, 100);
-        }, 100);
+        trigger(el, 'touchstart', {touches: [
+            {pageX: 200, pageY: 200}
+        ]});
+        trigger(el, 'touchmove', {changedTouches: [
+            {pageX: 200, pageY: 90}
+        ]});
+        trigger(el, 'touchend', {});
+        expect(scope.datagrid.scrollModel.enable()).toBe(true);
     });
 
-    it("should disable the main container while scrolling the target container", function (done) {
+    it("should disable the main container while scrolling the target container", function () {
         // wait for content to be ready.
         var el = element.children()[0];
-        setTimeout(function () {
-            trigger(el, 'touchstart', {touches: [
-                {pageX: 200, pageY: 200}
-            ]});
-            trigger(el, 'touchmove', {changedTouches: [
-                {pageX: 200, pageY: 50}
-            ]});
-            trigger(el, 'touchend', {});
-            // now change to the datagrid content.
-            el = scope.datagrid.getContent()[0];
-            trigger(el, 'touchstart', {touches: [
-                {pageX: 200, pageY: 200}
-            ]});
-            trigger(el, 'touchmove', {changedTouches: [
-                {pageX: 200, pageY: 50}
-            ]});
-        }, 100);
-        setTimeout(function () {
-            expect(scope.datagrid.scrollModel.enable()).toBe(true);
-            expect(scope.datagrid.scrollModel.getValues().scroll).toBe(150);
-            trigger(el, 'touchend', {});
-            setTimeout(done, 100);
-        }, 500);
+        trigger(el, 'touchstart', {touches: [
+            {pageX: 200, pageY: 200}
+        ]});
+        trigger(el, 'touchmove', {changedTouches: [
+            {pageX: 200, pageY: 50}
+        ]});
+        trigger(el, 'touchend', {});
+        // now change to the datagrid content.
+        el = scope.datagrid.getContent()[0];
+        trigger(el, 'touchstart', {touches: [
+            {pageX: 200, pageY: 200}
+        ]});
+        trigger(el, 'touchmove', {changedTouches: [
+            {pageX: 200, pageY: 50}
+        ]});
+        expect(scope.datagrid.scrollModel.enable()).toBe(true);
+        expect(scope.datagrid.scrollModel.getValues().scroll).toBe(150);
+        trigger(el, 'touchend', {});
     });
 
     it("should enable the main container when the target container scrolls back to the top.", function (done) {

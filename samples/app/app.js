@@ -240,9 +240,9 @@ app.controller('root', function root($scope) {
     $scope.percents = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     setInterval(function () {
         $scope.counter += 1;
-        if (!$scope.$$phase) {
-            $scope.$apply();
-        }
+//        if (!$scope.$$phase) {
+//            $scope.$apply();
+//        }
     }, 1000);
 
     $scope.scrollToPercent = function (percent) {

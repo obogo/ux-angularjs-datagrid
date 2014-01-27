@@ -40,7 +40,7 @@ module.exports = function (grunt) {
                     footer: '<%= wrapEnd %>'
                 },
                 files: {
-                    'build/angular-ux-<%= pkg.filename %>.js': [
+                    'build/latest/angular-ux-<%= pkg.filename %>.js': [
                         'src/ux-datagrid-config.js',
                         'src/lib/*.js',
                         'src/core/logWrapper.js',
@@ -48,43 +48,43 @@ module.exports = function (grunt) {
                         'src/ux-datagrid.js',
                         'src/core/addons/*.js'
                     ],
-                    'build/addons/desktop/ux-<%= pkg.filename %>-focusManager.js': [
+                    'build/latest/addons/desktop/ux-<%= pkg.filename %>-focusManager.js': [
                         'src/addons/libs/ux-visibility.js',
                         'src/addons/libs/ux-selector.js',
                         'src/addons/desktop/gridFocusManager.js'
                     ],
-                    'build/addons/desktop/ux-<%= pkg.filename %>-disableHoverWhileScrolling.js': [
+                    'build/latest/addons/desktop/ux-<%= pkg.filename %>-disableHoverWhileScrolling.js': [
                         'src/addons/desktop/disableHoverWhileScrolling.js'
                     ],
-                    'build/addons/touch/ios/ux-<%= pkg.filename %>-iosScroll.js': [
+                    'build/latest/addons/touch/ios/ux-<%= pkg.filename %>-iosScroll.js': [
                         'src/addons/libs/VirtualScroll.js',
                         'src/addons/touch/ios/iosScroll.js'
                     ],
-                    'build/addons/ux-<%= pkg.filename %>-expandRows.js': [
+                    'build/latest/addons/ux-<%= pkg.filename %>-expandRows.js': [
                         'src/addons/expandRows.js'
                     ],
-                    'build/addons/ux-<%= pkg.filename %>-findInList.js': [
+                    'build/latest/addons/ux-<%= pkg.filename %>-findInList.js': [
                         'src/addons/findInList.js'
                     ],
-                    'build/addons/ux-<%= pkg.filename %>-gridLogger.js': [
+                    'build/latest/addons/ux-<%= pkg.filename %>-gridLogger.js': [
                         'src/addons/gridLogger.js'
                     ],
-                    'build/addons/ux-<%= pkg.filename %>-infiniteScroll.js': [
+                    'build/latest/addons/ux-<%= pkg.filename %>-infiniteScroll.js': [
                         'src/addons/infiniteScroll.js'
                     ],
-                    'build/addons/ux-<%= pkg.filename %>-scrollHistory.js': [
+                    'build/latest/addons/ux-<%= pkg.filename %>-scrollHistory.js': [
                         'src/addons/scrollHistory.js'
                     ],
-                    'build/addons/ux-<%= pkg.filename %>-sortModel.js': [
+                    'build/latest/addons/ux-<%= pkg.filename %>-sortModel.js': [
                         'src/addons/sortModel.js'
                     ],
-                    'build/addons/ux-<%= pkg.filename %>-statsModel.js': [
+                    'build/latest/addons/ux-<%= pkg.filename %>-statsModel.js': [
                         'src/addons/statsModel.js'
                     ],
-                    'build/addons/ux-<%= pkg.filename %>-windowScroll.js': [
+                    'build/latest/addons/ux-<%= pkg.filename %>-windowScroll.js': [
                         'src/addons/windowScroll.js'
                     ],
-                    'build/other/ux-doubleScroll.js': [
+                    'build/latest/other/ux-doubleScroll.js': [
                         'src/other/doubleScroll.js'
                     ]
                 }
@@ -95,8 +95,16 @@ module.exports = function (grunt) {
                     banner: '<%= banner %>'
                 },
                 files: {
-                    'build/angular-ux-<%= pkg.filename %>.min.js': ['build/angular-ux-<%= pkg.filename %>.js']
+                    'build/latest/angular-ux-<%= pkg.filename %>.min.js': ['build/latest/angular-ux-<%= pkg.filename %>.js']
                 }
+            }
+        },
+        copy: {
+            main: {
+                files: [
+                    // include files withing path
+                    {expand: true, src: ['build/latest/**'], dest: 'build/v<%= pkg.version %>/', filter:'isFile'}
+                ]
             }
         },
         //https://github.com/gruntjs/grunt-contrib-watch
@@ -127,10 +135,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-ngmin');
     grunt.loadNpmTasks('grunt-contrib-compress');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
     // Default task(s).
 //    grunt.registerTask('default', ['jshint', 'uglify', 'compress']);
-    grunt.registerTask('default', ['jshint', 'uglify']);
+    grunt.registerTask('default', ['jshint', 'uglify', 'copy']);
 
 };

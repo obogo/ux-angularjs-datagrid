@@ -107,7 +107,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*
-* uxDatagrid v.0.2.0
+* uxDatagrid v.0.2.1
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -168,6 +168,9 @@ angular.module(<span class="hljs-string">"ux"</span>).directive(<span class="hlj
                 } <span class="hljs-keyword">else</span> {
                     <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(selector ? <span class="hljs-string">'selector "'</span> + selector + <span class="hljs-string">'" did not select any objects'</span> : <span class="hljs-string">"double scroll requires a selector."</span>);
                 }
+            }
+            <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onIOSUpdateValues</span><span class="hljs-params">(values)</span> {</span>
+                onIOSScroll(values.scroll);
             }
             <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onIOSScroll</span><span class="hljs-params">(value)</span> {</span>
                 result.log(<span class="hljs-string">"onIOSScroll"</span>);
@@ -265,8 +268,9 @@ angular.module(<span class="hljs-string">"ux"</span>).directive(<span class="hlj
             }
             <span class="hljs-keyword">if</span> (exports.datagrid.isIOS) {
                 result.log(<span class="hljs-string">"is iOS"</span>);
-                vScroll = ux.datagrid.VirtualScroll(scope, element, {}, onIOSScroll);
+                vScroll = ux.datagrid.VirtualScroll(scope, element, {}, onIOSUpdateValues, onIOSScroll);
                 vScroll.setup();
+                result.virtualScroll = vScroll;
                 unwatchRender = scope.$on(exports.datagrid.events.ON_LISTENERS_READY, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span></pre></div></div>
             
         </li>

@@ -51,6 +51,10 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                 }
             }
 
+            function onIOSUpdateValues(values) {
+                onIOSScroll(values.scroll);
+            }
+
             function onIOSScroll(value) {
                 result.log("onIOSScroll");
                 var s;
@@ -106,7 +110,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
             function onTargetScrollToTop(event, scroller, speed) {
                 result.log('onTargetScrollToTop');
                 // we only want the scroll event from the target.
-                if (scroller.element[0] === target) {
+                if (scroller.element[0] === target && scrollModel.enable()) {
                     scrollModel.enable(false);
                     vScroll.enable(true, speed);
                     target.disabled = 'disabled';
@@ -125,8 +129,9 @@ angular.module('ux').directive('uxDoubleScroll', function () {
 
             if (exports.datagrid.isIOS) {
                 result.log('is iOS');
-                vScroll = ux.datagrid.VirtualScroll(scope, element, {}, onIOSScroll);
+                vScroll = ux.datagrid.VirtualScroll(scope, element, {}, onIOSUpdateValues, onIOSScroll);
                 vScroll.setup();
+                result.virtualScroll = vScroll;
                 unwatchRender = scope.$on(exports.datagrid.events.ON_LISTENERS_READY, function () {
                     // it needs to start off with the target disabled.
                     unwatchRender();

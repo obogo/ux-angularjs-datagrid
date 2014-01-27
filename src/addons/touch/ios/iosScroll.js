@@ -8,26 +8,28 @@ angular.module('ux').factory('iosScroll', function () {
         if (!exports.datagrid.isIOS) {
             return exp;
         }
-        vScroll = new ux.datagrid.VirtualScroll(exp.scope, exp.element, exp.values, function (value, immediately) {
-            vScroll.clear();
-            var values = vScroll.getValues();
-            originalScrollModel.removeScrollListener();
-            exp.values.scroll = values.scroll;
-            exp.values.speed = values.speed;
-            exp.values.absSpeed = values.absSpeed;
-            originalScrollModel.scrollTo(value, immediately);
-        });
-        function onBeforeVirtualScrollStart(event) {
-            // update the virtual scroll values to reflect what is in the datagrid.
-            var values = vScroll.getValues();
-            ux.each(exp.values, function (value, key) {
-                values[key] = value;
-            });
-        }
-        exp.scope.$on(ux.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeVirtualScrollStart);
+        vScroll = new ux.datagrid.VirtualScroll(
+            exp.scope,
+            exp.element,
+            exp.values,
+            function updateValues(values) {
+                exp.values.scroll = values.scroll;
+                exp.values.speed = values.speed;
+                exp.values.absSpeed = values.absSpeed;
+            },
+            function render(value, immediately) {
+                exp.values.scroll = value;
+                if (immediately) {
+                    originalScrollModel.onScrollingStop();
+                } else {
+                    originalScrollModel.waitForStop();
+                }
+            }
+        );
         exp.scope.$on(ux.datagrid.events.ON_READY, function () {
             vScroll.content = exp.getContent();
             vScroll.setup();
+            originalScrollModel.removeScrollListener();
         });
         vScroll.scrollToIndex = originalScrollModel.scrollToIndex;
         vScroll.scrollToItem = originalScrollModel.scrollToItem;

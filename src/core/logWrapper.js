@@ -2,6 +2,7 @@ exports.logWrapper = function LogWrapper(name, instance, theme, dispatch) {
     theme = theme || 'black';
     dispatch = dispatch || instance.dispatch || function () {};
     instance.$logName = name;
+    instance.log = instance.info = instance.warn = instance.error = function () {};
     instance.log = function log() {
         var args = [exports.datagrid.events.LOG, name, theme].concat(exports.util.array.toArray(arguments));
         dispatch.apply(instance, args);

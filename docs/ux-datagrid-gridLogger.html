@@ -107,13 +107,13 @@
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*
-* uxDatagrid v.0.2.0
+* uxDatagrid v.0.2.1
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */</span>
 (<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(exports, global)</span>{</span>
-angular.module(<span class="hljs-string">"ux"</span>).factory(<span class="hljs-string">"gridLogger"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+angular.module(<span class="hljs-string">"ux"</span>).factory(<span class="hljs-string">"gridLogger"</span>, [ <span class="hljs-string">"$rootScope"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">($rootScope)</span> {</span>
     <span class="hljs-keyword">var</span> level = {
         LOG: <span class="hljs-number">1</span>,
         INFO: <span class="hljs-number">2</span>,
@@ -178,15 +178,15 @@ angular.module(<span class="hljs-string">"ux"</span>).factory(<span class="hljs-
             <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
         }
         <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">output</span><span class="hljs-params">(lvl, args)</span> {</span>
-            <span class="hljs-keyword">var</span> logArgs, zl = lvl - <span class="hljs-number">1</span>;
+            <span class="hljs-keyword">var</span> logArgs, zl = lvl - <span class="hljs-number">1</span>, event = args[<span class="hljs-number">0</span>];
             <span class="hljs-keyword">if</span> (hasPermissionToLog(lvl, args[<span class="hljs-number">1</span>])) {
                 logArgs = getArgs(<span class="hljs-built_in">arguments</span>[<span class="hljs-number">1</span>], <span class="hljs-number">1</span>);
                 <span class="hljs-keyword">if</span> (window.console &amp;&amp; console[methods[zl]]) {
-                    console[methods[zl]].apply(console, result.format(logArgs, lvl));
+                    console[methods[zl]].apply(console, result.format(logArgs, lvl, event));
                 }
             }
         }
-        result.format = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">format</span><span class="hljs-params">(args, lvl)</span> {</span>
+        result.format = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">format</span><span class="hljs-params">(args, lvl, event)</span> {</span>
             <span class="hljs-keyword">var</span> name = args.shift(), theme = args.shift() || <span class="hljs-string">"grey"</span>, i = <span class="hljs-number">0</span>, len = args[<span class="hljs-number">0</span>].length, indent = <span class="hljs-string">""</span>, char = args[<span class="hljs-number">0</span>].charAt(i);
             <span class="hljs-keyword">while</span> (i &lt; len &amp;&amp; (char === <span class="hljs-string">" "</span> || char === <span class="hljs-string">"	"</span>)) {
                 indent += char;
@@ -194,20 +194,21 @@ angular.module(<span class="hljs-string">"ux"</span>).factory(<span class="hljs-
                 char = args[<span class="hljs-number">0</span>].charAt(i);
             }
             args[<span class="hljs-number">0</span>] = args[<span class="hljs-number">0</span>].substr(indent.length, args[<span class="hljs-number">0</span>].length);
-            args[<span class="hljs-number">0</span>] = indent + <span class="hljs-string">"%c"</span> + name + <span class="hljs-string">"::"</span> + args[<span class="hljs-number">0</span>];
+            args[<span class="hljs-number">0</span>] = indent + <span class="hljs-string">"%c"</span> + name + <span class="hljs-string">"["</span> + event.targetScope.$id + <span class="hljs-string">"]::"</span> + args[<span class="hljs-number">0</span>];
             args.splice(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, (themes[theme] || theme)[lvl - <span class="hljs-number">1</span>]);
             <span class="hljs-keyword">return</span> args;
         };
         result.destroy = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
             result = <span class="hljs-literal">null</span>;
+            $rootScope = <span class="hljs-literal">null</span>;
         };
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.LOG, onLog));
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.INFO, onInfo));
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.WARN, onWarn));
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ERROR, onError));
+        exp.unwatchers.push($rootScope.$on(exports.datagrid.events.LOG, onLog));
+        exp.unwatchers.push($rootScope.$on(exports.datagrid.events.INFO, onInfo));
+        exp.unwatchers.push($rootScope.$on(exports.datagrid.events.WARN, onWarn));
+        exp.unwatchers.push($rootScope.$on(exports.datagrid.events.ERROR, onError));
         exp.logger = result;
     };
-});
+} ]);
 }(<span class="hljs-keyword">this</span>.ux = <span class="hljs-keyword">this</span>.ux || {}, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span><span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;}()));</pre></div></div>
             
         </li>

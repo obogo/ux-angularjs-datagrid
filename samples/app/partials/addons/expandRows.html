@@ -11,7 +11,7 @@
     </div>
     <div class="listA">
         <!--// this is the datagrid //-->
-        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="iosScroll expandRows" data-options="{expandRows:[{template:'default', cls:'expandDefault'},{template:'sub', cls:'expandSub'}]}">
+        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="iosScroll expandRows" data-options="{expandRows:[{template:'group', cls:'groupExpand'},{template:'default', cls:'expandDefault'},{template:'sub', cls:'expandSub'}]}">
             <script type="template/html" data-template-name="group" data-template-item="item">
                 <div class="group {{fake}}" data-ng-click="datagrid.expandRows.toggle($index)">
                     <div class="col col1">{{item.id}}</div>

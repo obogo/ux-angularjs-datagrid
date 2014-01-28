@@ -68,6 +68,7 @@ function Datagrid(scope, element, attr, $compile) {
         exp.isActive = isActive;
         exp.isCompiled = isCompiled;
         exp.getScope = getScope;
+        exp.getRowItem = getRowItem;
         exp.getRowElm = getRowElm;
         exp.getRowIndex = exp.getIndexOf = getRowIndex;
         exp.getRowOffset = getRowOffset;
@@ -142,7 +143,7 @@ function Datagrid(scope, element, attr, $compile) {
     // before references are removed to avoid memory leaks with circular references amd to prevent events from
     // being listened to while the destroy is happening.
     function addListeners() {
-        var unwatchFirstRender = scope.$on(exports.datagrid.events.ON_AFTER_RENDER, function () {
+        var unwatchFirstRender = scope.$on(exports.datagrid.events.ON_BEFORE_RENDER_AFTER_DATA_CHANGE, function () {
             unwatchFirstRender();
             flow.add(dispatch, [exports.datagrid.events.ON_STARTUP_COMPLETE]);
         });
@@ -197,6 +198,11 @@ function Datagrid(scope, element, attr, $compile) {
         return scopes[index];
     }
 
+    // <a name="getRowItem">getRowItem</a> Return the data item of that row.
+    function getRowItem(index) {
+        return this.getData()[index];
+    }
+
     // <a name="getRowElm">getRowElm</a> Return the dom element at that row index.
     function getRowElm(index) {
         return angular.element(exp.chunkModel.getRow(index));
@@ -209,7 +215,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     // <a name="getRowIndex">getRowIndex</a> Get the index of a row from a reference the data object of a row.
     function getRowIndex(item) {
-        return this.getData().indexOf(item);
+        return exp.getNormalizedIndex(item, 0);
     }
 
     // <a name="getRowIndexFromElement">getRowIndexFromElement</a> Get the index of a row from a reference to a dom element that is contained within a row.
@@ -511,8 +517,13 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function afterRenderAfterDataChange() {
+        var tplHeight;
         if (values.dirty) {
             values.dirty = false;
+            tplHeight = getRowElm(values.activeRange.min)[0].offsetHeight;
+            if (tplHeight !== exp.templateModel.getTemplateHeight(exp.getData()[values.activeRange.min])) {
+                exp.templateModel.updateTemplateHeights();
+            }
             dispatch(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE);
         }
     }

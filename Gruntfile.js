@@ -60,6 +60,9 @@ module.exports = function (grunt) {
                         'src/addons/libs/VirtualScroll.js',
                         'src/addons/touch/ios/iosScroll.js'
                     ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-collapsibleGroups.js': [
+                        'src/addons/collapsibleGroups.js'
+                    ],
                     'build/latest/addons/ux-<%= pkg.filename %>-expandRows.js': [
                         'src/addons/expandRows.js'
                     ],

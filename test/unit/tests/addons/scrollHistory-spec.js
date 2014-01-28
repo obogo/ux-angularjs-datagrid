@@ -1,9 +1,9 @@
 describe("scrollHistory", function () {
 
-    var sh, scope, exp, shFactory;
+    var sh, scope, exp, shFactory, injector;
 
     beforeEach(function () {
-        var injector = angular.injector(['ngMock', 'ng', 'ux']);
+        injector = angular.injector(['ngMock', 'ng', 'ux']);
         injector.invoke(function ($location, $rootScope, scrollHistory) {
             scope = $rootScope.$new();
             $location.path = function () {
@@ -14,7 +14,7 @@ describe("scrollHistory", function () {
                 scope.items.push({id: i.toString(), name: i.toString(36)});
             }
             shFactory = scrollHistory;
-            exp = scrollHistory({
+            exp = {
                 scope: scope,
                 values: {
                     scroll: 0
@@ -32,9 +32,14 @@ describe("scrollHistory", function () {
                         this.scrolledTo = value;
                     }
                 }
-            });
+            };
+            exp = injector.invoke(scrollHistory, exp, {exp: exp});
             sh = exp.scrollHistory;
         });
+    });
+
+    afterEach(function () {
+        injector = null;
     });
 
     it("should store the value at any path given", function () {
@@ -57,7 +62,7 @@ describe("scrollHistory", function () {
 
     it("should return the value of the previous scroll history", function () {
         sh.storeScroll('path', 10);
-        exp = shFactory({
+        exp = {
             scope: scope,
             values: {
                 scroll: 0
@@ -74,7 +79,8 @@ describe("scrollHistory", function () {
 
                 }
             }
-        });
+        };
+        injector.invoke(shFactory, exp, {exp: exp});
         sh = exp.scrollHistory;
         expect(sh.getScroll('path')).toBe(10);
     });

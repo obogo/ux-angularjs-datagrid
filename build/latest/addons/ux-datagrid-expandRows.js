@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.2.1
+* uxDatagrid v.0.2.2
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -144,6 +144,7 @@ angular.module("ux").factory("expandRows", function() {
         // override the getTemplateHeight to return the result with the expanded height.
         exp.templateModel.getTemplateHeight = getTemplateHeight;
         result.states = states;
+        result.getIndex = getIndex;
         result.toggle = toggle;
         result.expand = expand;
         result.collapse = collapse;

@@ -3,6 +3,10 @@
     -webkit-transition: height: 0.5s;
 }
 
+.groupExpand {
+    height: 40px;
+}
+
 .expandDefault {
     height: 80px;
 }

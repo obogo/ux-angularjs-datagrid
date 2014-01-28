@@ -138,6 +138,13 @@ app.config(function ($routeProvider) {
                 $scope.items = createSimpleList(100);
             }
         })
+        .when('/addons/collapsibleGroups', {
+            templateUrl: "partials/addons/collapsibleGroups.html",
+            controller: function ($scope) {
+                $scope.name = "Addons >> Collapsible Groups";
+                $scope.items = createGroupedList();
+            }
+        })
         .when('/addons/expandRows', {
             templateUrl: "partials/addons/expandRows.html",
             controller: function ($scope) {

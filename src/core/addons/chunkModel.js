@@ -146,13 +146,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
     }
 
     function updateAllChunkHeights(rowIndex) {
-        var indexes = getRowIndexes(rowIndex, _list), ary = _list, index;
-        while (indexes.length) {
-            index = indexes.shift();
-            if (ary[index] instanceof ChunkArray) {
-                ary = ary[index];
-            }
-        }
+        var indexes = getRowIndexes(rowIndex, _list), ary = getArrayFromIndexes(indexes, _list);
         ary.updateHeight(exp.templateModel, _rows);
         updateChunkHeights(_el, _list, indexes);
     }
@@ -162,11 +156,22 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
         while (i < len) {
             if (ary.dirtyHeight) {
                 ary.dirtyHeight = false;
-                el.css({height: ary.height + 'px'});
+                el[0].style.height = ary.height + 'px';
                 updateChunkHeights(angular.element(el.children()[i]), ary[i]);
             }
             i += 1;
         }
+    }
+
+    function getArrayFromIndexes(indexes, ary) {
+        var index;
+        while (indexes.length) {
+            index = indexes.shift();
+            if (ary[index] instanceof ChunkArray) {
+                ary = ary[index];
+            }
+        }
+        return ary;
     }
 
     /**

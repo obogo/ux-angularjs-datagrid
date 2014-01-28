@@ -147,6 +147,27 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             exp.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName);
         }
 
+        function updateTemplateHeights() {
+            //TODO: needs unit tested.
+            var i = exp.values.activeRange.min, len = exp.values.activeRange.max - i, row, tpl, rowHeight, changed = false,
+                heightCache = {};
+            while (i < len) {
+                tpl = result.getTemplate(exp.getData()[i]);
+                if (!heightCache[tpl.name]) {
+                    row = exp.getRowElm(i);
+                    rowHeight = row[0].offsetHeight;
+                    if (rowHeight !== tpl.height) {
+                        tpl.height = rowHeight;
+                        changed = true;
+                    }
+                }
+                i += 1;
+            }
+            if (changed) {
+                exp.updateHeights();
+            }
+        }
+
         function destroy() {
             result.destroyLogger();
             result = null;
@@ -166,6 +187,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
         result.getTemplateHeight = getTemplateHeight;
         result.setTemplate = setTemplate;
         result.setTemplateName = setTemplateName;
+        result.updateTemplateHeights = updateTemplateHeights;
         result.destroy = destroy;
 
         return result;

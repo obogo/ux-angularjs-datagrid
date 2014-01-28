@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.2.1
+* uxDatagrid v.0.2.2
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -698,6 +698,7 @@ function Datagrid(scope, element, attr, $compile) {
         exp.isActive = isActive;
         exp.isCompiled = isCompiled;
         exp.getScope = getScope;
+        exp.getRowItem = getRowItem;
         exp.getRowElm = getRowElm;
         exp.getRowIndex = exp.getIndexOf = getRowIndex;
         exp.getRowOffset = getRowOffset;
@@ -774,7 +775,7 @@ function Datagrid(scope, element, attr, $compile) {
     // before references are removed to avoid memory leaks with circular references amd to prevent events from
     // being listened to while the destroy is happening.
     function addListeners() {
-        var unwatchFirstRender = scope.$on(exports.datagrid.events.ON_AFTER_RENDER, function() {
+        var unwatchFirstRender = scope.$on(exports.datagrid.events.ON_BEFORE_RENDER_AFTER_DATA_CHANGE, function() {
             unwatchFirstRender();
             flow.add(dispatch, [ exports.datagrid.events.ON_STARTUP_COMPLETE ]);
         });
@@ -823,6 +824,10 @@ function Datagrid(scope, element, attr, $compile) {
     function getScope(index) {
         return scopes[index];
     }
+    // <a name="getRowItem">getRowItem</a> Return the data item of that row.
+    function getRowItem(index) {
+        return this.getData()[index];
+    }
     // <a name="getRowElm">getRowElm</a> Return the dom element at that row index.
     function getRowElm(index) {
         return angular.element(exp.chunkModel.getRow(index));
@@ -833,7 +838,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
     // <a name="getRowIndex">getRowIndex</a> Get the index of a row from a reference the data object of a row.
     function getRowIndex(item) {
-        return this.getData().indexOf(item);
+        return exp.getNormalizedIndex(item, 0);
     }
     // <a name="getRowIndexFromElement">getRowIndexFromElement</a> Get the index of a row from a reference to a dom element that is contained within a row.
     function getRowIndexFromElement(el) {
@@ -1118,8 +1123,13 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
     function afterRenderAfterDataChange() {
+        var tplHeight;
         if (values.dirty) {
             values.dirty = false;
+            tplHeight = getRowElm(values.activeRange.min)[0].offsetHeight;
+            if (tplHeight !== exp.templateModel.getTemplateHeight(exp.getData()[values.activeRange.min])) {
+                exp.templateModel.updateTemplateHeights();
+            }
             dispatch(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE);
         }
     }
@@ -1459,13 +1469,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
         }
     }
     function updateAllChunkHeights(rowIndex) {
-        var indexes = getRowIndexes(rowIndex, _list), ary = _list, index;
-        while (indexes.length) {
-            index = indexes.shift();
-            if (ary[index] instanceof ChunkArray) {
-                ary = ary[index];
-            }
-        }
+        var indexes = getRowIndexes(rowIndex, _list), ary = getArrayFromIndexes(indexes, _list);
         ary.updateHeight(exp.templateModel, _rows);
         updateChunkHeights(_el, _list, indexes);
     }
@@ -1474,13 +1478,21 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
         while (i < len) {
             if (ary.dirtyHeight) {
                 ary.dirtyHeight = false;
-                el.css({
-                    height: ary.height + "px"
-                });
+                el[0].style.height = ary.height + "px";
                 updateChunkHeights(angular.element(el.children()[i]), ary[i]);
             }
             i += 1;
         }
+    }
+    function getArrayFromIndexes(indexes, ary) {
+        var index;
+        while (indexes.length) {
+            index = indexes.shift();
+            if (ary[index] instanceof ChunkArray) {
+                ary = ary[index];
+            }
+        }
+        return ary;
     }
     /**
      * Create the chunkList so that it is ready for dom. Set properties needed to create the dom.
@@ -1787,13 +1799,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         result.log("addScrollListener");
         exp.element[0].addEventListener("scroll", onUpdateScrollHandler);
         exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_TO_INDEX, function(event, index) {
-            result.scrollToIndex(index);
+            result.scrollToIndex(index, true);
         }));
         exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_TO_ITEM, function(event, item) {
-            result.scrollToItem(item);
+            result.scrollToItem(item, true);
         }));
         exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_INTO_VIEW, function(event, itemOrIndex) {
-            result.scrollIntoView(itemOrIndex);
+            result.scrollIntoView(itemOrIndex, true);
         }));
         addTouchEvents();
         setup = true;
@@ -2098,6 +2110,25 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             result.setTemplateName(item, newTemplateName);
             exp.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName);
         }
+        function updateTemplateHeights() {
+            //TODO: needs unit tested.
+            var i = exp.values.activeRange.min, len = exp.values.activeRange.max - i, row, tpl, rowHeight, changed = false, heightCache = {};
+            while (i < len) {
+                tpl = result.getTemplate(exp.getData()[i]);
+                if (!heightCache[tpl.name]) {
+                    row = exp.getRowElm(i);
+                    rowHeight = row[0].offsetHeight;
+                    if (rowHeight !== tpl.height) {
+                        tpl.height = rowHeight;
+                        changed = true;
+                    }
+                }
+                i += 1;
+            }
+            if (changed) {
+                exp.updateHeights();
+            }
+        }
         function destroy() {
             result.destroyLogger();
             result = null;
@@ -2116,6 +2147,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
         result.getTemplateHeight = getTemplateHeight;
         result.setTemplate = setTemplate;
         result.setTemplateName = setTemplateName;
+        result.updateTemplateHeights = updateTemplateHeights;
         result.destroy = destroy;
         return result;
     }();

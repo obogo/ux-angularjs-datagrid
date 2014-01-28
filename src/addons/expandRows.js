@@ -166,6 +166,7 @@ angular.module('ux').factory('expandRows', function () {
         exp.templateModel.getTemplateHeight = getTemplateHeight;
 
         result.states = states;
+        result.getIndex = getIndex;
         result.toggle = toggle;
         result.expand = expand;
         result.collapse = collapse;

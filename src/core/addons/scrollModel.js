@@ -17,13 +17,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
         result.log('addScrollListener');
         exp.element[0].addEventListener('scroll', onUpdateScrollHandler);
         exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_TO_INDEX, function (event, index) {
-            result.scrollToIndex(index);
+            result.scrollToIndex(index, true);
         }));
         exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_TO_ITEM, function (event, item) {
-            result.scrollToItem(item);
+            result.scrollToItem(item, true);
         }));
         exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_INTO_VIEW, function (event, itemOrIndex) {
-            result.scrollIntoView(itemOrIndex);
+            result.scrollIntoView(itemOrIndex, true);
         }));
         addTouchEvents();
         setup = true;

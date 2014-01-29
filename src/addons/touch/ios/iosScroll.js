@@ -2,23 +2,23 @@
 // we want to override the default scrolling if it is an IOS device.
 angular.module('ux').factory('iosScroll', function () {
 
-    return function iosScroll(exp) {
+    return function iosScroll(inst) {
         // do not let escape if in unit tests. exp.flow.async is false in unit tests.
-        var vScroll, originalScrollModel = exp.scrollModel;
+        var vScroll, originalScrollModel = inst.scrollModel;
         if (!exports.datagrid.isIOS) {
-            return exp;
+            return inst;
         }
         vScroll = new ux.datagrid.VirtualScroll(
-            exp.scope,
-            exp.element,
-            exp.values,
+            inst.scope,
+            inst.element,
+            inst.values,
             function updateValues(values) {
-                exp.values.scroll = values.scroll;
-                exp.values.speed = values.speed;
-                exp.values.absSpeed = values.absSpeed;
+                inst.values.scroll = values.scroll;
+                inst.values.speed = values.speed;
+                inst.values.absSpeed = values.absSpeed;
             },
             function render(value, immediately) {
-                exp.values.scroll = value;
+                inst.values.scroll = value;
                 if (immediately) {
                     originalScrollModel.onScrollingStop();
                 } else {
@@ -26,14 +26,14 @@ angular.module('ux').factory('iosScroll', function () {
                 }
             }
         );
-        exp.scope.$on(ux.datagrid.events.ON_READY, function () {
-            vScroll.content = exp.getContent();
+        inst.scope.$on(ux.datagrid.events.ON_READY, function () {
+            vScroll.content = inst.getContent();
             vScroll.setup();
             originalScrollModel.removeScrollListener();
         });
         vScroll.scrollToIndex = originalScrollModel.scrollToIndex;
         vScroll.scrollToItem = originalScrollModel.scrollToItem;
-        exp.scrollModel = vScroll;
-        return exp;
+        inst.scrollModel = vScroll;
+        return inst;
     };
 });

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ux-doubleScroll.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../doc-style.css" />
+  <script src="../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../", thisFile = "Users/wes/PhpstormProjects/wes/webux/ux-datagrid//other/ux-doubleScroll.js", defaultSidebar = true;
+  </script>
+  <script src="../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>ux-doubleScroll.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>uxDatagrid v.0.2.2
+(c) 2014, WebUX
+<a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
+License: MIT.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">DOUBLE_SCROLL_SCROLL_TO_TOP</span> <span class="o">=</span> <span class="s2">&quot;datagrid:doubleScrollScrollToTop&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">DOUBLE_SCROLL_SCROLL_TO_BOTTOM</span> <span class="o">=</span> <span class="s2">&quot;datagrid:doubleScrollScrollToBottom&quot;</span><span class="p">;</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Allow a header to scroll out before scrolling the content. Nested scrollers.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">directive</span><span class="p">(</span><span class="s2">&quot;uxDoubleScroll&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">link</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="nx">attr</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">lastValue</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">unwatchRender</span><span class="p">,</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;doubleScroll&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">scope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+            <span class="p">}),</span> <span class="nx">selector</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$eval</span><span class="p">(</span><span class="nx">attr</span><span class="p">.</span><span class="nx">uxDoubleScroll</span><span class="p">),</span> <span class="nx">target</span><span class="p">,</span> <span class="nx">vScroll</span><span class="p">,</span> <span class="nx">contentHeight</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">elHeight</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">targetOffset</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$eval</span><span class="p">(</span><span class="nx">attr</span><span class="p">.</span><span class="nx">targetOffset</span><span class="p">)</span> <span class="o">||</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">scrollModel</span><span class="p">;</span>
+            <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">style</span><span class="p">.</span><span class="nx">overflowY</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">;</span>
+            <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">style</span><span class="p">.</span><span class="nx">overflowX</span> <span class="o">=</span> <span class="s2">&quot;hidden&quot;</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+
+<div class="highlight"><pre><code>       <span class="n">element</span><span class="p">.</span><span class="n">css</span><span class="p">({</span><span class="n">webkitOverflowScrolling</span><span class="o">:</span> <span class="err">&#39;</span><span class="n">touch</span><span class="err">&#39;</span><span class="p">});</span>
+</code></pre></div>
+
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">updateTarget</span><span class="p">();</span>
+            <span class="nx">updateScrollModel</span><span class="p">();</span>
+            <span class="kd">function</span> <span class="nx">updateTarget</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">target</span> <span class="o">=</span> <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">querySelector</span><span class="p">(</span><span class="nx">selector</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="kd">function</span> <span class="nx">updateScrollModel</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">scrollModel</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span> <span class="o">&amp;&amp;</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">scrollModel</span> <span class="o">||</span> <span class="p">{};</span>
+            <span class="p">}</span>
+            <span class="kd">function</span> <span class="nx">onScroll</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;onScroll&quot;</span><span class="p">);</span>
+                <span class="nx">updateTarget</span><span class="p">();</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">el</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">+</span> <span class="nx">el</span><span class="p">.</span><span class="nx">offsetHeight</span> <span class="o">&lt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">scrollHeight</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nx">target</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">overflowY</span> <span class="o">!==</span> <span class="s2">&quot;hidden&quot;</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  target.overflowY = hidden&quot;</span><span class="p">);</span>
+                            <span class="nx">target</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">overflowY</span> <span class="o">=</span> <span class="s2">&quot;hidden&quot;</span><span class="p">;</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">target</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">overflowY</span> <span class="o">!==</span> <span class="s2">&quot;auto&quot;</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  target.overflowY = auto&quot;</span><span class="p">);</span>
+                        <span class="nx">target</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">overflowY</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">;</span>
+                    <span class="p">}</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">selector</span> <span class="o">?</span> <span class="s1">&#39;selector &quot;&#39;</span> <span class="o">+</span> <span class="nx">selector</span> <span class="o">+</span> <span class="s1">&#39;&quot; did not select any objects&#39;</span> <span class="o">:</span> <span class="s2">&quot;double scroll requires a selector.&quot;</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="kd">function</span> <span class="nx">onIOSUpdateValues</span><span class="p">(</span><span class="nx">values</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">onIOSScroll</span><span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="kd">function</span> <span class="nx">onIOSScroll</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;onIOSScroll&quot;</span><span class="p">);</span>
+                <span class="kd">var</span> <span class="nx">s</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">vScroll</span><span class="p">.</span><span class="nx">enable</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="nx">value</span> <span class="o">!==</span> <span class="nx">lastValue</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">lastValue</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+                    <span class="nx">vScroll</span><span class="p">.</span><span class="nx">content</span><span class="p">.</span><span class="nx">css</span><span class="p">({</span>
+                        <span class="nx">webkitTransform</span><span class="o">:</span> <span class="s2">&quot;translate3d(0px, &quot;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">scrollTop</span> <span class="o">-</span> <span class="nx">value</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;px, 0px)&quot;</span>
+                    <span class="p">});</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">s</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">target</span><span class="p">).</span><span class="nx">scope</span><span class="p">();</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">onTargetScrollToTop</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">s</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="kd">function</span> <span class="nx">scrollToTop</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;scrollToTop&quot;</span><span class="p">);</span>
+                <span class="kd">var</span> <span class="nx">enabled</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">isIOS</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">enabled</span> <span class="o">=</span> <span class="nx">vScroll</span><span class="p">.</span><span class="nx">enable</span><span class="p">();</span>
+                    <span class="nx">vScroll</span><span class="p">.</span><span class="nx">enable</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+                    <span class="nx">vScroll</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+                    <span class="nx">vScroll</span><span class="p">.</span><span class="nx">enable</span><span class="p">(</span><span class="nx">enabled</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">el</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="kd">function</span> <span class="nx">scrollToBottom</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;scrollToBottom&quot;</span><span class="p">);</span>
+                <span class="kd">var</span> <span class="nx">enabled</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">isIOS</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">enabled</span> <span class="o">=</span> <span class="nx">vScroll</span><span class="p">.</span><span class="nx">enable</span><span class="p">();</span>
+                    <span class="nx">vScroll</span><span class="p">.</span><span class="nx">enable</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+                    <span class="nx">vScroll</span><span class="p">.</span><span class="nx">scrollToBottom</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+                    <span class="nx">vScroll</span><span class="p">.</span><span class="nx">enable</span><span class="p">(</span><span class="nx">enabled</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">el</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">scrollHeight</span> <span class="o">-</span> <span class="nx">el</span><span class="p">.</span><span class="nx">offsetHeight</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="kd">function</span> <span class="nx">onSizeChange</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;onSizeChange&quot;</span><span class="p">);</span>
+                <span class="kd">var</span> <span class="nx">content</span> <span class="o">=</span> <span class="nx">element</span><span class="p">.</span><span class="nx">children</span><span class="p">();</span>
+                <span class="nx">elHeight</span> <span class="o">=</span> <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">offsetHeight</span><span class="p">;</span>
+                <span class="nx">target</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">elHeight</span> <span class="o">-</span> <span class="nx">targetOffset</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span><span class="p">;</span>
+                <span class="nx">content</span><span class="p">.</span><span class="nx">children</span><span class="p">()[</span><span class="mi">1</span><span class="p">].</span><span class="nx">style</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">elHeight</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span><span class="p">;</span>
+                <span class="nx">contentHeight</span> <span class="o">=</span> <span class="nx">content</span><span class="p">.</span><span class="nx">children</span><span class="p">()[</span><span class="mi">0</span><span class="p">].</span><span class="nx">offsetHeight</span> <span class="o">+</span> <span class="nx">elHeight</span><span class="p">;</span>
+                <span class="nx">content</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">style</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">contentHeight</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span><span class="p">;</span>
+                <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">upateViewportHeight</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="kd">function</span> <span class="nx">onTargetScrollToTop</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">scroller</span><span class="p">,</span> <span class="nx">speed</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;onTargetScrollToTop&quot;</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>we only want the scroll event from the target.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">scroller</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">===</span> <span class="nx">target</span> <span class="o">&amp;&amp;</span> <span class="nx">scrollModel</span><span class="p">.</span><span class="nx">enable</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="nx">scrollModel</span><span class="p">.</span><span class="nx">enable</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+                    <span class="nx">vScroll</span><span class="p">.</span><span class="nx">enable</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">speed</span><span class="p">);</span>
+                    <span class="nx">target</span><span class="p">.</span><span class="nx">disabled</span> <span class="o">=</span> <span class="s2">&quot;disabled&quot;</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="kd">function</span> <span class="nx">onDoubleScrollBottom</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">scroller</span><span class="p">,</span> <span class="nx">speed</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;onDoubleScrollBottom&quot;</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>we only want the double scroll bottom.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">scroller</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">===</span> <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">{</span>
+                    <span class="nx">vScroll</span><span class="p">.</span><span class="nx">enable</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+                    <span class="nx">scrollModel</span><span class="p">.</span><span class="nx">enable</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">speed</span><span class="p">);</span>
+                    <span class="nx">target</span><span class="p">.</span><span class="nx">disabled</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">isIOS</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;is iOS&quot;</span><span class="p">);</span>
+                <span class="nx">vScroll</span> <span class="o">=</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">VirtualScroll</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="p">{},</span> <span class="nx">onIOSUpdateValues</span><span class="p">,</span> <span class="nx">onIOSScroll</span><span class="p">);</span>
+                <span class="nx">vScroll</span><span class="p">.</span><span class="nx">setup</span><span class="p">();</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">virtualScroll</span> <span class="o">=</span> <span class="nx">vScroll</span><span class="p">;</span>
+                <span class="nx">unwatchRender</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_LISTENERS_READY</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+</div>
+<p>it needs to start off with the target disabled.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="nx">unwatchRender</span><span class="p">();</span>
+                    <span class="nx">updateScrollModel</span><span class="p">();</span>
+                    <span class="nx">updateTarget</span><span class="p">();</span>
+                    <span class="nx">onSizeChange</span><span class="p">();</span>
+                    <span class="nx">onIOSScroll</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+                    <span class="nx">unwatchRender</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_RENDER</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                        <span class="nx">unwatchRender</span><span class="p">();</span>
+                        <span class="nx">onTargetScrollToTop</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">scrollModel</span><span class="p">,</span> <span class="p">.</span><span class="mi">05</span><span class="p">);</span>
+                        <span class="nx">onSizeChange</span><span class="p">();</span>
+                    <span class="p">});</span>
+                <span class="p">});</span>
+                <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">VIRTUAL_SCROLL_TOP</span><span class="p">,</span> <span class="nx">onTargetScrollToTop</span><span class="p">);</span>
+                <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">VIRTUAL_SCROLL_BOTTOM</span><span class="p">,</span> <span class="nx">onDoubleScrollBottom</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">&quot;scroll&quot;</span><span class="p">,</span> <span class="nx">onScroll</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-7" id="section-7">&#182;</a>
+</div>
+<p>if this exists the ready event should have already been fired.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="nx">onSizeChange</span><span class="p">();</span>
+                    <span class="nx">onScroll</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">unwatchRender</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_LISTENERS_READY</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                        <span class="nx">unwatchRender</span><span class="p">();</span>
+                        <span class="nx">updateTarget</span><span class="p">();</span>
+                        <span class="nx">onSizeChange</span><span class="p">();</span>
+                        <span class="nx">onScroll</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+                    <span class="p">});</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">resize</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">resize</span><span class="p">(</span><span class="nx">height</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;resize&quot;</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">height</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">style</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">height</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="nx">onSizeChange</span><span class="p">();</span>
+            <span class="p">};</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">scrollToBottom</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;scrollToBottom&quot;</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">vScroll</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">vScroll</span><span class="p">.</span><span class="nx">scrollToBottom</span><span class="p">();</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">scrollTop</span> <span class="o">=</span> <span class="nx">element</span><span class="p">.</span><span class="nx">children</span><span class="p">().</span><span class="nx">children</span><span class="p">()[</span><span class="mi">0</span><span class="p">].</span><span class="nx">offsetHeight</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">};</span>
+            <span class="nx">scope</span><span class="p">.</span><span class="nx">doubleScroll</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
+            <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">RESIZE</span><span class="p">,</span> <span class="nx">onSizeChange</span><span class="p">);</span>
+            <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">DOUBLE_SCROLL_SCROLL_TO_TOP</span><span class="p">,</span> <span class="nx">scrollToTop</span><span class="p">);</span>
+            <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">DOUBLE_SCROLL_SCROLL_TO_BOTTOM</span><span class="p">,</span> <span class="nx">scrollToBottom</span><span class="p">);</span>
+            <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="s2">&quot;$destroy&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">destroyLogger</span><span class="p">();</span>
+                <span class="nx">result</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">isIOS</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">vScroll</span><span class="p">.</span><span class="nx">destroy</span><span class="p">();</span>
+                    <span class="nx">vScroll</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="s2">&quot;scroll&quot;</span><span class="p">,</span> <span class="nx">onScroll</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+<span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ux-datagrid-focusManager.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../doc-style.css" />
+  <script src="../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../", thisFile = "Users/wes/PhpstormProjects/wes/webux/ux-datagrid//addons/desktop/ux-datagrid-focusManager.js", defaultSidebar = true;
+  </script>
+  <script src="../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>ux-datagrid-focusManager.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>uxDatagrid v.0.2.2
+(c) 2014, WebUX
+<a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
+License: MIT.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
+<span class="cm">/*global exports */</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Author: Jason Farrell
+Author URI: <a href='http://useallfive.com/'>http://useallfive.com/</a></p>
+  </div>
+  <div class="body"><p>Description: Handles all things involving element visibility.
+Package URL: <a href='https://github.com/UseAllFive/ua5-js-utils'>https://github.com/UseAllFive/ua5-js-utils</a></p>
+
+<p>Modified by Wes Jones.</p>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">visibility</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Checks if a DOM element is visible. Takes into
+consideration its parents and overflow.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">(el)</span>
+      <span>the DOM element to check if is visible</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="kd">function</span> <span class="nx">_isVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">,</span> <span class="nx">VISIBLE_PADDING</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">_elementInDocument</span><span class="p">(</span><span class="nx">el</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>-- Return true for document node</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">if</span> <span class="p">(</span><span class="mi">9</span> <span class="o">===</span> <span class="nx">p</span><span class="p">.</span><span class="nx">nodeType</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>-- Return false if our element is invisible</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;0&quot;</span> <span class="o">===</span> <span class="nx">_getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;opacity&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;none&quot;</span> <span class="o">===</span> <span class="nx">_getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;display&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;hidden&quot;</span> <span class="o">===</span> <span class="nx">_getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;visibility&quot;</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+</div>
+<p>-- If we have a parent, let's continue:</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">p</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-7" id="section-7">&#182;</a>
+</div>
+<p>-- Let's recursively check upwards:</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">return</span> <span class="nx">_isVisible</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-8" id="section-8">&#182;</a>
+</div>
+<p>-- Cross browser method to get style properties:</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="kd">function</span> <span class="nx">_getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">property</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">getComputedStyle</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nb">document</span><span class="p">.</span><span class="nx">defaultView</span><span class="p">.</span><span class="nx">getComputedStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="kc">null</span><span class="p">)[</span><span class="nx">property</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">el</span><span class="p">.</span><span class="nx">currentStyle</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">el</span><span class="p">.</span><span class="nx">currentStyle</span><span class="p">[</span><span class="nx">property</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="kc">undefined</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">_elementInDocument</span><span class="p">(</span><span class="nx">element</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">while</span> <span class="p">(</span><span class="nx">element</span> <span class="o">=</span> <span class="nx">element</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">element</span> <span class="o">==</span> <span class="nb">document</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">getStyle</span><span class="o">:</span> <span class="nx">_getStyle</span><span class="p">,</span>
+        <span class="nx">isVisible</span><span class="o">:</span> <span class="nx">_isVisible</span>
+    <span class="p">};</span>
+<span class="p">}();</span>
+
+<span class="cm">/*global exports */</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">selector</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">$</span> <span class="o">=</span> <span class="nx">$</span> <span class="o">||</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-9" id="section-9">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>build the string selector for the element.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">element</span>
+      <span class="dox_type">DomElement</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">maxParent</span>
+      <span class="dox_type">DomElement=</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">ignoreClass</span>
+      <span class="dox_type">Function=</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="kd">function</span> <span class="nx">getSelector</span><span class="p">(</span><span class="nx">element</span><span class="p">,</span> <span class="nx">maxParent</span><span class="p">,</span> <span class="nx">ignoreClass</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">selector</span> <span class="o">=</span> <span class="nx">getSelectorData</span><span class="p">(</span><span class="nx">element</span><span class="p">,</span> <span class="nx">maxParent</span><span class="p">,</span> <span class="nx">ignoreClass</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nx">selectorToString</span><span class="p">(</span><span class="nx">selector</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;:visible&quot;</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">getSelectorData</span><span class="p">(</span><span class="nx">element</span><span class="p">,</span> <span class="nx">maxParent</span><span class="p">,</span> <span class="nx">ignoreClass</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">element</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nx">maxParent</span> <span class="o">=</span> <span class="nx">maxParent</span> <span class="o">||</span> <span class="nb">document</span><span class="p">;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="nx">element</span><span class="o">:</span> <span class="nx">element</span><span class="p">,</span>
+            <span class="nx">ignoreClass</span><span class="o">:</span> <span class="nx">ignoreClass</span><span class="p">,</span>
+            <span class="nx">maxParent</span><span class="o">:</span> <span class="nx">maxParent</span><span class="p">,</span>
+            <span class="nx">classes</span><span class="o">:</span> <span class="nx">getClasses</span><span class="p">(</span><span class="nx">element</span><span class="p">,</span> <span class="nx">ignoreClass</span><span class="p">),</span>
+            <span class="nx">type</span><span class="o">:</span> <span class="nx">element</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">(),</span>
+            <span class="nx">parent</span><span class="o">:</span> <span class="nx">getParentSelector</span><span class="p">(</span><span class="nx">element</span><span class="p">,</span> <span class="nx">maxParent</span><span class="p">,</span> <span class="nx">ignoreClass</span><span class="p">)</span>
+        <span class="p">};</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">getClasses</span><span class="p">(</span><span class="nx">element</span><span class="p">,</span> <span class="nx">ignoreClass</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">element</span><span class="p">.</span><span class="nx">classList</span><span class="p">,</span> <span class="nx">ignoreClass</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">selectorToString</span><span class="p">(</span><span class="nx">selector</span><span class="p">,</span> <span class="nx">depth</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">matches</span><span class="p">,</span> <span class="nx">str</span><span class="p">;</span>
+        <span class="nx">depth</span> <span class="o">=</span> <span class="nx">depth</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">str</span> <span class="o">=</span> <span class="nx">selector</span> <span class="o">?</span> <span class="nx">selectorToString</span><span class="p">(</span><span class="nx">selector</span><span class="p">.</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">selector</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">str</span> <span class="o">+=</span> <span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">length</span> <span class="o">?</span> <span class="s2">&quot; &quot;</span> <span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="nx">selector</span><span class="p">.</span><span class="nx">type</span> <span class="o">+</span> <span class="p">(</span><span class="nx">selector</span><span class="p">.</span><span class="nx">classes</span><span class="p">.</span><span class="nx">length</span> <span class="o">?</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="nx">selector</span><span class="p">.</span><span class="nx">classes</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">depth</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">matches</span> <span class="o">=</span> <span class="nx">selector</span><span class="p">.</span><span class="nx">maxParent</span><span class="p">.</span><span class="nx">querySelectorAll</span><span class="p">(</span><span class="nx">str</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">matches</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">str</span> <span class="o">+=</span> <span class="s2">&quot;:eq(&quot;</span> <span class="o">+</span> <span class="nx">getIndexOfTarget</span><span class="p">(</span><span class="nx">matches</span><span class="p">,</span> <span class="nx">selector</span><span class="p">.</span><span class="nx">element</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nx">str</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">getParentSelector</span><span class="p">(</span><span class="nx">element</span><span class="p">,</span> <span class="nx">maxParent</span><span class="p">,</span> <span class="nx">ignoreClass</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nx">element</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">parent</span> <span class="o">&amp;&amp;</span> <span class="nx">parent</span> <span class="o">!==</span> <span class="nx">maxParent</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">getSelectorData</span><span class="p">(</span><span class="nx">element</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">,</span> <span class="nx">maxParent</span><span class="p">,</span> <span class="nx">ignoreClass</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">getIndexOfTarget</span><span class="p">(</span><span class="nx">list</span><span class="p">,</span> <span class="nx">element</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">iLen</span> <span class="o">=</span> <span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">iLen</span><span class="p">;</span> <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">element</span> <span class="o">===</span> <span class="nx">list</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">i</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">getSelector</span><span class="o">:</span> <span class="nx">getSelector</span>
+    <span class="p">};</span>
+<span class="p">}();</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_PREV_ELEMENT_OF_SAME</span> <span class="o">=</span> <span class="s2">&quot;ux-datagrid:focusToPrevElementOfSame&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_NEXT_ELEMENT_OF_SAME</span> <span class="o">=</span> <span class="s2">&quot;ux-datagrid:focusToNextElementOfSame&quot;</span><span class="p">;</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-10" id="section-10">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Handle focus for enterKey to move down the correct columns.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;gridFocusManager&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-11" id="section-11">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>We want to add and remove listeners only on the dom that is currently under watch.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[];</span>
+        <span class="kd">function</span> <span class="nx">wrap</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">el</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">el</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">el</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">el</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-12" id="section-12">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Add all of the listeners to the visible rows.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">addListeners</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">applyToListeners</span><span class="p">(</span><span class="nx">addListenersToRow</span><span class="p">);</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-13" id="section-13">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>remove all of the listeners from min to max.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">removeListeners</span><span class="p">()</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-14" id="section-14">&#182;</a>
+</div>
+<p>this needs executed before the activeRange changes.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">applyToListeners</span><span class="p">(</span><span class="nx">removeListenersToRow</span><span class="p">);</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-15" id="section-15">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>using the inst.activeRange.min/max apply methods to those rows.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">method
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">applyToListeners</span><span class="p">(</span><span class="nx">method</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span><span class="p">,</span> <span class="nx">row</span><span class="p">;</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">row</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+                <span class="nx">method</span><span class="p">(</span><span class="nx">row</span><span class="p">);</span>
+                <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-16" id="section-16">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Get all of the focusable elements within an element</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">el</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getFocusableElements</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">focusable</span> <span class="o">=</span> <span class="p">[].</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">querySelectorAll</span><span class="p">(</span><span class="s2">&quot;input,a,select&quot;</span><span class="p">));</span>
+            <span class="k">return</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">focusable</span><span class="p">,</span> <span class="nx">filterVisible</span><span class="p">);</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-17" id="section-17">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Filter the elements in the selection to only get those that are visible.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">item</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">filterVisible</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">visibility</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-18" id="section-18">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Move up the dom to determine the row of an element.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">el</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getRowElmFromChildElm</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-19" id="section-19">&#182;</a>
+</div>
+<p>keep moving up until the parent is a chunk.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="kd">var</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">parent</span><span class="p">();</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">parent</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">parent</span><span class="p">.</span><span class="nx">hasClass</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">chunkClass</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">el</span> <span class="o">=</span> <span class="nx">parent</span><span class="p">;</span>
+                <span class="nx">parent</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">parent</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">el</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-20" id="section-20">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Similar to jquery find.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">el</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">selector</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">query</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">selector</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">filters</span> <span class="o">=</span> <span class="nx">selector</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">),</span> <span class="nx">sel</span> <span class="o">=</span> <span class="nx">filters</span><span class="p">.</span><span class="nx">shift</span><span class="p">(),</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[].</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">((</span><span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">||</span> <span class="nx">el</span><span class="p">).</span><span class="nx">querySelectorAll</span><span class="p">(</span><span class="nx">sel</span><span class="p">));</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">filters</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span> <span class="o">=</span> <span class="nx">filterSelection</span><span class="p">(</span><span class="nx">filters</span><span class="p">.</span><span class="nx">shift</span><span class="p">(),</span> <span class="nx">result</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-21" id="section-21">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Apply filters to the selection array.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">filterStr</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">elements</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">filterSelection</span><span class="p">(</span><span class="nx">filterStr</span><span class="p">,</span> <span class="nx">elements</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">filterStr</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;eq(&quot;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">filterEq</span><span class="p">(</span><span class="nx">filterStr</span><span class="p">,</span> <span class="nx">elements</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">filterStr</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;visible&quot;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">elements</span><span class="p">,</span> <span class="nx">filterVisible</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">elements</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-22" id="section-22">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Filter for eq.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">filterStr</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">elements</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">filterEq</span><span class="p">(</span><span class="nx">filterStr</span><span class="p">,</span> <span class="nx">elements</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">filterStr</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/\d+/</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
+            <span class="k">return</span> <span class="nx">elements</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">?</span> <span class="p">[</span> <span class="nx">elements</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="p">]</span> <span class="o">:</span> <span class="p">[];</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-23" id="section-23">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Detect if is an ng-* class from the selectors.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">cls</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">isNgClass</span><span class="p">(</span><span class="nx">cls</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="o">!!</span><span class="p">(</span><span class="nx">cls</span> <span class="o">&amp;&amp;</span> <span class="nx">cls</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;ng-&quot;</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">filterClasses</span><span class="p">(</span><span class="nx">cls</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">isToBeFiltered</span> <span class="o">=</span> <span class="nx">cls</span> <span class="o">?</span> <span class="kc">false</span> <span class="o">:</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isToBeFiltered</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">gridFocusManager</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">gridFocusManager</span><span class="p">.</span><span class="nx">filterClasses</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">isToBeFiltered</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">gridFocusManager</span><span class="p">.</span><span class="nx">filterClasses</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">cls</span><span class="p">)</span> <span class="o">!==</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isToBeFiltered</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">isToBeFiltered</span> <span class="o">=</span> <span class="nx">isNgClass</span><span class="p">(</span><span class="nx">cls</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="o">!</span><span class="nx">isToBeFiltered</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-24" id="section-24">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Apply event listeners to the row.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">rowElm
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">addListenersToRow</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">getFocusableElements</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">focusable</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">focusable</span><span class="p">);</span>
+                <span class="nx">focusable</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="s2">&quot;keydown&quot;</span><span class="p">,</span> <span class="nx">onKeyDown</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-25" id="section-25">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Remove event listeners from that row.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">rowElm
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">removeListenersToRow</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">getFocusableElements</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">focusable</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">focusable</span><span class="p">);</span>
+                <span class="nx">focusable</span><span class="p">.</span><span class="nx">unbind</span><span class="p">(</span><span class="s2">&quot;keydown&quot;</span><span class="p">,</span> <span class="nx">onKeyDown</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-26" id="section-26">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Handle Enter, up/down key events.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">event
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">onKeyDown</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">target</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;FM: onKeyDown&quot;</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">shiftKey</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">13</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-27" id="section-27">&#182;</a>
+</div>
+<p>SHIFT+ENTER, UP ARROW</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="nx">focusToPrevRowElement</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">13</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-28" id="section-28">&#182;</a>
+</div>
+<p>ENTER, DOWN ARROW</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="nx">focusToNextRowElement</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-29" id="section-29">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Focus to the previous row element from the current focused element.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">focusedEl
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">focusToPrevRowElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">focusEl</span> <span class="o">=</span> <span class="nx">getPrevRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+            <span class="nx">performFocus</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">);</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-30" id="section-30">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Focus to the next row element from the current focused element.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">focusedEl
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">focusToNextRowElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot; FM: focusToNextRowElement&quot;</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">focusEl</span> <span class="o">=</span> <span class="nx">getNextRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">);</span>
+            <span class="nx">performFocus</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">hasPrevRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">getPrevRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">);</span>
+            <span class="k">return</span> <span class="o">!!</span><span class="p">(</span><span class="nx">el</span> <span class="o">&amp;&amp;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">hasNextRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">getNextRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">);</span>
+            <span class="k">return</span> <span class="o">!!</span><span class="p">(</span><span class="nx">el</span> <span class="o">&amp;&amp;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">getPrevRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">focusToRowElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">getNextRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot; FM: getNextRowFocusElement&quot;</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">focusToRowElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-31" id="section-31">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Do the heavy lifting for focusing from one row to the next and pulling the selector.
+Since it is the same going to previous or next it is all one method and just needs to know which direction
+to increment.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">focusedEl</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">dir
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">focusToRowElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">,</span> <span class="nx">dir</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-32" id="section-32">&#182;</a>
+</div>
+<p>dir should be 1 or -1</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot; FM: focusToRowElement&quot;</span><span class="p">);</span>
+            <span class="nx">focusedEl</span> <span class="o">=</span> <span class="nx">wrap</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">contains</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="p">{</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="kd">var</span> <span class="nx">resultEl</span><span class="p">,</span> <span class="nx">rowEl</span> <span class="o">=</span> <span class="nx">getRowElmFromChildElm</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">),</span> <span class="nx">currentIndex</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowIndexFromElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">),</span> <span class="nx">nextIndex</span> <span class="o">=</span> <span class="nx">currentIndex</span> <span class="o">+</span> <span class="nx">dir</span><span class="p">,</span> <span class="nx">selector</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">nextIndex</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="nx">nextIndex</span> <span class="o">&gt;=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">rowsLength</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">focusedEl</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">selector</span> <span class="o">=</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">selector</span><span class="p">.</span><span class="nx">getSelector</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">rowEl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">filterClasses</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot; FM: selector: %s&quot;</span><span class="p">,</span> <span class="nx">selector</span><span class="p">);</span>
+            <span class="nx">resultEl</span> <span class="o">=</span> <span class="nx">findNextRowWithSelection</span><span class="p">(</span><span class="nx">nextIndex</span><span class="p">,</span> <span class="nx">dir</span><span class="p">,</span> <span class="nx">selector</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">resultEl</span> <span class="o">&amp;&amp;</span> <span class="nx">resultEl</span><span class="p">.</span><span class="nx">length</span> <span class="o">?</span> <span class="nx">resultEl</span> <span class="o">:</span> <span class="nx">focusedEl</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-33" id="section-33">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Do the actual focus. Select the text if select exists.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">focusEl
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">performFocus</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot; FM: performFocus %o&quot;</span><span class="p">,</span> <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">select</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-34" id="section-34">&#182;</a>
+</div>
+<p>TODO: if no jquery. There may be no select.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">select</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">{</span>
+                <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">focus</span><span class="p">();</span>
+            <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-35" id="section-35">&#182;</a>
+</div>
+<p>we now need to scroll the row into view if it is not.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollIntoView</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getRowIndexFromElement</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">),</span> <span class="kc">true</span><span class="p">);</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-36" id="section-36">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Find the next row that has a matching selection. If one is not found it will no focus.
+Since a creep render happens after every scroll it should not have difficulty finding a row.
+However, possible bug here if a selector similar to this one doesn't exist for a large distance.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">nextIndex</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">dir</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">selector</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">findNextRowWithSelection</span><span class="p">(</span><span class="nx">nextIndex</span><span class="p">,</span> <span class="nx">dir</span><span class="p">,</span> <span class="nx">selector</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot; FM: findNextRowWithSelection&quot;</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">nextEl</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">nextIndex</span><span class="p">),</span> <span class="nx">focusEl</span> <span class="o">=</span> <span class="nx">query</span><span class="p">(</span><span class="nx">nextEl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">selector</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">content</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getContent</span><span class="p">();</span>
+            <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">dir</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">nextIndex</span> <span class="o">&lt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">rowsLength</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">||</span> <span class="nx">dir</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">nextIndex</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">nextIndex</span> <span class="o">+=</span> <span class="nx">dir</span><span class="p">;</span>
+                <span class="nx">nextEl</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">nextIndex</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">nextEl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">===</span> <span class="nx">content</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="nx">focusEl</span> <span class="o">=</span> <span class="nx">query</span><span class="p">(</span><span class="nx">nextEl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">selector</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">focusEl</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">hasPrevRowFocusElement</span> <span class="o">=</span> <span class="nx">hasPrevRowFocusElement</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">hasNextRowFocusElement</span> <span class="o">=</span> <span class="nx">hasNextRowFocusElement</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">focusToPrevRowElement</span> <span class="o">=</span> <span class="nx">focusToPrevRowElement</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">focusToNextRowElement</span> <span class="o">=</span> <span class="nx">focusToNextRowElement</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">query</span> <span class="o">=</span> <span class="nx">query</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">destroy</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">destroy</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">pop</span><span class="p">()();</span>
+            <span class="p">}</span>
+            <span class="nx">unwatchers</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">result</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_UPDATE_WATCHERS</span><span class="p">,</span> <span class="nx">removeListeners</span><span class="p">));</span>
+        <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_UPDATE_WATCHERS</span><span class="p">,</span> <span class="nx">addListeners</span><span class="p">));</span>
+        <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_PREV_ELEMENT_OF_SAME</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">focusToPrevRowElement</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">activeElement</span><span class="p">);</span>
+        <span class="p">}));</span>
+        <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_NEXT_ELEMENT_OF_SAME</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">focusToNextRowElement</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">activeElement</span><span class="p">);</span>
+        <span class="p">}));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">gridFocusManager</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+<span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

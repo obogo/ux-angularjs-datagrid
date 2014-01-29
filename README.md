@@ -8,7 +8,7 @@ Of course since this is angular there is then the issue with a **digest being to
 
 - [Demos](https://rawgithub.com/webux/ux-angularjs-datagrid/master/samples/index.html)
 - [Unit Tests](https://rawgithub.com/webux/ux-angularjs-datagrid/master/test/index.html)
-- [Docs - in Progress](https://rawgithub.com/webux/ux-angularjs-datagrid/master/docs/angular-ux-datagrid.html)
+- [Docs - in Progress](https://rawgithub.com/webux/ux-angularjs-datagrid/master/docs/angular-ux-datagrid.js.html)
 
 ### More Examples ###
 - [Quick Start](https://github.com/webux/ux-angularjs-datagrid/wiki/#quick-start)

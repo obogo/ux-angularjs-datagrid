@@ -33,7 +33,7 @@ describe("scrollHistory", function () {
                     }
                 }
             };
-            exp = injector.invoke(scrollHistory, exp, {exp: exp});
+            exp = injector.invoke(scrollHistory, exp, {inst: exp});
             sh = exp.scrollHistory;
         });
     });
@@ -80,7 +80,7 @@ describe("scrollHistory", function () {
                 }
             }
         };
-        injector.invoke(shFactory, exp, {exp: exp});
+        injector.invoke(shFactory, exp, {inst: exp});
         sh = exp.scrollHistory;
         expect(sh.getScroll('path')).toBe(10);
     });

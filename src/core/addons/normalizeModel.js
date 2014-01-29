@@ -1,7 +1,7 @@
 /*global ux */
-exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
+exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
 //TODO: this needs to be put on exp.normalizedModel
-    var originalData, normalizedData, result = exports.logWrapper('normalizeModel', {}, 'grey', exp.dispatch);
+    var originalData, normalizedData, result = exports.logWrapper('normalizeModel', {}, 'grey', inst.dispatch);
 
     function normalize(data, grouped, normalized) {
         data = data || [];
@@ -17,7 +17,7 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
         return normalized;
     }
 
-    exp.setData = function (data, grouped) {
+    inst.setData = function (data, grouped) {
         result.log('setData');
         originalData = data;
         if (grouped) {
@@ -27,10 +27,10 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
         }
         return normalizedData;
     };
-    exp.getData = function () {
+    inst.getData = function () {
         return normalizedData;
     };
-    exp.getOriginalData = function () {
+    inst.getOriginalData = function () {
         return originalData;
     };
 
@@ -39,10 +39,10 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
      * @param item
      * @param {Number=} startIndex
      */
-    exp.getNormalizedIndex = function getNormalizedIndex(item, startIndex) {
+    inst.getNormalizedIndex = function getNormalizedIndex(item, startIndex) {
         var i = startIndex || 0;
-        while (i < exp.rowsLength) {
-            if (exp.data[i] === item) {
+        while (i < inst.rowsLength) {
+            if (inst.data[i] === item) {
                 return i;
             }
             i += 1;
@@ -50,7 +50,7 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
         if (startIndex) {
             i = startIndex;
             while (i >= 0) {
-                if (exp.data[i] === item) {
+                if (inst.data[i] === item) {
                     return i;
                 }
                 i -= 1;
@@ -64,8 +64,8 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(exp) {
         result = null;
     };
 
-    exp.normalizeModel = result;
+    inst.normalizeModel = result;
 
-    return exp;
+    return inst;
 };
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.normalizeModel);

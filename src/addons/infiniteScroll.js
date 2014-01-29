@@ -5,36 +5,36 @@
 ux.datagrid.events.SCROLL_TO_TOP = "datagrid:scrollToTop";
 ux.datagrid.events.SCROLL_TO_BOTTOM = 'datagrid:scrollToBottom';
 angular.module('ux').factory('infiniteScroll', function () {
-    return function (exp) {
+    return function infiniteScroll(inst) {
         var result = {}, bottomOffset = 0, scrollOffset = 0, loadingRow = {_template:'loadingRow'};
 
         result.beforeDataChange = function beforeDataChange() {
-            scrollOffset = exp.values.scroll;
-            if (exp.data[exp.data.length - 1] !== loadingRow && (!exp.options.infiniteScrollLimit || exp.data.length < exp.options.infiniteScrollLimit)) {
-                exp.data.push(loadingRow);
+            scrollOffset = inst.values.scroll;
+            if (inst.data[inst.data.length - 1] !== loadingRow && (!inst.options.infiniteScrollLimit || inst.data.length < inst.options.infiniteScrollLimit)) {
+                inst.data.push(loadingRow);
             }
         };
 
         result.calculateBottomOffset = function calculateBottomOffset() {
-            if (exp.rowsLength) {
-                var i = exp.rowsLength - 1;
-                bottomOffset = (exp.getRowOffset(i) - exp.getViewportHeight()) + exp.getRowHeight(i);
-                exp.scrollModel.scrollTo(scrollOffset, true);
+            if (inst.rowsLength) {
+                var i = inst.rowsLength - 1;
+                bottomOffset = (inst.getRowOffset(i) - inst.getViewportHeight()) + inst.getRowHeight(i);
+                inst.scrollModel.scrollTo(scrollOffset, true);
             }
         };
 
         result.onUpdateScroll = function onUpdateScroll(event, scroll) {
             if (scroll >= bottomOffset) {
-                exp.dispatch(ux.datagrid.events.SCROLL_TO_BOTTOM);
+                inst.dispatch(ux.datagrid.events.SCROLL_TO_BOTTOM);
             } else if (scroll <= 0) {
-                exp.dispatch(ux.datagrid.events.SCROLL_TO_TOP);
+                inst.dispatch(ux.datagrid.events.SCROLL_TO_TOP);
             }
         };
 
-        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_AFTER_DATA_CHANGE, result.beforeDataChange));
-        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
-        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.SCROLL_STOP, result.onUpdateScroll));
+        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_AFTER_DATA_CHANGE, result.beforeDataChange));
+        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
+        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.SCROLL_STOP, result.onUpdateScroll));
 
-        exp.infiniteScroll = result;
+        inst.infiniteScroll = result;
     };
 });

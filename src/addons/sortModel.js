@@ -326,9 +326,9 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
 
 angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStatesModel) {
 
-    return function sortModel(exp) {
+    return function sortModel(inst) {
         // cache is the stored sort values. It needs to be cleared if the data changes.
-        var result = exports.logWrapper('sortModel', {}, 'blue', exp.dispatch), sorts = {}, original, cache = {},
+        var result = exports.logWrapper('sortModel', {}, 'blue', inst.dispatch), sorts = {}, original, cache = {},
             lastSortResult;
 
         result.addSortColumn = function addSortColumn(name, methods) {
@@ -356,14 +356,14 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
                 var key = sortStatesModel.createKeyFromStates(pathStateRef), event,
                     pathState = angular.copy(pathStateRef); // clone so they cannot mess with the data directly.
                 result.info("applySorts %s", key);
-                event = exp.dispatch(exports.datagrid.events.ON_BEFORE_SORT, key, currentPathState, pathState);
+                event = inst.dispatch(exports.datagrid.events.ON_BEFORE_SORT, key, currentPathState, pathState);
                 // prevent default on event to prevent sort.
                 if (!event.defaultPrevented) {
                     if (!result.getCache(key)) {
                         result.log("\tstore sort %s", key);
                         result.setCache(key, original.slice(0));// clone it
                         ux.each(pathState.$order, applyListSort, {
-                            grouped: exp.grouped,
+                            grouped: inst.grouped,
                             pathState: pathState,
                             ary: result.getCache(key)
                         });
@@ -374,7 +374,7 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
 //TODO: need to unit test this to make sure it works with async sort.
                     lastSortResult = original;
                 }
-                exp.dispatch(exports.datagrid.events.ON_AFTER_SORT, key, pathState, currentPathState);
+                inst.dispatch(exports.datagrid.events.ON_AFTER_SORT, key, pathState, currentPathState);
             }
             return lastSortResult;
         };
@@ -411,13 +411,13 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
 
         function addSortsFromOptions() {
             var i, methods, pathState = sortStatesModel.getPathState();
-            if (exp.options.sorts) {
-                for (i in exp.options.sorts) {
-                    if (typeof exp.options.sorts[i] === 'object') {
-                        sortStatesModel.setState(i, exp.options.sorts[i].value, pathState);// value is the default sort state.
-                        methods = exp.options.sorts[i];// allow them to pass in their own sort methods.
+            if (inst.options.sorts) {
+                for (i in inst.options.sorts) {
+                    if (typeof inst.options.sorts[i] === 'object') {
+                        sortStatesModel.setState(i, inst.options.sorts[i].value, pathState);// value is the default sort state.
+                        methods = inst.options.sorts[i];// allow them to pass in their own sort methods.
                     } else {
-                        sortStatesModel.setState(i, exp.options.sorts[i], pathState); // set the default sort state.
+                        sortStatesModel.setState(i, inst.options.sorts[i], pathState); // set the default sort state.
                         methods = {
                             asc: sortStatesModel.createAscSort(i),
                             desc: sortStatesModel.createDescSort(i),
@@ -445,11 +445,11 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
             sorts = null;
             cache = null;
             original = null;
-            exp = null;
+            inst = null;
         };
 
-        exp.sortModel = result;
+        inst.sortModel = result;
         addSortsFromOptions();
-        return exp;
+        return inst;
     };
 }]);

@@ -5,6 +5,8 @@
  *
  * Description: Handles all things involving element visibility.
  * Package URL: https://github.com/UseAllFive/ua5-js-utils
+ * 
+ * Modified by Wes Jones.
  */
 exports.visibility = (function () {
     /**
@@ -12,18 +14,8 @@ exports.visibility = (function () {
      * consideration its parents and overflow.
      *
      * @param (el)      the DOM element to check if is visible
-     *
-     * These params are optional that are sent in recursively,
-     * you typically won't use these:
-     *
-     * @param (t)       Top corner position number
-     * @param (r)       Right corner position number
-     * @param (b)       Bottom corner position number
-     * @param (l)       Left corner position number
-     * @param (w)       Element width number
-     * @param (h)       Element height number
      */
-    function _isVisible(el, t, r, b, l, w, h) {
+    function _isVisible(el) {
         var p = el.parentNode,
             VISIBLE_PADDING = 2;
 
@@ -48,7 +40,7 @@ exports.visibility = (function () {
         //-- If we have a parent, let's continue:
         if (p) {
             //-- Let's recursively check upwards:
-            return _isVisible(p, t, r, b, l, w, h);
+            return _isVisible(p);
         }
         return true;
     }

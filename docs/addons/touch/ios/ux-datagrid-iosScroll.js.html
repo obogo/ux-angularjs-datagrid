@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ux-datagrid-iosScroll.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../../doc-style.css" />
+  <script src="../../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../../", thisFile = "Users/wes/PhpstormProjects/wes/webux/ux-datagrid//addons/touch/ios/ux-datagrid-iosScroll.js", defaultSidebar = true;
+  </script>
+  <script src="../../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+      <div class="heading h2">
+        <a href="#virtualscroll">virtualScroll</a>
+      </div>
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>ux-datagrid-iosScroll.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>uxDatagrid v.0.2.2
+(c) 2014, WebUX
+<a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
+License: MIT.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap" id="virtualscroll">
+  <h2>
+    <a href="#virtualscroll" name="virtualscroll" class="pilcrow">&#182;</a>
+    <a name="virtualScroll">virtualScroll</a>
+  </h2>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">BEFORE_VIRTUAL_SCROLL_START</span> <span class="o">=</span> <span class="s2">&quot;virtualScroll:beforeScrollStart&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">VIRTUAL_SCROLL_TOP</span> <span class="o">=</span> <span class="s2">&quot;virtualScroll:top&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">VIRTUAL_SCROLL_BOTTOM</span> <span class="o">=</span> <span class="s2">&quot;virtualScroll:bottom&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_VIRTUAL_SCROLL_UPDATE</span> <span class="o">=</span> <span class="s2">&quot;virtualScroll:onUpdate&quot;</span><span class="p">;</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>For simulating the scroll in IOS that doesn't have a smooth scroll natively using transform3d.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">VirtualScroll</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">VirtualScroll</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="nx">vals</span><span class="p">,</span> <span class="nx">updateValuesCallback</span><span class="p">,</span> <span class="nx">renderCallback</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">friction</span> <span class="o">=</span> <span class="p">.</span><span class="mi">9</span><span class="p">,</span> <span class="nx">stopThreshold</span> <span class="o">=</span> <span class="p">.</span><span class="mi">01</span><span class="p">,</span> <span class="nx">moved</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">transitionDuration</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;VirtualScroll&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;redOrange&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">scope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+    <span class="p">}),</span> <span class="nx">_x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">_y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">max</span><span class="p">,</span> <span class="nx">top</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">bottom</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">enabled</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">doubleTapTimer</span><span class="p">,</span> <span class="nx">offTouchEnd</span><span class="p">,</span> <span class="nx">touchStart</span> <span class="o">=</span> <span class="s2">&quot;touchstart&quot;</span><span class="p">,</span> <span class="nx">touchEnd</span> <span class="o">=</span> <span class="s2">&quot;touchend&quot;</span><span class="p">,</span> <span class="nx">touchMove</span> <span class="o">=</span> <span class="s2">&quot;touchmove&quot;</span><span class="p">,</span> <span class="nx">touchCancel</span> <span class="o">=</span> <span class="s2">&quot;touchCancel&quot;</span><span class="p">,</span> <span class="nx">values</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+        <span class="nx">scrollingStopIntv</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nx">scroll</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nx">speed</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nx">absSpeed</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nx">touchDown</span><span class="o">:</span> <span class="kc">false</span>
+    <span class="p">},</span> <span class="nx">vals</span><span class="p">);</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">scope</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">;</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">element</span> <span class="o">=</span> <span class="nx">element</span><span class="p">;</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">content</span> <span class="o">=</span> <span class="nx">element</span><span class="p">.</span><span class="nx">children</span><span class="p">();</span>
+    <span class="kd">function</span> <span class="nx">setup</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">element</span><span class="p">.</span><span class="nx">css</span><span class="p">({</span>
+            <span class="nx">overflow</span><span class="o">:</span> <span class="s2">&quot;hidden&quot;</span>
+        <span class="p">});</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span> <span class="o">&amp;&amp;</span> <span class="nx">element</span> <span class="o">===</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">element</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">TOUCH_DOWN</span><span class="p">,</span> <span class="nx">onTouchStartNg</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">content</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">touchStart</span><span class="p">,</span> <span class="nx">onTouchStart</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">content</span><span class="p">.</span><span class="nx">css</span><span class="p">({</span>
+            <span class="nx">transitionTimingFunction</span><span class="o">:</span> <span class="s2">&quot;ease-out&quot;</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">wait</span><span class="p">(</span><span class="nx">method</span><span class="p">,</span> <span class="nx">time</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">array</span><span class="p">.</span><span class="nx">toArray</span><span class="p">(</span><span class="nx">arguments</span><span class="p">),</span> <span class="nx">intv</span><span class="p">;</span>
+        <span class="nx">args</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">async</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">intv</span> <span class="o">=</span> <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">method</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">args</span><span class="p">);</span>
+            <span class="p">},</span> <span class="nx">time</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">method</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">args</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nx">intv</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">clearIntv</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scrollingStopIntv</span><span class="p">);</span>
+        <span class="nx">values</span><span class="p">.</span><span class="nx">scrollingStopIntv</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">stopEvent</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+        <span class="nx">e</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">();</span>
+        <span class="nx">e</span><span class="p">.</span><span class="nx">stopImmediatePropagation</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">onTouchStartNg</span><span class="p">(</span><span class="nx">evtType</span><span class="p">,</span> <span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">onTouchStart</span><span class="p">(</span><span class="nx">event</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">onTouchStart</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">enabled</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;onTouchStart&quot;</span><span class="p">);</span>
+        <span class="nx">clearIntv</span><span class="p">();</span>
+        <span class="nx">updateValuesCallback</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">getValues</span><span class="p">());</span>
+        <span class="kd">var</span> <span class="nx">touches</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">touches</span> <span class="o">||</span> <span class="nx">e</span><span class="p">.</span><span class="nx">originalEvent</span><span class="p">.</span><span class="nx">touches</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">BEFORE_VIRTUAL_SCROLL_START</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">touches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="nx">touches</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">target</span> <span class="o">&amp;&amp;</span> <span class="nx">touches</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">target</span><span class="p">.</span><span class="nx">tagName</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/input|textarea|select/i</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nx">max</span> <span class="o">=</span> <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">scrollHeight</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">touch</span> <span class="o">=</span> <span class="nx">touches</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+        <span class="nx">_x</span> <span class="o">=</span> <span class="nx">touch</span><span class="p">.</span><span class="nx">pageX</span><span class="p">;</span>
+        <span class="nx">_y</span> <span class="o">=</span> <span class="nx">touch</span><span class="p">.</span><span class="nx">pageY</span><span class="p">;</span>
+        <span class="nx">values</span><span class="p">.</span><span class="nx">touchDown</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="nx">moved</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="nx">stopEvent</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+        <span class="nx">stopCreep</span><span class="p">();</span>
+        <span class="nx">updateBottom</span><span class="p">();</span>
+        <span class="nx">addTouchEnd</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">waitToStop</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">clearIntv</span><span class="p">();</span>
+        <span class="nx">values</span><span class="p">.</span><span class="nx">scrollingStopIntv</span> <span class="o">=</span> <span class="nx">wait</span><span class="p">(</span><span class="nx">stop</span><span class="p">,</span> <span class="nx">transitionDuration</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">stop</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">clearIntv</span><span class="p">();</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">onScrollingStop</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">stopCreep</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">creepRenderModel</span><span class="p">.</span><span class="nx">stop</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">updateBottom</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">bottom</span> <span class="o">=</span> <span class="nx">getHeight</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">content</span><span class="p">)</span> <span class="o">-</span> <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">offsetHeight</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">getHeight</span><span class="p">(</span><span class="nx">elms</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">totals</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nx">height</span><span class="o">:</span> <span class="mi">0</span>
+        <span class="p">};</span>
+        <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">elms</span><span class="p">,</span> <span class="nx">onGetHeight</span><span class="p">,</span> <span class="nx">totals</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nx">totals</span><span class="p">.</span><span class="nx">height</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">onGetHeight</span><span class="p">(</span><span class="nx">item</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">params</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">params</span><span class="p">.</span><span class="nx">height</span> <span class="o">+=</span> <span class="nx">item</span><span class="p">.</span><span class="nx">offsetHeight</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">enable</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">enable</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">speed</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">enabled</span> <span class="o">=</span> <span class="o">!!</span><span class="nx">value</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">enabled</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">removeTouchEnd</span><span class="p">();</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">enabled</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">updateBottom</span><span class="p">();</span>
+                <span class="nx">values</span><span class="p">.</span><span class="nx">touchDown</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+                <span class="nx">_y</span> <span class="o">=</span> <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">offsetTop</span> <span class="o">+</span> <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">offsetHeight</span> <span class="o">*</span> <span class="p">.</span><span class="mi">5</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">speed</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">values</span><span class="p">.</span><span class="nx">speed</span> <span class="o">=</span> <span class="nx">speed</span><span class="p">;</span>
+                    <span class="nx">values</span><span class="p">.</span><span class="nx">absSpeed</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">speed</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="nx">clearIntv</span><span class="p">();</span>
+                <span class="nx">values</span><span class="p">.</span><span class="nx">scrollingStopIntv</span> <span class="o">=</span> <span class="nx">wait</span><span class="p">(</span><span class="nx">applyFriction</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nx">enabled</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="kd">function</span> <span class="nx">addTouchEnd</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;addTouchEnd&quot;</span><span class="p">);</span>
+        <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">content</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">touchMove</span><span class="p">,</span> <span class="nx">onTouchMove</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span> <span class="o">&amp;&amp;</span> <span class="nx">element</span> <span class="o">===</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">element</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  listen for TOUCH_UP&quot;</span><span class="p">);</span>
+                <span class="nx">offTouchEnd</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">TOUCH_UP</span><span class="p">,</span> <span class="nx">onTouchEndNg</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  listen for touchend&quot;</span><span class="p">);</span>
+                <span class="nx">el</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">touchEnd</span><span class="p">,</span> <span class="nx">onTouchEnd</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+                <span class="nx">el</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">touchCancel</span><span class="p">,</span> <span class="nx">onTouchEnd</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">removeTouchEnd</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;removeTouchEnd&quot;</span><span class="p">);</span>
+        <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">content</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="nx">touchMove</span><span class="p">,</span> <span class="nx">onTouchMove</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">offTouchEnd</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  remove TOUCH_UP&quot;</span><span class="p">);</span>
+                <span class="nx">offTouchEnd</span><span class="p">();</span>
+                <span class="nx">offTouchEnd</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  remove touchend&quot;</span><span class="p">);</span>
+                <span class="nx">el</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="nx">touchEnd</span><span class="p">,</span> <span class="nx">onTouchEnd</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+                <span class="nx">el</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="nx">touchCancel</span><span class="p">,</span> <span class="nx">onTouchEnd</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">onTouchEndNg</span><span class="p">(</span><span class="nx">evtStr</span><span class="p">,</span> <span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">onTouchEnd</span><span class="p">(</span><span class="nx">event</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">onTouchEnd</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;onTouchEnd&quot;</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">enabled</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">values</span><span class="p">.</span><span class="nx">touchDown</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="nx">stopEvent</span><span class="p">(</span><span class="nx">event</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">moved</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">fireClick</span><span class="p">(</span><span class="nx">event</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="nx">removeTouchEnd</span><span class="p">();</span>
+            <span class="nx">applyFriction</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">onTouchMove</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">enabled</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">moved</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="nx">stopEvent</span><span class="p">(</span><span class="nx">event</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">touch</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">changedTouches</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+            <span class="nx">updateScroll</span><span class="p">(</span><span class="nx">touch</span><span class="p">.</span><span class="nx">pageX</span><span class="p">,</span> <span class="nx">touch</span><span class="p">.</span><span class="nx">pageY</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">updateScrollValues</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">deltaX</span> <span class="o">=</span> <span class="nx">_x</span> <span class="o">+</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">deltaY</span> <span class="o">=</span> <span class="nx">_y</span> <span class="o">-</span> <span class="nx">y</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">+</span> <span class="nx">deltaY</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">VIRTUAL_SCROLL_TOP</span><span class="p">,</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">deltaY</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="nx">values</span><span class="p">.</span><span class="nx">speed</span> <span class="o">=</span> <span class="o">-</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">;</span>
+            <span class="nx">values</span><span class="p">.</span><span class="nx">absSpeed</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">speed</span><span class="p">);</span>
+            <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">=</span> <span class="nx">deltaY</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">+</span> <span class="nx">deltaY</span> <span class="o">&gt;=</span> <span class="nx">bottom</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">!==</span> <span class="nx">bottom</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">VIRTUAL_SCROLL_BOTTOM</span><span class="p">,</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">deltaY</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">=</span> <span class="nx">bottom</span><span class="p">;</span>
+            <span class="nx">values</span><span class="p">.</span><span class="nx">speed</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="nx">values</span><span class="p">.</span><span class="nx">absSpeed</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">values</span><span class="p">.</span><span class="nx">speed</span> <span class="o">=</span> <span class="nx">deltaY</span><span class="p">;</span>
+            <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">+=</span> <span class="nx">deltaY</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>result.cap(values.scroll + deltaY);</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">values</span><span class="p">.</span><span class="nx">absSpeed</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">deltaY</span><span class="p">);</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+
+<div class="highlight"><pre><code>   <span class="n">console</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">values</span><span class="p">.</span><span class="n">speed</span><span class="p">);</span>
+</code></pre></div>
+
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">_y</span> <span class="o">=</span> <span class="nx">y</span><span class="p">;</span>
+        <span class="nx">_x</span> <span class="o">=</span> <span class="nx">x</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">updateScroll</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">updateScrollValues</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">values</span><span class="p">.</span><span class="nx">touchDown</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">clearIntv</span><span class="p">();</span>
+            <span class="nx">values</span><span class="p">.</span><span class="nx">scrollingStopIntv</span> <span class="o">=</span> <span class="nx">wait</span><span class="p">(</span><span class="nx">applyFriction</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="nx">render</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">fireClick</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;fireClick&quot;</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">point</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">changedTouches</span> <span class="o">?</span> <span class="nx">e</span><span class="p">.</span><span class="nx">changedTouches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">:</span> <span class="nx">e</span><span class="p">,</span> <span class="nx">target</span><span class="p">,</span> <span class="nx">ev</span><span class="p">;</span>
+        <span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">doubleTapTimer</span><span class="p">);</span>
+        <span class="nx">doubleTapTimer</span> <span class="o">=</span> <span class="nx">wait</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">doubleTapTimer</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+</div>
+<p>Find the last touched element</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">target</span> <span class="o">=</span> <span class="nx">point</span><span class="p">.</span><span class="nx">target</span><span class="p">;</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">target</span><span class="p">.</span><span class="nx">nodeType</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span> <span class="nx">target</span> <span class="o">=</span> <span class="nx">target</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">target</span><span class="p">.</span><span class="nx">tagName</span> <span class="o">!=</span> <span class="s2">&quot;SELECT&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">target</span><span class="p">.</span><span class="nx">tagName</span> <span class="o">!=</span> <span class="s2">&quot;INPUT&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">target</span><span class="p">.</span><span class="nx">tagName</span> <span class="o">!=</span> <span class="s2">&quot;TEXTAREA&quot;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">ev</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createEvent</span><span class="p">(</span><span class="s2">&quot;MouseEvents&quot;</span><span class="p">);</span>
+                <span class="nx">ev</span><span class="p">.</span><span class="nx">initMouseEvent</span><span class="p">(</span><span class="s2">&quot;click&quot;</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">e</span><span class="p">.</span><span class="nx">view</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">point</span><span class="p">.</span><span class="nx">screenX</span><span class="p">,</span> <span class="nx">point</span><span class="p">.</span><span class="nx">screenY</span><span class="p">,</span> <span class="nx">point</span><span class="p">.</span><span class="nx">clientX</span><span class="p">,</span> <span class="nx">point</span><span class="p">.</span><span class="nx">clientY</span><span class="p">,</span> <span class="nx">e</span><span class="p">.</span><span class="nx">ctrlKey</span><span class="p">,</span> <span class="nx">e</span><span class="p">.</span><span class="nx">altKey</span><span class="p">,</span> <span class="nx">e</span><span class="p">.</span><span class="nx">shiftKey</span><span class="p">,</span> <span class="nx">e</span><span class="p">.</span><span class="nx">metaKey</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
+                <span class="nx">ev</span><span class="p">.</span><span class="nx">_fake</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="nx">target</span><span class="p">.</span><span class="nx">dispatchEvent</span><span class="p">(</span><span class="nx">ev</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">},</span> <span class="mi">250</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">dispatch</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">dispatch</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">scope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+    <span class="p">};</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">cap</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">cap</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">v</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+        <span class="nx">v</span> <span class="o">=</span> <span class="nx">v</span> <span class="o">&gt;</span> <span class="nx">bottom</span> <span class="o">?</span> <span class="nx">bottom</span> <span class="o">:</span> <span class="nx">v</span> <span class="o">&lt;</span> <span class="nx">top</span> <span class="o">?</span> <span class="nx">top</span> <span class="o">:</span> <span class="nx">v</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">value</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="o">-</span><span class="nx">v</span> <span class="o">:</span> <span class="nx">v</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="kd">function</span> <span class="nx">applyFriction</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">absSpeed</span> <span class="o">&gt;=</span> <span class="nx">stopThreshold</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">startScroll</span> <span class="o">=</span> <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">,</span> <span class="nx">dist</span><span class="p">,</span> <span class="nx">transDuration</span><span class="p">;</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">absSpeed</span> <span class="o">&gt;=</span> <span class="nx">stopThreshold</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">updateScrollValues</span><span class="p">(</span><span class="nx">_x</span><span class="p">,</span> <span class="nx">_y</span> <span class="o">-</span> <span class="nx">values</span><span class="p">.</span><span class="nx">speed</span> <span class="o">*</span> <span class="nx">friction</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="nx">dist</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">-</span> <span class="nx">startScroll</span><span class="p">);</span>
+            <span class="nx">transDuration</span> <span class="o">=</span> <span class="nx">dist</span> <span class="o">&gt;</span> <span class="nx">transitionDuration</span> <span class="o">?</span> <span class="nx">dist</span> <span class="o">:</span> <span class="nx">transitionDuration</span><span class="p">;</span>
+            <span class="nx">render</span><span class="p">(</span><span class="nx">transDuration</span><span class="p">);</span>
+            <span class="nx">values</span><span class="p">.</span><span class="nx">scrollingStopIntv</span> <span class="o">=</span> <span class="nx">wait</span><span class="p">(</span><span class="nx">applyFriction</span><span class="p">,</span> <span class="nx">transDuration</span><span class="p">);</span>
+            <span class="nx">_startX</span> <span class="o">=</span> <span class="nx">_endX</span> <span class="o">=</span> <span class="nx">_startY</span> <span class="o">=</span> <span class="nx">_endY</span> <span class="o">=</span> <span class="nx">_startTime</span> <span class="o">=</span> <span class="nx">_endTime</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">waitToStop</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">render</span><span class="p">(</span><span class="nx">tranDuration</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">scrollTop</span> <span class="o">-</span> <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">content</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">style</span><span class="p">.</span><span class="nx">transitionDuration</span> <span class="o">=</span> <span class="p">(</span><span class="nx">tranDuration</span> <span class="o">?</span> <span class="nx">tranDuration</span> <span class="o">:</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;ms&quot;</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">content</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">style</span><span class="p">.</span><span class="nx">webkitTransform</span> <span class="o">=</span> <span class="s2">&quot;translate3d(0px, &quot;</span> <span class="o">+</span> <span class="nx">value</span> <span class="o">+</span> <span class="s2">&quot;px, 0px)&quot;</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_VIRTUAL_SCROLL_UPDATE</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">getScroll</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">getScroll</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">setScroll</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">setScroll</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">scrollToBottom</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">immediately</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">updateBottom</span><span class="p">();</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="nx">bottom</span><span class="p">,</span> <span class="nx">immediately</span><span class="p">);</span>
+    <span class="p">};</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">getValues</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">getValues</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">values</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">clear</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">clearRender</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">content</span><span class="p">.</span><span class="nx">css</span><span class="p">({</span>
+            <span class="nx">webkitTransform</span><span class="o">:</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">});</span>
+    <span class="p">};</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">async</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-7" id="section-7">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Scroll to the numeric value.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">value</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">immediately
+</span>
+      <span class="dox_type">Boolean=</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">scrollTo</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">scrollTo</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">immediately</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">render</span><span class="p">();</span>
+        <span class="nx">renderCallback</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">immediately</span><span class="p">);</span>
+    <span class="p">};</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">scrollIntoView</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span> <span class="o">?</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollIntoView</span> <span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-8" id="section-8">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>When it stops render.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">onScrollingStop</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">onScrollingStop</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+    <span class="p">};</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">destroy</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">removeTouchEnd</span><span class="p">();</span>
+        <span class="nx">element</span><span class="p">.</span><span class="nx">unbind</span><span class="p">(</span><span class="nx">touchStart</span><span class="p">,</span> <span class="nx">onTouchStart</span><span class="p">);</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">destroyLogger</span><span class="p">();</span>
+        <span class="nx">result</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="nx">values</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">setup</span> <span class="o">=</span> <span class="nx">setup</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="cm">/*global ux */</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-9" id="section-9">&#182;</a>
+</div>
+<p>we want to override the default scrolling if it is an IOS device.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;iosScroll&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kd">function</span> <span class="nx">iosScroll</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-10" id="section-10">&#182;</a>
+</div>
+<p>do not let escape if in unit tests. exp.flow.async is false in unit tests.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">var</span> <span class="nx">vScroll</span><span class="p">,</span> <span class="nx">originalScrollModel</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">isIOS</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nx">vScroll</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">VirtualScroll</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">,</span> <span class="kd">function</span> <span class="nx">updateValues</span><span class="p">(</span><span class="nx">values</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">=</span> <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">;</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">speed</span> <span class="o">=</span> <span class="nx">values</span><span class="p">.</span><span class="nx">speed</span><span class="p">;</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">absSpeed</span> <span class="o">=</span> <span class="nx">values</span><span class="p">.</span><span class="nx">absSpeed</span><span class="p">;</span>
+        <span class="p">},</span> <span class="kd">function</span> <span class="nx">render</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">immediately</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">immediately</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">onScrollingStop</span><span class="p">();</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">waitForStop</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_READY</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">vScroll</span><span class="p">.</span><span class="nx">content</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getContent</span><span class="p">();</span>
+            <span class="nx">vScroll</span><span class="p">.</span><span class="nx">setup</span><span class="p">();</span>
+            <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">removeScrollListener</span><span class="p">();</span>
+        <span class="p">});</span>
+        <span class="nx">vScroll</span><span class="p">.</span><span class="nx">scrollToIndex</span> <span class="o">=</span> <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">scrollToIndex</span><span class="p">;</span>
+        <span class="nx">vScroll</span><span class="p">.</span><span class="nx">scrollToItem</span> <span class="o">=</span> <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">scrollToItem</span><span class="p">;</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span> <span class="o">=</span> <span class="nx">vScroll</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+<span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

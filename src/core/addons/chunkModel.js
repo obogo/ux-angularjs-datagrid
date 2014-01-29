@@ -1,5 +1,5 @@
 /**
- * ChunkArray is an array with additional properties needed by the chunkModel to generate and access chunks
+ * ###ChunkArray### is an array with additional properties needed by the chunkModel to generate and access chunks
  * of the dom with high performance.
  * @constructor
  */
@@ -14,6 +14,7 @@ ChunkArray.prototype.getStub = function getStub(str) {
     return this.templateStart + str + this.templateEnd;
 };
 /**
+ * **ChunkArray.prototype.getChildStr**
  * Get the HTML string representation of the children in this array.
  * If deep then return this and all children down.
  * @param deep
@@ -64,7 +65,7 @@ ChunkArray.prototype.destroy = function () {
 };
 
 /**
- * chunkModel
+ * ##chunkModel##
  * Because the browser has low performance on dom elements that exist in high numbers and are all
  * siblings chunking is used to break them up into limits of their number and their parents and so on.
  * So think of it as every chunk not having more than X number of children weather those children be
@@ -73,14 +74,15 @@ ChunkArray.prototype.destroy = function () {
  * This speeds up the browser significantly because a resize event from a dom element will not affect
  * all of them, but just those direct siblings and then it's parents siblings and so on up the chain.
  *
- * @param exp
+ * @param {ux.datagrid} inst
  * @returns {{}}
  */
-exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
+exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
 
-    var _list, _rows, _chunkSize, _el, result = exports.logWrapper('chunkModel', {}, 'purple', exp.dispatch);
+    var _list, _rows, _chunkSize, _el, result = exports.logWrapper('chunkModel', {}, 'purple', inst.dispatch);
 
     /**
+     * **getChunkList**
      * Return the list that was created.
      * @returns {ChunkArray}
      */
@@ -108,7 +110,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
                 }
                 childAry = new ChunkArray();
                 childAry.min = item.min || i;
-                childAry.templateModel = exp.templateModel;
+                childAry.templateModel = inst.templateModel;
                 childAry.templateStart = templateStart;
                 childAry.templateEnd = templateEnd;
                 childAry.parent = result;
@@ -139,7 +141,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
      * @param ary {ChunkArray}
      */
     function calculateHeight(ary) {
-        ary.updateHeight(exp.templateModel, _rows);
+        ary.updateHeight(inst.templateModel, _rows);
         if (!ary.rendered) {
             ary.templateStart = ary.templateStart.substr(0, ary.templateStart.length - 1) + ' style="width:100%;height:' + ary.height + 'px;">';
         }
@@ -147,7 +149,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
 
     function updateAllChunkHeights(rowIndex) {
         var indexes = getRowIndexes(rowIndex, _list), ary = getArrayFromIndexes(indexes, _list);
-        ary.updateHeight(exp.templateModel, _rows);
+        ary.updateHeight(inst.templateModel, _rows);
         updateChunkHeights(_el, _list, indexes);
     }
 
@@ -279,7 +281,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(exp) {
     // apply event dispatching.
     dispatcher(result);
 
-    exp.chunkModel = result;
+    inst.chunkModel = result;
     return result;
 };
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);

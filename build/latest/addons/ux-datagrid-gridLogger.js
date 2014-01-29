@@ -29,7 +29,7 @@ angular.module("ux").factory("gridLogger", function() {
         }
         return ary;
     }
-    return function gridLogger(exp, $rootScope) {
+    return function gridLogger(inst, $rootScope) {
         var result = {};
         // listen to events and write them.
         function onLog(event) {
@@ -45,12 +45,12 @@ angular.module("ux").factory("gridLogger", function() {
             output(level.ERROR, arguments);
         }
         function hasPermissionToLog(lvl, name) {
-            if (exp.options.debug) {
-                if (exp.options.debug.all <= lvl && exp.options.debug[name] === 0) {
+            if (inst.options.debug) {
+                if (inst.options.debug.all <= lvl && inst.options.debug[name] === 0) {
                     return false;
-                } else if (exp.options.debug.all <= lvl) {
+                } else if (inst.options.debug.all <= lvl) {
                     return true;
-                } else if (exp.options.debug[name] <= lvl) {
+                } else if (inst.options.debug[name] <= lvl) {
                     return true;
                 }
             }
@@ -81,11 +81,11 @@ angular.module("ux").factory("gridLogger", function() {
             result = null;
             $rootScope = null;
         };
-        exp.unwatchers.push($rootScope.$on(exports.datagrid.events.LOG, onLog));
-        exp.unwatchers.push($rootScope.$on(exports.datagrid.events.INFO, onInfo));
-        exp.unwatchers.push($rootScope.$on(exports.datagrid.events.WARN, onWarn));
-        exp.unwatchers.push($rootScope.$on(exports.datagrid.events.ERROR, onError));
-        exp.logger = result;
+        inst.unwatchers.push($rootScope.$on(exports.datagrid.events.LOG, onLog));
+        inst.unwatchers.push($rootScope.$on(exports.datagrid.events.INFO, onInfo));
+        inst.unwatchers.push($rootScope.$on(exports.datagrid.events.WARN, onWarn));
+        inst.unwatchers.push($rootScope.$on(exports.datagrid.events.ERROR, onError));
+        inst.logger = result;
     };
 });
 }(this.ux = this.ux || {}, function() {return this;}()));

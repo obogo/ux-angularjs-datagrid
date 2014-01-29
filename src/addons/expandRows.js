@@ -1,5 +1,5 @@
 angular.module('ux').factory('expandRows', function () {
-    return function (exp) {
+    return function (inst) {
         var result = {},
             lastGetIndex,
             cache = {},
@@ -7,7 +7,7 @@ angular.module('ux').factory('expandRows', function () {
             states = {
                 opened: "opened", closed: "closed"
             },
-            superGetTemplateHeight = exp.templateModel.getTemplateHeight,
+            superGetTemplateHeight = inst.templateModel.getTemplateHeight,
 
         // transition end lookup.
             dummyStyle = document.createElement('div').style,
@@ -43,12 +43,12 @@ angular.module('ux').factory('expandRows', function () {
         dummyStyle = null;
 
         function getIndex(itemOrIndex) {
-            lastGetIndex = typeof itemOrIndex === "number" ? itemOrIndex : exp.getNormalizedIndex(itemOrIndex, lastGetIndex);
+            lastGetIndex = typeof itemOrIndex === "number" ? itemOrIndex : inst.getNormalizedIndex(itemOrIndex, lastGetIndex);
             return lastGetIndex;
         }
 
         function setup(item) {
-            item.template = item.template || exp.templateModel.defaultName;
+            item.template = item.template || inst.templateModel.defaultName;
             if (!item.cls && !item.style) {
                 throw new Error("expandRows will not work without an cls property");
             }
@@ -56,7 +56,7 @@ angular.module('ux').factory('expandRows', function () {
         }
 
         function setupTemplates() {
-            ux.each(exp.options.expandRows, setup);
+            ux.each(inst.options.expandRows, setup);
         }
 
         function getState(itemOrIndex) {
@@ -87,9 +87,9 @@ angular.module('ux').factory('expandRows', function () {
         }
 
         function setState(index, state) {
-            var template = exp.templateModel.getTemplate(exp.data[index]), elm, tpl;
+            var template = inst.templateModel.getTemplate(inst.data[index]), elm, tpl;
             if (cache[template.name]) {
-                elm = exp.getRowElm(index);
+                elm = inst.getRowElm(index);
                 elm.scope().$state = state;
                 tpl = cache[template.name];
                 if (tpl.transition !== false) {
@@ -139,7 +139,7 @@ angular.module('ux').factory('expandRows', function () {
             } else {
                 delete opened[index];
             }
-            exp.updateHeights(index);
+            inst.updateHeights(index);
         }
 
         function isExpanded(itemOrIndex) {
@@ -163,7 +163,7 @@ angular.module('ux').factory('expandRows', function () {
         }
 
         // override the getTemplateHeight to return the result with the expanded height.
-        exp.templateModel.getTemplateHeight = getTemplateHeight;
+        inst.templateModel.getTemplateHeight = getTemplateHeight;
 
         result.states = states;
         result.getIndex = getIndex;
@@ -173,10 +173,10 @@ angular.module('ux').factory('expandRows', function () {
         result.isExpanded = isExpanded;
         result.destroy = destroy;
 
-        exp.scope.$on(ux.datagrid.events.ON_READY, setupTemplates);
+        inst.scope.$on(ux.datagrid.events.ON_READY, setupTemplates);
 
-        exp.expandRows = result;
+        inst.expandRows = result;
 
-        return exp;
+        return inst;
     };
 });

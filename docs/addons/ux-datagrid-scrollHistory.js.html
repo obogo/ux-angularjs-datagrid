@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ux-datagrid-scrollHistory.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../doc-style.css" />
+  <script src="../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../", thisFile = "Users/wes/PhpstormProjects/wes/webux/ux-datagrid//addons/ux-datagrid-scrollHistory.js", defaultSidebar = true;
+  </script>
+  <script src="../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>ux-datagrid-scrollHistory.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>uxDatagrid v.0.2.2
+(c) 2014, WebUX
+<a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
+License: MIT.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">AFTER_SCROLL_HISTORY_INIT_SCROLL</span> <span class="o">=</span> <span class="s2">&quot;datagrid:afterScrollHistoryInitScroll&quot;</span><span class="p">;</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p><a name="scrollHistoryModel">scrollHistoryModel</a> is a singleton that stores the values of all datagrids
+that have the scrollHistory implemented. So that as a grid gets destroyed, the history persists so when that
+grid gets reconstructed at that same path, it will pull from the history that matches that path.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">service</span><span class="p">(</span><span class="s2">&quot;scrollHistoryModel&quot;</span><span class="p">,</span> <span class="p">[</span> <span class="s2">&quot;$location&quot;</span><span class="p">,</span> <span class="s2">&quot;$rootScope&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">$location</span><span class="p">,</span> <span class="nx">$rootScope</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">cache</span> <span class="o">=</span> <span class="p">{};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>cache is persistent until application reloads.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">scrollHistory</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">scrollHistory</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;scrollHistoryModel&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;orange&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">$rootScope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">$rootScope</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+        <span class="p">});</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p><a name="getPath">getPath</a> get the location of the url to store the scroll history at.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getPath</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">$location</span><span class="p">.</span><span class="nx">path</span><span class="p">();</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p><a name="storeScroll">storeScroll</a> store the scroll value at the key path given.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">storeScroll</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">scroll</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">cache</span><span class="p">[</span><span class="nx">path</span><span class="p">]</span> <span class="o">=</span> <span class="nx">scroll</span><span class="p">;</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;storeScroll %s = %s&quot;</span><span class="p">,</span> <span class="nx">path</span><span class="p">,</span> <span class="nx">scroll</span><span class="p">);</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+</div>
+<p><a name="getCurrentScroll">getCurrentScroll</a> get the stored value of the current path.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getCurrentScroll</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getScroll</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">getPath</span><span class="p">());</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-7" id="section-7">&#182;</a>
+</div>
+<p><a name="getScroll">getScroll</a> get the stored value of the specified path.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getScroll</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">cache</span><span class="p">[</span><span class="nx">path</span><span class="p">]</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-8" id="section-8">&#182;</a>
+</div>
+<p><a name="clearPath">clearPath</a> clear the stored value for the specified path.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">clearPath</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;clearPath %s&quot;</span><span class="p">,</span> <span class="nx">path</span><span class="p">);</span>
+            <span class="k">delete</span> <span class="nx">cache</span><span class="p">[</span><span class="nx">path</span><span class="p">];</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-9" id="section-9">&#182;</a>
+</div>
+<p><a name="clear">clear</a> clear all stored values</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">clear</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;clear all stored values&quot;</span><span class="p">);</span>
+            <span class="nx">cache</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="p">}</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getPath</span> <span class="o">=</span> <span class="nx">getPath</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span> <span class="o">=</span> <span class="nx">getCurrentScroll</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getScroll</span> <span class="o">=</span> <span class="nx">getScroll</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">storeScroll</span> <span class="o">=</span> <span class="nx">storeScroll</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">clearPath</span> <span class="o">=</span> <span class="nx">clearPath</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">clear</span> <span class="o">=</span> <span class="nx">clear</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+    <span class="p">}();</span>
+    <span class="k">return</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">scrollHistory</span><span class="p">;</span>
+<span class="p">}</span> <span class="p">]);</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-10" id="section-10">&#182;</a>
+</div>
+<p><a name="scrollHistory">scrollHistory</a> the scrollHistory instance that gets added to the datagrid as an addon.
+it implements the same api as the global one because all methods map to it. This just allows it to be used as an
+addon but it is still a singleton for the values that are stored and keep the listeners stored just for the addon
+instance.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;scrollHistory&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">,</span> <span class="nx">scrollHistoryModel</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;scrollHistory&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-11" id="section-11">&#182;</a>
+</div>
+<p>map methods from singleton to addon instance.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getPath</span> <span class="o">=</span> <span class="nx">scrollHistoryModel</span><span class="p">.</span><span class="nx">getPath</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-12" id="section-12">&#182;</a>
+</div>
+<p><a name="storeCurrentScroll">storeCurrentScroll</a> store the current scroll of the datagrid based
+on the current url path.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">storeCurrentScroll</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">storeCurrentScroll</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">storeScroll</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">getPath</span><span class="p">(),</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">);</span>
+        <span class="p">};</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">storeScroll</span> <span class="o">=</span> <span class="nx">scrollHistoryModel</span><span class="p">.</span><span class="nx">storeScroll</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span> <span class="o">=</span> <span class="nx">scrollHistoryModel</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getScroll</span> <span class="o">=</span> <span class="nx">scrollHistoryModel</span><span class="p">.</span><span class="nx">getScroll</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">clearPath</span> <span class="o">=</span> <span class="nx">scrollHistoryModel</span><span class="p">.</span><span class="nx">clearPath</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">destroy</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">destroy</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">scrollHistoryModel</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">result</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">inst</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-13" id="section-13">&#182;</a>
+</div>
+<p>watch only once to have it start at that scrolling position on startup.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">var</span> <span class="nx">unwatch</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_RENDER_AFTER_DATA_CHANGE</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;found scrollHistory so scrollTo %s&quot;</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">());</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">(),</span> <span class="kc">true</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-14" id="section-14">&#182;</a>
+</div>
+<p>remove the listener. So that it will only have been captured once.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">unwatch</span><span class="p">();</span>
+            <span class="nx">unwatch</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">AFTER_SCROLL_HISTORY_INIT_SCROLL</span><span class="p">);</span>
+        <span class="p">});</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-15" id="section-15">&#182;</a>
+</div>
+<p>add the listener to the main unwatchers array to make sure it gets cleaned up later before the destroy to
+keep events from firing during the destroy process.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_UPDATE_WATCHERS</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">unwatch</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">storeCurrentScroll</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollHistory</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+<span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

@@ -4,7 +4,7 @@
  */
 ux.datagrid.events.STATS_UPDATE = 'datagrid:statsUpdate';
 angular.module('ux').factory('statsModel', function () {
-    return function (exp) {
+    return function (inst) {
         var initStartTime = 0, rendersTotal = 0, renders = [], unwatchers = [];
         var api = {
             initialRenderTime: 0,
@@ -43,15 +43,15 @@ angular.module('ux').factory('statsModel', function () {
         function updateAverage() {
             api.renders = renders.length;
             api.averageRenderTime = rendersTotal / api.renders;
-            exp.dispatch(ux.datagrid.events.STATS_UPDATE, api);
+            inst.dispatch(ux.datagrid.events.STATS_UPDATE, api);
         }
 
-        unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_INIT, startInit));
-        unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_READY, stopInit));
+        unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_INIT, startInit));
+        unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_READY, stopInit));
 
-        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_BEFORE_UPDATE_WATCHERS, renderStart));
-        exp.unwatchers.push(exp.scope.$on(ux.datagrid.events.ON_AFTER_UPDATE_WATCHERS, renderStop));
+        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_BEFORE_UPDATE_WATCHERS, renderStart));
+        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_AFTER_UPDATE_WATCHERS, renderStop));
 
-        exp.stats = api;
+        inst.stats = api;
     };
 });

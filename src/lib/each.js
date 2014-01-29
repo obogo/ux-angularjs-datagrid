@@ -1,3 +1,19 @@
+/**
+ * ##ux.each##
+ * Like angular.forEach except that you can pass additional arguments to it that will be available
+ * in the iteration function. It is optimized to use while loops where possible instead of for loops for speed.
+ * Like Lo-Dash.
+ * @param {Array\Object} list
+ * @param {Function} method
+ * @param {..rest} data _additional arguments passes are available in the iteration function_
+ * @returns {*}
+ */
+//_example:_
+//
+//      function myMethod(item, index, list, arg1, arg2, arg3) {
+//          console.log(arg1, arg2, arg3);
+//      }
+//      ux.each(myList, myMethod, arg1, arg2, arg3);
 function each(list, method, data) {
     var i = 0, len, result, extraArgs;
     if (arguments.length > 2) {

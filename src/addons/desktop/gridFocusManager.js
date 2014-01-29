@@ -4,7 +4,7 @@ exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME = "ux-datagrid:focusToNext
  * Handle focus for enterKey to move down the correct columns.
  */
 angular.module('ux').factory('gridFocusManager', function () {
-    return function (exp) {
+    return function (inst) {
 
         /**
          * We want to add and remove listeners only on the dom that is currently under watch.
@@ -34,16 +34,16 @@ angular.module('ux').factory('gridFocusManager', function () {
         }
 
         /**
-         * using the exp.activeRange.min/max apply methods to those rows.
+         * using the inst.activeRange.min/max apply methods to those rows.
          * @param method
          */
         function applyToListeners(method) {
-            if (!exp.values.activeRange.max) {
+            if (!inst.values.activeRange.max) {
                 return;// if max is 0. there is no point.
             }
-            var i = exp.values.activeRange.min, row;
-            while (i <= exp.values.activeRange.max) {
-                row = exp.getRowElm(i);
+            var i = inst.values.activeRange.min, row;
+            while (i <= inst.values.activeRange.max) {
+                row = inst.getRowElm(i);
                 method(row);
                 i += 1;
             }
@@ -76,7 +76,7 @@ angular.module('ux').factory('gridFocusManager', function () {
         function getRowElmFromChildElm(el) {
             // keep moving up until the parent is a chunk.
             var parent = el.parent();
-            while (parent && !parent.hasClass(exp.options.chunkClass)) {
+            while (parent && !parent.hasClass(inst.options.chunkClass)) {
                 el = parent;
                 parent = el.parent();
             }
@@ -135,8 +135,8 @@ angular.module('ux').factory('gridFocusManager', function () {
 
         function filterClasses(cls) {
             var isToBeFiltered = cls ? false : true;
-            if (!isToBeFiltered && exp.options.gridFocusManager && exp.options.gridFocusManager.filterClasses) {
-                isToBeFiltered = (exp.options.gridFocusManager.filterClasses.indexOf(cls) !== -1);
+            if (!isToBeFiltered && inst.options.gridFocusManager && inst.options.gridFocusManager.filterClasses) {
+                isToBeFiltered = (inst.options.gridFocusManager.filterClasses.indexOf(cls) !== -1);
             }
             if (!isToBeFiltered) {
                 isToBeFiltered = isNgClass(cls);
@@ -174,7 +174,7 @@ angular.module('ux').factory('gridFocusManager', function () {
          */
         function onKeyDown(event) {
             var target = angular.element(event.currentTarget);
-            exp.flow.log('FM: onKeyDown');
+            inst.flow.log('FM: onKeyDown');
             if ((event.shiftKey && event.keyCode === 13) || event.keyCode === 38) {// SHIFT+ENTER, UP ARROW
                 focusToPrevRowElement(target);
             } else if (event.keyCode === 13 || event.keyCode === 40) { // ENTER, DOWN ARROW
@@ -196,7 +196,7 @@ angular.module('ux').factory('gridFocusManager', function () {
          * @param focusedEl
          */
         function focusToNextRowElement(focusedEl) {
-            exp.flow.log("\tFM: focusToNextRowElement");
+            inst.flow.log("\tFM: focusToNextRowElement");
             var focusEl = getNextRowFocusElement(focusedEl);
             performFocus(focusEl);
         }
@@ -216,7 +216,7 @@ angular.module('ux').factory('gridFocusManager', function () {
         }
 
         function getNextRowFocusElement(focusedEl) {
-            exp.flow.log("\tFM: getNextRowFocusElement");
+            inst.flow.log("\tFM: getNextRowFocusElement");
             return focusToRowElement(focusedEl, 1);
         }
 
@@ -228,20 +228,20 @@ angular.module('ux').factory('gridFocusManager', function () {
          * @param dir
          */
         function focusToRowElement(focusedEl, dir) { // dir should be 1 or -1
-            exp.flow.log("\tFM: focusToRowElement");
+            inst.flow.log("\tFM: focusToRowElement");
             focusedEl = wrap(focusedEl);
-            if (!exp.element[0].contains(focusedEl[0])) {
+            if (!inst.element[0].contains(focusedEl[0])) {
                 return; // the focusedEl is not inside the datagrid.
             }
             var resultEl,
                 rowEl = getRowElmFromChildElm(focusedEl),
-                currentIndex = exp.getRowIndexFromElement(focusedEl),
+                currentIndex = inst.getRowIndexFromElement(focusedEl),
                 nextIndex = currentIndex + dir, selector;
-            if (nextIndex < 0 || nextIndex >= exp.rowsLength) {
+            if (nextIndex < 0 || nextIndex >= inst.rowsLength) {
                 return focusedEl;
             }
             selector = ux.selector.getSelector(focusedEl[0], rowEl[0], filterClasses);
-            exp.flow.log("\tFM: selector: %s", selector);
+            inst.flow.log("\tFM: selector: %s", selector);
             resultEl = findNextRowWithSelection(nextIndex, dir, selector);
             return resultEl && resultEl.length ? resultEl : focusedEl;// if the result cannot be found. return the current one.
         }
@@ -251,7 +251,7 @@ angular.module('ux').factory('gridFocusManager', function () {
          * @param focusEl
          */
         function performFocus(focusEl) {
-            exp.flow.log("\tFM: performFocus %o", focusEl[0]);
+            inst.flow.log("\tFM: performFocus %o", focusEl[0]);
             if (focusEl[0].select) {// TODO: if no jquery. There may be no select.
                 focusEl[0].select();
             }
@@ -259,7 +259,7 @@ angular.module('ux').factory('gridFocusManager', function () {
                 focusEl[0].focus();
             }
             // we now need to scroll the row into view if it is not.
-            exp.scrollModel.scrollIntoView(exp.getRowIndexFromElement(focusEl), true);
+            inst.scrollModel.scrollIntoView(inst.getRowIndexFromElement(focusEl), true);
         }
 
         /**
@@ -272,12 +272,12 @@ angular.module('ux').factory('gridFocusManager', function () {
          * @returns {element|*}
          */
         function findNextRowWithSelection(nextIndex, dir, selector) {
-            exp.flow.log("\tFM: findNextRowWithSelection");
-            var nextEl = exp.getRowElm(nextIndex), focusEl = query(nextEl[0], selector);
-            var content = exp.getContent();
-            while (!focusEl[0] && ((dir > 0 && nextIndex < exp.rowsLength - 1) || (dir < 0 && nextIndex > 0))) {
+            inst.flow.log("\tFM: findNextRowWithSelection");
+            var nextEl = inst.getRowElm(nextIndex), focusEl = query(nextEl[0], selector);
+            var content = inst.getContent();
+            while (!focusEl[0] && ((dir > 0 && nextIndex < inst.rowsLength - 1) || (dir < 0 && nextIndex > 0))) {
                 nextIndex += dir;
-                nextEl = exp.getRowElm(nextIndex);
+                nextEl = inst.getRowElm(nextIndex);
                 if (nextEl[0] === content) {
                     return;
                 }
@@ -299,17 +299,17 @@ angular.module('ux').factory('gridFocusManager', function () {
             result = null;
         };
 
-        unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_BEFORE_UPDATE_WATCHERS, removeListeners));
-        unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, addListeners));
-        unwatchers.push(exp.scope.$on(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME, function () {
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_UPDATE_WATCHERS, removeListeners));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, addListeners));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME, function () {
             focusToPrevRowElement(document.activeElement);
         }));
-        unwatchers.push(exp.scope.$on(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME, function () {
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME, function () {
             focusToNextRowElement(document.activeElement);
         }));
 
-        exp.gridFocusManager = result;
+        inst.gridFocusManager = result;
 
-        return exp;
+        return inst;
     };
 });

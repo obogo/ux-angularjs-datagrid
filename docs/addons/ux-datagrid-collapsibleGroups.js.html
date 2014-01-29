@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ux-datagrid-collapsibleGroups.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../doc-style.css" />
+  <script src="../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../", thisFile = "Users/wes/PhpstormProjects/wes/webux/ux-datagrid//addons/ux-datagrid-collapsibleGroups.js", defaultSidebar = true;
+  </script>
+  <script src="../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>ux-datagrid-collapsibleGroups.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>uxDatagrid v.0.2.2
+(c) 2014, WebUX
+<a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
+License: MIT.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;collapsibleGroups&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;collapsibleGroups&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;orange&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">lastIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">collapsed</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">superGetTemplateHeight</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplateHeight</span><span class="p">,</span> <span class="nx">states</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nx">COLLAPSE</span><span class="o">:</span> <span class="s2">&quot;collapse&quot;</span><span class="p">,</span>
+            <span class="nx">EXPAND</span><span class="o">:</span> <span class="s2">&quot;expand&quot;</span>
+        <span class="p">};</span>
+        <span class="kd">function</span> <span class="nx">getIndex</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">lastIndex</span> <span class="o">=</span> <span class="k">typeof</span> <span class="nx">itemOrIndex</span> <span class="o">===</span> <span class="s2">&quot;number&quot;</span> <span class="o">?</span> <span class="nx">itemOrIndex</span> <span class="o">:</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getNormalizedIndex</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">,</span> <span class="nx">lastIndex</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">lastIndex</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">isCollapsed</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">collapsible</span> <span class="o">=</span> <span class="nx">isCollapsible</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">collapsible</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="o">!!</span><span class="nx">collapsed</span><span class="p">[</span><span class="nx">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="o">!!</span><span class="nx">collapsed</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">isCollapsible</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">item</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowItem</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+            <span class="k">return</span> <span class="o">!!</span><span class="p">(</span><span class="nx">item</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">grouped</span> <span class="o">&amp;&amp;</span> <span class="nx">item</span><span class="p">[</span><span class="nx">inst</span><span class="p">.</span><span class="nx">grouped</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="nx">item</span><span class="p">[</span><span class="nx">inst</span><span class="p">.</span><span class="nx">grouped</span><span class="p">].</span><span class="nx">length</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">setRowStatesInGroup</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">,</span> <span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">item</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowItem</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">),</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">item</span><span class="p">[</span><span class="nx">inst</span><span class="p">.</span><span class="nx">grouped</span><span class="p">].</span><span class="nx">length</span><span class="p">,</span> <span class="nx">changed</span><span class="p">;</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">state</span> <span class="o">===</span> <span class="nx">states</span><span class="p">.</span><span class="nx">COLLAPSE</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">changed</span> <span class="o">=</span> <span class="nx">collapse</span><span class="p">(</span><span class="nx">rowIndex</span> <span class="o">+</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">changed</span> <span class="o">=</span> <span class="nx">expand</span><span class="p">(</span><span class="nx">rowIndex</span> <span class="o">+</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">changed</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">chunkModel</span><span class="p">.</span><span class="nx">updateAllChunkHeights</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="nx">changed</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+                <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">updateHeights</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">collapse</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">el</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isCollapsed</span><span class="p">(</span><span class="nx">index</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">el</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">index</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
+                <span class="nx">collapsed</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="nx">prevDisplay</span><span class="o">:</span> <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">display</span><span class="p">,</span>
+                    <span class="nx">height</span><span class="o">:</span> <span class="mi">0</span>
+                <span class="p">};</span>
+                <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">display</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span><span class="p">;</span>
+                <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">expand</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">el</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">isCollapsed</span><span class="p">(</span><span class="nx">index</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">el</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">index</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
+                <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">display</span> <span class="o">=</span> <span class="nx">collapsed</span><span class="p">[</span><span class="nx">index</span><span class="p">].</span><span class="nx">prevDisplay</span><span class="p">;</span>
+                <span class="k">delete</span> <span class="nx">collapsed</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
+                <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">collapse</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">rowIndexOrGroup</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">getIndex</span><span class="p">(</span><span class="nx">rowIndexOrGroup</span><span class="p">);</span>
+            <span class="nx">setRowStatesInGroup</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="nx">states</span><span class="p">.</span><span class="nx">COLLAPSE</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">render</span><span class="p">();</span>
+        <span class="p">};</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">expand</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">rowIndexOrGroup</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">getIndex</span><span class="p">(</span><span class="nx">rowIndexOrGroup</span><span class="p">);</span>
+            <span class="nx">setRowStatesInGroup</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="nx">states</span><span class="p">.</span><span class="nx">EXPAND</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">render</span><span class="p">();</span>
+        <span class="p">};</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">toggle</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">toggle</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">getIndex</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">isCollapsible</span><span class="p">(</span><span class="nx">index</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">isCollapsed</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="o">?</span> <span class="nx">result</span><span class="p">.</span><span class="nx">expand</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="o">:</span> <span class="nx">result</span><span class="p">.</span><span class="nx">collapse</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplateHeight</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">getTemplateHeight</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">getIndex</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">collapsed</span><span class="p">[</span><span class="nx">index</span><span class="p">])</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">collapsed</span><span class="p">[</span><span class="nx">index</span><span class="p">].</span><span class="nx">height</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">superGetTemplateHeight</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+        <span class="p">};</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">collapsibleGroups</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+<span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

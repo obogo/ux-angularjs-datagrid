@@ -1,5 +1,5 @@
 exports.datagrid.events.ON_RENDER_PROGRESS = "datagrid:onRenderProgress";
-exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
+exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
 
     var intv = 0,
         creepCount = 0,
@@ -9,16 +9,16 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
         time;
 
     function digest(index) {
-        var s = exp.getScope(index);
+        var s = inst.getScope(index);
         if (!s || !s.digested) {// just skip if already digested.
-            exp.forceRenderScope(index);
+            inst.forceRenderScope(index);
         }
     }
 
     function calculatePercent() {
         var result = {count: 0};
-        each(exp.scopes, calculateScopePercent, result);
-        return {count: result.count, len: exp.rowsLength};
+        each(inst.scopes, calculateScopePercent, result);
+        return {count: result.count, len: inst.rowsLength};
     }
 
     function calculateScopePercent(s, index, list, result) {
@@ -26,8 +26,8 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
     }
 
     function onInterval(started, ended, force) {
-        if (!exp.values.touchDown) {
-            time = Date.now() + exp.options.renderThreshold;
+        if (!inst.values.touchDown) {
+            time = Date.now() + inst.options.renderThreshold;
             upIndex = started;
             downIndex = ended;
             render(onComplete, force);
@@ -37,9 +37,9 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
     function wait(method, time) {
         var i, args = exports.util.array.toArray(arguments);
         args.splice(0, 2);
-        if (exp.options.async) {
-            exp.flow.remove(method);
-            i = exp.flow.add(method, args, time);
+        if (inst.options.async) {
+            inst.flow.remove(method);
+            i = inst.flow.add(method, args, time);
         } else {
             method.apply(this, args);
         }
@@ -48,14 +48,14 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
 
     function render(complete, force) {
         var changed = false, now = Date.now();
-        if (time > now && (upIndex >= 0 || downIndex < exp.rowsLength)) {
+        if (time > now && (upIndex >= 0 || downIndex < inst.rowsLength)) {
             if (upIndex >= 0) {
-                changed = force || !exp.isCompiled(upIndex);
+                changed = force || !inst.isCompiled(upIndex);
                 if (changed) digest(upIndex);
                 upIndex -= 1;
             }
-            if (downIndex < exp.rowsLength) {
-                changed = force || changed || !exp.isCompiled(downIndex);
+            if (downIndex < inst.rowsLength) {
+                changed = force || changed || !inst.isCompiled(downIndex);
                 if (changed) digest(downIndex);
                 downIndex += 1;
             }
@@ -68,10 +68,10 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
     function onComplete() {
         stop();
         creepCount += 1;
-        if (!exp.values.speed && exp.scopes.length < exp.rowsLength) {
+        if (!inst.values.speed && inst.scopes.length < inst.rowsLength) {
             resetInterval(upIndex, downIndex);
         }
-        exp.dispatch(exports.datagrid.events.ON_RENDER_PROGRESS, calculatePercent());
+        inst.dispatch(exports.datagrid.events.ON_RENDER_PROGRESS, calculatePercent());
     }
 
     function stop() {
@@ -82,8 +82,8 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
 
     function resetInterval(started, ended, waitTime, forceCompileRowRender) {
         stop();
-        if (creepCount < exp.options.creepLimit) {
-            intv = wait(onInterval, waitTime || exp.options.renderThresholdWait, started, ended, forceCompileRowRender);
+        if (creepCount < inst.options.creepLimit) {
+            intv = wait(onInterval, waitTime || inst.options.renderThresholdWait, started, ended, forceCompileRowRender);
         }
     }
 
@@ -92,7 +92,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
     }
 
     function onBeforeRender(event) {
-        creepCount = exp.options.creepLimit;
+        creepCount = inst.options.creepLimit;
         stop();
     }
 
@@ -107,17 +107,17 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(exp) {
 
     model.destroy = function destroy() {
         stop();
-        exp = null;
+        inst = null;
         model = null;
     };
 
-    exp.creepRenderModel = model;
+    inst.creepRenderModel = model;
 
-    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
-    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
-    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
-    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
-    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_RESET, onBeforeRender));
-    exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_RESET, onBeforeRender));
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
 };
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.creepRenderModel);

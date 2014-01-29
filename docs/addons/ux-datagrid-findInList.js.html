@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ux-datagrid-findInList.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../doc-style.css" />
+  <script src="../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../", thisFile = "Users/wes/PhpstormProjects/wes/webux/ux-datagrid//addons/ux-datagrid-findInList.js", defaultSidebar = true;
+  </script>
+  <script src="../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>ux-datagrid-findInList.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>uxDatagrid v.0.2.2
+(c) 2014, WebUX
+<a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
+License: MIT.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
+<span class="kd">var</span> <span class="nx">finder</span><span class="p">,</span> <span class="c1">// there can only be one at a time.</span>
+<span class="nx">cmdKey</span><span class="p">;</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>if the cmdKey is pressed on a mac.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;findInList&quot;</span><span class="p">,</span> <span class="p">[</span> <span class="s2">&quot;$window&quot;</span><span class="p">,</span> <span class="s2">&quot;$compile&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">$window</span><span class="p">,</span> <span class="nx">$compile</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">term</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nx">input</span><span class="p">,</span> <span class="nx">lowerCaseTerm</span><span class="p">,</span> <span class="nx">lastFiltered</span><span class="p">,</span> <span class="nx">searchIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">matchCount</span><span class="p">,</span> <span class="nx">searchIntv</span><span class="p">,</span> <span class="nx">scrollToItemActive</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">itemTexts</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">findInListTemplate</span> <span class="o">=</span> <span class="s1">&#39;&lt;div data-ux-datagrid-find-in-list=&quot;datagrid&quot; class=&quot;findInList&quot;&gt;&lt;/div&gt;&#39;</span><span class="p">,</span> <span class="nx">templateTexts</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">workingScope</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$new</span><span class="p">();</span>
+        <span class="kd">function</span> <span class="nx">onKeyDown</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;onKeyDown %s&quot;</span><span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span><span class="p">);</span>
+            <span class="nx">detectCmdKey</span><span class="p">(</span><span class="nx">event</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>we only want to do this if the grid has focus.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">contains</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">activeElement</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">==</span> <span class="mi">114</span> <span class="o">||</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">ctrlKey</span> <span class="o">||</span> <span class="nx">cmdKey</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">==</span> <span class="mi">70</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>Block CTRL + F event</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+                    <span class="nx">addFinder</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">onKeyUp</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;onKeyUp %s&quot;</span><span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">cmdKey</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">detectCmdKey</span><span class="p">(</span><span class="nx">event</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">detectCmdKey</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;detectCmdKey&quot;</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">isCmdKey</span><span class="p">(</span><span class="nx">event</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">cmdKey</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="s2">&quot;keydown&quot;</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">isCmdKey</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;isCmdKey&quot;</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>if mac we need to check the command key based on each browser because the keycode is different.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">$window</span><span class="p">.</span><span class="nx">navigator</span><span class="p">.</span><span class="nx">platform</span> <span class="o">===</span> <span class="s2">&quot;MacIntel&quot;</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+</div>
+<p>chrome/safari left cmd or right cmd key</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">$window</span><span class="p">.</span><span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/(Chrome|Safari)/i</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">91</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">93</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/Firefox/i</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">224</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/Opera/i</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">17</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">cloneTextNodes</span><span class="p">()</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">ary</span> <span class="o">=</span> <span class="p">[];</span>
+            <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">cloneTextNodeProps</span><span class="p">,</span> <span class="nx">ary</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">ary</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">cloneTextNodeProps</span><span class="p">(</span><span class="nx">textNode</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">ary</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">ary</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="nx">textNode</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+            <span class="nx">ary</span><span class="p">[</span><span class="nx">index</span><span class="p">].</span><span class="nx">text</span> <span class="o">=</span> <span class="nx">textNode</span><span class="p">.</span><span class="nx">text</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">onGetTemplate</span><span class="p">(</span><span class="nx">template</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">el</span><span class="p">,</span> <span class="nx">textNodes</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">res</span><span class="p">[</span><span class="nx">template</span><span class="p">.</span><span class="nx">name</span><span class="p">])</span> <span class="p">{</span>
+                <span class="nx">textNodes</span> <span class="o">=</span> <span class="p">[];</span>
+                <span class="nx">textNodes</span><span class="p">.</span><span class="nx">clone</span> <span class="o">=</span> <span class="nx">cloneTextNodes</span><span class="p">;</span>
+                <span class="nx">el</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">template</span><span class="p">.</span><span class="nx">template</span><span class="p">);</span>
+                <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">childNodes</span><span class="p">,</span> <span class="nx">findTextNodes</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="nx">textNodes</span><span class="o">:</span> <span class="nx">textNodes</span>
+                <span class="p">});</span>
+                <span class="nx">res</span><span class="p">[</span><span class="nx">template</span><span class="p">.</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">textNodes</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">findTextNodes</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">childNodes</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">indexes</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">indexes</span> <span class="o">?</span> <span class="nx">data</span><span class="p">.</span><span class="nx">indexes</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">:</span> <span class="p">[];</span>
+            <span class="nx">indexes</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">el</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">el</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">,</span> <span class="nx">findTextNodes</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="nx">indexes</span><span class="o">:</span> <span class="nx">indexes</span><span class="p">,</span>
+                    <span class="nx">textNodes</span><span class="o">:</span> <span class="nx">data</span><span class="p">.</span><span class="nx">textNodes</span>
+                <span class="p">});</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">el</span><span class="p">.</span><span class="nx">nodeValue</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">indexes</span><span class="p">.</span><span class="nx">text</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">nodeValue</span><span class="p">;</span>
+                <span class="nx">data</span><span class="p">.</span><span class="nx">textNodes</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">indexes</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">addFinder</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;addFinder&quot;</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">finder</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">finder</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">findInListTemplate</span><span class="p">);</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">insertBefore</span><span class="p">(</span><span class="nx">finder</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+                <span class="nx">$compile</span><span class="p">(</span><span class="nx">finder</span><span class="p">)(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">);</span>
+                <span class="nx">input</span> <span class="o">=</span> <span class="nx">finder</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">getElementsByClassName</span><span class="p">(</span><span class="s2">&quot;findInListInput&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nx">select</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">input</span><span class="p">.</span><span class="nx">select</span><span class="p">();</span>
+                <span class="p">}</span>
+                <span class="nx">input</span><span class="p">.</span><span class="nx">focus</span><span class="p">();</span>
+                <span class="nx">finder</span><span class="p">.</span><span class="nx">scope</span><span class="p">().</span><span class="nx">close</span> <span class="o">=</span> <span class="nx">removeFinder</span><span class="p">;</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">safeDigest</span><span class="p">(</span><span class="nx">finder</span><span class="p">.</span><span class="nx">scope</span><span class="p">());</span>
+                <span class="nx">input</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">&quot;keyup&quot;</span><span class="p">,</span> <span class="nx">onInputKeyUp</span><span class="p">);</span>
+                <span class="nx">matchCount</span> <span class="o">=</span> <span class="nx">finder</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">getElementsByClassName</span><span class="p">(</span><span class="s2">&quot;findInListMatchCount&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
+                <span class="nx">itemTexts</span> <span class="o">=</span> <span class="p">{};</span>
+                <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplates</span><span class="p">(),</span> <span class="nx">onGetTemplate</span><span class="p">,</span> <span class="nx">templateTexts</span><span class="p">);</span>
+                <span class="nx">throttleDoSearch</span><span class="p">();</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">removeFinder</span><span class="p">();</span>
+                <span class="nx">addFinder</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">removeFinder</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;removeFinder&quot;</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">finder</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">f</span> <span class="o">=</span> <span class="nx">finder</span><span class="p">;</span>
+                <span class="nx">itemTexts</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+                <span class="nx">clearHighlights</span><span class="p">();</span>
+                <span class="nx">finder</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-7" id="section-7">&#182;</a>
+</div>
+<p>null this first to prevent recursive loop possibility.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="nx">input</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="s2">&quot;keyup&quot;</span><span class="p">,</span> <span class="nx">onInputKeyUp</span><span class="p">);</span>
+                <span class="nx">f</span><span class="p">.</span><span class="nx">scope</span><span class="p">().</span><span class="nx">$destroy</span><span class="p">();</span>
+                <span class="nx">f</span><span class="p">.</span><span class="nx">remove</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">onInputKeyUp</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;onInputKeyUp&quot;</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">newTerm</span> <span class="o">=</span> <span class="nx">input</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-8" id="section-8">&#182;</a>
+</div>
+<p>TODO: iOS has different key for enter that needs to be added here.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">13</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-9" id="section-9">&#182;</a>
+</div>
+<p>enter</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">shiftKey</span> <span class="o">?</span> <span class="nx">result</span><span class="p">.</span><span class="nx">up</span> <span class="o">:</span> <span class="nx">result</span><span class="p">.</span><span class="nx">down</span><span class="p">)();</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">27</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-10" id="section-10">&#182;</a>
+</div>
+<p>esc</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">newTerm</span> <span class="o">===</span> <span class="nx">term</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">throttleDoSearch</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">throttleDoSearch</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">searchIntv</span><span class="p">);</span>
+            <span class="nx">searchIntv</span> <span class="o">=</span> <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">doSearch</span><span class="p">,</span> <span class="mi">250</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">doSearch</span><span class="p">()</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">searchList</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">(),</span> <span class="nx">filtered</span> <span class="o">=</span> <span class="p">[];</span>
+            <span class="nx">term</span> <span class="o">=</span> <span class="nx">input</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-11" id="section-11">&#182;</a>
+</div>
+<p>TODO: need to ignore keys that are navigation or special characters.
+TODO: this needs to make sure to keep the indexes of the data in the original list to scroll to them.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">clearHighlights</span><span class="p">();</span>
+            <span class="nx">searchIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">term</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">scrollToItemActive</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="nx">filtered</span><span class="p">.</span><span class="nx">absCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="nx">lowerCaseTerm</span> <span class="o">=</span> <span class="nx">term</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">();</span>
+                <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">searchList</span><span class="p">,</span> <span class="nx">onFilter</span><span class="p">,</span> <span class="nx">filtered</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">filtered</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">highlightMatches</span><span class="p">(</span><span class="nx">filtered</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="nx">lastFiltered</span> <span class="o">=</span> <span class="nx">filtered</span><span class="p">;</span>
+                <span class="nx">updateMatchCount</span><span class="p">();</span>
+                <span class="nx">scrollToItemActive</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">updateMatchCount</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">lastFiltered</span> <span class="o">&amp;&amp;</span> <span class="nx">lastFiltered</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">matchCount</span><span class="p">.</span><span class="nx">innerText</span> <span class="o">=</span> <span class="nx">searchIndex</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="s2">&quot; of &quot;</span> <span class="o">+</span> <span class="nx">lastFiltered</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">matchCount</span><span class="p">.</span><span class="nx">innerText</span> <span class="o">=</span> <span class="s2">&quot;0 of 0&quot;</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">evalTemplateText</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">tpl</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="nx">item</span><span class="p">),</span> <span class="nx">matches</span><span class="p">,</span> <span class="nx">uncompiledText</span> <span class="o">=</span> <span class="nx">templateTexts</span><span class="p">[</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">name</span><span class="p">].</span><span class="nx">clone</span><span class="p">();</span>
+            <span class="nx">workingScope</span><span class="p">[</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">item</span><span class="p">]</span> <span class="o">=</span> <span class="nx">item</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-12" id="section-12">&#182;</a>
+</div>
+<p>TODO: this can be optimized. Perhaps cache results for a time.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">uncompiledText</span><span class="p">,</span> <span class="nx">replaceCompiled</span><span class="p">,</span> <span class="nx">workingScope</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">uncompiledText</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">replaceCompiled</span><span class="p">(</span><span class="nx">textNode</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">workingScope</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">matches</span> <span class="o">=</span> <span class="nx">textNode</span><span class="p">.</span><span class="nx">text</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/{{(.*?)}}/g</span><span class="p">);</span>
+            <span class="nx">textNode</span><span class="p">.</span><span class="nx">workingScope</span> <span class="o">=</span> <span class="nx">workingScope</span><span class="p">;</span>
+            <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">matches</span><span class="p">,</span> <span class="nx">evalMatches</span><span class="p">,</span> <span class="nx">textNode</span><span class="p">);</span>
+            <span class="k">delete</span> <span class="nx">textNode</span><span class="p">.</span><span class="nx">workingScope</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">evalMatches</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">textNode</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">evalStr</span> <span class="o">=</span> <span class="nx">textNode</span><span class="p">.</span><span class="nx">workingScope</span><span class="p">.</span><span class="nx">$eval</span><span class="p">(</span><span class="nx">value</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">value</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">4</span><span class="p">));</span>
+            <span class="nx">textNode</span><span class="p">.</span><span class="nx">text</span> <span class="o">=</span> <span class="nx">textNode</span><span class="p">.</span><span class="nx">text</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">evalStr</span><span class="p">);</span>
+            <span class="nx">list</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="nx">evalStr</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">onFilter</span><span class="p">(</span><span class="nx">item</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">filtered</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">matches</span> <span class="o">=</span> <span class="p">[];</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-13" id="section-13">&#182;</a>
+</div>
+<p>cache itemTexts on an open/close basis.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">itemTexts</span><span class="p">[</span><span class="nx">index</span><span class="p">])</span> <span class="p">{</span>
+                <span class="nx">itemTexts</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="nx">evalTemplateText</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">itemTexts</span><span class="p">[</span><span class="nx">index</span><span class="p">],</span> <span class="nx">getMatches</span><span class="p">,</span> <span class="nx">matches</span><span class="p">,</span> <span class="nx">filtered</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">matches</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">matches</span><span class="p">.</span><span class="nx">rowIndex</span> <span class="o">=</span> <span class="nx">index</span><span class="p">;</span>
+                <span class="nx">filtered</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">matches</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">getMatches</span><span class="p">(</span><span class="nx">itemText</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">itemTextMatches</span><span class="p">,</span> <span class="nx">filtered</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">itemText</span><span class="p">.</span><span class="nx">text</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">(),</span> <span class="nx">matchIndex</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">lowerCaseTerm</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">itemTextMatches</span><span class="p">.</span><span class="nx">absIndex</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-14" id="section-14">&#182;</a>
+</div>
+<p>only set it if it has not been. we don't want to overwrite it.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="nx">itemTextMatches</span><span class="p">.</span><span class="nx">absIndex</span> <span class="o">=</span> <span class="nx">filtered</span><span class="p">.</span><span class="nx">absCount</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">matchIndex</span> <span class="o">!==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">itemTextMatches</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+                    <span class="nx">matchIndex</span><span class="o">:</span> <span class="nx">matchIndex</span><span class="p">,</span>
+                    <span class="nx">itemText</span><span class="o">:</span> <span class="nx">itemText</span><span class="p">,</span>
+                    <span class="nx">absIndex</span><span class="o">:</span> <span class="nx">filtered</span><span class="p">.</span><span class="nx">absCount</span>
+                <span class="p">});</span>
+                <span class="nx">matchIndex</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">lowerCaseTerm</span><span class="p">,</span> <span class="nx">matchIndex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+                <span class="nx">filtered</span><span class="p">.</span><span class="nx">absCount</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+                <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">highlightMatches</span><span class="p">(</span><span class="nx">filtered</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">selected</span><span class="p">;</span>
+            <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">filtered</span><span class="p">,</span> <span class="nx">highlight</span><span class="p">);</span>
+            <span class="nx">selected</span> <span class="o">=</span> <span class="nx">filtered</span><span class="p">.</span><span class="nx">selected</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">scrollToItemActive</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">selected</span><span class="p">.</span><span class="nx">rowIndex</span> <span class="o">&lt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">||</span> <span class="nx">selected</span><span class="p">.</span><span class="nx">rowIndex</span> <span class="o">&gt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollIntoView</span><span class="p">(</span><span class="nx">selected</span><span class="p">.</span><span class="nx">rowIndex</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">highlight</span><span class="p">(</span><span class="nx">match</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-15" id="section-15">&#182;</a>
+</div>
+<p>we need to find all of the matches. And make a selected range. Then highlight those.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">match</span><span class="p">.</span><span class="nx">rowIndex</span> <span class="o">&gt;=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span> <span class="o">&amp;&amp;</span> <span class="nx">match</span><span class="p">.</span><span class="nx">rowIndex</span> <span class="o">&lt;=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">row</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">match</span><span class="p">.</span><span class="nx">rowIndex</span><span class="p">);</span>
+                <span class="nx">clearHighlightsForRow</span><span class="p">(</span><span class="nx">match</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+                <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">match</span><span class="p">,</span> <span class="nx">highlightRowMatches</span><span class="p">,</span> <span class="nx">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">match</span><span class="p">.</span><span class="nx">absIndex</span> <span class="o">&lt;=</span> <span class="nx">searchIndex</span> <span class="o">&amp;&amp;</span> <span class="nx">searchIndex</span> <span class="o">-</span> <span class="nx">match</span><span class="p">.</span><span class="nx">absIndex</span> <span class="o">&lt;</span> <span class="nx">match</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">list</span><span class="p">.</span><span class="nx">selected</span> <span class="o">=</span> <span class="nx">match</span><span class="p">;</span>
+                <span class="nx">list</span><span class="p">.</span><span class="nx">selectedMatchIndex</span> <span class="o">=</span> <span class="nx">searchIndex</span> <span class="o">-</span> <span class="nx">match</span><span class="p">.</span><span class="nx">absIndex</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">highlightRowMatches</span><span class="p">(</span><span class="nx">match</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">row</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">getNodeFromMatch</span><span class="p">(</span><span class="nx">row</span><span class="p">,</span> <span class="nx">match</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-16" id="section-16">&#182;</a>
+</div>
+<p>TODO: this needs to check all matches.
+now we need to highlight the text range inside of the node</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">highlightTextRange</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="nx">match</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">getNodeFromMatch</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">match</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">depth</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">match</span><span class="p">.</span><span class="nx">itemText</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="nx">child</span> <span class="o">=</span> <span class="nx">el</span><span class="p">;</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">depth</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">child</span> <span class="o">=</span> <span class="nx">child</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">[</span><span class="nx">match</span><span class="p">.</span><span class="nx">itemText</span><span class="p">[</span><span class="nx">depth</span><span class="p">]];</span>
+                <span class="nx">depth</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">child</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">highlightTextRange</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">match</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-17" id="section-17">&#182;</a>
+</div>
+<p>TODO: needs to be injected.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="kd">var</span> <span class="nx">range</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createRange</span><span class="p">(),</span> <span class="nx">selectionContents</span><span class="p">,</span> <span class="nx">span</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">&quot;span&quot;</span><span class="p">),</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">startIndex</span> <span class="o">=</span> <span class="nx">match</span><span class="p">.</span><span class="nx">matchIndex</span><span class="p">,</span> <span class="nx">endIndex</span> <span class="o">=</span> <span class="nx">match</span><span class="p">.</span><span class="nx">matchIndex</span> <span class="o">+</span> <span class="nx">term</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="nx">siblings</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">;</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">siblings</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">el</span> <span class="o">=</span> <span class="nx">siblings</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">el</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-18" id="section-18">&#182;</a>
+</div>
+<p>these are already matches that have been turned into spans.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="nx">len</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">nodeValue</span> <span class="o">?</span> <span class="nx">el</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">nodeValue</span><span class="p">.</span><span class="nx">length</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">len</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">nodeValue</span> <span class="o">?</span> <span class="nx">el</span><span class="p">.</span><span class="nx">nodeValue</span><span class="p">.</span><span class="nx">length</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="nx">startIndex</span> <span class="o">-=</span> <span class="nx">len</span><span class="p">;</span>
+                <span class="nx">endIndex</span> <span class="o">-=</span> <span class="nx">len</span><span class="p">;</span>
+                <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">el</span> <span class="o">=</span> <span class="nx">siblings</span><span class="p">[</span><span class="nx">siblings</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-19" id="section-19">&#182;</a>
+</div>
+
+<div class="highlight"><pre><code>       <span class="k">if</span> <span class="p">(</span><span class="n">startIndex</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</code></pre></div>
+
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="nx">range</span><span class="p">.</span><span class="nx">setStart</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">startIndex</span><span class="p">);</span>
+                <span class="nx">range</span><span class="p">.</span><span class="nx">setEnd</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">endIndex</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;OOPS! Something went wrong with the highlighting!&quot;</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="nx">selectionContents</span> <span class="o">=</span> <span class="nx">range</span><span class="p">.</span><span class="nx">extractContents</span><span class="p">();</span>
+            <span class="nx">span</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">selectionContents</span><span class="p">);</span>
+            <span class="nx">span</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="s2">&quot;uxDatagridFindInListHighlight&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">match</span><span class="p">.</span><span class="nx">absIndex</span> <span class="o">===</span> <span class="nx">searchIndex</span> <span class="o">?</span> <span class="s2">&quot; selectedHighlight&quot;</span> <span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">);</span>
+            <span class="nx">range</span><span class="p">.</span><span class="nx">insertNode</span><span class="p">(</span><span class="nx">span</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">clearHighlights</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">lastFiltered</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-20" id="section-20">&#182;</a>
+</div>
+<p>we want to digest every row that had one.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">lastFiltered</span><span class="p">,</span> <span class="nx">clearHighlightsForRow</span><span class="p">);</span>
+                <span class="nx">lastFiltered</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">clearHighlightsForRow</span><span class="p">(</span><span class="nx">match</span><span class="p">,</span> <span class="nx">force</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-21" id="section-21">&#182;</a>
+</div>
+<p>TODO: We need to clear all. Not just the ones that are in view. or when out of view we need to clear them... maybe before a render we clear them.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">force</span> <span class="o">||</span> <span class="nx">match</span><span class="p">.</span><span class="nx">rowIndex</span> <span class="o">&gt;=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span> <span class="o">+</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">cushion</span> <span class="o">&amp;&amp;</span> <span class="nx">match</span><span class="p">.</span><span class="nx">rowIndex</span> <span class="o">&lt;=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">-</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">cushion</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">row</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">match</span><span class="p">.</span><span class="nx">rowIndex</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
+                <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">match</span><span class="p">,</span> <span class="nx">clearHighlightsForRowMatches</span><span class="p">,</span> <span class="nx">row</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">clearHighlightsForRowMatches</span><span class="p">(</span><span class="nx">match</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">row</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">getNodeFromMatch</span><span class="p">(</span><span class="nx">row</span><span class="p">,</span> <span class="nx">match</span><span class="p">);</span>
+            <span class="nx">node</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">innerText</span> <span class="o">=</span> <span class="nx">match</span><span class="p">.</span><span class="nx">itemText</span><span class="p">.</span><span class="nx">text</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">setup</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;setup&quot;</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-22" id="section-22">&#182;</a>
+</div>
+<p>listen for key events to open the find.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">$window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">&quot;keydown&quot;</span><span class="p">,</span> <span class="nx">onKeyDown</span><span class="p">);</span>
+            <span class="nx">$window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">&quot;keyup&quot;</span><span class="p">,</span> <span class="nx">onKeyUp</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-23" id="section-23">&#182;</a>
+</div>
+<p>make datagrid focusable so we can have focus in it to find.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;tabindex&quot;</span><span class="p">,</span> <span class="mi">999999</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">updateSearchIndexHighlight</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">beforeRender</span><span class="p">();</span>
+            <span class="nx">afterRender</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">beforeRender</span><span class="p">()</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">filtered</span> <span class="o">=</span> <span class="nx">lastFiltered</span><span class="p">;</span>
+            <span class="nx">clearHighlights</span><span class="p">();</span>
+            <span class="nx">lastFiltered</span> <span class="o">=</span> <span class="nx">filtered</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">afterRender</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">finder</span> <span class="o">&amp;&amp;</span> <span class="nx">lastFiltered</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">highlightMatches</span><span class="p">(</span><span class="nx">lastFiltered</span><span class="p">);</span>
+                <span class="nx">updateMatchCount</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">up</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">up</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">scrollToItemActive</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">searchIndex</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">searchIndex</span> <span class="o">-=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">searchIndex</span> <span class="o">=</span> <span class="nx">lastFiltered</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">updateSearchIndexHighlight</span><span class="p">();</span>
+            <span class="nx">scrollToItemActive</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">down</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">down</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">scrollToItemActive</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">searchIndex</span> <span class="o">&lt;</span> <span class="nx">lastFiltered</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">searchIndex</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">searchIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">updateSearchIndexHighlight</span><span class="p">();</span>
+            <span class="nx">scrollToItemActive</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">destroy</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">finder</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">removeFinder</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="nx">$window</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="s2">&quot;keydown&quot;</span><span class="p">,</span> <span class="nx">onKeyDown</span><span class="p">);</span>
+            <span class="nx">$window</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="s2">&quot;keyup&quot;</span><span class="p">,</span> <span class="nx">onKeyUp</span><span class="p">);</span>
+            <span class="nx">input</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">lastFiltered</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">matchCount</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">workingScope</span><span class="p">.</span><span class="nx">$destroy</span><span class="p">();</span>
+            <span class="nx">workingScope</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">result</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="nx">setup</span><span class="p">();</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">open</span> <span class="o">=</span> <span class="nx">addFinder</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">close</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">removeFinder</span><span class="p">();</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">focus</span><span class="p">();</span>
+        <span class="p">};</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">findInList</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_UPDATE_WATCHERS</span><span class="p">,</span> <span class="nx">beforeRender</span><span class="p">));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_UPDATE_WATCHERS</span><span class="p">,</span> <span class="nx">afterRender</span><span class="p">));</span>
+        <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">}</span> <span class="p">]);</span>
+
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">directive</span><span class="p">(</span><span class="s2">&quot;uxDatagridFindInList&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">directiveTerm</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+    <span class="kd">function</span> <span class="nx">countFind</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">el</span> <span class="o">===</span> <span class="nb">document</span><span class="p">.</span><span class="nx">activeElement</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">count</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">restrict</span><span class="o">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span>
+        <span class="nx">scope</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+        <span class="nx">template</span><span class="o">:</span> <span class="s1">&#39;&lt;input type=&quot;text&quot; ng-model=&quot;term&quot; class=&quot;findInListInput&quot;&gt;&#39;</span> <span class="o">+</span> <span class="s1">&#39;&lt;span class=&quot;findInListMatchCount&quot;&gt;&lt;/span&gt;&#39;</span> <span class="o">+</span> <span class="s1">&#39;&lt;input type=&quot;button&quot; class=&quot;findInListButton findInListDown&quot; value=&quot;&amp;#x25BC;&quot; ng-click=&quot;down()&quot;&gt;&#39;</span> <span class="o">+</span> <span class="s1">&#39;&lt;input type=&quot;button&quot; class=&quot;findInListButton findInListUp&quot; value=&quot;&amp;#x25B2;&quot; ng-click=&quot;up()&quot;&gt;&#39;</span> <span class="o">+</span> <span class="s1">&#39;&lt;input type=&quot;button&quot; class=&quot;findInListButton findInListClose&quot; value=&quot;X&quot; ng-click=&quot;close()&quot;&gt;&#39;</span><span class="p">,</span>
+        <span class="nx">link</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="nx">attr</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">children</span> <span class="o">=</span> <span class="nx">element</span><span class="p">.</span><span class="nx">children</span><span class="p">();</span>
+            <span class="nx">scope</span><span class="p">.</span><span class="nx">term</span> <span class="o">=</span> <span class="nx">directiveTerm</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-24" id="section-24">&#182;</a>
+</div>
+<p>we want this to wait and run after the element is there.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">children</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="s2">&quot;blur&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="nx">count</span><span class="o">:</span> <span class="mi">0</span>
+                    <span class="p">};</span>
+                    <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">children</span><span class="p">,</span> <span class="nx">countFind</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">result</span><span class="p">.</span><span class="nx">count</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">scope</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+                    <span class="p">}</span>
+                <span class="p">});</span>
+            <span class="p">});</span>
+            <span class="nx">scope</span><span class="p">.</span><span class="nx">up</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">findInList</span><span class="p">.</span><span class="nx">up</span><span class="p">();</span>
+            <span class="p">};</span>
+            <span class="nx">scope</span><span class="p">.</span><span class="nx">down</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">findInList</span><span class="p">.</span><span class="nx">down</span><span class="p">();</span>
+            <span class="p">};</span>
+            <span class="nx">scope</span><span class="p">.</span><span class="nx">$watch</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">directiveTerm</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">term</span><span class="p">;</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+<span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

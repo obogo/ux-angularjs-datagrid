@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ux-datagrid-disableHoverWhileScrolling.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../doc-style.css" />
+  <script src="../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../", thisFile = "Users/wes/PhpstormProjects/wes/webux/ux-datagrid//addons/desktop/ux-datagrid-disableHoverWhileScrolling.js", defaultSidebar = true;
+  </script>
+  <script src="../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>ux-datagrid-disableHoverWhileScrolling.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>uxDatagrid v.0.2.2
+(c) 2014, WebUX
+<a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
+License: MIT.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>Based on the article here for a performance increase or prevention of performance degradation
+when hover elements are added to a grid. If your grid has lots of hover events this will keep
+them from reducing your fps.
+<a href='http://www.thecssninja.com/javascript/pointer-events-60fps'>http://www.thecssninja.com/javascript/pointer-events-60fps</a></p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;disableHoverWhileScrolling&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="s2">&quot;disable-hover-while-scrolling&quot;</span><span class="p">,</span> <span class="nx">timer</span><span class="p">;</span>
+        <span class="kd">function</span> <span class="nx">init</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;init&quot;</span><span class="p">);</span>
+            <span class="nx">ux</span><span class="p">.</span><span class="nx">css</span><span class="p">.</span><span class="nx">createClass</span><span class="p">(</span><span class="s2">&quot;grid&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="nx">name</span> <span class="o">+</span> <span class="s2">&quot; *&quot;</span><span class="p">,</span> <span class="s2">&quot;pointer-events: none !important;&quot;</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">scrollStart</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">stopTimeout</span><span class="p">(</span><span class="nx">timer</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;scrollStart&quot;</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">classList</span><span class="p">.</span><span class="nx">contains</span><span class="p">(</span><span class="nx">name</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">classList</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">scrollStop</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">async</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">timer</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">timeout</span><span class="p">(</span><span class="nx">waitAfterScrollStopToDisableHover</span><span class="p">,</span> <span class="mi">500</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">waitAfterScrollStopToDisableHover</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">waitAfterScrollStopToDisableHover</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;scrollStop&quot;</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">classList</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">SCROLL_START</span><span class="p">,</span> <span class="nx">scrollStart</span><span class="p">));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">SCROLL_STOP</span><span class="p">,</span> <span class="nx">scrollStop</span><span class="p">));</span>
+        <span class="nx">init</span><span class="p">();</span>
+        <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+<span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

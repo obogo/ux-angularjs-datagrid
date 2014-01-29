@@ -2,24 +2,24 @@
 // we want to override the default scrolling if it is an IOS device.
 angular.module('ux').factory('windowScroll', function () {
 
-    return function windowScroll(exp) {
-        var result = exp.scrollModel;
-        exp.calculateViewportHeight = function () {
+    return function windowScroll(inst) {
+        var result = inst.scrollModel;
+        inst.calculateViewportHeight = function () {
             return window.screen.height;
         };
         result.onUpdateScroll = function onUpadateScroll(event) {
             var val = window.scrollY;
-            if (exp.values.scroll !== val) {
-                exp.dispatch(ux.datagrid.events.SCROLL_START, val);
-                exp.values.speed = val - exp.values.scroll;
-                exp.values.absSpeed = Math.abs(exp.values.speed);
-                exp.values.scroll = val;
-                exp.values.scrollPercent = ((exp.values.scroll / exp.getContentHeight()) * 100).toFixed(2);
+            if (inst.values.scroll !== val) {
+                inst.dispatch(ux.datagrid.events.SCROLL_START, val);
+                inst.values.speed = val - inst.values.scroll;
+                inst.values.absSpeed = Math.abs(inst.values.speed);
+                inst.values.scroll = val;
+                inst.values.scrollPercent = ((inst.values.scroll / inst.getContentHeight()) * 100).toFixed(2);
             }
             result.waitForStop();
-            exp.dispatch(ux.datagrid.events.ON_SCROLL, exp.values);
+            inst.dispatch(ux.datagrid.events.ON_SCROLL, inst.values);
         };
-        window.addEventListener('scroll', exp.scrollModel.onUpdateScroll);
+        window.addEventListener('scroll', inst.scrollModel.onUpdateScroll);
 
         function resetScroll() {
             // force browser to start at 0,0 on page reload.
@@ -29,7 +29,7 @@ angular.module('ux').factory('windowScroll', function () {
             });
         }
 
-        exp.scope.$on(ux.datagrid.events.ON_READY, resetScroll);
-        return exp;
+        inst.scope.$on(ux.datagrid.events.ON_READY, resetScroll);
+        return inst;
     };
 });

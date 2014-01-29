@@ -10,13 +10,13 @@ cmdKey;
 
 // if the cmdKey is pressed on a mac.
 angular.module("ux").factory("findInList", [ "$window", "$compile", function($window, $compile) {
-    return function(exp) {
-        var result = {}, term = "", input, lowerCaseTerm, lastFiltered, searchIndex = 0, matchCount, searchIntv, scrollToItemActive = false, itemTexts = {}, findInListTemplate = '<div data-ux-datagrid-find-in-list="datagrid" class="findInList"></div>', templateTexts = {}, workingScope = exp.scope.$new();
+    return function(inst) {
+        var result = {}, term = "", input, lowerCaseTerm, lastFiltered, searchIndex = 0, matchCount, searchIntv, scrollToItemActive = false, itemTexts = {}, findInListTemplate = '<div data-ux-datagrid-find-in-list="datagrid" class="findInList"></div>', templateTexts = {}, workingScope = inst.scope.$new();
         function onKeyDown(event) {
-            exp.flow.info("onKeyDown %s", event.keyCode);
+            inst.flow.info("onKeyDown %s", event.keyCode);
             detectCmdKey(event);
             // we only want to do this if the grid has focus.
-            if (exp.element[0].contains(document.activeElement)) {
+            if (inst.element[0].contains(document.activeElement)) {
                 if (event.keyCode == 114 || (event.ctrlKey || cmdKey) && event.keyCode == 70) {
                     // Block CTRL + F event
                     event.preventDefault();
@@ -25,19 +25,19 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             }
         }
         function onKeyUp(event) {
-            exp.flow.info("onKeyUp %s", event.keyCode);
+            inst.flow.info("onKeyUp %s", event.keyCode);
             if (cmdKey) {
                 detectCmdKey(event);
             }
         }
         function detectCmdKey(event) {
-            exp.flow.info("detectCmdKey");
+            inst.flow.info("detectCmdKey");
             if (isCmdKey(event)) {
                 cmdKey = event.type === "keydown";
             }
         }
         function isCmdKey(event) {
-            exp.flow.info("isCmdKey");
+            inst.flow.info("isCmdKey");
             // if mac we need to check the command key based on each browser because the keycode is different.
             if ($window.navigator.platform === "MacIntel") {
                 // chrome/safari left cmd or right cmd key
@@ -88,22 +88,22 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             }
         }
         function addFinder() {
-            exp.flow.info("addFinder");
+            inst.flow.info("addFinder");
             if (!finder) {
                 finder = angular.element(findInListTemplate);
-                exp.element[0].parentNode.insertBefore(finder[0], exp.element[0]);
-                $compile(finder)(exp.scope);
+                inst.element[0].parentNode.insertBefore(finder[0], inst.element[0]);
+                $compile(finder)(inst.scope);
                 input = finder[0].getElementsByClassName("findInListInput")[0];
                 if (input.select) {
                     input.select();
                 }
                 input.focus();
                 finder.scope().close = removeFinder;
-                exp.safeDigest(finder.scope());
+                inst.safeDigest(finder.scope());
                 input.addEventListener("keyup", onInputKeyUp);
                 matchCount = finder[0].getElementsByClassName("findInListMatchCount")[0];
                 itemTexts = {};
-                ux.each(exp.templateModel.getTemplates(), onGetTemplate, templateTexts);
+                ux.each(inst.templateModel.getTemplates(), onGetTemplate, templateTexts);
                 throttleDoSearch();
             } else {
                 removeFinder();
@@ -111,7 +111,7 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             }
         }
         function removeFinder() {
-            exp.flow.info("removeFinder");
+            inst.flow.info("removeFinder");
             if (finder) {
                 var f = finder;
                 itemTexts = null;
@@ -124,7 +124,7 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             }
         }
         function onInputKeyUp(event) {
-            exp.flow.info("onInputKeyUp");
+            inst.flow.info("onInputKeyUp");
             var newTerm = input.value;
             //TODO: iOS has different key for enter that needs to be added here.
             if (event.keyCode === 13) {
@@ -145,7 +145,7 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             searchIntv = setTimeout(doSearch, 250);
         }
         function doSearch() {
-            var searchList = exp.getData(), filtered = [];
+            var searchList = inst.getData(), filtered = [];
             term = input.value;
             //TODO: need to ignore keys that are navigation or special characters.
             //TODO: this needs to make sure to keep the indexes of the data in the original list to scroll to them.
@@ -172,7 +172,7 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             }
         }
         function evalTemplateText(item) {
-            var tpl = exp.templateModel.getTemplate(item), matches, uncompiledText = templateTexts[tpl.name].clone();
+            var tpl = inst.templateModel.getTemplate(item), matches, uncompiledText = templateTexts[tpl.name].clone();
             workingScope[tpl.item] = item;
             //TODO: this can be optimized. Perhaps cache results for a time.
             exports.each(uncompiledText, replaceCompiled, workingScope);
@@ -222,14 +222,14 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             var selected;
             ux.each(filtered, highlight);
             selected = filtered.selected;
-            if (scrollToItemActive && (selected.rowIndex < exp.values.activeRange.min + 2 || selected.rowIndex > exp.values.activeRange.max - 2)) {
-                exp.scrollModel.scrollIntoView(selected.rowIndex, true);
+            if (scrollToItemActive && (selected.rowIndex < inst.values.activeRange.min + 2 || selected.rowIndex > inst.values.activeRange.max - 2)) {
+                inst.scrollModel.scrollIntoView(selected.rowIndex, true);
             }
         }
         function highlight(match, index, list) {
             // we need to find all of the matches. And make a selected range. Then highlight those.
-            if (match.rowIndex >= exp.values.activeRange.min && match.rowIndex <= exp.values.activeRange.max) {
-                var row = exp.getRowElm(match.rowIndex);
+            if (match.rowIndex >= inst.values.activeRange.min && match.rowIndex <= inst.values.activeRange.max) {
+                var row = inst.getRowElm(match.rowIndex);
                 clearHighlightsForRow(match, true);
                 exports.each(match, highlightRowMatches, row[0]);
             }
@@ -289,8 +289,8 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
         }
         function clearHighlightsForRow(match, force) {
             //TODO: We need to clear all. Not just the ones that are in view. or when out of view we need to clear them... maybe before a render we clear them.
-            if (force || match.rowIndex >= exp.values.activeRange.min + exp.options.cushion && match.rowIndex <= exp.values.activeRange.max - exp.options.cushion) {
-                var row = exp.getRowElm(match.rowIndex)[0];
+            if (force || match.rowIndex >= inst.values.activeRange.min + inst.options.cushion && match.rowIndex <= inst.values.activeRange.max - inst.options.cushion) {
+                var row = inst.getRowElm(match.rowIndex)[0];
                 exports.each(match, clearHighlightsForRowMatches, row);
             }
         }
@@ -299,12 +299,12 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             node.parentNode.innerText = match.itemText.text;
         }
         function setup() {
-            exp.flow.info("setup");
+            inst.flow.info("setup");
             // listen for key events to open the find.
             $window.addEventListener("keydown", onKeyDown);
             $window.addEventListener("keyup", onKeyUp);
             // make datagrid focusable so we can have focus in it to find.
-            exp.element.attr("tabindex", 999999);
+            inst.element.attr("tabindex", 999999);
         }
         function updateSearchIndexHighlight() {
             beforeRender();
@@ -358,12 +358,12 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
         result.open = addFinder;
         result.close = function() {
             removeFinder();
-            exp.element[0].focus();
+            inst.element[0].focus();
         };
-        exp.findInList = result;
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_BEFORE_UPDATE_WATCHERS, beforeRender));
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, afterRender));
-        return exp;
+        inst.findInList = result;
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_UPDATE_WATCHERS, beforeRender));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, afterRender));
+        return inst;
     };
 } ]);
 

@@ -1,3 +1,9 @@
+/**
+ * ##ux.CSS##
+ * Create custom style sheets. This has a performance increase over modifying the style on multiple dom
+ * elements because you can create the sheet or override it and then all with that classname update by the browser
+ * instead of the manual insertion into style attributes per dom node.
+ */
 exports.css = (function CSS() {
 
     var customStyleSheets = {},
@@ -9,6 +15,11 @@ exports.css = (function CSS() {
             object: "object"
         };
 
+    /**
+     * **createCustomStyleSheet** given a name creates a new styleSheet.
+     * @param {Strng} name
+     * @returns {*}
+     */
     function createCustomStyleSheet(name) {
         if (!getCustomSheet(name)) {
             customStyleSheets[name] = createStyleSheet(name);
@@ -16,10 +27,20 @@ exports.css = (function CSS() {
         return getCustomSheet(name);
     }
 
+    /**
+     * **getCustomSheet** get one of the custom created sheets.
+     * @param name
+     * @returns {*}
+     */
     function getCustomSheet(name) {
         return customStyleSheets[name];
     }
 
+    /**
+     * **createStyleSheet** does the heavy lifting of creating a style sheet.
+     * @param {String} name
+     * @returns {{name: *, styleSheet: *}}
+     */
     function createStyleSheet(name) {
         if (!document.styleSheets) {
             return;
@@ -73,6 +94,12 @@ exports.css = (function CSS() {
         };
     }
 
+    /**
+     * **createClass** creates a class on a custom style sheet.
+     * @param {String} sheetName
+     * @param {String} selector - example: ".datagrid"
+     * @param {String} style - example: "height:20px;width:40px;color:blue;"
+     */
     function createClass(sheetName, selector, style) {
         var sheet = getCustomSheet(sheetName) || createCustomStyleSheet(sheetName), styleSheet = sheet.styleSheet,
             i;
@@ -97,6 +124,11 @@ exports.css = (function CSS() {
         }
     }
 
+    /**
+     * **getSelector** given a selector this will find that selector in the stylesheets. Not just the custom ones.
+     * @param {String} selector
+     * @returns {*}
+     */
     function getSelector(selector) {
         var i, ilen, sheet, classes, result;
 
@@ -118,6 +150,12 @@ exports.css = (function CSS() {
         return null;
     }
 
+    /**
+     * **getRules** given a set of classes and a selector it will get the rules for a style sheet.
+     * @param {CSSRules} classes
+     * @param {String} selector
+     * @returns {*}
+     */
     function getRules(classes, selector) {
         var j, jlen, cls, result;
         if (classes) {
@@ -146,16 +184,31 @@ exports.css = (function CSS() {
         return null;
     }
 
+    /**
+     * **getCSSValue** return the css value of a property given the selector and the property.
+     * @param {String} selector
+     * @param {String} property
+     * @returns {*}
+     */
     function getCSSValue(selector, property) {
         var cls = getSelector(selector);
         return cls && cls[property] !== undefined ? cls[property] : null;// hasOwnProperty in FF and IE not working on CSSStyleDeclaration.
     }
 
+    /**
+     * **setCSSValue** overwrite a css value given a selector, property, and new value.
+     * @param {String} selector
+     * @param {String} property
+     * @param {String} value
+     */
     function setCSSValue(selector, property, value) {
         var cls = getSelector(selector);
         cls[property] = value;
     }
 
+    /**
+     * **ux.CSS API**
+     */
     return {
         createdStyleSheets: [],
         createStyleSheet: createStyleSheet,

@@ -1,4 +1,4 @@
-function Flow(exp, dispatch) {
+function Flow(inst, dispatch) {
     var running = false,
         intv,
         current = null,
@@ -29,7 +29,7 @@ function Flow(exp, dispatch) {
         var i = 0, len = list.length;
         while (i < len) {
             if (list[i].label === item.label && list[i] !== current) {
-                exp.log("clear duplicate item %c%s", consoleMethodStyle, item.label);
+                inst.log("clear duplicate item %c%s", consoleMethodStyle, item.label);
                 list.splice(i, 1);
                 i -= 1;
                 len -= 1;
@@ -61,10 +61,10 @@ function Flow(exp, dispatch) {
     function timeout(method, time) {
         var intv, item = createItem(method, [], time), startTime = Date.now(),
             timeoutCall = function () {
-                exp.log("exec timeout method %c%s %sms", consoleMethodStyle, item.label, Date.now() - startTime);
+                inst.log("exec timeout method %c%s %sms", consoleMethodStyle, item.label, Date.now() - startTime);
                 method();
             };
-        exp.log("wait for timeout method %c%s", consoleMethodStyle, item.label);
+        inst.log("wait for timeout method %c%s", consoleMethodStyle, item.label);
         intv = setTimeout(timeoutCall, time);
         timeouts[intv] = function () {
             clearTimeout(intv);
@@ -89,7 +89,7 @@ function Flow(exp, dispatch) {
 
     function done() {
         execEndTime = Date.now();
-        exp.log("finish %c%s took %dms", consoleMethodStyle, current.label, execEndTime - execStartTime);
+        inst.log("finish %c%s took %dms", consoleMethodStyle, current.label, execEndTime - execStartTime);
         current = null;
         addToHistory(list.shift());
         if (list.length) {
@@ -109,8 +109,8 @@ function Flow(exp, dispatch) {
     function next() {
         if (!current && list.length) {
             current = list[0];
-            if (exp.async && current.delay !== undefined) {
-                exp.log("\tdelay for %c%s %sms", consoleMethodStyle, current.label, current.delay);
+            if (inst.async && current.delay !== undefined) {
+                inst.log("\tdelay for %c%s %sms", consoleMethodStyle, current.label, current.delay);
                 clearTimeout(intv);
                 intv = setTimeout(exec, current.delay);
             } else {
@@ -120,7 +120,7 @@ function Flow(exp, dispatch) {
     }
 
     function exec() {
-        exp.log("start method %c%s", consoleMethodStyle, current.label);
+        inst.log("start method %c%s", consoleMethodStyle, current.label);
         var methodHasDoneArg = hasDoneArg(current.method);
         if (methodHasDoneArg) current.args.push(done);
         execStartTime = Date.now();
@@ -136,21 +136,21 @@ function Flow(exp, dispatch) {
     function destroy() {
         clearTimeout(intv);
         list.length = 0;
-        exp = null;
+        inst = null;
     }
 
-    exp = exports.logWrapper('Flow', exp || {}, 'grey', dispatch);
-    exp.async = exp.hasOwnProperty('async') ? exp.async : true;
-    exp.debug = exp.hasOwnProperty('debug') ? exp.debug : 0;
-    exp.insert = insert;
-    exp.add = add;
-    exp.unique = unique;
-    exp.remove = remove;
-    exp.timeout = timeout;
-    exp.stopTimeout = stopTimeout;
-    exp.run = run;
-    exp.destroy = destroy;
+    inst = exports.logWrapper('Flow', inst || {}, 'grey', dispatch);
+    inst.async = inst.hasOwnProperty('async') ? inst.async : true;
+    inst.debug = inst.hasOwnProperty('debug') ? inst.debug : 0;
+    inst.insert = insert;
+    inst.add = add;
+    inst.unique = unique;
+    inst.remove = remove;
+    inst.timeout = timeout;
+    inst.stopTimeout = stopTimeout;
+    inst.run = run;
+    inst.destroy = destroy;
 
-    return exp;
+    return inst;
 }
 exports.datagrid.Flow = Flow;

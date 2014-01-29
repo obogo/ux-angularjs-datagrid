@@ -3,36 +3,36 @@ exports.datagrid.events.SCROLL_START = "datagrid:scrollStart";
 exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
 exports.datagrid.events.TOUCH_DOWN = "datagrid:touchDown";
 exports.datagrid.events.TOUCH_UP = "datagrid:touchUp";
-exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
+exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
-    var result = exports.logWrapper('scrollModel', {}, 'orange', exp.dispatch), setup = false, unwatchSetup, scrollListeners = [];
+    var result = exports.logWrapper('scrollModel', {}, 'orange', inst.dispatch), setup = false, unwatchSetup, scrollListeners = [];
 
     /**
      * Listen for scrollingEvents.
      */
     function setupScrolling() {
-        if (!exp.element.css('overflow')) {
-            exp.element.css({overflow: 'auto'});
+        if (!inst.element.css('overflow')) {
+            inst.element.css({overflow: 'auto'});
         }
         result.log('addScrollListener');
-        exp.element[0].addEventListener('scroll', onUpdateScrollHandler);
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_TO_INDEX, function (event, index) {
+        inst.element[0].addEventListener('scroll', onUpdateScrollHandler);
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_TO_INDEX, function (event, index) {
             result.scrollToIndex(index, true);
         }));
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_TO_ITEM, function (event, item) {
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_TO_ITEM, function (event, item) {
             result.scrollToItem(item, true);
         }));
-        exp.unwatchers.push(exp.scope.$on(exports.datagrid.events.SCROLL_INTO_VIEW, function (event, itemOrIndex) {
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_INTO_VIEW, function (event, itemOrIndex) {
             result.scrollIntoView(itemOrIndex, true);
         }));
         addTouchEvents();
         setup = true;
-        exp.flow.unique(result.onScrollingStop);
+        inst.flow.unique(result.onScrollingStop);
     }
 
     function addTouchEvents() {
         result.log('addTouchEvents');
-        var content = exp.getContent();
+        var content = inst.getContent();
         content.bind('touchstart', result.onTouchStart);
         content.bind('touchend', result.onTouchEnd);
         content.bind('touchcancel', result.onTouchEnd);
@@ -40,39 +40,39 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
 
     result.removeScrollListener = function removeScrollListener() {
         result.log('removeScrollListener');
-        exp.element[0].removeEventListener('scroll', onUpdateScrollHandler);
+        inst.element[0].removeEventListener('scroll', onUpdateScrollHandler);
     };
 
     result.removeTouchEvents = function removeTouchEvents() {
         if (setup) {
             result.log('removeTouchEvents');
-            exp.getContent().unbind('touchstart', result.onTouchStart);
-            exp.getContent().unbind('touchend', result.onTouchEnd);
-            exp.getContent().unbind('touchcancel', result.onTouchEnd);
+            inst.getContent().unbind('touchstart', result.onTouchStart);
+            inst.getContent().unbind('touchend', result.onTouchEnd);
+            inst.getContent().unbind('touchcancel', result.onTouchEnd);
         }
     };
 
     result.onTouchStart = function onTouchStart(event) {
-        exp.values.touchDown = true;
-        exp.dispatch(exports.datagrid.events.TOUCH_DOWN, event);
+        inst.values.touchDown = true;
+        inst.dispatch(exports.datagrid.events.TOUCH_DOWN, event);
     };
 
     result.onTouchEnd = function onTouchEnd(event) {
-        exp.values.touchDown = false;
-        exp.dispatch(exports.datagrid.events.TOUCH_UP, event);
+        inst.values.touchDown = false;
+        inst.dispatch(exports.datagrid.events.TOUCH_UP, event);
     };
 
     result.getScroll = function getScroll(el) {
-        return (el || exp.element[0]).scrollTop;
+        return (el || inst.element[0]).scrollTop;
     };
 
     result.setScroll = function setScroll(value) {
-        exp.element[0].scrollTop = value;
-        exp.values.scroll = value;
+        inst.element[0].scrollTop = value;
+        inst.values.scroll = value;
     };
 
     function onUpdateScrollHandler(event) {
-        exp.flow.add(result.onUpdateScroll, [event]);
+        inst.flow.add(result.onUpdateScroll, [event]);
     }
 
     /**
@@ -81,15 +81,15 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      */
     result.onUpdateScroll = function onUpdateScroll(event) {
         var val = result.getScroll(event.target || event.srcElement);
-        if (exp.values.scroll !== val) {
-            exp.dispatch(exports.datagrid.events.SCROLL_START, val);
-            exp.values.speed = val - exp.values.scroll;
-            exp.values.absSpeed = Math.abs(exp.values.speed);
-            exp.values.scroll = val;
-            exp.values.scrollPercent = ((exp.values.scroll / exp.getContentHeight()) * 100).toFixed(2);
+        if (inst.values.scroll !== val) {
+            inst.dispatch(exports.datagrid.events.SCROLL_START, val);
+            inst.values.speed = val - inst.values.scroll;
+            inst.values.absSpeed = Math.abs(inst.values.speed);
+            inst.values.scroll = val;
+            inst.values.scrollPercent = ((inst.values.scroll / inst.getContentHeight()) * 100).toFixed(2);
         }
         result.waitForStop();
-        exp.dispatch(exports.datagrid.events.ON_SCROLL, exp.values);
+        inst.dispatch(exports.datagrid.events.ON_SCROLL, inst.values);
     };
 
     /**
@@ -107,17 +107,17 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
     };
 
     result.clearOnScrollingStop = function clearOnScrollingStop() {
-        exp.flow.remove(result.onScrollingStop);
+        inst.flow.remove(result.onScrollingStop);
     };
 
     /**
      * Wait for the datagrid to slow down enough to render.
      */
     result.waitForStop = function waitForStop() {
-        if (exp.flow.async || exp.values.touchDown) {
-            exp.flow.add(result.onScrollingStop, null, exp.options.updateDelay);
+        if (inst.flow.async || inst.values.touchDown) {
+            inst.flow.add(result.onScrollingStop, null, inst.options.updateDelay);
         } else {
-            exp.flow.add(result.onScrollingStop);
+            inst.flow.add(result.onScrollingStop);
         }
     };
 
@@ -125,10 +125,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      * When it stops render.
      */
     result.onScrollingStop = function onScrollingStop() {
-        exp.values.speed = 0;
-        exp.values.absSpeed = 0;
-        exp.flow.add(exp.render);
-        exp.dispatch(exports.datagrid.events.SCROLL_STOP, exp.values.scroll);
+        inst.values.speed = 0;
+        inst.values.absSpeed = 0;
+        inst.flow.add(inst.render);
+        inst.dispatch(exports.datagrid.events.SCROLL_STOP, inst.values.scroll);
     };
 
     /**
@@ -138,7 +138,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      */
     result.scrollToIndex = function scrollToIndex(index, immediately) {
         result.log('scrollToIndex');
-        var offset = exp.getRowOffset(index);
+        var offset = inst.getRowOffset(index);
         result.scrollTo(offset, immediately);
         return offset;
     };
@@ -150,11 +150,11 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      */
     result.scrollToItem = function scrollToItem(item, immediately) {
         result.log('scrollToItem');
-        var index = exp.getNormalizedIndex(item);
+        var index = inst.getNormalizedIndex(item);
         if (index !== -1) {
             return result.scrollToIndex(index, immediately);
         }
-        return exp.values.scroll;
+        return inst.values.scroll;
     };
 
     /**
@@ -164,15 +164,15 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      */
     result.scrollIntoView = function scrollIntoView(itemOrIndex, immediately) {
         result.log('scrollIntoView');
-        var index = typeof itemOrIndex === 'number' ? itemOrIndex : exp.getNormalizedIndex(itemOrIndex),
-            offset = exp.getRowOffset(index), rowHeight, viewHeight;
-        if (offset < exp.values.scroll) { // it is above the view.
+        var index = typeof itemOrIndex === 'number' ? itemOrIndex : inst.getNormalizedIndex(itemOrIndex),
+            offset = inst.getRowOffset(index), rowHeight, viewHeight;
+        if (offset < inst.values.scroll) { // it is above the view.
             result.scrollTo(offset, immediately);
             return;
         }
-        viewHeight = exp.getViewportHeight();
-        rowHeight = exp.templateModel.getTemplateHeight(exp.getData()[index]);
-        if (offset >= exp.values.scroll + viewHeight - rowHeight) { // it is below the view.
+        viewHeight = inst.getViewportHeight();
+        rowHeight = inst.templateModel.getTemplateHeight(inst.getData()[index]);
+        if (offset >= inst.values.scroll + viewHeight - rowHeight) { // it is below the view.
             result.scrollTo(offset - viewHeight + rowHeight);
         }
         // otherwise it is in view so do nothing.
@@ -193,7 +193,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
      */
     result.scrollToBottom = function (immediately) {
         result.log('scrollToBottom');
-        var value = exp.getContentHeight() - exp.getViewportHeight();
+        var value = inst.getContentHeight() - inst.getViewportHeight();
         result.scrollTo(value >= 0 ? value : 0, immediately);
     };
 
@@ -205,18 +205,18 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(exp) {
             result.removeTouchEvents();
         }
         result = null;
-        exp = null;
+        inst = null;
     }
 
     /**
      * Wait till the grid is ready before we setup our listeners.
      */
-    unwatchSetup = exp.scope.$on(exports.datagrid.events.ON_READY, setupScrolling);
+    unwatchSetup = inst.scope.$on(exports.datagrid.events.ON_READY, setupScrolling);
 
     result.destroy = destroy;
 
-    exp.scrollModel = result;// all models should try not to pollute the main model to keep it clean.
+    inst.scrollModel = result;// all models should try not to pollute the main model to keep it clean.
 
-    return exp;
+    return inst;
 };
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.scrollModel);

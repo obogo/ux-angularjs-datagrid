@@ -1,5 +1,5 @@
 /*global angular */
-exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
+exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
     'use strict';
 
     function trim(str) {
@@ -14,13 +14,13 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
         return str;
     }
 
-    exp.templateModel = function () {
+    inst.templateModel = function () {
 
-        var templates = [], totalHeight, defaultName = 'default', result = exports.logWrapper('templateModel', {}, 'teal', exp.dispatch);
+        var templates = [], totalHeight, defaultName = 'default', result = exports.logWrapper('templateModel', {}, 'teal', inst.dispatch);
 
         function createTemplates() {
             result.log('createTemplates');
-            var i, scriptTemplates = exp.element[0].getElementsByTagName('script'), len = scriptTemplates.length;
+            var i, scriptTemplates = inst.element[0].getElementsByTagName('script'), len = scriptTemplates.length;
             if (!len) {
                 throw new Error("at least one template is required.");
             }
@@ -28,7 +28,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
                 createTemplate(scriptTemplates[i]);
             }
             while (scriptTemplates.length) {
-                exp.element[0].removeChild(scriptTemplates[0]);
+                inst.element[0].removeChild(scriptTemplates[0]);
             }
         }
 
@@ -39,9 +39,9 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
                 templateData;
             wrapper.className = 'grid-template-wrapper';
             template = angular.element(template)[0];
-            template.className += ' ' + exp.options.uncompiledClass + ' {{$status}}';
+            template.className += ' ' + inst.options.uncompiledClass + ' {{$status}}';
             template.setAttribute('template', name);
-            exp.getContent()[0].appendChild(wrapper);
+            inst.getContent()[0].appendChild(wrapper);
             wrapper.appendChild(template);
             template = trim(wrapper.innerHTML);
             templateData = {
@@ -56,7 +56,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
             }
             templates[templateData.name] = templateData;
             templates.push(templateData);
-            exp.getContent()[0].removeChild(wrapper);
+            inst.getContent()[0].removeChild(wrapper);
             totalHeight = 0;// reset cached value.
             return templateData;
         }
@@ -141,20 +141,20 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
 
         function setTemplate(itemOrIndex, newTemplateName) {
             result.log('setTemplate %s %s', itemOrIndex, newTemplateName);
-            var item = typeof itemOrIndex === "number" ? exp.data[itemOrIndex] : itemOrIndex;
+            var item = typeof itemOrIndex === "number" ? inst.data[itemOrIndex] : itemOrIndex;
             var oldTemplate = result.getTemplate(item).name;
             result.setTemplateName(item, newTemplateName);
-            exp.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName);
+            inst.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName);
         }
 
         function updateTemplateHeights() {
             //TODO: needs unit tested.
-            var i = exp.values.activeRange.min, len = exp.values.activeRange.max - i, row, tpl, rowHeight, changed = false,
+            var i = inst.values.activeRange.min, len = inst.values.activeRange.max - i, row, tpl, rowHeight, changed = false,
                 heightCache = {};
             while (i < len) {
-                tpl = result.getTemplate(exp.getData()[i]);
+                tpl = result.getTemplate(inst.getData()[i]);
                 if (!heightCache[tpl.name]) {
-                    row = exp.getRowElm(i);
+                    row = inst.getRowElm(i);
                     rowHeight = row[0].offsetHeight;
                     if (rowHeight !== tpl.height) {
                         tpl.height = rowHeight;
@@ -164,7 +164,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
                 i += 1;
             }
             if (changed) {
-                exp.updateHeights();
+                inst.updateHeights();
             }
         }
 
@@ -193,6 +193,6 @@ exports.datagrid.coreAddons.templateModel = function templateModel(exp) {
         return result;
     }();
 
-    return exp.templateModel;
+    return inst.templateModel;
 };
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.templateModel);

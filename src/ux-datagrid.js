@@ -510,12 +510,14 @@ function Datagrid(scope, element, attr, $compile) {
         values.activeRange.max = values.activeRange.max > activeIndex && values.activeRange.max >= 0 ? values.activeRange.max : activeIndex;
     }
 
+    // <a name="beforeRenderAfterDataChange">beforeRenderAfterDataChange</a> fired just before the update watchers are applied if the data has changed.
     function beforeRenderAfterDataChange() {
         if (values.dirty) {
             dispatch(exports.datagrid.events.ON_BEFORE_RENDER_AFTER_DATA_CHANGE);
         }
     }
 
+    // <a name="afterRenderAfterDataChange">afterRenderAfterDataChange</a> after the data has changed this is fired after the following render.
     function afterRenderAfterDataChange() {
         var tplHeight;
         if (values.dirty) {
@@ -528,6 +530,9 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
 
+    // <a name="readyToRender">readyToRender</a> the datagrid requires a height to be able to render. If the datagrid is compiled
+    // and not added to the dom it will not have a height until added to the dom. If this fails it will wait till the next
+    // frame to check the height. If that fails it exits.
     function readyToRender() {
         if (!viewHeight) {
             exp.upateViewportHeight();
@@ -543,6 +548,8 @@ function Datagrid(scope, element, attr, $compile) {
         return true;
     }
 
+    // <a name="render">render</a> depending on the state of the datagrid this will create necessary dom, compile rows, or
+    // digest <a href="#activeRange">activeRange</a> of rows.
     function render() {
         exp.log("render");
         if (readyToRender()) {
@@ -567,11 +574,14 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
 
+    // <a name="update">update</a> force the datagrid to fire a data change update.
     function update() {
         exp.warn("force update");
         onDataChanged(scope.$eval(attr.uxDatagrid), exp.data);
     }
 
+    // <a name="onDataChanged">onDataChanged</a> when the data changes. It is compared by reference, not value for speed
+    // (this is the default angular setting).
     function onDataChanged(newVal, oldVal) {
         dispatch(exports.datagrid.events.ON_BEFORE_DATA_CHANGE);
         values.dirty = true;
@@ -599,6 +609,8 @@ function Datagrid(scope, element, attr, $compile) {
         flow.add(render);
     }
 
+    // <a name="forceRenderScope">forceRenderScope</a> used to force a row to render and digest that may not be within
+    // the <a href="#activeRange">activeRange</a>
     function forceRenderScope(index) {
         var s = scopes[index];
 //        exp.log("\tforceRenderScope %s", index);
@@ -612,6 +624,7 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
 
+    // <a name="onRowTemplateChange">onRowTemplateChange</a> when changing the template for an individual row.
     function onRowTemplateChange(evt, item, oldTemplate, newTemplate) {
         var index = exp.getNormalizedIndex(item),
             el = getRowElm(index), s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope();
@@ -624,21 +637,25 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
 
+    // <a name="updateHeights">updateHeights</a> force invalidation of heights and recalculate them then render.
     function updateHeights(rowIndex) {
         flow.add(exp.chunkModel.updateAllChunkHeights, [rowIndex]);
         flow.add(updateHeightValues);
         flow.add(render);
     }
 
+    // <a name="isLogEvent">isLogEvent</a> used to compare events to detect log events.
     function isLogEvent(evt) {
         return logEvents.indexOf(evt) !== -1;
     }
 
+    // <a name="dispatch">dispatch</a> handle dispaching of events from the datagrid.
     function dispatch(event) {
         if (!isLogEvent(event)) eventLogger.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
         return scope.$emit.apply(scope, arguments);
     }
 
+    // <a name="destroyScopes">destroyScopes</a> used to destroy the scopes of all rows in the datagrid that are compiled.
     function destroyScopes() {
         // because child scopes may not be in order because of rendering techniques. We must loop through
         // all scopes and destroy them manually.
@@ -662,7 +679,7 @@ function Datagrid(scope, element, attr, $compile) {
         scopes.length = 0;
     }
 
-    // destroy needs to put all watcher back before destroying or it will not destroy child scopes, or remove watchers.
+    // <a name="destroy">destroy</a> needs to put all watcher back before destroying or it will not destroy child scopes, or remove watchers.
     function destroy() {
         scope.datagrid = null; // we have a circular reference. break it on destroy.
         exp.log('destroying grid');
@@ -708,6 +725,7 @@ function Datagrid(scope, element, attr, $compile) {
     return exp;
 }
 
+// <a name="uxDatagrid">uxDatagrid</a> define the directive, setup addons, apply core addons then optional addons.
 module.directive('uxDatagrid', ['$compile', 'addons', function ($compile, addons) {
     return {
         restrict: 'AE',

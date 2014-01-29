@@ -133,6 +133,10 @@ function Flow(inst, dispatch) {
         next();
     }
 
+    function length() {
+        return list.length;
+    }
+
     function destroy() {
         clearTimeout(intv);
         list.length = 0;
@@ -149,6 +153,7 @@ function Flow(inst, dispatch) {
     inst.timeout = timeout;
     inst.stopTimeout = stopTimeout;
     inst.run = run;
+    inst.length = length;
     inst.destroy = destroy;
 
     return inst;

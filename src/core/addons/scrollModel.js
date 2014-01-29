@@ -30,6 +30,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         inst.flow.unique(result.onScrollingStop);
     }
 
+    function onBeforeReset() {
+        result.removeTouchEvents();
+    }
+
+    function onAfterReset() {
+        addTouchEvents();
+    }
+
     function addTouchEvents() {
         result.log('addTouchEvents');
         var content = inst.getContent();
@@ -212,6 +220,8 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * Wait till the grid is ready before we setup our listeners.
      */
     unwatchSetup = inst.scope.$on(exports.datagrid.events.ON_READY, setupScrolling);
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_READY, onAfterReset));
 
     result.destroy = destroy;
 

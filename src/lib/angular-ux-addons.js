@@ -8,12 +8,12 @@
 module.factory('addons', ['$injector', function ($injector) {
 
     function applyAddons(addons, instance) {
-        var i = 0, len = addons.length, result;
+        var i = 0, len = addons.length, result, addon;
         while (i < len) {
             result = $injector.get(addons[i]);
             if (typeof result === "function") {
                 // It is expected that each addon be a function. inst is the instance that is injected.
-                $injector.invoke(result, instance, {inst:instance});
+                addon = $injector.invoke(result, instance, {inst:instance});
             } else {
                 // they must have returned a null? what was the point. Throw an error.
                 throw new Error("Addons expect a function to pass the grid instance to.");

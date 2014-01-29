@@ -59,7 +59,9 @@ exports.datagrid = {
      * - **<a name="events.ON_RENDER_AFTER_DATA_CHANGE">ON_RENDER_AFTER_DATA_CHANGE</a>** When a render finishes and a data change was what caused it.
      * - **<a name="events.ON_ROW_TEMPLATE_CHANGE">ON_ROW_TEMPLATE_CHANGE</a>** When we change the template that is matched with the row.
      * - **<a name="events.ON_SCROLL">ON_SCROLL</a>** When a scroll change is captured by the datagrid.
-     * - **<a name="events.ON_RESET">ON_RESET</a>** When a scroll change is captured by the datagrid.
+     * - **<a name="events.ON_BEFORE_RESET">ON_BEFORE_RESET</a>** Before the dom is reset this event is fired. Every addon should listen to this event and clean up any listeners
+     * that are necessary when this happens so the dom can be cleaned up for the reset.
+     * - **<a name="events.ON_AFTER_RESET">ON_AFTER_RESET</a>** After the reset the listeners from the addon can be put back on allowing the reset data to have been completely cleared.
      */
     events: {
         ON_INIT: 'datagrid:onInit',
@@ -76,7 +78,8 @@ exports.datagrid = {
         ON_RENDER_AFTER_DATA_CHANGE: 'datagrid:onRenderAfterDataChange',
         ON_ROW_TEMPLATE_CHANGE: 'datagrid:onRowTemplateChange',
         ON_SCROLL: 'datagrid:onScroll',
-        ON_RESET: 'datagrid:onReset',
+        ON_BEFORE_RESET: 'datagrid:onBeforeReset',
+        ON_AFTER_RESET: 'datagrid:onAfterReset',
         /**
          * #### Driving Events ####
          * - **<a name="events.RESIZE">RESIZE</a>** tells the datagrid to resize. This will update all height calculations.

@@ -1,71 +1,5 @@
 /**
- * ###ChunkArray### is an array with additional properties needed by the chunkModel to generate and access chunks
- * of the dom with high performance.
- * @constructor
- */
-var ChunkArray = function () {
-};
-ChunkArray.prototype = Array.prototype;
-ChunkArray.prototype.min = 0;
-ChunkArray.prototype.max = 0;
-ChunkArray.prototype.templateStart = '';
-ChunkArray.prototype.templateEnd = '';
-ChunkArray.prototype.getStub = function getStub(str) {
-    return this.templateStart + str + this.templateEnd;
-};
-/**
- * **ChunkArray.prototype.getChildStr**
- * Get the HTML string representation of the children in this array.
- * If deep then return this and all children down.
- * @param deep
- * @returns {string}
- */
-ChunkArray.prototype.getChildrenStr = function (deep) {
-    var i = 0, len = this.length, str = '', ca = this;
-    while (i < len) {
-        if (ca[i] instanceof ChunkArray) {
-            str += ca[i].getStub(deep ? ca[i].getChildrenStr(deep) : '');
-        } else {
-            str += this.templateModel.getTemplate(ca[i]).template;
-        }
-        i += 1;
-    }
-    this.rendered = true;
-    return str;
-};
-ChunkArray.prototype.updateHeight = function(templateModel, _rows) {
-    var i = 0, len, height = 0;
-    if (this[0] instanceof ChunkArray) {
-        len = this.length;
-        while (i < len) {
-            height += this[i].height;
-            i += 1;
-        }
-    } else {
-        height = templateModel.getHeight(_rows, this.min, this.max);
-    }
-    if (this.height !== height) {
-        this.dirtyHeight = true;
-    }
-    this.height = height;
-    if (this.dirtyHeight) {
-        if (this.parent) this.parent.updateHeight(templateModel, _rows);
-    }
-};
-/**
- * Perform proper cleanup.
- */
-ChunkArray.prototype.destroy = function () {
-    this.templateStart = '';
-    this.templateEnd = '';
-    this.templateModel = null;
-    this.rendered = false;
-    this.parent = null;
-    this.length = 0;
-};
-
-/**
- * ##chunkModel##
+ * ###chunkModel###
  * Because the browser has low performance on dom elements that exist in high numbers and are all
  * siblings chunking is used to break them up into limits of their number and their parents and so on.
  * So think of it as every chunk not having more than X number of children weather those children be
@@ -285,3 +219,70 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     return result;
 };
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);
+
+/**
+ * ####ChunkArray####
+ * is an array with additional properties needed by the chunkModel to generate and access chunks
+ * of the dom with high performance.
+ * @constructor
+ */
+var ChunkArray = function () {
+};
+ChunkArray.prototype = Array.prototype;
+ChunkArray.prototype.min = 0;
+ChunkArray.prototype.max = 0;
+ChunkArray.prototype.templateStart = '';
+ChunkArray.prototype.templateEnd = '';
+ChunkArray.prototype.getStub = function getStub(str) {
+    return this.templateStart + str + this.templateEnd;
+};
+/**
+ * **ChunkArray.prototype.getChildStr**
+ * Get the HTML string representation of the children in this array.
+ * If deep then return this and all children down.
+ * @param deep
+ * @returns {string}
+ */
+ChunkArray.prototype.getChildrenStr = function (deep) {
+    var i = 0, len = this.length, str = '', ca = this;
+    while (i < len) {
+        if (ca[i] instanceof ChunkArray) {
+            str += ca[i].getStub(deep ? ca[i].getChildrenStr(deep) : '');
+        } else {
+            str += this.templateModel.getTemplate(ca[i]).template;
+        }
+        i += 1;
+    }
+    this.rendered = true;
+    return str;
+};
+ChunkArray.prototype.updateHeight = function(templateModel, _rows) {
+    var i = 0, len, height = 0;
+    if (this[0] instanceof ChunkArray) {
+        len = this.length;
+        while (i < len) {
+            height += this[i].height;
+            i += 1;
+        }
+    } else {
+        height = templateModel.getHeight(_rows, this.min, this.max);
+    }
+    if (this.height !== height) {
+        this.dirtyHeight = true;
+    }
+    this.height = height;
+    if (this.dirtyHeight) {
+        if (this.parent) this.parent.updateHeight(templateModel, _rows);
+    }
+};
+/**
+ * Perform proper cleanup.
+ */
+ChunkArray.prototype.destroy = function () {
+    this.templateStart = '';
+    this.templateEnd = '';
+    this.templateModel = null;
+    this.rendered = false;
+    this.parent = null;
+    this.length = 0;
+};

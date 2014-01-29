@@ -5,6 +5,7 @@ describe("scrollModel", function () {
     beforeEach(function () {
         rendered = false;
         model = ux.datagrid.coreAddons.scrollModel({
+            unwatchers: [],
             scope: {
                 $on: function () {
 

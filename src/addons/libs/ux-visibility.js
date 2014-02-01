@@ -1,52 +1,45 @@
 /*global exports */
 /**
- * Author: Jason Farrell
- * Author URI: http://useallfive.com/
- *
- * Description: Handles all things involving element visibility.
- * Package URL: https://github.com/UseAllFive/ua5-js-utils
- * 
- * Modified by Wes Jones.
+ * ##<a name="visibility">ux.visibility</a>##
+ * Determines simplistic element visibility.
  */
 exports.visibility = (function () {
     /**
-     * Checks if a DOM element is visible. Takes into
-     * consideration its parents and overflow.
-     *
-     * @param (el)      the DOM element to check if is visible
+     * ###<a name="isVisible">isVisible</a>###
+     * Checks if a DOM element is visible. Takes into consideration its parents.
+     * @param {DOMElement} el the DOMElement to check if is visible
      */
-    function _isVisible(el) {
-        var p = el.parentNode,
-            VISIBLE_PADDING = 2;
+    function isVisible(el) {
+        var p = el.parentNode;
 
-        if (!_elementInDocument(el)) {
+        if (!elementInDocument(el)) {
             return false;
         }
 
-        //-- Return true for document node
-        if (9 === p.nodeType) {
+        if (9 === p.nodeType) {// Return true for document node
             return true;
         }
 
-        //-- Return false if our element is invisible
-        if (
-            '0' === _getStyle(el, 'opacity') ||
-                'none' === _getStyle(el, 'display') ||
-                'hidden' === _getStyle(el, 'visibility')
-            ) {
+        // Return false if our element is invisible
+        if ('0' === getStyle(el, 'opacity') || 'none' === getStyle(el, 'display') || 'hidden' === getStyle(el, 'visibility')) {
             return false;
         }
 
-        //-- If we have a parent, let's continue:
-        if (p) {
+        if (p) {//-- If we have a parent, let's continue:
             //-- Let's recursively check upwards:
-            return _isVisible(p);
+            return isVisible(p);
         }
         return true;
     }
 
-    //-- Cross browser method to get style properties:
-    function _getStyle(el, property) {
+    /**
+     * ###<a name="getStyle">getStyle</a>###
+     * Cross browser method to get style properties.
+     * @param {DOMElement} el
+     * @param {String} property
+     * @returns {*}
+     */
+    function getStyle(el, property) {
         if (window.getComputedStyle) {
             return document.defaultView.getComputedStyle(el, null)[property];
         }
@@ -56,7 +49,12 @@ exports.visibility = (function () {
         return undefined;
     }
 
-    function _elementInDocument(element) {
+    /**
+     * ###<a name="elementInDocument">elementInDocument</a>###
+     * @param {DOMElement} element
+     * @returns {boolean}
+     */
+    function elementInDocument(element) {
         while ((element = element.parentNode)) {
             if (element == document) {
                 return true;
@@ -66,8 +64,8 @@ exports.visibility = (function () {
     }
 
     return {
-        'getStyle': _getStyle,
-        'isVisible': _isVisible
+        'getStyle': getStyle,
+        'isVisible': isVisible
     };
 
 })();

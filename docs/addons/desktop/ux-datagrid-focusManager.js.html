@@ -18,6 +18,93 @@
     </div>
     <div id="tree"></div>
     <div id="headings">
+      <div class="heading h2">
+        <a href="#ux.visibility">ux.visibility</a>
+      </div>
+      <div class="heading h3">
+        <a href="#isvisible">isVisible</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getstyle">getStyle</a>
+      </div>
+      <div class="heading h3">
+        <a href="#elementindocument">elementInDocument</a>
+      </div>
+      <div class="heading h2">
+        <a href="#gridfocusmanager">gridFocusManager</a>
+      </div>
+      <div class="heading h3">
+        <a href="#wrap">wrap</a>
+      </div>
+      <div class="heading h3">
+        <a href="#addlisteners">addListeners</a>
+      </div>
+      <div class="heading h3">
+        <a href="#removelisteners">removeListeners</a>
+      </div>
+      <div class="heading h3">
+        <a href="#applytolisteners">applyToListeners</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getfocusableelements">getFocusableElements</a>
+      </div>
+      <div class="heading h3">
+        <a href="#filtervisible">filterVisible</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getrowelmfromchildelm">getRowElmFromChildElm</a>
+      </div>
+      <div class="heading h3">
+        <a href="#query">query</a>
+      </div>
+      <div class="heading h3">
+        <a href="#filterselection">filterSelection</a>
+      </div>
+      <div class="heading h3">
+        <a href="#filtereq">filterEq</a>
+      </div>
+      <div class="heading h3">
+        <a href="#isngclass">isNgClass</a>
+      </div>
+      <div class="heading h3">
+        <a href="#filterclasses">filterClasses</a>
+      </div>
+      <div class="heading h3">
+        <a href="#addlistenerstorow">addListenersToRow</a>
+      </div>
+      <div class="heading h3">
+        <a href="#removelistenerstorow">removeListenersToRow</a>
+      </div>
+      <div class="heading h3">
+        <a href="#onkeydown">onKeyDown</a>
+      </div>
+      <div class="heading h3">
+        <a href="#focustoprevrowelement">focusToPrevRowElement</a>
+      </div>
+      <div class="heading h3">
+        <a href="#focustonextrowelement">focusToNextRowElement</a>
+      </div>
+      <div class="heading h3">
+        <a href="#hasprevrowfocuselement">hasPrevRowFocusElement</a>
+      </div>
+      <div class="heading h3">
+        <a href="#hasnextrowfocuselement">hasNextRowFocusElement</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getprevrowfocuselement">getPrevRowFocusElement</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getnextrowfocuselement">getNextRowFocusElement</a>
+      </div>
+      <div class="heading h3">
+        <a href="#focustorowelement">focusToRowElement</a>
+      </div>
+      <div class="heading h3">
+        <a href="#performfocus">performFocus</a>
+      </div>
+      <div class="heading h3">
+        <a href="#findnextrowwithselection">findNextRowWithSelection</a>
+      </div>
     </div>
   </div>
   <div id="sidebar-toggle"></div>
@@ -36,7 +123,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.2.3
+  <div class="summary"><p>uxDatagrid v.0.3.0-alpha
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -52,18 +139,19 @@ License: MIT.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="ux.visibility">
+  <h2>
+    <a href="#ux.visibility" name="ux.visibility" class="pilcrow">&#182;</a>
+    <a name="visibility">ux.visibility</a>
+  </h2>
 </div>
-<div class="dox">
-  <div class="summary"><p>Author: Jason Farrell
-Author URI: <a href='http://useallfive.com/'>http://useallfive.com/</a></p>
-  </div>
-  <div class="body"><p>Description: Handles all things involving element visibility.
-Package URL: <a href='https://github.com/UseAllFive/ua5-js-utils'>https://github.com/UseAllFive/ua5-js-utils</a></p>
 
-<p>Modified by Wes Jones.</p>
+
+<p>Determines simplistic element visibility.</p>
+  </div>
+  <div class="body">
   </div>
 </div>
         </td>
@@ -74,31 +162,37 @@ Package URL: <a href='https://github.com/UseAllFive/ua5-js-utils'>https://github
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="isvisible">
+  <h3>
+    <a href="#isvisible" name="isvisible" class="pilcrow">&#182;</a>
+    <a name="isVisible">isVisible</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Checks if a DOM element is visible. Takes into
-consideration its parents and overflow.</p>
+
+
+<p>Checks if a DOM element is visible. Takes into consideration its parents.</p>
   </div>
   <div class="body">
   </div>
   <div class="details">
     <div class="dox_tag_title">Params</div>
     <div class="dox_tag_detail">
-      <span class="dox_tag_name">(el)</span>
-      <span>the DOM element to check if is visible</span>
+      <span class="dox_tag_name">el</span>
+      <span class="dox_type">DOMElement</span>
+      <span>the DOMElement to check if is visible</span>
     </div>
   </div>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="kd">function</span> <span class="nx">_isVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">,</span> <span class="nx">VISIBLE_PADDING</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">_elementInDocument</span><span class="p">(</span><span class="nx">el</span><span class="p">))</span> <span class="p">{</span>
+    <span class="kd">function</span> <span class="nx">isVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">elementInDocument</span><span class="p">(</span><span class="nx">el</span><span class="p">))</span> <span class="p">{</span>
             <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
         <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="mi">9</span> <span class="o">===</span> <span class="nx">p</span><span class="p">.</span><span class="nx">nodeType</span><span class="p">)</span> <span class="p">{</span>
 
 </pre></div>
         </td>
@@ -108,10 +202,9 @@ consideration its parents and overflow.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
 </div>
-<p>-- Return true for document node</p>
+<p>Return true for document node</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-        <span class="k">if</span> <span class="p">(</span><span class="mi">9</span> <span class="o">===</span> <span class="nx">p</span><span class="p">.</span><span class="nx">nodeType</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
         <span class="p">}</span>
 
@@ -123,12 +216,13 @@ consideration its parents and overflow.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
 </div>
-<p>-- Return false if our element is invisible</p>
+<p>Return false if our element is invisible</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;0&quot;</span> <span class="o">===</span> <span class="nx">_getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;opacity&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;none&quot;</span> <span class="o">===</span> <span class="nx">_getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;display&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;hidden&quot;</span> <span class="o">===</span> <span class="nx">_getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;visibility&quot;</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;0&quot;</span> <span class="o">===</span> <span class="nx">getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;opacity&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;none&quot;</span> <span class="o">===</span> <span class="nx">getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;display&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;hidden&quot;</span> <span class="o">===</span> <span class="nx">getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;visibility&quot;</span><span class="p">))</span> <span class="p">{</span>
             <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
         <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">p</span><span class="p">)</span> <span class="p">{</span>
 
 </pre></div>
         </td>
@@ -138,23 +232,11 @@ consideration its parents and overflow.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
 </div>
-<p>-- If we have a parent, let's continue:</p>
+<p>-- If we have a parent, let's continue:
+-- Let's recursively check upwards:</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-        <span class="k">if</span> <span class="p">(</span><span class="nx">p</span><span class="p">)</span> <span class="p">{</span>
-
-</pre></div>
-        </td>
-      </tr>
-      <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-7" id="section-7">&#182;</a>
-</div>
-<p>-- Let's recursively check upwards:</p>
-        </td>
-        <td class="code highlight"><div class="highlight"><pre>
-            <span class="k">return</span> <span class="nx">_isVisible</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">isVisible</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
     <span class="p">}</span>
@@ -163,14 +245,35 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-8" id="section-8">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getstyle">
+  <h3>
+    <a href="#getstyle" name="getstyle" class="pilcrow">&#182;</a>
+    <a name="getStyle">getStyle</a>
+  </h3>
 </div>
-<p>-- Cross browser method to get style properties:</p>
+
+
+<p>Cross browser method to get style properties.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">el</span>
+      <span class="dox_type">DOMElement</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">property</span>
+      <span class="dox_type">String</span>
+    </div>
+  </div>
+</div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="kd">function</span> <span class="nx">_getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">property</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">function</span> <span class="nx">getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">property</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">getComputedStyle</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="nb">document</span><span class="p">.</span><span class="nx">defaultView</span><span class="p">.</span><span class="nx">getComputedStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="kc">null</span><span class="p">)[</span><span class="nx">property</span><span class="p">];</span>
         <span class="p">}</span>
@@ -179,7 +282,34 @@ consideration its parents and overflow.</p>
         <span class="p">}</span>
         <span class="k">return</span> <span class="kc">undefined</span><span class="p">;</span>
     <span class="p">}</span>
-    <span class="kd">function</span> <span class="nx">_elementInDocument</span><span class="p">(</span><span class="nx">element</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="elementindocument">
+  <h3>
+    <a href="#elementindocument" name="elementindocument" class="pilcrow">&#182;</a>
+    <a name="elementInDocument">elementInDocument</a>
+  </h3>
+</div>
+
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">element</span>
+      <span class="dox_type">DOMElement</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="kd">function</span> <span class="nx">elementInDocument</span><span class="p">(</span><span class="nx">element</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">while</span> <span class="p">(</span><span class="nx">element</span> <span class="o">=</span> <span class="nx">element</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">element</span> <span class="o">==</span> <span class="nb">document</span><span class="p">)</span> <span class="p">{</span>
                 <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
@@ -188,8 +318,8 @@ consideration its parents and overflow.</p>
         <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="nx">getStyle</span><span class="o">:</span> <span class="nx">_getStyle</span><span class="p">,</span>
-        <span class="nx">isVisible</span><span class="o">:</span> <span class="nx">_isVisible</span>
+        <span class="nx">getStyle</span><span class="o">:</span> <span class="nx">getStyle</span><span class="p">,</span>
+        <span class="nx">isVisible</span><span class="o">:</span> <span class="nx">isVisible</span>
     <span class="p">};</span>
 <span class="p">}();</span>
 
@@ -294,12 +424,25 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-10" id="section-10">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="gridfocusmanager">
+  <h2>
+    <a href="#gridfocusmanager" name="gridfocusmanager" class="pilcrow">&#182;</a>
+    <a name="gridFocusManager">gridFocusManager</a>
+  </h2>
 </div>
-<div class="dox">
-  <div class="summary"><p>Handle focus for enterKey to move down the correct columns.</p>
+
+
+<p>Handle focus for enterKey to move down the correct columns.</p>
+
+<blockquote>
+  <p><em><strong>Note:</strong> One of the most common mistakes when implementing this is to have classes that are applied on focus.
+  Those get picked up in the selectors and then when it tries to find them in the next row they do not
+  match because they are not focused or selected yet. You can easily get around this by applying <a href="#filterClasses">filterClasses</a>.
+  <a href="#filterClasses">filterClasses</a> are defined in the options of the datagrid.</em>
+  <code>data-options="{gridFocusManger: {filterClasses: ['focused','selected']}}"</code></p>
+</blockquote>
   </div>
   <div class="body">
   </div>
@@ -325,7 +468,41 @@ consideration its parents and overflow.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[];</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">keys</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nx">ENTER</span><span class="o">:</span> <span class="mi">13</span><span class="p">,</span>
+            <span class="nx">UP</span><span class="o">:</span> <span class="mi">38</span><span class="p">,</span>
+            <span class="nx">DOWN</span><span class="o">:</span> <span class="mi">40</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="wrap">
+  <h3>
+    <a href="#wrap" name="wrap" class="pilcrow">&#182;</a>
+    <a name="wrap">wrap</a>
+  </h3>
+</div>
+
+
+<p>if an element is not a JQLite element then make it one.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">el</span>
+      <span class="dox_type">JQLite</span>
+      <span class="dox_type">DOMElement</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">wrap</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">el</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">el</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">el</span><span class="p">);</span>
@@ -337,12 +514,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-12" id="section-12">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="addlisteners">
+  <h3>
+    <a href="#addlisteners" name="addlisteners" class="pilcrow">&#182;</a>
+    <a name="addListeners">addListeners</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Add all of the listeners to the visible rows.</p>
+
+
+<p>Add all of the listeners to the visible rows.</p>
   </div>
   <div class="body">
   </div>
@@ -357,12 +539,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-13" id="section-13">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="removelisteners">
+  <h3>
+    <a href="#removelisteners" name="removelisteners" class="pilcrow">&#182;</a>
+    <a name="removeListeners">removeListeners</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>remove all of the listeners from min to max.</p>
+
+
+<p>remove all of the listeners from min to max.</p>
   </div>
   <div class="body">
   </div>
@@ -377,7 +564,7 @@ consideration its parents and overflow.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-14" id="section-14">&#182;</a>
+  <a class="pilcrow" href="#section-15" id="section-15">&#182;</a>
 </div>
 <p>this needs executed before the activeRange changes.</p>
         </td>
@@ -389,12 +576,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-15" id="section-15">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="applytolisteners">
+  <h3>
+    <a href="#applytolisteners" name="applytolisteners" class="pilcrow">&#182;</a>
+    <a name="applyToListeners">applyToListeners</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>using the inst.activeRange.min/max apply methods to those rows.</p>
+
+
+<p>using the inst.activeRange.min/max apply methods to those rows.</p>
   </div>
   <div class="body">
   </div>
@@ -403,6 +595,7 @@ consideration its parents and overflow.</p>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">method
 </span>
+      <span class="dox_type">Function</span>
     </div>
   </div>
 </div>
@@ -424,12 +617,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-16" id="section-16">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getfocusableelements">
+  <h3>
+    <a href="#getfocusableelements" name="getfocusableelements" class="pilcrow">&#182;</a>
+    <a name="getFocusableElements">getFocusableElements</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Get all of the focusable elements within an element</p>
+
+
+<p>Get all of the focusable elements within an element</p>
   </div>
   <div class="body">
   </div>
@@ -437,6 +635,7 @@ consideration its parents and overflow.</p>
     <div class="dox_tag_title">Params</div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">el</span>
+      <span class="dox_type">JQLite</span>
     </div>
   </div>
 </div>
@@ -451,38 +650,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-17" id="section-17">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="filtervisible">
+  <h3>
+    <a href="#filtervisible" name="filtervisible" class="pilcrow">&#182;</a>
+    <a name="filterVisible">filterVisible</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Filter the elements in the selection to only get those that are visible.</p>
-  </div>
-  <div class="body">
-  </div>
-  <div class="details">
-    <div class="dox_tag_title">Params</div>
-    <div class="dox_tag_detail">
-      <span class="dox_tag_name">item</span>
-    </div>
-  </div>
-</div>
-        </td>
-        <td class="code highlight"><div class="highlight"><pre>
-        <span class="kd">function</span> <span class="nx">filterVisible</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">visibility</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
-        <span class="p">}</span>
 
-</pre></div>
-        </td>
-      </tr>
-      <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-18" id="section-18">&#182;</a>
-</div>
-<div class="dox">
-  <div class="summary"><p>Move up the dom to determine the row of an element.</p>
+
+<p>Filter the elements in the selection to only get those that are visible.</p>
   </div>
   <div class="body">
   </div>
@@ -490,6 +668,39 @@ consideration its parents and overflow.</p>
     <div class="dox_tag_title">Params</div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">el</span>
+      <span class="dox_type">DOMElement</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">filterVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">visibility</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">);</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getrowelmfromchildelm">
+  <h3>
+    <a href="#getrowelmfromchildelm" name="getrowelmfromchildelm" class="pilcrow">&#182;</a>
+    <a name="getRowElmFromChildElm">getRowElmFromChildElm</a>
+  </h3>
+</div>
+
+
+<p>Move up the dom to determine the row of an element.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">el</span>
+      <span class="dox_type">JQLite</span>
     </div>
   </div>
 </div>
@@ -503,7 +714,7 @@ consideration its parents and overflow.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-19" id="section-19">&#182;</a>
+  <a class="pilcrow" href="#section-20" id="section-20">&#182;</a>
 </div>
 <p>keep moving up until the parent is a chunk.</p>
         </td>
@@ -520,12 +731,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-20" id="section-20">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="query">
+  <h3>
+    <a href="#query" name="query" class="pilcrow">&#182;</a>
+    <a name="query">query</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Similar to jquery find.</p>
+
+
+<p>Similar to jquery find.</p>
   </div>
   <div class="body">
   </div>
@@ -533,9 +749,12 @@ consideration its parents and overflow.</p>
     <div class="dox_tag_title">Params</div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">el</span>
+      <span class="dox_type">JQLite</span>
+      <span class="dox_type">DOMElement</span>
     </div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">selector</span>
+      <span class="dox_type">String</span>
     </div>
   </div>
 </div>
@@ -553,12 +772,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-21" id="section-21">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="filterselection">
+  <h3>
+    <a href="#filterselection" name="filterselection" class="pilcrow">&#182;</a>
+    <a name="filterSelection">filterSelection</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Apply filters to the selection array.</p>
+
+
+<p>Apply filters to the selection array.</p>
   </div>
   <div class="body">
   </div>
@@ -566,9 +790,11 @@ consideration its parents and overflow.</p>
     <div class="dox_tag_title">Params</div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">filterStr</span>
+      <span class="dox_type">String</span>
     </div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">elements</span>
+      <span class="dox_type">Array</span>
     </div>
   </div>
 </div>
@@ -587,12 +813,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-22" id="section-22">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="filtereq">
+  <h3>
+    <a href="#filtereq" name="filtereq" class="pilcrow">&#182;</a>
+    <a name="filterEq">filterEq</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Filter for eq.</p>
+
+
+<p>Filter for eq.</p>
   </div>
   <div class="body">
   </div>
@@ -600,9 +831,11 @@ consideration its parents and overflow.</p>
     <div class="dox_tag_title">Params</div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">filterStr</span>
+      <span class="dox_type">String</span>
     </div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">elements</span>
+      <span class="dox_type">Array</span>
     </div>
   </div>
 </div>
@@ -617,12 +850,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-23" id="section-23">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="isngclass">
+  <h3>
+    <a href="#isngclass" name="isngclass" class="pilcrow">&#182;</a>
+    <a name="isNgClass">isNgClass</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Detect if is an ng-* class from the selectors.</p>
+
+
+<p>Detect if is an ng-* class from the selectors.</p>
   </div>
   <div class="body">
   </div>
@@ -630,6 +868,7 @@ consideration its parents and overflow.</p>
     <div class="dox_tag_title">Params</div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">cls</span>
+      <span class="dox_type">String</span>
     </div>
   </div>
 </div>
@@ -638,6 +877,43 @@ consideration its parents and overflow.</p>
         <span class="kd">function</span> <span class="nx">isNgClass</span><span class="p">(</span><span class="nx">cls</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="o">!!</span><span class="p">(</span><span class="nx">cls</span> <span class="o">&amp;&amp;</span> <span class="nx">cls</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;ng-&quot;</span><span class="p">);</span>
         <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="filterclasses">
+  <h3>
+    <a href="#filterclasses" name="filterclasses" class="pilcrow">&#182;</a>
+    <a name="filterClasses">filterClasses</a>
+  </h3>
+</div>
+
+
+<p>Filter out classes that are not supposed to be part of the selection.
+By defining options.gridFocusManager.filterClasses as an array of class names to omit from the selection
+you can filter these out from causing selections to not be made.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">cls</span>
+      <span class="dox_type">String</span>
+    </div>
+  </div>
+</div>
+
+
+<div class="highlight"><pre><code> <span class="nt">&lt;div</span> <span class="na">ux-datagrid=</span><span class="s">&quot;items&quot;</span> <span class="na">addons=</span><span class="s">&quot;gridFocusManager&quot;</span> <span class="na">options=</span><span class="s">&quot;{gridFocusManager: {filterClasses: </span><span class="cp">[</span><span class="s1">&#39;focus&#39;</span><span class="p">,</span><span class="s1">&#39;selected&#39;</span><span class="p">,</span><span class="s1">&#39;highlight&#39;</span><span class="cp">]</span><span class="s">}}&quot;</span><span class="nt">&gt;</span>...<span class="nt">&lt;/div&gt;</span>
+</code></pre></div>
+
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">filterClasses</span><span class="p">(</span><span class="nx">cls</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">isToBeFiltered</span> <span class="o">=</span> <span class="nx">cls</span> <span class="o">?</span> <span class="kc">false</span> <span class="o">:</span> <span class="kc">true</span><span class="p">;</span>
             <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isToBeFiltered</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">gridFocusManager</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">gridFocusManager</span><span class="p">.</span><span class="nx">filterClasses</span><span class="p">)</span> <span class="p">{</span>
@@ -653,12 +929,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-24" id="section-24">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="addlistenerstorow">
+  <h3>
+    <a href="#addlistenerstorow" name="addlistenerstorow" class="pilcrow">&#182;</a>
+    <a name="addListenersToRow">addListenersToRow</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Apply event listeners to the row.</p>
+
+
+<p>Apply event listeners to the row.</p>
   </div>
   <div class="body">
   </div>
@@ -667,6 +948,8 @@ consideration its parents and overflow.</p>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">rowElm
 </span>
+      <span class="dox_type">JQLite</span>
+      <span class="dox_type">DOMElement</span>
     </div>
   </div>
 </div>
@@ -684,12 +967,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-25" id="section-25">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="removelistenerstorow">
+  <h3>
+    <a href="#removelistenerstorow" name="removelistenerstorow" class="pilcrow">&#182;</a>
+    <a name="removeListenersToRow">removeListenersToRow</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Remove event listeners from that row.</p>
+
+
+<p>Remove event listeners from that row.</p>
   </div>
   <div class="body">
   </div>
@@ -698,6 +986,8 @@ consideration its parents and overflow.</p>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">rowElm
 </span>
+      <span class="dox_type">JQLite</span>
+      <span class="dox_type">DOMElement</span>
     </div>
   </div>
 </div>
@@ -715,12 +1005,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-26" id="section-26">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="onkeydown">
+  <h3>
+    <a href="#onkeydown" name="onkeydown" class="pilcrow">&#182;</a>
+    <a name="onKeyDown">onKeyDown</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Handle Enter, up/down key events.</p>
+
+
+<p>Handle Enter, up/down key events.</p>
   </div>
   <div class="body">
   </div>
@@ -729,6 +1024,7 @@ consideration its parents and overflow.</p>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">event
 </span>
+      <span class="dox_type">Event</span>
     </div>
   </div>
 </div>
@@ -737,33 +1033,9 @@ consideration its parents and overflow.</p>
         <span class="kd">function</span> <span class="nx">onKeyDown</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">target</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">);</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;FM: onKeyDown&quot;</span><span class="p">);</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">shiftKey</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">13</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span>
-
-</pre></div>
-        </td>
-      </tr>
-      <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-27" id="section-27">&#182;</a>
-</div>
-<p>SHIFT+ENTER, UP ARROW</p>
-        </td>
-        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">shiftKey</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">ENTER</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">UP</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">focusToPrevRowElement</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
-            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">13</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span>
-
-</pre></div>
-        </td>
-      </tr>
-      <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-28" id="section-28">&#182;</a>
-</div>
-<p>ENTER, DOWN ARROW</p>
-        </td>
-        <td class="code highlight"><div class="highlight"><pre>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">ENTER</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">DOWN</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">focusToNextRowElement</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
             <span class="p">}</span>
         <span class="p">}</span>
@@ -772,12 +1044,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-29" id="section-29">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="focustoprevrowelement">
+  <h3>
+    <a href="#focustoprevrowelement" name="focustoprevrowelement" class="pilcrow">&#182;</a>
+    <a name="focusToPrevRowElement">focusToPrevRowElement</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Focus to the previous row element from the current focused element.</p>
+
+
+<p>Focus to the previous row element from the current focused element.</p>
   </div>
   <div class="body">
   </div>
@@ -786,6 +1063,7 @@ consideration its parents and overflow.</p>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">focusedEl
 </span>
+      <span class="dox_type">JQLite</span>
     </div>
   </div>
 </div>
@@ -800,12 +1078,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-30" id="section-30">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="focustonextrowelement">
+  <h3>
+    <a href="#focustonextrowelement" name="focustonextrowelement" class="pilcrow">&#182;</a>
+    <a name="focusToNextRowElement">focusToNextRowElement</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Focus to the next row element from the current focused element.</p>
+
+
+<p>Focus to the next row element from the current focused element.</p>
   </div>
   <div class="body">
   </div>
@@ -814,6 +1097,7 @@ consideration its parents and overflow.</p>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">focusedEl
 </span>
+      <span class="dox_type">JQLite</span>
     </div>
   </div>
 </div>
@@ -824,17 +1108,131 @@ consideration its parents and overflow.</p>
             <span class="kd">var</span> <span class="nx">focusEl</span> <span class="o">=</span> <span class="nx">getNextRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">);</span>
             <span class="nx">performFocus</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">);</span>
         <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="hasprevrowfocuselement">
+  <h3>
+    <a href="#hasprevrowfocuselement" name="hasprevrowfocuselement" class="pilcrow">&#182;</a>
+    <a name="hasPrevRowFocusElement">hasPrevRowFocusElement</a>
+  </h3>
+</div>
+
+
+<p>check to see if the previous row has the same selector which is derived from the focusedEl</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">focusedEl</span>
+      <span class="dox_type">DOMElement</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">hasPrevRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">getPrevRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">);</span>
-            <span class="k">return</span> <span class="o">!!</span><span class="p">(</span><span class="nx">el</span> <span class="o">&amp;&amp;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+            <span class="k">return</span> <span class="o">!!</span><span class="p">(</span><span class="nx">el</span> <span class="o">&amp;&amp;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">focusedEl</span><span class="p">);</span>
         <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="hasnextrowfocuselement">
+  <h3>
+    <a href="#hasnextrowfocuselement" name="hasnextrowfocuselement" class="pilcrow">&#182;</a>
+    <a name="hasNextRowFocusElement">hasNextRowFocusElement</a>
+  </h3>
+</div>
+
+
+<p>check to see if the next row has the same selector which is derived from the focusedEl</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">focusedEl</span>
+      <span class="dox_type">DOMElement</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">hasNextRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">getNextRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">);</span>
-            <span class="k">return</span> <span class="o">!!</span><span class="p">(</span><span class="nx">el</span> <span class="o">&amp;&amp;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+            <span class="k">return</span> <span class="o">!!</span><span class="p">(</span><span class="nx">el</span> <span class="o">&amp;&amp;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">focusedEl</span><span class="p">);</span>
         <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getprevrowfocuselement">
+  <h3>
+    <a href="#getprevrowfocuselement" name="getprevrowfocuselement" class="pilcrow">&#182;</a>
+    <a name="getPrevRowFocusElement">getPrevRowFocusElement</a>
+  </h3>
+</div>
+
+
+<p>get the previous row and check for the focusedEl selector.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">focusedEl</span>
+      <span class="dox_type">JQLite</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">getPrevRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="nx">focusToRowElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
         <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getnextrowfocuselement">
+  <h3>
+    <a href="#getnextrowfocuselement" name="getnextrowfocuselement" class="pilcrow">&#182;</a>
+    <a name="getNextRowFocusElement">getNextRowFocusElement</a>
+  </h3>
+</div>
+
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">focusedEl</span>
+      <span class="dox_type">JQLite</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">getNextRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot; FM: getNextRowFocusElement&quot;</span><span class="p">);</span>
             <span class="k">return</span> <span class="nx">focusToRowElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
@@ -844,12 +1242,17 @@ consideration its parents and overflow.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-31" id="section-31">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="focustorowelement">
+  <h3>
+    <a href="#focustorowelement" name="focustorowelement" class="pilcrow">&#182;</a>
+    <a name="focusToRowElment">focusToRowElement</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Do the heavy lifting for focusing from one row to the next and pulling the selector.
+
+
+<p>Do the heavy lifting for focusing from one row to the next and pulling the selector.
 Since it is the same going to previous or next it is all one method and just needs to know which direction
 to increment.</p>
   </div>
@@ -859,10 +1262,12 @@ to increment.</p>
     <div class="dox_tag_title">Params</div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">focusedEl</span>
+      <span class="dox_type">JQLite</span>
     </div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">dir
 </span>
+      <span class="dox_type">Number</span>
     </div>
   </div>
 </div>
@@ -876,7 +1281,7 @@ to increment.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-32" id="section-32">&#182;</a>
+  <a class="pilcrow" href="#section-36" id="section-36">&#182;</a>
 </div>
 <p>dir should be 1 or -1</p>
         </td>
@@ -900,12 +1305,17 @@ to increment.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-33" id="section-33">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="performfocus">
+  <h3>
+    <a href="#performfocus" name="performfocus" class="pilcrow">&#182;</a>
+    <a name="performFocus">performFocus</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Do the actual focus. Select the text if select exists.</p>
+
+
+<p>Do the actual focus. Select the text if select exists.</p>
   </div>
   <div class="body">
   </div>
@@ -914,6 +1324,7 @@ to increment.</p>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">focusEl
 </span>
+      <span class="dox_type">JQLite</span>
     </div>
   </div>
 </div>
@@ -929,7 +1340,7 @@ to increment.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-34" id="section-34">&#182;</a>
+  <a class="pilcrow" href="#section-38" id="section-38">&#182;</a>
 </div>
 <p>TODO: if no jquery. There may be no select.</p>
         </td>
@@ -946,7 +1357,7 @@ to increment.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-35" id="section-35">&#182;</a>
+  <a class="pilcrow" href="#section-39" id="section-39">&#182;</a>
 </div>
 <p>we now need to scroll the row into view if it is not.</p>
         </td>
@@ -958,12 +1369,17 @@ to increment.</p>
         </td>
       </tr>
       <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-36" id="section-36">&#182;</a>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="findnextrowwithselection">
+  <h3>
+    <a href="#findnextrowwithselection" name="findnextrowwithselection" class="pilcrow">&#182;</a>
+    <a name="findNextRowWithSelection">findNextRowWithSelection</a>
+  </h3>
 </div>
-<div class="dox">
-  <div class="summary"><p>Find the next row that has a matching selection. If one is not found it will no focus.
+
+
+<p>Find the next row that has a matching selection. If one is not found it will no focus.
 Since a creep render happens after every scroll it should not have difficulty finding a row.
 However, possible bug here if a selector similar to this one doesn't exist for a large distance.</p>
   </div>
@@ -973,12 +1389,15 @@ However, possible bug here if a selector similar to this one doesn't exist for a
     <div class="dox_tag_title">Params</div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">nextIndex</span>
+      <span class="dox_type">Number</span>
     </div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">dir</span>
+      <span class="dox_type">Number</span>
     </div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">selector</span>
+      <span class="dox_type">String</span>
     </div>
   </div>
 </div>

@@ -47,29 +47,30 @@ function Datagrid(scope, element, attr, $compile) {
     var state = states.BUILDING;
     // **<a name="values">values</a>** `values` is the object that is used to share data for scrolling and other shared values.
     var values = {
-        // - if the data is dirty and a render has not happended since the data change.
+        // - <a name="values.dirty"></a>if the data is dirty and a render has not happended since the data change.
         dirty: false,
-        // - current scroll value of the grid
+        // - <a name="values.scroll"></a>current scroll value of the grid
         scroll: 0,
-        // - current speed of the scroll
+        // - <a name="values.speed"></a>current speed of the scroll
         speed: 0,
-        // - current absSpeed of the grid.
+        // - <a name="values.absSpeed"></a>current absSpeed of the grid.
         absSpeed: 0,
-        // - the current percent position of the scroll.
+        // - <a name="values.scrollPercent"></a>the current percent position of the scroll.
         scrollPercent: 0,
-        // - if there is currently a touch start and not a touch end. Since touch is used for scrolling on a touch device. Ignored for desktop.
+        // - <a name="values.touchDown"></a>if there is currently a touch start and not a touch end. Since touch is used for scrolling on a touch device. Ignored for desktop.
         touchDown: false,
-        // - interval that allows waits for checks to know when the scrolling has stopped and a render is needed.
+        // - <a name="values.scrollingStopIntv"></a>interval that allows waits for checks to know when the scrolling has stopped and a render is needed.
         scrollingStopIntv: null,
-        // - the current range of active scopes.
+        // - <a name="values.activeRange"></a>the current range of active scopes.
         activeRange: {min: 0, max: 0}
     };
-    // listing the log events so they can be ignored if needed.
+    // <a name="logEvents"></a>listing the log events so they can be ignored if needed.
     var logEvents = [exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR];
-    // the instance of the datagrid that will be referenced by all addons.
+    // <a name="inst"></a>the instance of the datagrid that will be referenced by all addons.
     var inst = {};
+
     // wrap the instance for logging.
-    var eventLogger = exports.logWrapper('datagrid event', inst, 'grey', dispatch);
+    exports.logWrapper('datagrid event', inst, 'grey', dispatch);
 
     /**
      * ###<a name="init">init</a>###
@@ -473,6 +474,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     /**
+     * ###<a name="safeDigest">safeDigest</a>###
      * SafeDigest by checking the render phase of the scope before rendering.
      * while this is not recommended by angular it is effective.
      * @param {Scope} s
@@ -481,6 +483,71 @@ function Datagrid(scope, element, attr, $compile) {
         if (!s.$$phase) {
             s.$digest();
         }
+    }
+
+    /**
+     * ###<a name="applyEventCounts">applyEventCounts</a>###
+     * Take all of the counts that we have and move up the parent chain subtracting them from the totals
+     * so that event listeners do not get stuck on broadcast.
+     * @param {Scope} s
+     * @param {Object} listenerCounts
+     * @param {Function} fn
+     */
+    function applyEventCounts(s, listenerCounts, fn) {
+        while (s) {
+            for (var eventName in listenerCounts) {
+                if (listenerCounts.hasOwnProperty(eventName)) {
+                    fn(s, listenerCounts, eventName);
+                }
+            }
+            s = s.$parent;
+        }
+    }
+
+    /**
+     * ###<a name="addEvents">addEvents</a>###
+     * Take all of the counts that we have and move up the parent chain adding them from the totals
+     * so that event listeners have them back for broadcast events.
+     * @param {Scope} s
+     * @param {Object} listenerCounts
+     */
+    function addEvents(s, listenerCounts) {
+        applyEventCounts(s, listenerCounts, addEvent);
+    }
+
+    /**
+     * ###<a name="addEvent">addEvent</a>####
+     * Add the event to the $$listenerCount.
+     * @param {Scope} s
+     * @param {Object} listenerCounts
+     * @param {String} eventName
+     */
+    function addEvent(s, listenerCounts, eventName) {
+        //console.log("%c%s.$$listenerCount[%s] %s + %s = %s", "color:#009900", s.$id, eventName, s.$$listenerCount[eventName], listenerCounts[eventName], s.$$listenerCount[eventName] + listenerCounts[eventName]);
+        s.$$listenerCount[eventName] += listenerCounts[eventName];
+    }
+
+    /**
+     * ###<a name="subtractEvents">subtractEvents</a>###
+     * Take all of the counts that we have and move up the parent chain subtracting them from the totals
+     * so that event listeners do not get stuck on broadcast.
+     * @param {Scope} s
+     * @param {Object} listenerCounts
+     */
+    function subtractEvents(s, listenerCounts) {
+        applyEventCounts(s, listenerCounts, subtractEvent);
+    }
+
+    /**
+     * ###<a name="subtractEvent">subtractEvent</a>###
+     * Take the count of events away from the $$listenerCount
+     * @param {Scope} s
+     * @param {Object} listenerCounts
+     * @param {String} eventName
+     */
+    function subtractEvent(s, listenerCounts, eventName) {
+        //console.log("%c%s.$$listenerCount[%s] %s - %s = %s", "color:#FF6600", s.$id, eventName, s.$$listenerCount[eventName], listenerCounts[eventName], s.$$listenerCount[eventName] - listenerCounts[eventName]);
+        s.$$listenerCount[eventName] -= listenerCounts[eventName];
     }
 
     /**
@@ -493,19 +560,27 @@ function Datagrid(scope, element, attr, $compile) {
      * $$childHead and $$nextSibling variables are also updated for angular so that it will not even iterate
      * over a scope that is deactivated. It becomes completely hidden from the digest.
      * @param {Scope} s
+     * @param {Number=} depth
      * @returns {boolean}
      */
-    function deactivateScope(s) {
+    function deactivateScope(s, depth) {
         var child;
+        depth = depth || 0;
         // if the scope is not created yet. just skip.
         if (s && !isActive(s)) { // do not deactivate one that is already deactivated.
             s.$$$watchers = s.$$watchers;
             s.$$watchers = [];
+            if (!depth) {
+                // only do this on the first depth so we do not recursively reset counts.
+                s.$$$listenerCount = s.$$listenerCount;
+                s.$$listenerCount = angular.copy(s.$$$listenerCount);
+                subtractEvents(s, s.$$$listenerCount);
+            }
             // recursively go through children and deactivate them.
             if (s.$$childHead) {
                 child = s.$$childHead;
                 while (child) {
-                    deactivateScope(child);
+                    deactivateScope(child, depth + 1);
                     child = child.$$nextSibling;
                 }
             }
@@ -521,18 +596,24 @@ function Datagrid(scope, element, attr, $compile) {
      * though child scopes as well to activate them. It also updates the linking $$childHead and $$nextSiblings
      * to fully make sure the scope is as if it was before it was deactivated.
      * @param {Scope} s
+     * @param {Number=} depth
      * @returns {boolean}
      */
-    function activateScope(s) {
+    function activateScope(s, depth) {
         var child;
+        depth = depth || 0;
         if (s && s.$$$watchers) { // do not activate one that is already active.
             s.$$watchers = s.$$$watchers;
             s.$$$watchers = null;
+            if (!depth) {
+                addEvents(s, s.$$$listenerCount);
+                s.$$$listenerCount = null;
+            }
             // recursively go through children and activate them.
             if (s.$$childHead) {
                 child = s.$$childHead;
                 while (child) {
-                    activateScope(child);
+                    activateScope(child, depth + 1);
                     child = child.$$nextSibling;
                 }
             }
@@ -733,7 +814,7 @@ function Datagrid(scope, element, attr, $compile) {
         if (values.dirty) {
             values.dirty = false;
             tplHeight = getRowElm(values.activeRange.min)[0].offsetHeight;
-            if (tplHeight !== inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min])) {
+            if (inst.getData().length && tplHeight !== inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min])) {
                 inst.templateModel.updateTemplateHeights();
             }
             dispatch(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE);
@@ -751,12 +832,15 @@ function Datagrid(scope, element, attr, $compile) {
             inst.upateViewportHeight();
             waitCount += 1;
             if (waitCount < 2) {
-                inst.info(exports + ".datagrid is waiting for element to have a height.");
+                inst.info("datagrid is waiting for element to have a height.");
                 flow.add(render, null, 0);// have it wait a moment for the height to change.
             } else {
                 flow.warn("Datagrid: Unable to determine a height for the datagrid. Cannot render. Exiting.");
             }
             return false;
+        }
+        if (waitCount) {
+            inst.info("datagrid has height of %s.", viewHeight);
         }
         return true;
     }
@@ -818,7 +902,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.grouped = scope.$eval(attr.grouped);
         inst.data = inst.setData((newVal || attr.list), inst.grouped) || [];
         dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE);
-        flow.add(reset);
+        reset();
     }
 
     /**
@@ -826,7 +910,9 @@ function Datagrid(scope, element, attr, $compile) {
      * clear all and rebuild.
      */
     function reset() {
+        inst.info("reset start");
         dispatch(exports.datagrid.events.ON_BEFORE_RESET);
+        flow.clear();// we are going to clear all in the flow before doing a reset.
         state = states.BUILDING;
         destroyScopes();
         // now destroy all of the dom.
@@ -841,6 +927,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.chunkModel.reset();
         flow.add(updateViewportHeight);
         flow.add(render);
+        flow.add(inst.info, ["reset complete"]);
         flow.add(dispatch, [exports.datagrid.events.ON_AFTER_RESET]);
     }
 
@@ -859,7 +946,8 @@ function Datagrid(scope, element, attr, $compile) {
     /**
      * ###<a name="forceRenderScope">forceRenderScope</a>###
      * used to force a row to render and digest that may not be within
-     * the <a href="#activeRange">activeRange</a>
+     * the <a href="#values.activeRange">activeRange</a>
+     * @param {Number} index
      */
     function forceRenderScope(index) {
         var s = scopes[index];
@@ -913,7 +1001,7 @@ function Datagrid(scope, element, attr, $compile) {
      * handle dispaching of events from the datagrid.
      */
     function dispatch(event) {
-        if (!isLogEvent(event)) eventLogger.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
+        if (!isLogEvent(event)) inst.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
         return scope.$emit.apply(scope, arguments);
     }
 
@@ -997,7 +1085,7 @@ function Datagrid(scope, element, attr, $compile) {
  * ###<a name="uxDatagrid">uxDatagrid</a>###
  * define the directive, setup addons, apply core addons then optional addons.
  */
-module.directive('uxDatagrid', ['$compile', 'addons', function ($compile, addons) {
+module.directive('uxDatagrid', ['$compile', 'gridAddons', function ($compile, gridAddons) {
     return {
         restrict: 'AE',
         link: function (scope, element, attr) {
@@ -1006,7 +1094,7 @@ module.directive('uxDatagrid', ['$compile', 'addons', function ($compile, addons
             each(exports.datagrid.coreAddons, function (method) {
                 method.apply(inst, [inst]);
             });
-            addons(inst, attr.addons);
+            gridAddons(inst, attr.addons);
             inst.start();
         }
     };

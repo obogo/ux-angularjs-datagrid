@@ -11,10 +11,10 @@ Of course since this is angular there is then the issue with a **digest being to
 - [Docs - in Progress](https://rawgithub.com/webux/ux-angularjs-datagrid/master/docs/angular-ux-datagrid.js.html)
 
 ### More Examples ###
-- [Quick Start](https://github.com/webux/ux-angularjs-datagrid/wiki/#quick-start)
-- [Getting Started](https://github.com/webux/ux-angularjs-datagrid/wiki/#getting-started)
-- [Multiple Row Templates](https://github.com/webux/ux-angularjs-datagrid/wiki/#multiple-row-templates)
-- [Grouped Data](https://github.com/webux/ux-angularjs-datagrid/wiki/#grouped-data)
+- [Quick Start](https://github.com/webux/ux-angularjs-datagrid/wiki/#wiki-quick-start)
+- [Getting Started](https://github.com/webux/ux-angularjs-datagrid/wiki/#wiki-getting-started)
+- [Multiple Row Templates](https://github.com/webux/ux-angularjs-datagrid/wiki/#wiki-multiple-row-templates)
+- [Grouped Data](https://github.com/webux/ux-angularjs-datagrid/wiki/#wiki-grouped-data)
 
 ## What makes this list/datagrid different? ##
 Chunking is the concept of **grouping the dom elements in hierarchies** so that the browser does not calculate the position of every element when one changes, but only those in that container, it's parents in it's container, and so on up the chain. The smaller the groups the less the browser has to redraw, size, and position elements because it can just move the parent of necessary. **This works regardless of rows all having the same heights or dynamic heights as long as there is a template for each different height.**

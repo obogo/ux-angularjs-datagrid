@@ -3,7 +3,7 @@ describe("normalizeModel setData", function () {
     var model;
 
     beforeEach(function () {
-        model = ux.datagrid.coreAddons.normalizeModel({});
+        model = ux.datagrid.coreAddons.normalizeModel({grouped:'items'});
     });
 
     it("should keep a single array unmodified", function () {
@@ -36,5 +36,27 @@ describe("normalizeModel setData", function () {
         var data = [];
         model.setData(data);
         expect(model.getOriginalData()).toBe(data);
+    });
+
+    it("getOriginalIndexOfItem should get the original index from the originalData", function() {
+        var data = [
+                {
+                    items: [
+                        {items: "abc".split('')}
+                    ]
+                },
+                {
+                    items: [
+                        {items: "def".split('')}
+                    ]
+                },
+                {
+                    items: [
+                        {items: "ghi".split('')}
+                    ]
+                }
+            ];
+        model.setData(data);
+        expect(model.getOriginalIndexOfItem('h')).toEqual([2, 0, 1]);
     });
 });

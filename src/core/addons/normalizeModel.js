@@ -33,6 +33,39 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
     inst.getOriginalData = function () {
         return originalData;
     };
+    /**
+     * ##<a name="getOriginalIndexOfItem">getOriginalIndexOfItem</a>##
+     * get the index or indexes of the item from the original data that the normalized array was created from.
+     */
+    inst.getOriginalIndexOfItem = function getOriginalIndexOfItem(item) {
+        var indexes = ux.each(originalData, findItem, item, []);
+        return indexes && indexes !== originalData ? indexes : [];
+    };
+
+    /**
+     * ##<a name="findItem">findItem</a>##
+     * find the item in the list of items and recursively search the child arrays if they have the grouped property
+     * @param {*} item
+     * @param {Number} index
+     * @param {Array} list
+     * @param {*} targetItem
+     * @param {Array} indexes
+     * @returns {*}
+     */
+    function findItem(item, index, list, targetItem, indexes) {
+        var found;
+        indexes = indexes.slice(0);
+        indexes.push(index);
+        if (item === targetItem) {
+            return indexes;
+        } else if (item[inst.grouped] && item[inst.grouped].length) {
+            found = ux.each(item[inst.grouped], findItem, targetItem, indexes);
+            if (found && found !== item[inst.grouped]) {
+                return found;
+            }
+        }
+        return undefined;
+    }
 
     /**
      * Get the normalized index for an item.

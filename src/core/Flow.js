@@ -133,6 +133,15 @@ function Flow(inst, dispatch) {
         next();
     }
 
+    function clear() {
+        var len = current ? 1 : 0, item;
+        inst.log("clear");
+        while (list.length > len) {
+            item = list.splice(len, 1)[0];
+            inst.log("\tremove %s from flow", item.label);
+        }
+    }
+
     function length() {
         return list.length;
     }
@@ -153,6 +162,7 @@ function Flow(inst, dispatch) {
     inst.timeout = timeout;
     inst.stopTimeout = stopTimeout;
     inst.run = run;
+    inst.clear = clear;
     inst.length = length;
     inst.destroy = destroy;
 

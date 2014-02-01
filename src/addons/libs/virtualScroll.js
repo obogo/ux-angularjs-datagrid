@@ -247,6 +247,7 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, up
         result.log('fireClick');
         var point = e.changedTouches ? e.changedTouches[0] : e, target, ev;
         clearTimeout(doubleTapTimer);
+        //TODO: doubleTapTimer needs to be configurable to make clicks fire faster.
         doubleTapTimer = wait(function () {
             doubleTapTimer = null;
 
@@ -263,7 +264,7 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, up
                 ev._fake = true;
                 target.dispatchEvent(ev);
             }
-        }, 250);
+        }, 1);
     }
 
     result.dispatch = function dispatch() {
@@ -294,7 +295,7 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, up
 
     function render(tranDuration) {
         var value = element[0].scrollTop - values.scroll;
-        result.content[0].style.transitionDuration = (tranDuration ? tranDuration : 0) + "ms";
+        result.content[0].style.transitionDuration = (tranDuration ? tranDuration + 'ms' : 0);
         result.content[0].style.webkitTransform = "translate3d(0px, " + value + "px, 0px)";
         result.dispatch(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE);
     }

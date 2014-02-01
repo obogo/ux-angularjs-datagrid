@@ -9,7 +9,7 @@
             <div data-ng-repeat="num in [1, 2, 3, 4, 5, 6, 7, 8]" class="spinningSquaresG spinningSquares_{{num}}"></div>
         </div>
         <!--// this is the datagrid //-->
-        <div data-ux-datagrid="items" class="datagrid" data-options="{infiniteScrollLimit: 200}" data-addons="iosScroll, infiniteScroll, gridLogger">
+        <div data-ux-datagrid="items" class="datagrid" data-options="{debug:{all:1}, infiniteScrollLimit: 200}" data-addons="iosScroll, infiniteScroll, gridLogger">
             <script type="template/html" data-template-name="default" data-template-item="item">
                 <div class="row">
                     <div class="text">{{item.id}} {{$id}} {{counter}}</div>

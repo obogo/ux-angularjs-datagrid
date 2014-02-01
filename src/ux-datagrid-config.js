@@ -129,13 +129,13 @@ exports.datagrid = {
         uncompiledClass: 'uncompiled',
         // - **<a name="options.renderThreshold">renderThreshold</a>** this value is used by the creepRenderModel to allow the render to process for this amount of ms in
         // both directions from the current visible area and then it will wait and process again as many rows as it can in this timeframe.
-        renderThreshold: 10,
+        renderThreshold: 1,
         // - **<a name="options.renderThresholdWait">renderThresholdWait</a>** used in conjunction with options.renderThreshold this will wait this amount of time before
         // trying to render more rows.
-        renderThresholdWait: 50,
+        renderThresholdWait: 100,
         // - **<a name="options.creepLimit">creepLimit</a>** used with options.renderThreshold and options.renderThresholdWait this will give a maximum amount of renders
         // that can be done before the creep render is turned off.
-        creepLimit: 100,
+        creepLimit: 200,
         // - **<a name="options.chunkClass">chunkClass</a>** the class assigned to each chunk in the datagrid. This can be customized on a per grid basis since options
         // can be overridden so that styles or selection may differ from one grid to the next.
         chunkClass: 'ux-datagrid-chunk'

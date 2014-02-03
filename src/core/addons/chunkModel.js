@@ -228,7 +228,7 @@ exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);
  */
 var ChunkArray = function () {
 };
-ChunkArray.prototype = Array.prototype;
+ChunkArray.prototype = [];
 ChunkArray.prototype.min = 0;
 ChunkArray.prototype.max = 0;
 ChunkArray.prototype.templateStart = '';

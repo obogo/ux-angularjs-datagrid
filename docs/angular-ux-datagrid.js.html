@@ -2742,7 +2742,7 @@ being listened to while the destroy is happening.</p>
         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">changeWatcherSet</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setupChangeWatcher&quot;</span><span class="p">);</span>
             <span class="nx">changeWatcherSet</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-            <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$watch</span><span class="p">(</span><span class="nx">attr</span><span class="p">.</span><span class="nx">uxDatagrid</span><span class="p">,</span> <span class="nx">onDataChangeFromWatcher</span><span class="p">));</span>
+            <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$watchCollection</span><span class="p">(</span><span class="nx">attr</span><span class="p">.</span><span class="nx">uxDatagrid</span><span class="p">,</span> <span class="nx">onDataChangeFromWatcher</span><span class="p">));</span>
 
 </pre></div>
         </td>
@@ -5626,7 +5626,7 @@ of the dom with high performance.</p>
         <td class="code highlight"><div class="highlight"><pre>
 <span class="kd">var</span> <span class="nx">ChunkArray</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{};</span>
 
-<span class="nx">ChunkArray</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">;</span>
+<span class="nx">ChunkArray</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">[];</span>
 
 <span class="nx">ChunkArray</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">min</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 

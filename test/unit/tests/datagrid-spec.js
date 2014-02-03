@@ -33,14 +33,20 @@ describe('datagrid', function () {
     });
 
     describe("simple template", function () {
-        var template = '<div data-ux-datagrid="items" class="datagrid" data-options="{debug:1, chunkSize:10, async:false}" style="width:100px;height:400px;">' +
+        angular.module('ux').filter('myFilter1', function () {
+
+        });
+        angular.module('ux').filter('myFilter2', function () {
+
+        });
+        var template = '<div data-ux-datagrid="items" class="datagrid" data-options="{debug:1, chunkSize:10, async:false}" filters="myFilter1, myFilter2" style="width:100px;height:400px;">' +
                             '<script type="template/html" data-template-name="default" data-template-item="item">' +
                                 '<div class="mock-row" style="height:10px;">{{item.id}}</div>' +
                             '</script>' +
                         '</div>';
         beforeEach(function () {
-            var inject = angular.injector(['ng','ux']).invoke;
-            inject(function ($compile, $rootScope) {
+            var injector = angular.injector(['ng','ux']);
+            injector.invoke(function ($compile, $rootScope) {
                 scope = $rootScope.$new();
                 scope.items = [];
                 for (var i = 0; i < 100; i += 1) {
@@ -100,6 +106,10 @@ describe('datagrid', function () {
         it("getNormalizedIndex should get the index in the normalized array of the item that is passed", function () {
             var nIndex = scope.datagrid.getNormalizedIndex(scope.items[10]);
             expect(scope.datagrid.data[nIndex]).toBe(scope.items[10]);
+        });
+
+        it("should convert a string to an array of injections", function() {
+
         });
     });
 

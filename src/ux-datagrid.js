@@ -234,7 +234,7 @@ function Datagrid(scope, element, attr, $compile) {
         if (!changeWatcherSet) {
             inst.log("setupChangeWatcher");
             changeWatcherSet = true;
-            unwatchers.push(scope.$watch(attr.uxDatagrid, onDataChangeFromWatcher));
+            unwatchers.push(scope.$watchCollection(attr.uxDatagrid, onDataChangeFromWatcher));
             // force intial watcher.
             flow.add(render);
         }

@@ -1033,7 +1033,7 @@ function Datagrid(scope, element, attr, $compile) {
         if (!changeWatcherSet) {
             inst.log("setupChangeWatcher");
             changeWatcherSet = true;
-            unwatchers.push(scope.$watch(attr.uxDatagrid, onDataChangeFromWatcher));
+            unwatchers.push(scope.$watchCollection(attr.uxDatagrid, onDataChangeFromWatcher));
             // force intial watcher.
             flow.add(render);
         }
@@ -2075,7 +2075,7 @@ exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);
  */
 var ChunkArray = function() {};
 
-ChunkArray.prototype = Array.prototype;
+ChunkArray.prototype = [];
 
 ChunkArray.prototype.min = 0;
 

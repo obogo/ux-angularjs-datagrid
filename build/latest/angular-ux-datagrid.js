@@ -124,6 +124,9 @@ exports.datagrid = {
         // while faster times on this make it render faster, it can cause it to rencer multiple times because the scrollbar is not completely stopped and may decrease
         // scrolling performance. if < 100ms this fires too often.
         updateDelay: 500,
+        // - **<a name="creepStartDelay">creepStartDelay</a>**
+        // when the creep render starts. How long after the scrolling has stopped.
+        creepStartDelay: 2e3,
         // - **<a name="options.cushion">cushion</a>** this it used by the updateRowWatchers and what rows it will update. It can be handy for debugging to make sure only
         // the correct rows are digesting by making the value positive it will take off space from the top and bottom of the viewport that number of pixels to match what
         // rows are activated and which ones are not. Also a negative number will cause the grid to render past the viewable area and digest rows that are out of view.
@@ -144,7 +147,7 @@ exports.datagrid = {
         renderThresholdWait: 100,
         // - **<a name="options.creepLimit">creepLimit</a>** used with options.renderThreshold and options.renderThresholdWait this will give a maximum amount of renders
         // that can be done before the creep render is turned off.
-        creepLimit: 200,
+        creepLimit: 100,
         // - **<a name="options.chunkClass">chunkClass</a>** the class assigned to each chunk in the datagrid. This can be customized on a per grid basis since options
         // can be overridden so that styles or selection may differ from one grid to the next.
         chunkClass: "ux-datagrid-chunk"
@@ -1516,7 +1519,6 @@ function Datagrid(scope, element, attr, $compile) {
         inst.log("	activated %s", active.join(", "));
         updateLinks();
         // update the $$childHead and $$nextSibling values to keep digest loops at a minimum count.
-        flow.add(safeDigest, [ scope ]);
         // this dispatch needs to be after the digest so that it doesn't cause {} to show up in the render.
         inst.dispatch(events.ON_AFTER_UPDATE_WATCHERS, loop);
     }
@@ -1662,12 +1664,15 @@ function Datagrid(scope, element, attr, $compile) {
      * (this is the default angular setting).
      */
     function onDataChanged(newVal, oldVal) {
-        dispatch(exports.datagrid.events.ON_BEFORE_DATA_CHANGE);
+        var evt = dispatch(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, newVal, oldVal);
+        if (evt.defaultPrevented && evt.newValue) {
+            newVal = evt.newValue;
+        }
         values.dirty = true;
         inst.log("dataChanged");
         inst.grouped = scope.$eval(attr.grouped);
         inst.data = inst.setData(newVal || attr.list, inst.grouped) || [];
-        dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE);
+        dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal);
         reset();
     }
     /**
@@ -2145,7 +2150,7 @@ ChunkArray.prototype.destroy = function() {
 exports.datagrid.events.ON_RENDER_PROGRESS = "datagrid:onRenderProgress";
 
 exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
-    var intv = 0, creepCount = 0, model = {}, upIndex = 0, downIndex = 0, time;
+    var intv = 0, creepCount = 0, model = {}, upIndex = 0, downIndex = 0, waitHandle, time;
     function digest(index) {
         var s = inst.getScope(index);
         if (!s || !s.digested) {
@@ -2175,15 +2180,17 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         }
     }
     function wait(method, time) {
-        var i, args = exports.util.array.toArray(arguments);
+        var args = exports.util.array.toArray(arguments);
         args.splice(0, 2);
         if (inst.options.async) {
-            inst.flow.remove(method);
-            i = inst.flow.add(method, args, time);
+            clearTimeout(waitHandle);
+            waitHandle = setTimeout(function() {
+                method.apply(null, args);
+            }, time);
         } else {
             method.apply(this, args);
         }
-        return i;
+        return waitHandle;
     }
     function render(complete, force) {
         var changed = false, now = Date.now();
@@ -2223,7 +2230,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         }
     }
     function renderLater(event, forceCompileRowRender) {
-        resetInterval(upIndex, downIndex, 500, forceCompileRowRender);
+        resetInterval(upIndex, downIndex, inst.options.creepStartDelay, forceCompileRowRender);
     }
     function onBeforeRender(event) {
         creepCount = inst.options.creepLimit;
@@ -2362,7 +2369,7 @@ exports.datagrid.events.TOUCH_DOWN = "datagrid:touchDown";
 exports.datagrid.events.TOUCH_UP = "datagrid:touchUp";
 
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
-    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, scrollListeners = [];
+    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, waitForStopIntv, scrollListeners = [];
     /**
      * Listen for scrollingEvents.
      */
@@ -2462,14 +2469,18 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.clearOnScrollingStop = function clearOnScrollingStop() {
         inst.flow.remove(result.onScrollingStop);
     };
+    function flowWaitForStop() {
+        inst.flow.add(result.onScrollingStop);
+    }
     /**
      * Wait for the datagrid to slow down enough to render.
      */
     result.waitForStop = function waitForStop() {
         if (inst.flow.async || inst.values.touchDown) {
-            inst.flow.add(result.onScrollingStop, null, inst.options.updateDelay);
+            clearTimeout(waitForStopIntv);
+            waitForStopIntv = setTimeout(flowWaitForStop, inst.options.updateDelay);
         } else {
-            inst.flow.add(result.onScrollingStop);
+            flowWaitForStop();
         }
     };
     /**

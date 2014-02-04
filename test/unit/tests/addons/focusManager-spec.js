@@ -24,7 +24,7 @@ describe("gridFocusManager", function () {
     }
 
     beforeEach(function () {
-        console.clear();
+//        console.clear();
         var inject = angular.injector(['ng','ux']).invoke;
         inject(function ($compile, $rootScope) {
             scope = $rootScope.$new();

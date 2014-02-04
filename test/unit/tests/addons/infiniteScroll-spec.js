@@ -74,7 +74,9 @@ describe("infiniteScrollModel", function () {
                     '</script>' +
                 '</div>');
         scope.datagrid.scrollModel.scrollTo(110, true);// force first call
+        scope.$digest();
         scope.datagrid.scrollModel.scrollTo(210, true);// force second call which should not fire.
+        scope.$digest();
         expect(scope.items.length).toBe(scope.datagrid.data.length);
     });
 });

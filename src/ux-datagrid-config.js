@@ -115,6 +115,9 @@ exports.datagrid = {
         // while faster times on this make it render faster, it can cause it to rencer multiple times because the scrollbar is not completely stopped and may decrease
         // scrolling performance. if < 100ms this fires too often.
         updateDelay: 500,
+        // - **<a name="creepStartDelay">creepStartDelay</a>**
+        // when the creep render starts. How long after the scrolling has stopped.
+        creepStartDelay: 2000,
         // - **<a name="options.cushion">cushion</a>** this it used by the updateRowWatchers and what rows it will update. It can be handy for debugging to make sure only
         // the correct rows are digesting by making the value positive it will take off space from the top and bottom of the viewport that number of pixels to match what
         // rows are activated and which ones are not. Also a negative number will cause the grid to render past the viewable area and digest rows that are out of view.
@@ -135,7 +138,7 @@ exports.datagrid = {
         renderThresholdWait: 100,
         // - **<a name="options.creepLimit">creepLimit</a>** used with options.renderThreshold and options.renderThresholdWait this will give a maximum amount of renders
         // that can be done before the creep render is turned off.
-        creepLimit: 200,
+        creepLimit: 100,
         // - **<a name="options.chunkClass">chunkClass</a>** the class assigned to each chunk in the datagrid. This can be customized on a per grid basis since options
         // can be overridden so that styles or selection may differ from one grid to the next.
         chunkClass: 'ux-datagrid-chunk'

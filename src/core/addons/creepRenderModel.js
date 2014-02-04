@@ -6,6 +6,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         model = {},
         upIndex = 0,
         downIndex = 0,
+        waitHandle,
         time;
 
     function digest(index) {
@@ -35,15 +36,17 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     }
 
     function wait(method, time) {
-        var i, args = exports.util.array.toArray(arguments);
+        var args = exports.util.array.toArray(arguments);
         args.splice(0, 2);
         if (inst.options.async) {
-            inst.flow.remove(method);
-            i = inst.flow.add(method, args, time);
+            clearTimeout(waitHandle);
+            waitHandle = setTimeout(function () {
+                method.apply(null, args);
+            }, time);
         } else {
             method.apply(this, args);
         }
-        return i;
+        return waitHandle;
     }
 
     function render(complete, force) {
@@ -88,7 +91,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     }
 
     function renderLater(event, forceCompileRowRender) {
-        resetInterval(upIndex, downIndex, 500, forceCompileRowRender);
+        resetInterval(upIndex, downIndex, inst.options.creepStartDelay, forceCompileRowRender);
     }
 
     function onBeforeRender(event) {

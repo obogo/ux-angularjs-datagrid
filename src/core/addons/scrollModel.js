@@ -5,7 +5,11 @@ exports.datagrid.events.TOUCH_DOWN = "datagrid:touchDown";
 exports.datagrid.events.TOUCH_UP = "datagrid:touchUp";
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
-    var result = exports.logWrapper('scrollModel', {}, 'orange', inst.dispatch), setup = false, unwatchSetup, scrollListeners = [];
+    var result = exports.logWrapper('scrollModel', {}, 'orange', inst.dispatch),
+        setup = false,
+        unwatchSetup,
+        waitForStopIntv,
+        scrollListeners = [];
 
     /**
      * Listen for scrollingEvents.
@@ -118,14 +122,19 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         inst.flow.remove(result.onScrollingStop);
     };
 
+    function flowWaitForStop() {
+        inst.flow.add(result.onScrollingStop);
+    }
+
     /**
      * Wait for the datagrid to slow down enough to render.
      */
     result.waitForStop = function waitForStop() {
         if (inst.flow.async || inst.values.touchDown) {
-            inst.flow.add(result.onScrollingStop, null, inst.options.updateDelay);
+            clearTimeout(waitForStopIntv);
+            waitForStopIntv = setTimeout(flowWaitForStop, inst.options.updateDelay);
         } else {
-            inst.flow.add(result.onScrollingStop);
+            flowWaitForStop();
         }
     };
 

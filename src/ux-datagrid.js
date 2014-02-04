@@ -740,7 +740,6 @@ function Datagrid(scope, element, attr, $compile) {
         lastVisibleScrollStart = loop.visibleScrollStart;
         inst.log("\tactivated %s", active.join(', '));
         updateLinks(); // update the $$childHead and $$nextSibling values to keep digest loops at a minimum count.
-        flow.add(safeDigest, [scope]);
         // this dispatch needs to be after the digest so that it doesn't cause {} to show up in the render.
         inst.dispatch(events.ON_AFTER_UPDATE_WATCHERS, loop);
     }
@@ -896,12 +895,15 @@ function Datagrid(scope, element, attr, $compile) {
      * (this is the default angular setting).
      */
     function onDataChanged(newVal, oldVal) {
-        dispatch(exports.datagrid.events.ON_BEFORE_DATA_CHANGE);
+        var evt = dispatch(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, newVal, oldVal);
+        if (evt.defaultPrevented && evt.newValue) {
+            newVal = evt.newValue;
+        }
         values.dirty = true;
         inst.log("dataChanged");
         inst.grouped = scope.$eval(attr.grouped);
         inst.data = inst.setData((newVal || attr.list), inst.grouped) || [];
-        dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE);
+        dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal);
         reset();
     }
 

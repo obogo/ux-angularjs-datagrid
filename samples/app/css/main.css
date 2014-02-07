@@ -152,12 +152,34 @@ input[type="text"] {
     background: url(../images/row-loader.gif) no-repeat center #FFFFFF !important;
 }
 
-.uncompiled > * {
-    visibility: hidden;
+.datagrid-row > * {
+    -webkit-transition: opacity 0.5s ease-out;
+    -moz-transition: opacity 0.5s ease-out;
+    -ms-transition: opacity 0.5s ease-out;
+    -o-transition: opacity 0.5s ease-out;
+    transition: opacity 0.5s ease-out;
 }
 
-.ux-datagrid-chunk {
-    /*outline: 4px #FF0000 solid;*/
+.uncompiled > * {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.compiled > * {
+    opacity: 1;
+}
+
+.datagrid-chunk {
+    opacity: 0;
+    -webkit-transition: opacity 0.5s ease-out;
+    -moz-transition: opacity 0.5s ease-out;
+    -ms-transition: opacity 0.5s ease-out;
+    -o-transition: opacity 0.5s ease-out;
+    transition: opacity 0.5s ease-out;
+}
+
+.datagrid-chunk-ready {
+    opacity: 1;
 }
 
 .page-title {

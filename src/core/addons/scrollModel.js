@@ -9,36 +9,48 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         setup = false,
         unwatchSetup,
         waitForStopIntv,
-        scrollListeners = [];
+        hasScrollListener = false;
 
     /**
      * Listen for scrollingEvents.
      */
     function setupScrolling() {
+        unwatchSetup();
         if (!inst.element.css('overflow')) {
             inst.element.css({overflow: 'auto'});
         }
         result.log('addScrollListener');
-        inst.element[0].addEventListener('scroll', onUpdateScrollHandler);
+        addScrollListener();
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_TO_INDEX, function (event, index) {
-            result.scrollToIndex(index, true);
+            inst.scrollModel.scrollToIndex(index, true);
         }));
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_TO_ITEM, function (event, item) {
-            result.scrollToItem(item, true);
+            inst.scrollModel.scrollToItem(item, true);
         }));
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_INTO_VIEW, function (event, itemOrIndex) {
-            result.scrollIntoView(itemOrIndex, true);
+            inst.scrollModel.scrollIntoView(itemOrIndex, true);
         }));
         addTouchEvents();
         setup = true;
-        inst.flow.unique(result.onScrollingStop);
+    }
+
+    function addScrollListener() {
+        hasScrollListener = true;
+        inst.element[0].addEventListener('scroll', onUpdateScrollHandler);
     }
 
     function onBeforeReset() {
+        if (hasScrollListener) {
+            result.removeScrollListener();
+            hasScrollListener = true;
+        }
         result.removeTouchEvents();
     }
 
     function onAfterReset() {
+        if (hasScrollListener) {
+            addScrollListener();
+        }
         addTouchEvents();
     }
 
@@ -53,6 +65,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.removeScrollListener = function removeScrollListener() {
         result.log('removeScrollListener');
         inst.element[0].removeEventListener('scroll', onUpdateScrollHandler);
+        hasScrollListner = false;
     };
 
     result.removeTouchEvents = function removeTouchEvents() {
@@ -84,7 +97,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
 
     function onUpdateScrollHandler(event) {
-        inst.flow.add(result.onUpdateScroll, [event]);
+        inst.scrollModel.onUpdateScroll(event);
     }
 
     /**
@@ -92,7 +105,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * @param event
      */
     result.onUpdateScroll = function onUpdateScroll(event) {
-        var val = result.getScroll(event.target || event.srcElement);
+        var val = inst.scrollModel.getScroll(event.target || event.srcElement);
         if (inst.values.scroll !== val) {
             inst.dispatch(exports.datagrid.events.SCROLL_START, val);
             inst.values.speed = val - inst.values.scroll;
@@ -100,7 +113,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             inst.values.scroll = val;
             inst.values.scrollPercent = ((inst.values.scroll / inst.getContentHeight()) * 100).toFixed(2);
         }
-        result.waitForStop();
+        inst.scrollModel.waitForStop();
         inst.dispatch(exports.datagrid.events.ON_SCROLL, inst.values);
     };
 
@@ -110,20 +123,20 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * @param {Boolean=} immediately
      */
     result.scrollTo = function scrollTo(value, immediately) {
-        result.setScroll(value);
+        inst.scrollModel.setScroll(value);
         if (immediately) {
-            result.onScrollingStop();
+            inst.scrollModel.onScrollingStop();
         } else {
-            result.waitForStop();
+            inst.scrollModel.waitForStop();
         }
     };
 
     result.clearOnScrollingStop = function clearOnScrollingStop() {
-        inst.flow.remove(result.onScrollingStop);
+        result.onScrollingStop();
     };
 
     function flowWaitForStop() {
-        inst.flow.add(result.onScrollingStop);
+        inst.scrollModel.onScrollingStop();
     }
 
     /**
@@ -144,7 +157,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.onScrollingStop = function onScrollingStop() {
         inst.values.speed = 0;
         inst.values.absSpeed = 0;
-        inst.flow.add(inst.render);
+        inst.render();
         inst.dispatch(exports.datagrid.events.SCROLL_STOP, inst.values.scroll);
     };
 
@@ -156,7 +169,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.scrollToIndex = function scrollToIndex(index, immediately) {
         result.log('scrollToIndex');
         var offset = inst.getRowOffset(index);
-        result.scrollTo(offset, immediately);
+        inst.scrollModel.scrollTo(offset, immediately);
         return offset;
     };
 
@@ -169,7 +182,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         result.log('scrollToItem');
         var index = inst.getNormalizedIndex(item);
         if (index !== -1) {
-            return result.scrollToIndex(index, immediately);
+            return inst.scrollModel.scrollToIndex(index, immediately);
         }
         return inst.values.scroll;
     };
@@ -184,13 +197,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         var index = typeof itemOrIndex === 'number' ? itemOrIndex : inst.getNormalizedIndex(itemOrIndex),
             offset = inst.getRowOffset(index), rowHeight, viewHeight;
         if (offset < inst.values.scroll) { // it is above the view.
-            result.scrollTo(offset, immediately);
+            inst.scrollModel.scrollTo(offset, immediately);
             return;
         }
         viewHeight = inst.getViewportHeight();
         rowHeight = inst.templateModel.getTemplateHeight(inst.getData()[index]);
         if (offset >= inst.values.scroll + viewHeight - rowHeight) { // it is below the view.
-            result.scrollTo(offset - viewHeight + rowHeight);
+            inst.scrollModel.scrollTo(offset - viewHeight + rowHeight, true);
         }
         // otherwise it is in view so do nothing.
     };
@@ -201,7 +214,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.scrollToTop = function (immediately) {
         result.log('scrollToTop');
-        result.scrollTo(0, immediately);
+        inst.scrollModel.scrollTo(0, immediately);
     };
 
     /**
@@ -211,7 +224,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.scrollToBottom = function (immediately) {
         result.log('scrollToBottom');
         var value = inst.getContentHeight() - inst.getViewportHeight();
-        result.scrollTo(value >= 0 ? value : 0, immediately);
+        inst.scrollModel.scrollTo(value >= 0 ? value : 0, immediately);
     };
 
     function destroy() {
@@ -230,7 +243,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     unwatchSetup = inst.scope.$on(exports.datagrid.events.ON_READY, setupScrolling);
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
-    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_READY, onAfterReset));
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_RESET, onAfterReset));
 
     result.destroy = destroy;
 

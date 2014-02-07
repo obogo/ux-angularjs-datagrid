@@ -64,7 +64,7 @@ describe('datagrid', function () {
         });
 
         it("should add a content div", function() {
-            expect(element[0].childNodes[0].className).toBe('content');
+            expect(element[0].childNodes[0].className).toBe(ux.datagrid.options.contentClass);
         });
 
         it("should only have one child element. So it has removed all templates", function () {
@@ -86,7 +86,7 @@ describe('datagrid', function () {
         });
 
         it("reset should clear the dom and rebuild it", function() {
-            var content = element[0].getElementsByClassName('content')[0];
+            var content = element[0].getElementsByClassName(ux.datagrid.options.contentClass)[0];
             var firstChunk = content.childNodes[0];
             firstChunk.beforeReset = true;
             expect(firstChunk.beforeReset).toBe(true);
@@ -156,7 +156,7 @@ describe('datagrid', function () {
         });
 
         it("should add a content div", function() {
-            expect(element[0].childNodes[0].className).toBe('content');
+            expect(element[0].childNodes[0].className).toBe(ux.datagrid.options.contentClass);
         });
 
         it("should only have one child element. So it has removed all templates", function () {
@@ -186,7 +186,7 @@ describe('datagrid', function () {
         });
 
         it("reset should clear the dom and rebuild it", function() {
-            var content = element[0].getElementsByClassName('content')[0];
+            var content = element[0].getElementsByClassName(ux.datagrid.options.contentClass)[0];
             var firstChunk = content.childNodes[0];
             firstChunk.beforeReset = true;
             expect(firstChunk.beforeReset).toBe(true);

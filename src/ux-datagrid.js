@@ -29,6 +29,8 @@ function Datagrid(scope, element, attr, $compile) {
     var oldContent;
     // **<a name="scopes">scopes</a>** the array of all scopes that have been compiled.
     var scopes = [];
+    // **<a name="oldScopes">oldScopes</a>** keeping the old scopes around while the oldContent exists.
+    var oldScopes;
     // **<a name="active">active</a>** the scopes that are currently active.
     var active = [];
     // **<a name="lastVisibleScrollStart">lastVisibleScrollStart</a>** cached index to improve render loop by starting where it left off.
@@ -133,22 +135,42 @@ function Datagrid(scope, element, attr, $compile) {
      * It is used so append all of the `chunks` so that the it can be scrolled.
      * If the dom element is provided with the class [content](#content) then that dom element will be used
      * allowing the user to add custom classes directly tot he [content](#content) dom element.
+     * @returns {JQLite}
      */
     function createContent() {
-        var contents = element[0].getElementsByClassName('content'), cnt, classes = 'content';
+        var contents = element[0].getElementsByClassName(options.contentClass), cnt, classes = options.contentClass;
         contents = exports.filter(contents, filterOldContent);
         cnt = contents[0];
         if (cnt) { // if there is an old one. Pull the classes from it.
-            classes = cnt.className || 'content';
+            classes = cnt.className || options.contentClass;
         }
         if (!cnt) {
+            classes = getClassesFromOldContent() || classes;
             cnt = angular.element('<div class="' + classes + '"></div>');
-            element.append(cnt);
+            element.prepend(cnt);
         }
         if (!cnt[0]) {
             cnt = angular.element(cnt);
         }
         return cnt;
+    }
+
+    /**
+     * ###<a name="getClassesFromOldContent">getClassesFromOldContent</a>###
+     * If the old content exists it may have been an original dom element passed to the datagrid. If so we want
+     * to keep that dom elements classes in tact.
+     * @returns {string}
+     */
+    function getClassesFromOldContent() {
+        var classes, index;
+        if (oldContent) {// let's get classes from it.
+            classes = exports.util.array.toArray(oldContent[0].classList);
+            index = classes.indexOf('old-' + options.contentClass);
+            if (index !== -1) {
+                classes.splice(index, 1);
+            }
+            return classes.join(' ');
+        }
     }
 
     /**
@@ -160,7 +182,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @returns {boolean}
      */
     function filterOldContent(cnt, index, list) {
-        return angular.element(cnt).hasClass('old-content') ? false : true;
+        return angular.element(cnt).hasClass('old-' + options.contentClass) ? false : true;
     }
 
     /**
@@ -431,7 +453,7 @@ function Datagrid(scope, element, attr, $compile) {
                 prev.$$nextSibling = s;
                 s.$$prevSibling = prev;
             }
-            s.$status = 'compiled';
+            s.$status = options.compiledClass;
             s[tpl.item] = inst.data[index]; // set the data to the scope.
             s.$index = index;
             scopes[index] = s;
@@ -546,7 +568,6 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {String} eventName
      */
     function subtractEvent(s, listenerCounts, eventName) {
-        //console.log("%c%s.$$listenerCount[%s] %s - %s = %s", "color:#FF6600", s.$id, eventName, s.$$listenerCount[eventName], listenerCounts[eventName], s.$$listenerCount[eventName] - listenerCounts[eventName]);
         s.$$listenerCount[eventName] -= listenerCounts[eventName];
     }
 
@@ -726,6 +747,7 @@ function Datagrid(scope, element, attr, $compile) {
                     // make sure to put them into active in the right order.
                     active.push(loop.i);
                     safeDigest(s);
+                    s.$digested = true;
                 }
             }
             loop.i += loop.inc;
@@ -810,7 +832,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function afterRenderAfterDataChange() {
         var tplHeight;
-        if (values.dirty) {
+        if (values.dirty && values.activeRange.max > 0) {
             values.dirty = false;
             tplHeight = getRowElm(values.activeRange.min)[0].offsetHeight;
             if (inst.getData().length && tplHeight !== inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min])) {
@@ -901,6 +923,11 @@ function Datagrid(scope, element, attr, $compile) {
         }
         values.dirty = true;
         inst.log("dataChanged");
+        flow.add(changeData, [newVal, oldVal]);
+    }
+
+    function changeData(newVal, oldVal) {
+        dispatch(exports.datagrid.events.ON_BEFORE_RESET);
         inst.grouped = scope.$eval(attr.grouped);
         inst.data = inst.setData((newVal || attr.list), inst.grouped) || [];
         dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal);
@@ -913,8 +940,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function reset() {
         inst.info("reset start");
-        dispatch(exports.datagrid.events.ON_BEFORE_RESET);
-        flow.clear();// we are going to clear all in the flow before doing a reset.
+//        flow.clear();// we are going to clear all in the flow before doing a reset.
         state = states.BUILDING;
         destroyScopes();
         // now destroy all of the dom.
@@ -922,8 +948,9 @@ function Datagrid(scope, element, attr, $compile) {
         active.length = 0;
         scopes.length = 0;
         // keep reference to the old content and add a class to it so we can tell it is old. We will remove it after the render.
+        destroyOldContent();
         oldContent = content;
-        oldContent.addClass('old-content');
+        oldContent.addClass('old-' + options.contentClass);
         oldContent.children().unbind();
         // make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.
         inst.chunkModel.reset();
@@ -961,6 +988,7 @@ function Datagrid(scope, element, attr, $compile) {
             activateScope(s);
             s.$digest();
             deactivateScope(s);
+            s.$digested = true;
         }
     }
 
@@ -1041,6 +1069,7 @@ function Datagrid(scope, element, attr, $compile) {
     function destroy() {
         scope.datagrid = null; // we have a circular reference. break it on destroy.
         inst.log('destroying grid');
+        window.removeEventListener('resize', onResize);
         clearTimeout(values.scrollingStopIntv);
         // destroy flow.
         flow.destroy();
@@ -1078,6 +1107,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     exports.logWrapper('datagrid', inst, 'green', dispatch);
+    scope.datagrid = inst;
     setupExports();
 
     return inst;
@@ -1092,7 +1122,6 @@ module.directive('uxDatagrid', ['$compile', 'gridAddons', function ($compile, gr
         restrict: 'AE',
         link: function (scope, element, attr) {
             var inst = new Datagrid(scope, element, attr, $compile);
-            scope.datagrid = inst;// expose to scope.
             each(exports.datagrid.coreAddons, function (method) {
                 method.apply(inst, [inst]);
             });

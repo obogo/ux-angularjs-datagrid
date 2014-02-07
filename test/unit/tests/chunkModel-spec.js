@@ -4,6 +4,10 @@ describe("chunkModel", function () {
 
     beforeEach(function () {
         exports = {
+            options: {
+                chunkClass: 'datagrid-chunk',
+                chunkReadyClass: 'datagrid-chunk-ready'
+            },
             templateModel: {
                 templates: {},
                 getTemplate: function (name) {

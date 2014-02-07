@@ -229,7 +229,6 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, up
             values.scroll += deltaY;//result.cap(values.scroll + deltaY);
             values.absSpeed = Math.abs(deltaY);
         }
-//        console.log(values.speed);
         _y = y;
         _x = x;
     }
@@ -297,6 +296,14 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, up
         var value = element[0].scrollTop - values.scroll;
         result.content[0].style.transitionDuration = (tranDuration ? tranDuration + 'ms' : 0);
         result.content[0].style.webkitTransform = "translate3d(0px, " + value + "px, 0px)";
+        if (!tranDuration) {
+            onVirtualScrollUpdate();
+        } else {
+            setTimeout(onVirtualScrollUpdate, tranDuration);
+        }
+    }
+
+    function onVirtualScrollUpdate() {
         result.dispatch(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE);
     }
 

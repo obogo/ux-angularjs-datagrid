@@ -39,7 +39,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
                 templateData;
             wrapper.className = 'grid-template-wrapper';
             template = angular.element(template)[0];
-            template.className += ' ' + inst.options.uncompiledClass + ' {{$status}}';
+            template.className += ' ' + inst.options.rowClass + ' ' + inst.options.uncompiledClass + ' {{$status}}';
             template.setAttribute('template', name);
             inst.getContent()[0].appendChild(wrapper);
             wrapper.appendChild(template);

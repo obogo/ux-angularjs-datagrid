@@ -1,6 +1,6 @@
 .group, .row, .sub {
-    transition: height 0.5s;
-    -webkit-transition: height: 0.5s;
+    -webkit-transition: height 0.5s ease-out;
+    transition: height 0.5s ease-out;
 }
 
 .groupExpand {

@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.3.0-alpha
+* uxDatagrid v.0.3.1-alpha
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -9,25 +9,31 @@
  * Datagrid infinite scroll adds more data when the list scrolls to the bottom.
  * @type {string}
  */
-ux.datagrid.events.SCROLL_TO_TOP = "datagrid:scrollToTop";
+ux.datagrid.events.ON_SCROLL_TO_TOP = "datagrid:onScrollToTop";
 
-ux.datagrid.events.SCROLL_TO_BOTTOM = "datagrid:scrollToBottom";
+ux.datagrid.events.ON_SCROLL_TO_BOTTOM = "datagrid:onScrollToBottom";
 
 angular.module("ux").factory("infiniteScroll", function() {
     return function infiniteScroll(inst, $filter) {
         var result = {}, bottomOffset = 0, scrollOffset = 0, loadingRow = {
             _template: "loadingRow"
         };
+        inst.options.infiniteScroll = inst.options.infiniteScroll || {};
+        inst.options.infiniteScroll.enable = inst.options.infiniteScroll.enable === undefined ? true : inst.options.infiniteScroll.enable;
+        inst.options.infiniteScroll.limit = inst.options.infiniteScroll.limit === undefined ? 0 : inst.options.infiniteScroll.limit;
         result.onBeforeDataChange = function(event, newVal, oldVal) {
-            if (inst.options.infiniteScrollLimit) {
-                event.newValue = $filter("limitTo")(newVal, inst.options.infiniteScrollLimit);
-                event.preventDefault();
+            if (inst.options.infiniteScroll.enable) {
+                if (inst.options.infiniteScroll.limit && newVal.length < inst.options.infiniteScroll.limit) {
+                    event.newValue = $filter("limitTo")(newVal, inst.options.infiniteScroll.limit);
+                    event.preventDefault();
+                    result.addExtraRow(event.newValue);
+                }
             }
         };
-        result.afterDataChange = function beforeDataChange() {
+        result.addExtraRow = function(data) {
             scrollOffset = inst.values.scroll;
-            if (inst.data[inst.data.length - 1] !== loadingRow && (!inst.options.infiniteScrollLimit || inst.data.length < inst.options.infiniteScrollLimit)) {
-                inst.data.push(loadingRow);
+            if (data[data.length - 1] !== loadingRow) {
+                data.push(loadingRow);
             }
         };
         result.calculateBottomOffset = function calculateBottomOffset() {
@@ -39,13 +45,13 @@ angular.module("ux").factory("infiniteScroll", function() {
         };
         result.onUpdateScroll = function onUpdateScroll(event, scroll) {
             if (scroll >= bottomOffset) {
-                inst.dispatch(ux.datagrid.events.SCROLL_TO_BOTTOM);
+                inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_BOTTOM);
             } else if (scroll <= 0) {
-                inst.dispatch(ux.datagrid.events.SCROLL_TO_TOP);
+                inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_TOP);
             }
         };
         inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_BEFORE_DATA_CHANGE, result.onBeforeDataChange));
-        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_AFTER_DATA_CHANGE, result.afterDataChange));
+        //        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_AFTER_DATA_CHANGE, result.afterDataChange));
         inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
         inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.SCROLL_STOP, result.onUpdateScroll));
         inst.infiniteScroll = result;

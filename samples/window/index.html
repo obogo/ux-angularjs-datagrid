@@ -13,7 +13,6 @@
     <!--<script src="../../lib/angular.js"></script>-->
     <script src="../../build/latest/angular-ux-datagrid.js"></script>
     <script src="../../build/latest/addons/ux-datagrid-windowScroll.js"></script>
-    <script src="../../build/latest/addons/touch/ios/ux-datagrid-iosScroll.js"></script>
     <script>
 
         var records = 50000;
@@ -33,7 +32,7 @@
         Note: {{fake}} below is to get angular to process the class attribute. This wipes out any css classes that were added by jquery.
     //-->
 </head>
-<body data-ng-controller="root" class="listA datagrid" data-ux-datagrid="items" data-addons="windowScroll, iosScroll">
+<body data-ng-controller="root" class="listA datagrid" data-ux-datagrid="items" data-addons="windowScroll">
     <script type="template/html" data-template-name="default" data-template-item="item">
         <div class="row {{fake}}">
             <div class="text">{{item.id}} {{$id}} {{counter}}</div>

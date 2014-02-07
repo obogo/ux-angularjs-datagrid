@@ -54,7 +54,7 @@ angular.module('ux').factory('gridFocusManager', function () {
          * @param {Function} method
          */
         function applyToListeners(method) {
-            if (!inst.values.activeRange.max) {
+            if (!inst.values.activeRange.max || inst.values.activeRange.max < 0) {
                 return;// if max is 0. there is no point.
             }
             var i = inst.values.activeRange.min, row;

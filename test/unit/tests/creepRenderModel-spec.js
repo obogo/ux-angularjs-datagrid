@@ -15,6 +15,7 @@ describe("creepRenderModel", function () {
                 flow: new ux.datagrid.Flow({async: false}),
                 unwatchers: [],
                 options: {
+                    enableCreepRender: true,
                     renderThreshold: 100,
                     creepLimit: 1
                 },

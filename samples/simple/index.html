@@ -12,7 +12,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.js"></script>
     <!--<script src="../../lib/angular.js"></script>-->
     <script src="../../build/latest/angular-ux-datagrid.js"></script>
-    <script src="../../build/latest/addons/touch/ios/ux-datagrid-iosScroll.js"></script>
+    <script src="../../lib/iscroll.js"></script>
+    <script src="../../build/latest/addons/touch/ux-datagrid-iscroll.js"></script>
+    <!--<script src="../../build/latest/addons/touch/ios/ux-datagrid-iosScroll.js"></script>-->
     <script>
 
         var records = 50000;
@@ -64,7 +66,7 @@
 <div class="my-container">
     <div data-ng-controller="simpleArray" class="listA">
         <!--// this is the datagrid //-->
-        <div data-ux-datagrid="items" class="datagrid" data-addons="iosScroll">
+        <div data-ux-datagrid="items" class="datagrid" data-addons="iScrollAddon">
             <script type="template/html" data-template-name="default" data-template-item="item">
                 <div class="row {{fake}}">
                     <div class="text">{{item.id}} {{$id}} {{counter}}</div>

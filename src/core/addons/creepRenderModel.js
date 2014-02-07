@@ -7,11 +7,12 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         upIndex = 0,
         downIndex = 0,
         waitHandle,
+        waitingOnReset,
         time;
 
     function digest(index) {
         var s = inst.getScope(index);
-        if (!s || !s.digested) {// just skip if already digested.
+        if (!s || !s.$digested) {// just skip if already digested.
             inst.forceRenderScope(index);
         }
     }
@@ -28,6 +29,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
 
     function onInterval(started, ended, force) {
         if (!inst.values.touchDown) {
+            waitingOnReset = false;
             time = Date.now() + inst.options.renderThreshold;
             upIndex = started;
             downIndex = ended;
@@ -71,7 +73,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     function onComplete() {
         stop();
         creepCount += 1;
-        if (!inst.values.speed && inst.scopes.length < inst.rowsLength) {
+        if (!inst.values.touchDown && !inst.values.speed && inst.scopes.length < inst.rowsLength) {
             resetInterval(upIndex, downIndex);
         }
         inst.dispatch(exports.datagrid.events.ON_RENDER_PROGRESS, calculatePercent());
@@ -80,6 +82,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     function stop() {
         time = 0;
         clearTimeout(intv);
+        clearTimeout(waitHandle);
         intv = 0;
     }
 
@@ -115,12 +118,14 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     };
 
     inst.creepRenderModel = model;
-
-    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
-    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
-    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
-    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
-    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeRender));
-    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
+    // do not add listeners if it is not enabled.
+    if (inst.options.enableCreepRender) {
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeRender));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
+    }
 };
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.creepRenderModel);

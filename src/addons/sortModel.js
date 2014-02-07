@@ -359,9 +359,9 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
                 event = inst.dispatch(exports.datagrid.events.ON_BEFORE_SORT, key, currentPathState, pathState);
                 // prevent default on event to prevent sort.
                 if (!event.defaultPrevented) {
-                    if (!result.getCache(key)) {
+                    if (!result.getCache(key) || result.getCache(key).length !== original.length) {
                         result.log("\tstore sort %s", key);
-                        result.setCache(key, original.slice(0));// clone it
+                        result.setCache(key, original && original.slice(0) || []); // clone it
                         ux.each(pathState.$order, applyListSort, {
                             grouped: inst.grouped,
                             pathState: pathState,
@@ -386,7 +386,7 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
 
         function applyListSort(columnName, index, list, data) {
             var i, len;
-            if (data.grouped && data.ary[0].hasOwnProperty(data.grouped)) {
+            if (data.grouped && data.ary.length && data.ary[0].hasOwnProperty(data.grouped)) {
                 len = data.ary.length;
                 for(i = 0; i < len; i += 1) {
                     data.ary[i] = angular.extend({}, data.ary[i]);// shallow copy
@@ -432,6 +432,7 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
         result.toggleSort = function toggleSort(name) {
             result.log('toggleSort %s', name);
             sortStatesModel.toggle(name);
+            result.clear();
             result.applySorts(original);
         };
 

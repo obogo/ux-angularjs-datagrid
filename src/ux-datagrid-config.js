@@ -114,34 +114,48 @@ exports.datagrid = {
         // - **<a name="options.updateDelay">updateDelay</a>** used by the scrollModel so that it gives cushion after the grid has stopped scrolling before rendering.
         // while faster times on this make it render faster, it can cause it to rencer multiple times because the scrollbar is not completely stopped and may decrease
         // scrolling performance. if < 100ms this fires too often.
-        updateDelay: 500,
+        updateDelay: 100,
+        // - **<a name="options.enableCreepRender">enableCreepRender</a>** allow the rendering after the scrolling has stopped to creep in both directions away from the
+        // visible area. This can affect performance in a couple of ways. It will make it so more rows are rendered so scrolling will not have to wait for them, however if
+        // the device is slower this may affect performance in scrolling because the render has to finish before the touch events will work causing a delay in reaction to
+        // touch events.
+        enableCreepRender: true,
         // - **<a name="creepStartDelay">creepStartDelay</a>**
         // when the creep render starts. How long after the scrolling has stopped.
-        creepStartDelay: 2000,
+        creepStartDelay: 1000,
         // - **<a name="options.cushion">cushion</a>** this it used by the updateRowWatchers and what rows it will update. It can be handy for debugging to make sure only
         // the correct rows are digesting by making the value positive it will take off space from the top and bottom of the viewport that number of pixels to match what
         // rows are activated and which ones are not. Also a negative number will cause the grid to render past the viewable area and digest rows that are out of view.
         // In short it is a debugging cushion about what is activated to see them working.
-        cushion: -50,
+        cushion: -200,
         // - **<a name="options.chunkSize">chunkSize</a>** this is used to determine how large each chunk should be. Chunks are made recursively
         // so if you pass 8 items and they are chunked at 2 then you would have 2 chunks each with 2 chunks each with 2 rows.
         chunkSize: 50,
+        // - **<a name="options.compiledClass">compiledClass</a>** after a row has been compiled the uncompiled class is removed and compiled is added.
+        compiledClass: 'compiled',
         // - **<a name="options.uncompiledClass">uncompiledClass</a>** before a dom row is rendered it is compiled. The compiled row will have {{}} still in the code
         // because the row has not been digested yet. If the user scrolls they can see this. So the uncompiledClass is used to allow the css to hide rows that are not
         // yet compiled. Once they are compiled and digested the uncompiledClass will be removed from that dom row.
         uncompiledClass: 'uncompiled',
+        // - **<a name="contentClass">contentClass</a>** the name of the css class assigned to the content div.
+        contentClass: 'datagrid-content',
+        // - **<a name="rowClass">rowClass</a>** the css class assigned to every row.
+        rowClass: 'datagrid-row',
+        // - **<a name="options.chunkClass">chunkClass</a>** the class assigned to each chunk in the datagrid. This can be customized on a per grid basis since options
+        // can be overridden so that styles or selection may differ from one grid to the next.
+        chunkClass: 'datagrid-chunk',
+        // - **<a name="options.chunkReadyClass">chunkReadyClass</a>** after the chunk is added. The chunk ready class is added to all for css
+        // transitions on newly created chunks.
+        chunkReadyClass: 'datagrid-chunk-ready',
         // - **<a name="options.renderThreshold">renderThreshold</a>** this value is used by the creepRenderModel to allow the render to process for this amount of ms in
         // both directions from the current visible area and then it will wait and process again as many rows as it can in this timeframe.
         renderThreshold: 1,
         // - **<a name="options.renderThresholdWait">renderThresholdWait</a>** used in conjunction with options.renderThreshold this will wait this amount of time before
         // trying to render more rows.
-        renderThresholdWait: 100,
+        renderThresholdWait: 50,
         // - **<a name="options.creepLimit">creepLimit</a>** used with options.renderThreshold and options.renderThresholdWait this will give a maximum amount of renders
         // that can be done before the creep render is turned off.
-        creepLimit: 100,
-        // - **<a name="options.chunkClass">chunkClass</a>** the class assigned to each chunk in the datagrid. This can be customized on a per grid basis since options
-        // can be overridden so that styles or selection may differ from one grid to the next.
-        chunkClass: 'ux-datagrid-chunk'
+        creepLimit: 500
         //TODO: need to create global addons object.
     },
     /**

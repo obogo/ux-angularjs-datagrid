@@ -131,10 +131,10 @@ app.config(function ($routeProvider) {
                 $scope.items = createGroupedSpreadsheetData();
             }
         })
-        .when('/addons/iosScroll', {
-            templateUrl: "partials/addons/iosScroll.html",
+        .when('/addons/iScrollAddon', {
+            templateUrl: "partials/addons/iScrollAddon.html",
             controller: function ($scope) {
-                $scope.name = "Addons >> Touch >> ISO >> Scroll Friction";
+                $scope.name = "Addons >> Touch >> IScroll";
                 $scope.items = createSimpleList(100);
             }
         })
@@ -226,8 +226,8 @@ app.config(function ($routeProvider) {
             controller: function ($scope, $timeout) {
                 $scope.name = "Addons >> InfiniteScroll";
                 $scope.items = createSimpleList(20);
-                $scope.$on(ux.datagrid.events.SCROLL_TO_BOTTOM, function () {
-                    if ($scope.items.length < $scope.datagrid.options.infiniteScrollLimit) {
+                $scope.$on(ux.datagrid.events.ON_SCROLL_TO_BOTTOM, function () {
+                    if ($scope.items.length < $scope.datagrid.options.infiniteScroll.limit) {
                         // we are doing a timeout here to simulate time that an ajax call may need to get the paginated data.
                         $timeout(function () {
                             $scope.items = $scope.items.concat(createSimpleList(20, $scope.items.length));
@@ -245,12 +245,12 @@ app.controller('root', function root($scope) {
     $scope.counter = 0;
     $scope.records = records;
     $scope.percents = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
-    setInterval(function () {
-        $scope.counter += 1;
+//    setInterval(function () {
+//        $scope.counter += 1;
 //        if (!$scope.$$phase) {
 //            $scope.$apply();
 //        }
-    }, 1000);
+//    }, 1000);
 
     $scope.scrollToPercent = function (percent) {
         var datagrid = document.getElementsByClassName('datagrid');

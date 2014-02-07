@@ -1,7 +1,7 @@
 describe("infiniteScrollModel", function () {
     var element,
         scope,
-        template = '<div data-ux-datagrid="items" class="datagrid" data-options="{debug:{all:1, Flow:0}, chunkSize:10, async:false}" data-addons="infiniteScroll, gridLogger" style="width:100px;height:100px;">' +
+        template = '<div data-ux-datagrid="items" class="datagrid" data-options="{debug:{all:1, Flow:0}, chunkSize:10, async:false, infiniteScroll: {limit:21}}" data-addons="infiniteScroll, gridLogger" style="width:100px;height:100px;">' +
                         '<script type="template/html" data-template-name="default" data-template-item="item">' +
                             '<div class="mock-row" style="height:10px;">{{item.id}}</div>' +
                         '</script>' +
@@ -24,9 +24,9 @@ describe("infiniteScrollModel", function () {
         inject(function ($compile, $rootScope) {
             scope = $rootScope.$new();
             scope.items = createSimpleList(20);
-            scope.$on(ux.datagrid.events.SCROLL_TO_BOTTOM, function () {
+            scope.$on(ux.datagrid.events.ON_SCROLL_TO_BOTTOM, function () {
                 scope.scrollToBottomFired = true;
-                if (scope.items.length < scope.datagrid.options.infiniteScrollLimit) {
+                if (scope.items.length < scope.datagrid.options.infiniteScroll.limit) {
                     scope.items = scope.items.concat(createSimpleList(20, scope.items.length));
                 }
             });
@@ -43,7 +43,7 @@ describe("infiniteScrollModel", function () {
 
     it("should not fire scrollToBottom until it scrolls to it.", function() {
         setup(template);
-        scope.datagrid.scrollModel.scrollTo(100, true);
+        scope.datagrid.scrollModel.scrollTo(90, true);
         expect(scope.scrollToBottomFired).toBeUndefined();
     });
 
@@ -58,8 +58,8 @@ describe("infiniteScrollModel", function () {
         expect(scope.datagrid.data.length).toBe(21);
     });
 
-    it("should not add the extra row if it is past the options.infiniteScrollLimit", function() {
-        setup('<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10, async:false, infiniteScrollLimit:20}" data-addons="infiniteScroll" style="width:100px;height:100px;">' +
+    it("should not add the extra row if it is past the options.infiniteScroll.limit", function() {
+        setup('<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10, async:false, infiniteScroll: {limit:20}}" data-addons="infiniteScroll" style="width:100px;height:100px;">' +
                     '<script type="template/html" data-template-name="default" data-template-item="item">' +
                         '<div class="mock-row" style="height:10px;">{{item.id}}</div>' +
                     '</script>' +
@@ -68,7 +68,7 @@ describe("infiniteScrollModel", function () {
     });
 
     it("should not add more extra rows after it loads a row and reaches the limit", function() {
-        setup('<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10, async:false, infiniteScrollLimit:40}" data-addons="infiniteScroll" style="width:100px;height:100px;">' +
+        setup('<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10, async:false, infiniteScroll: {limit:40}}" data-addons="infiniteScroll" style="width:100px;height:100px;">' +
                     '<script type="template/html" data-template-name="default" data-template-item="item">' +
                         '<div class="mock-row" style="height:10px;">{{item.id}}</div>' +
                     '</script>' +

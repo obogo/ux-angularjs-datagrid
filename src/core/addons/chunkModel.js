@@ -172,16 +172,30 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * @returns {*}
      */
     function buildDomByIndexes(indexes) {
-        var i = 0, index, indxs = indexes.slice(0), ca = _list, el = _el;
+        var i = 0, index, indxs = indexes.slice(0), ca = _list, el = _el, children;
         while (i < indxs.length) {
             index = indxs.shift();
             if (!ca.rendered) {
                 el.html(ca.getChildrenStr());
+                children = el.children();
+                exports.each(children, computeStyles);
+                if (children[0].className.indexOf(inst.options.chunkClass) !== -1) {
+                    // need to calculate css styles before adding this class to make transitions work.
+                    children.addClass(inst.options.chunkReadyClass);
+                }
             }
             ca = ca[index];
             el = angular.element(el.children()[index]);
         }
         return el;
+    }
+
+    /**
+     * ##<a name="computedStyles">computedStyles</a>##
+     * calculate the computed styles of each element
+     */
+    function computeStyles(elm) {
+        window.getComputedStyle(elm).getPropertyValue('top');
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.3.0-alpha
+* uxDatagrid v.0.3.1-alpha
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -9,7 +9,7 @@
  * Datagrid stats. A good way to test to see if your plugin is adversly affecting performance.
  * @type {string}
  */
-ux.datagrid.events.STATS_UPDATE = "datagrid:statsUpdate";
+exports.datagrid.events.STATS_UPDATE = "datagrid:statsUpdate";
 
 angular.module("ux").factory("statsModel", function() {
     return function(inst) {

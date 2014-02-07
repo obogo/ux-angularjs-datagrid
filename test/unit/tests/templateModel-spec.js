@@ -35,13 +35,11 @@ describe("templateModel", function () {
 
     function setup(html) {
         var content = document.createElement('div'), ext;
-        content.className = 'content';
+        content.className = ux.datagrid.options.contentClass;
         content = angular.element(content);
         element = angular.element(html);
         ext = {
-            options: {
-                uncompiledClass: 'uncompiled'
-            },
+            options: angular.copy(ux.datagrid.options),
             element: element,
             getContent: function () {
                 return content;

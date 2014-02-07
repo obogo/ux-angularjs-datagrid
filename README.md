@@ -84,6 +84,9 @@ It is also handy to have addons that will update based on events. Here is an exa
 		};
 	})
 
+##Why use iScroll##
+I had my own version of a scroller. However, datagrid is not a scrolling solution, it is a long list rendering solution. Scrolling can be done with any javascript scrolling solution. IScroll is a popular scroller so I used it to leverage the reuse of other libraries with the addition of addons to make them compatible.
+
 ## No JQuery ##
 AngularJS Datagrid doesn't have any JQuery dependencies. This helps to keep your application light weight.
 

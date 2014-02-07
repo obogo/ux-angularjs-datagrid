@@ -99,14 +99,32 @@ table {
     background: #336699;
 }
 
+.datagrid-row > * {
+    -webkit-transition: opacity 0.5s ease-out;
+    -moz-transition: opacity 0.5s ease-out;
+    -ms-transition: opacity 0.5s ease-out;
+    -o-transition: opacity 0.5s ease-out;
+    transition: opacity 0.5s ease-out;
+}
+
 .uncompiled > * {
     visibility: hidden;
+    opacity: 0;
 }
 
-.uncompiled.compiled > * {
-    visibility: visible;
+.compiled > * {
+    opacity: 1;
 }
 
-.ux-datagrid-chunk {
-    /*outline: 4px #FF0000 solid;*/
+.datagrid-chunk {
+    opacity: 0;
+    -webkit-transition: opacity 0.5s ease-out;
+    -moz-transition: opacity 0.5s ease-out;
+    -ms-transition: opacity 0.5s ease-out;
+    -o-transition: opacity 0.5s ease-out;
+    transition: opacity 0.5s ease-out;
+}
+
+.datagrid-chunk-ready {
+    opacity: 1;
 }

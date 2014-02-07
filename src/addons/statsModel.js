@@ -2,7 +2,7 @@
  * Datagrid stats. A good way to test to see if your plugin is adversly affecting performance.
  * @type {string}
  */
-ux.datagrid.events.STATS_UPDATE = 'datagrid:statsUpdate';
+exports.datagrid.events.STATS_UPDATE = 'datagrid:statsUpdate';
 angular.module('ux').factory('statsModel', function () {
     return function (inst) {
         var initStartTime = 0, rendersTotal = 0, renders = [], unwatchers = [];

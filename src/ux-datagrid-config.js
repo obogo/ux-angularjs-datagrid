@@ -30,7 +30,7 @@ exports.datagrid = {
      * however with this attribute iOS would crash if you try to change the scroll with javascript, or turn it on and off.
      * So a [virtualScroll](#virtualScroll) was implemented for iOS to make it scroll using translate3d.
      */
-    isIOS: navigator.userAgent.match(/(iPad|iPhone|iPod)/g),
+    isIOS: !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g),
     /**
      * ###<a name="states">states</a>###
      *  - **<a name="states.BUILDING">BUILDING</a>**: is the startup phase of the grid before it is ready to perform the first render. This may include

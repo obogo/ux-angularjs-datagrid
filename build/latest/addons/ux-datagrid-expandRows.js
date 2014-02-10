@@ -86,6 +86,7 @@ angular.module("ux").factory("expandRows", function() {
                 }
                 if (tpl.cls) {
                     elm[state === states.opened ? "addClass" : "removeClass"](tpl.cls);
+                    elm.addClass("animating");
                 }
                 if (tpl.transition === false) {
                     onTransitionEnd({
@@ -111,6 +112,7 @@ angular.module("ux").factory("expandRows", function() {
         function onTransitionEnd(event) {
             var elm = angular.element(event.target), s = elm.scope(), index = s.$index, state = s.$state;
             elm[0].removeEventListener(TRNEND_EV, onTransitionEnd);
+            elm.removeClass("animating");
             if (state === states.opened) {
                 opened[index] = {
                     index: index,
@@ -122,6 +124,7 @@ angular.module("ux").factory("expandRows", function() {
             } else {
                 delete opened[index];
             }
+            s.$digest();
             inst.updateHeights(index);
         }
         function isExpanded(itemOrIndex) {

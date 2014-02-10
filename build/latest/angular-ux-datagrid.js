@@ -39,7 +39,7 @@ exports.datagrid = {
      * however with this attribute iOS would crash if you try to change the scroll with javascript, or turn it on and off.
      * So a [virtualScroll](#virtualScroll) was implemented for iOS to make it scroll using translate3d.
      */
-    isIOS: navigator.userAgent.match(/(iPad|iPhone|iPod)/g),
+    isIOS: !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g),
     /**
      * ###<a name="states">states</a>###
      *  - **<a name="states.BUILDING">BUILDING</a>**: is the startup phase of the grid before it is ready to perform the first render. This may include
@@ -2203,7 +2203,7 @@ ChunkArray.prototype.destroy = function() {
 exports.datagrid.events.ON_RENDER_PROGRESS = "datagrid:onRenderProgress";
 
 exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
-    var intv = 0, creepCount = 0, model = {}, upIndex = 0, downIndex = 0, waitHandle, waitingOnReset, time;
+    var intv = 0, creepCount = 0, model = exports.logWrapper("creepModel", {}, "blue", inst.dispatch), upIndex = 0, downIndex = 0, waitHandle, waitingOnReset, time, unwatchers = [];
     function digest(index) {
         var s = inst.getScope(index);
         if (!s || !s.$digested) {
@@ -2216,6 +2216,9 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
             count: 0
         };
         each(inst.scopes, calculateScopePercent, result);
+        if (result.count >= inst.rowsLength) {
+            model.disable();
+        }
         return {
             count: result.count,
             len: inst.rowsLength
@@ -2300,19 +2303,31 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     model.stop = stop;
     // allow external stop of creep render.
     model.destroy = function destroy() {
+        model.disable();
         stop();
         inst = null;
         model = null;
     };
+    model.enable = function() {
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeRender));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
+    };
+    model.disable = function() {
+        model.info("creep Disabled");
+        while (unwatchers.length) {
+            unwatchers.pop()();
+        }
+    };
     inst.creepRenderModel = model;
     // do not add listeners if it is not enabled.
     if (inst.options.enableCreepRender) {
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeRender));
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
+        model.enable();
+    } else {
+        model.disable();
     }
 };
 

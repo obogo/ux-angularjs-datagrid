@@ -40,7 +40,8 @@ describe("gridFocusManager", function () {
         });
 
         forceRenderAll = function () {
-            for (var i = 0; i < grid.scopes.length; i += 1) {
+            var len = grid.getData().length;
+            for (var i = 0; i < len; i += 1) {
                 grid.forceRenderScope(i);
             }
         }

@@ -103,6 +103,7 @@ angular.module('ux').factory('expandRows', function () {
                 }
                 if (tpl.cls) {
                     elm[(state === states.opened ? "addClass" : "removeClass")](tpl.cls);
+                    elm.addClass('animating');
                 }
                 if (tpl.transition === false) {
                     onTransitionEnd({target: elm[0]});
@@ -128,6 +129,7 @@ angular.module('ux').factory('expandRows', function () {
                 index = s.$index,
                 state = s.$state;
             elm[0].removeEventListener(TRNEND_EV, onTransitionEnd);
+            elm.removeClass('animating');
             if (state === states.opened) {
                 opened[index] = {
                     index: index,
@@ -139,6 +141,7 @@ angular.module('ux').factory('expandRows', function () {
             } else {
                 delete opened[index];
             }
+            s.$digest();
             inst.updateHeights(index);
         }
 

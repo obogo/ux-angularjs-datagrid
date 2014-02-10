@@ -155,15 +155,15 @@ exports.selector = function() {
             if (ignoreClasses instanceof Array) {
                 var i = 0, iLen = ignoreClasses.length;
                 while (i < iLen) {
-                    if (!matchesClass(cls, ignoreClasses[i])) {
-                        return true;
+                    if (matchesClass(cls, ignoreClasses[i])) {
+                        return false;
                     }
                     i += 1;
                 }
-            } else if (!matchesClass(cls, ignoreClasses)) {
-                return true;
+            } else if (matchesClass(cls, ignoreClasses)) {
+                return false;
             }
-            return false;
+            return true;
         };
     }
     function getClasses(element, ignoreClass) {

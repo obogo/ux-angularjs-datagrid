@@ -3,12 +3,13 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
 
     var intv = 0,
         creepCount = 0,
-        model = {},
+        model = exports.logWrapper('creepModel', {}, 'blue', inst.dispatch),
         upIndex = 0,
         downIndex = 0,
         waitHandle,
         waitingOnReset,
-        time;
+        time,
+        unwatchers = [];
 
     function digest(index) {
         var s = inst.getScope(index);
@@ -20,6 +21,9 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     function calculatePercent() {
         var result = {count: 0};
         each(inst.scopes, calculateScopePercent, result);
+        if (result.count >= inst.rowsLength) {
+            model.disable();
+        }
         return {count: result.count, len: inst.rowsLength};
     }
 
@@ -112,20 +116,34 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     model.stop = stop; // allow external stop of creep render.
 
     model.destroy = function destroy() {
+        model.disable();
         stop();
         inst = null;
         model = null;
     };
 
+    model.enable = function () {
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeRender));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
+    };
+
+    model.disable = function () {
+        model.info("creep Disabled");
+        while(unwatchers.length) {
+            unwatchers.pop()();
+        }
+    };
+
     inst.creepRenderModel = model;
     // do not add listeners if it is not enabled.
     if (inst.options.enableCreepRender) {
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeRender));
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
+        model.enable();
+    } else {
+        model.disable();
     }
 };
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.creepRenderModel);

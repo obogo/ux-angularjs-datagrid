@@ -5,7 +5,7 @@
 angular.module('ux').factory('iScrollAddon', function () {
     return function (inst) {
         // This is only needed for IOS devices. Android devices work fine without it.
-        if (!exports.datagrid.options.isIOS) {
+        if (!exports.datagrid.isIOS) {
             return;
         }
         if (!IScroll) {

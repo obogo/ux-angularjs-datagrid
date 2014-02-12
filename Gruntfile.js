@@ -109,7 +109,7 @@ module.exports = function (grunt) {
             main: {
                 files: [
                     // include files withing path
-                    {expand: true, src: ['build/latest/**'], dest: 'build/v<%= pkg.version %>/', filter:'isFile'}
+                    {expand: true, cwd: 'build/latest/', src: ['**'], dest: 'build/v<%= pkg.version %>/'}
                 ]
             }
         },

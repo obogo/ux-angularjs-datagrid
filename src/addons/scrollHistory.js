@@ -32,6 +32,7 @@ angular.module('ux').service('scrollHistoryModel', ['$location', '$rootScope', f
 
         // <a name="clearPath">clearPath</a> clear the stored value for the specified path.
         function clearPath(path) {
+            path = path || getPath();
             result.log("clearPath %s", path);
             delete cache[path];
         }

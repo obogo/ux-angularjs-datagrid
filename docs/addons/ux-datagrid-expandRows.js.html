@@ -36,7 +36,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.3.0-alpha
+  <div class="summary"><p>uxDatagrid v.0.3.2-alpha
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -127,6 +127,7 @@ License: MIT.</p>
                 <span class="p">}</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">cls</span><span class="p">)</span> <span class="p">{</span>
                     <span class="nx">elm</span><span class="p">[</span><span class="nx">state</span> <span class="o">===</span> <span class="nx">states</span><span class="p">.</span><span class="nx">opened</span> <span class="o">?</span> <span class="s2">&quot;addClass&quot;</span> <span class="o">:</span> <span class="s2">&quot;removeClass&quot;</span><span class="p">](</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">cls</span><span class="p">);</span>
+                    <span class="nx">elm</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;animating&quot;</span><span class="p">);</span>
                 <span class="p">}</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">transition</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
                     <span class="nx">onTransitionEnd</span><span class="p">({</span>
@@ -152,6 +153,7 @@ License: MIT.</p>
         <span class="kd">function</span> <span class="nx">onTransitionEnd</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">elm</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">),</span> <span class="nx">s</span> <span class="o">=</span> <span class="nx">elm</span><span class="p">.</span><span class="nx">scope</span><span class="p">(),</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">$index</span><span class="p">,</span> <span class="nx">state</span> <span class="o">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">$state</span><span class="p">;</span>
             <span class="nx">elm</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="nx">TRNEND_EV</span><span class="p">,</span> <span class="nx">onTransitionEnd</span><span class="p">);</span>
+            <span class="nx">elm</span><span class="p">.</span><span class="nx">removeClass</span><span class="p">(</span><span class="s2">&quot;animating&quot;</span><span class="p">);</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">state</span> <span class="o">===</span> <span class="nx">states</span><span class="p">.</span><span class="nx">opened</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">opened</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="nx">index</span><span class="o">:</span> <span class="nx">index</span><span class="p">,</span>
@@ -163,6 +165,7 @@ License: MIT.</p>
             <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
                 <span class="k">delete</span> <span class="nx">opened</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
             <span class="p">}</span>
+            <span class="nx">s</span><span class="p">.</span><span class="nx">$digest</span><span class="p">();</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">updateHeights</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">isExpanded</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">)</span> <span class="p">{</span>

@@ -1,4 +1,10 @@
 /*global angular */
+/**
+ * ##<a name="templateModel">templateModel</a>##
+ * Management of templates for the datagrid.
+ * @param inst
+ * @returns {templateModel|*|Function|templateModel|templateModel}
+ */
 exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
     'use strict';
 
@@ -71,6 +77,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         }
 
         /**
+         * ###<a name="getTemplate">getTemplate</a>###
          * Use the data object from each item in the array to determine the template for that item.
          * @param data
          */

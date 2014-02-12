@@ -127,7 +127,7 @@ exports.datagrid = {
         // the correct rows are digesting by making the value positive it will take off space from the top and bottom of the viewport that number of pixels to match what
         // rows are activated and which ones are not. Also a negative number will cause the grid to render past the viewable area and digest rows that are out of view.
         // In short it is a debugging cushion about what is activated to see them working.
-        cushion: -200,
+        cushion: -100,
         // - **<a name="options.chunkSize">chunkSize</a>** this is used to determine how large each chunk should be. Chunks are made recursively
         // so if you pass 8 items and they are chunked at 2 then you would have 2 chunks each with 2 chunks each with 2 rows.
         chunkSize: 50,

@@ -109,6 +109,16 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
         }
 
         /**
+         * See if there is a path that is registered or not.
+         * @param {String} path
+         * @returns {boolean}
+         */
+        function hasPathState(path) {
+            path = path || getPath();
+            return !!states[path];
+        }
+
+        /**
          * @param path
          * @return {*}
          * @private
@@ -132,7 +142,7 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
             result.log("setPathState %s to %s", currentPathState, pathState);
             setIgnoreParamsInPath(true);
             for (columnName in pathState) {
-                if (pathState.hasOwnProperty(columnName) && pathState[columnName] !== currentPathState[columnName]) {
+                if (pathState.hasOwnProperty(columnName) && pathState[columnName] !== currentPathState[columnName] && !isPrivate(columnName)) {
                     setState(columnName, pathState[columnName], currentPathState);
                 }
             }
@@ -302,6 +312,7 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
         result.setAllowMultipleStates = setAllowMultipleStates;
         result.getIgnoreParamsInPath = getIgnoreParamsInPath;
         result.setIgnoreParamsInPath = setIgnoreParamsInPath;
+        result.hasPathState = hasPathState;
         result.getPathState = getPathState;
         result.setPathState = setPathState;
         result.getState = getState;
@@ -380,7 +391,10 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
         };
 
         function sortArray(ary, columnName, pathState) {
-            ux.util.array.sort(ary, sorts[columnName][pathState[columnName]]);
+            var state = pathState[columnName];
+            if (state && sorts[columnName]) {
+                ux.util.array.sort(ary, sorts[columnName][state]);
+            }
             return ary;
         }
 
@@ -410,13 +424,13 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
         result.getSortKey = sortStatesModel.createKeyFromStates;
 
         function addSortsFromOptions() {
-            var i, methods, pathState = sortStatesModel.getPathState();
+            var i, methods, alreadyHasState = sortStatesModel.hasPathState(), pathState = sortStatesModel.getPathState();
             if (inst.options.sorts) {
                 for (i in inst.options.sorts) {
                     if (typeof inst.options.sorts[i] === 'object') {
                         sortStatesModel.setState(i, inst.options.sorts[i].value, pathState);// value is the default sort state.
                         methods = inst.options.sorts[i];// allow them to pass in their own sort methods.
-                    } else {
+                    } else if (!alreadyHasState) {
                         sortStatesModel.setState(i, inst.options.sorts[i], pathState); // set the default sort state.
                         methods = {
                             asc: sortStatesModel.createAscSort(i),

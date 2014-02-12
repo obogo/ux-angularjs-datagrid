@@ -36,7 +36,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.3.0-alpha
+  <div class="summary"><p>uxDatagrid v.0.3.2-alpha
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -348,6 +348,34 @@ fall back on the defaultAllowMultipleStates</p>
   <a class="pilcrow" href="#section-12" id="section-12">&#182;</a>
 </div>
 <div class="dox">
+  <div class="summary"><p>See if there is a path that is registered or not.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">path</span>
+      <span class="dox_type">String</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">hasPathState</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">path</span> <span class="o">=</span> <span class="nx">path</span> <span class="o">||</span> <span class="nx">getPath</span><span class="p">();</span>
+            <span class="k">return</span> <span class="o">!!</span><span class="nx">states</span><span class="p">[</span><span class="nx">path</span><span class="p">];</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-13" id="section-13">&#182;</a>
+</div>
+<div class="dox">
   <div class="summary">
   </div>
   <div class="body">
@@ -384,7 +412,7 @@ fall back on the defaultAllowMultipleStates</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-13" id="section-13">&#182;</a>
+  <a class="pilcrow" href="#section-14" id="section-14">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Override all of the path states.
@@ -407,7 +435,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
             <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setPathState %s to %s&quot;</span><span class="p">,</span> <span class="nx">currentPathState</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
             <span class="nx">setIgnoreParamsInPath</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
             <span class="k">for</span> <span class="p">(</span><span class="nx">columnName</span> <span class="k">in</span> <span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">pathState</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">columnName</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">currentPathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">])</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">pathState</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">columnName</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">currentPathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">columnName</span><span class="p">))</span> <span class="p">{</span>
                     <span class="nx">setState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">],</span> <span class="nx">currentPathState</span><span class="p">);</span>
                 <span class="p">}</span>
             <span class="p">}</span>
@@ -419,7 +447,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-14" id="section-14">&#182;</a>
+  <a class="pilcrow" href="#section-15" id="section-15">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Returns the current state at the currentPath of the columnName.
@@ -457,7 +485,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-15" id="section-15">&#182;</a>
+  <a class="pilcrow" href="#section-16" id="section-16">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Set the state at the currentPath for that columnName.</p>
@@ -522,7 +550,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-16" id="section-16">&#182;</a>
+  <a class="pilcrow" href="#section-17" id="section-17">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Increment the columnName's state to the next in the list.</p>
@@ -552,7 +580,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-17" id="section-17">&#182;</a>
+  <a class="pilcrow" href="#section-18" id="section-18">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary">
@@ -582,7 +610,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-18" id="section-18">&#182;</a>
+  <a class="pilcrow" href="#section-19" id="section-19">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary">
@@ -612,7 +640,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-19" id="section-19">&#182;</a>
+  <a class="pilcrow" href="#section-20" id="section-20">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>calculate the next state would be given a currentState.</p>
@@ -663,7 +691,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-20" id="section-20">&#182;</a>
+  <a class="pilcrow" href="#section-21" id="section-21">&#182;</a>
 </div>
 <p>sorts</p>
         </td>
@@ -690,7 +718,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-21" id="section-21">&#182;</a>
+  <a class="pilcrow" href="#section-22" id="section-22">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Clear the states for the currentPath.</p>
@@ -727,6 +755,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         <span class="nx">result</span><span class="p">.</span><span class="nx">setAllowMultipleStates</span> <span class="o">=</span> <span class="nx">setAllowMultipleStates</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">getIgnoreParamsInPath</span> <span class="o">=</span> <span class="nx">getIgnoreParamsInPath</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">setIgnoreParamsInPath</span> <span class="o">=</span> <span class="nx">setIgnoreParamsInPath</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">hasPathState</span> <span class="o">=</span> <span class="nx">hasPathState</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">getPathState</span> <span class="o">=</span> <span class="nx">getPathState</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">setPathState</span> <span class="o">=</span> <span class="nx">setPathState</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">getState</span> <span class="o">=</span> <span class="nx">getState</span><span class="p">;</span>
@@ -757,7 +786,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-22" id="section-22">&#182;</a>
+  <a class="pilcrow" href="#section-23" id="section-23">&#182;</a>
 </div>
 <p>cache is the stored sort values. It needs to be cleared if the data changes.</p>
         </td>
@@ -788,7 +817,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-23" id="section-23">&#182;</a>
+  <a class="pilcrow" href="#section-24" id="section-24">&#182;</a>
 </div>
 <p>the original is always without any sort options.</p>
         </td>
@@ -801,7 +830,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-24" id="section-24">&#182;</a>
+  <a class="pilcrow" href="#section-25" id="section-25">&#182;</a>
 </div>
 <p>clone so they cannot mess with the data directly.</p>
         </td>
@@ -815,7 +844,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-25" id="section-25">&#182;</a>
+  <a class="pilcrow" href="#section-26" id="section-26">&#182;</a>
 </div>
 <p>prevent default on event to prevent sort.</p>
         </td>
@@ -831,7 +860,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-26" id="section-26">&#182;</a>
+  <a class="pilcrow" href="#section-27" id="section-27">&#182;</a>
 </div>
 <p>clone it</p>
         </td>
@@ -852,7 +881,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-27" id="section-27">&#182;</a>
+  <a class="pilcrow" href="#section-28" id="section-28">&#182;</a>
 </div>
 <p>TODO: need to unit test this to make sure it works with async sort.</p>
         </td>
@@ -864,7 +893,10 @@ Any columnNames not passed are set to none if not allow multiples.</p>
             <span class="k">return</span> <span class="nx">lastSortResult</span><span class="p">;</span>
         <span class="p">};</span>
         <span class="kd">function</span> <span class="nx">sortArray</span><span class="p">(</span><span class="nx">ary</span><span class="p">,</span> <span class="nx">columnName</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">ux</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">array</span><span class="p">.</span><span class="nx">sort</span><span class="p">(</span><span class="nx">ary</span><span class="p">,</span> <span class="nx">sorts</span><span class="p">[</span><span class="nx">columnName</span><span class="p">][</span><span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]]);</span>
+            <span class="kd">var</span> <span class="nx">state</span> <span class="o">=</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">];</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">state</span> <span class="o">&amp;&amp;</span> <span class="nx">sorts</span><span class="p">[</span><span class="nx">columnName</span><span class="p">])</span> <span class="p">{</span>
+                <span class="nx">ux</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">array</span><span class="p">.</span><span class="nx">sort</span><span class="p">(</span><span class="nx">ary</span><span class="p">,</span> <span class="nx">sorts</span><span class="p">[</span><span class="nx">columnName</span><span class="p">][</span><span class="nx">state</span><span class="p">]);</span>
+            <span class="p">}</span>
             <span class="k">return</span> <span class="nx">ary</span><span class="p">;</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">applyListSort</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
@@ -880,7 +912,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-28" id="section-28">&#182;</a>
+  <a class="pilcrow" href="#section-29" id="section-29">&#182;</a>
 </div>
 <p>shallow copy</p>
         </td>
@@ -900,7 +932,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         <span class="nx">result</span><span class="p">.</span><span class="nx">multipleSort</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">setAllowMultipleStates</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">getSortKey</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">createKeyFromStates</span><span class="p">;</span>
         <span class="kd">function</span> <span class="nx">addSortsFromOptions</span><span class="p">()</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">methods</span><span class="p">,</span> <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">();</span>
+            <span class="kd">var</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">methods</span><span class="p">,</span> <span class="nx">alreadyHasState</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">hasPathState</span><span class="p">(),</span> <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">();</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sorts</span><span class="p">)</span> <span class="p">{</span>
                 <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="k">in</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sorts</span><span class="p">)</span> <span class="p">{</span>
                     <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sorts</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">===</span> <span class="s2">&quot;object&quot;</span><span class="p">)</span> <span class="p">{</span>
@@ -912,13 +944,13 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-29" id="section-29">&#182;</a>
+  <a class="pilcrow" href="#section-30" id="section-30">&#182;</a>
 </div>
 <p>value is the default sort state.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
                         <span class="nx">methods</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sorts</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
-                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">alreadyHasState</span><span class="p">)</span> <span class="p">{</span>
                         <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">setState</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sorts</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">pathState</span><span class="p">);</span>
 
 </pre></div>
@@ -927,7 +959,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-30" id="section-30">&#182;</a>
+  <a class="pilcrow" href="#section-31" id="section-31">&#182;</a>
 </div>
 <p>set the default sort state.</p>
         </td>

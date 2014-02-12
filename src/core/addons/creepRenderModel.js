@@ -113,6 +113,13 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         renderLater(event, forceCompileRowRender);
     }
 
+    function onBeforeReset() {
+        onBeforeRender(event);
+        if (inst.options.enableCreepRender) {
+            model.enable();
+        }
+    }
+
     model.stop = stop; // allow external stop of creep render.
 
     model.destroy = function destroy() {
@@ -123,12 +130,13 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     };
 
     model.enable = function () {
-        unwatchers.push(inst.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
-        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
-        unwatchers.push(inst.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
-        unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
-        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeRender));
-        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
+        if (!unwatchers.length) {
+            unwatchers.push(inst.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
+            unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
+            unwatchers.push(inst.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
+            unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
+            unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
+        }
     };
 
     model.disable = function () {
@@ -137,6 +145,8 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
             unwatchers.pop()();
         }
     };
+
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
 
     inst.creepRenderModel = model;
     // do not add listeners if it is not enabled.

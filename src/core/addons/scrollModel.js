@@ -228,6 +228,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
 
     function destroy() {
+        clearTimeout(waitForStopIntv);
         result.destroyLogger();
         unwatchSetup();
         if (setup) {

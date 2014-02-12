@@ -1031,7 +1031,7 @@ function Datagrid(scope, element, attr, $compile) {
      * handle dispaching of events from the datagrid.
      */
     function dispatch(event) {
-        if (!isLogEvent(event)) inst.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
+        if (!isLogEvent(event) && options.debug && options.debug.all === 1) inst.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
         return scope.$emit.apply(scope, arguments);
     }
 
@@ -1057,8 +1057,6 @@ function Datagrid(scope, element, attr, $compile) {
                 s.$destroy();
             }
         });
-        scope.$$childHead = undefined;
-        scope.$$childTail = undefined;
         scopes.length = 0;
     }
 
@@ -1120,13 +1118,17 @@ function Datagrid(scope, element, attr, $compile) {
 module.directive('uxDatagrid', ['$compile', 'gridAddons', function ($compile, gridAddons) {
     return {
         restrict: 'AE',
-        link: function (scope, element, attr) {
-            var inst = new Datagrid(scope, element, attr, $compile);
-            each(exports.datagrid.coreAddons, function (method) {
-                method.apply(inst, [inst]);
-            });
-            gridAddons(inst, attr.addons);
-            inst.start();
+        link: {
+            pre: function (scope, element, attr) {
+                var inst = new Datagrid(scope, element, attr, $compile);
+                each(exports.datagrid.coreAddons, function (method) {
+                    method.apply(inst, [inst]);
+                });
+                gridAddons(inst, attr.addons);
+            },
+            post: function (scope, element, attr) {
+                scope.datagrid.start();
+            }
         }
     };
 }]);

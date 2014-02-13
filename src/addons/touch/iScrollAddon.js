@@ -66,7 +66,7 @@ angular.module('ux').factory('iScrollAddon', function () {
         function beforeScrollStart() {
             stop();
             scrolling = true;
-            inst.dispatch(exports.datagrid.events.SCROLL_START, -myScroll.y);
+            inst.dispatch(exports.datagrid.events.ON_SCROLL_START, -myScroll.y);
         }
 
         function onScrollEnd() {
@@ -101,7 +101,7 @@ angular.module('ux').factory('iScrollAddon', function () {
                 inst.values.scroll = -myScroll.y;
                 lastY = myScroll.y;
                 inst.values.scrollPercent = ((inst.values.scroll / inst.getContentHeight()) * 100).toFixed(2);
-                inst.dispatch(exports.datagrid.events.ON_SCROLL, inst.values);
+                result.fireOnScroll();
             }
         }
 
@@ -120,6 +120,7 @@ angular.module('ux').factory('iScrollAddon', function () {
         };
         result.onScrollingStop = originalScrollModel.onScrollingStop;
         result.onUpdateScroll = onUpdateScroll;
+        result.fireOnScroll = originalScrollModel.fireOnScroll;
         result.destroy = function destroy() {
             unwatchSetup();
             clearInterval(pollTimer);

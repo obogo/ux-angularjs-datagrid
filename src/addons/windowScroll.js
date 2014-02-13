@@ -10,7 +10,7 @@ angular.module('ux').factory('windowScroll', function () {
         result.onUpdateScroll = function onUpadateScroll(event) {
             var val = window.scrollY;
             if (inst.values.scroll !== val) {
-                inst.dispatch(ux.datagrid.events.SCROLL_START, val);
+                inst.dispatch(ux.datagrid.events.ON_SCROLL_START, val);
                 inst.values.speed = val - inst.values.scroll;
                 inst.values.absSpeed = Math.abs(inst.values.speed);
                 inst.values.scroll = val;

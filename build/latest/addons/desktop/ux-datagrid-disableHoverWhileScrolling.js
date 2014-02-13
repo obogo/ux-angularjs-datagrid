@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.3.2-alpha
+* uxDatagrid v.0.4.0-alpha
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -36,8 +36,8 @@ angular.module("ux").factory("disableHoverWhileScrolling", function() {
             inst.flow.log("scrollStop");
             inst.element[0].classList.remove(name);
         }
-        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.SCROLL_START, scrollStart));
-        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.SCROLL_STOP, scrollStop));
+        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_SCROLL_START, scrollStart));
+        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_SCROLL_STOP, scrollStop));
         init();
         return inst;
     };

@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.3.2-alpha
+* uxDatagrid v.0.4.0-alpha
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -33,7 +33,7 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, up
             overflow: "hidden"
         });
         if (scope.datagrid && element === scope.datagrid.element) {
-            scope.$on(exports.datagrid.events.TOUCH_DOWN, onTouchStartNg);
+            scope.$on(exports.datagrid.events.ON_TOUCH_DOWN, onTouchStartNg);
         } else {
             result.content.bind(touchStart, onTouchStart);
         }
@@ -138,8 +138,8 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, up
         ux.each(result.content, function(el) {
             el.addEventListener(touchMove, onTouchMove, true);
             if (scope.datagrid && element === scope.datagrid.element) {
-                result.log("	listen for TOUCH_UP");
-                offTouchEnd = scope.$on(exports.datagrid.events.TOUCH_UP, onTouchEndNg);
+                result.log("	listen for ON_TOUCH_UP");
+                offTouchEnd = scope.$on(exports.datagrid.events.ON_TOUCH_UP, onTouchEndNg);
             } else {
                 result.log("	listen for touchend");
                 el.addEventListener(touchEnd, onTouchEnd, true);
@@ -152,7 +152,7 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, up
         ux.each(result.content, function(el) {
             el.removeEventListener(touchMove, onTouchMove, true);
             if (offTouchEnd) {
-                result.log("	remove TOUCH_UP");
+                result.log("	remove ON_TOUCH_UP");
                 offTouchEnd();
                 offTouchEnd = null;
             } else {

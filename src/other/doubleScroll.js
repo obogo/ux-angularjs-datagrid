@@ -30,7 +30,15 @@ angular.module('ux').directive('uxDoubleScroll', function () {
             }
 
             function updateScrollModel() {
-                scrollModel = scope.datagrid && scope.datagrid.scrollModel || {};
+                var s = scope.$$childHead;
+                while (s) {
+                    if (s.datagrid) {
+                        scrollModel = s.datagrid && s.datagrid.scrollModel || {};
+                        return scrollModel;
+                    }
+                    s = s.$$nextSibling;
+                }
+                return scrollModel;
             }
 
             function onScroll(event) {
@@ -65,7 +73,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                 if (value === 0) {
                     s = angular.element(target).scope();
                     if (s) {
-                        onTargetScrollToTop(event, s.datagrid.scrollModel, 0);
+                        onTargetScrollToTop(event, updateScrollModel(), 0);
                     }
                 }
             }

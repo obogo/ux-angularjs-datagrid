@@ -39,7 +39,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.3.2-alpha
+  <div class="summary"><p>uxDatagrid v.0.4.0-alpha
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -102,7 +102,7 @@ License: MIT.</p>
             <span class="nx">overflow</span><span class="o">:</span> <span class="s2">&quot;hidden&quot;</span>
         <span class="p">});</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span> <span class="o">&amp;&amp;</span> <span class="nx">element</span> <span class="o">===</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">element</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">TOUCH_DOWN</span><span class="p">,</span> <span class="nx">onTouchStartNg</span><span class="p">);</span>
+            <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_TOUCH_DOWN</span><span class="p">,</span> <span class="nx">onTouchStartNg</span><span class="p">);</span>
         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">content</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">touchStart</span><span class="p">,</span> <span class="nx">onTouchStart</span><span class="p">);</span>
         <span class="p">}</span>
@@ -207,8 +207,8 @@ License: MIT.</p>
         <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">content</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">el</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">touchMove</span><span class="p">,</span> <span class="nx">onTouchMove</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span> <span class="o">&amp;&amp;</span> <span class="nx">element</span> <span class="o">===</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">element</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  listen for TOUCH_UP&quot;</span><span class="p">);</span>
-                <span class="nx">offTouchEnd</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">TOUCH_UP</span><span class="p">,</span> <span class="nx">onTouchEndNg</span><span class="p">);</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  listen for ON_TOUCH_UP&quot;</span><span class="p">);</span>
+                <span class="nx">offTouchEnd</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_TOUCH_UP</span><span class="p">,</span> <span class="nx">onTouchEndNg</span><span class="p">);</span>
             <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
                 <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  listen for touchend&quot;</span><span class="p">);</span>
                 <span class="nx">el</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">touchEnd</span><span class="p">,</span> <span class="nx">onTouchEnd</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
@@ -221,7 +221,7 @@ License: MIT.</p>
         <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">content</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">el</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="nx">touchMove</span><span class="p">,</span> <span class="nx">onTouchMove</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">offTouchEnd</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  remove TOUCH_UP&quot;</span><span class="p">);</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  remove ON_TOUCH_UP&quot;</span><span class="p">);</span>
                 <span class="nx">offTouchEnd</span><span class="p">();</span>
                 <span class="nx">offTouchEnd</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
             <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>

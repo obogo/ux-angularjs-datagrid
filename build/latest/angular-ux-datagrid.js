@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.3.2-alpha
+* uxDatagrid v.0.4.0-alpha
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -905,6 +905,7 @@ function Datagrid(scope, element, attr, $compile) {
      * Build out the public api variables for the datagrid.
      */
     function setupExports() {
+        inst.name = scope.$eval(attr.gridName) || "datagrid";
         inst.scope = scope;
         inst.element = element;
         inst.attr = attr;
@@ -926,6 +927,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.getOffsetIndex = getOffsetIndex;
         inst.isActive = isActive;
         inst.isCompiled = isCompiled;
+        inst.swapItem = swapItem;
         inst.getScope = getScope;
         inst.getRowItem = getRowItem;
         inst.getRowElm = getRowElm;
@@ -1120,6 +1122,28 @@ function Datagrid(scope, element, attr, $compile) {
         dispatch(exports.datagrid.events.RESIZE, {
             event: event
         });
+    }
+    /**
+     * ##<a name="swapItem">swapItem</a>##
+     * swap out an old item with a new item without causing a data change. Quick swap of items.
+     * this will only work if the item already exists in the datagrid. You cannot add or remove items
+     * this way. Only change them to a different reference. Adding or Removing requires a re-chunking.
+     */
+    function swapItem(oldItem, newItem) {
+        //TODO: needs unit test.
+        var index = getRowIndex(oldItem), oldTpl, newTpl;
+        if (inst.data.hasOwnProperty(index)) {
+            oldTpl = inst.templateModel.getTemplate(oldItem);
+            newTpl = inst.templateModel.getTemplate(newItem);
+            inst.data[index] = newItem;
+            if (oldTpl !== newTpl) {
+                inst.templateModel.setTemplate(index, newTpl);
+            } else {
+                // nothing changed except the reference. So just update the scope and digest.
+                scopes[index][newTpl.item] = newItem;
+                safeDigest(scopes[index]);
+            }
+        }
     }
     /**
      * ###<a name="getScope">getScope</a>###
@@ -1695,23 +1719,81 @@ function Datagrid(scope, element, attr, $compile) {
         onDataChanged(scope.$eval(attr.uxDatagrid), inst.data);
     }
     /**
+     * ###<a name="dirtyCheckData">dirtyCheckData</a>###
+     * Compare the new and the old value. If the item number is the same, and no templates
+     * have changed. Than just update the scopes and run the watchers instead of doing a reset.
+     * @param {Array} newVal
+     * @param {Array} oldVal
+     */
+    function dirtyCheckData(newVal, oldVal) {
+        //TODO: this needs unit tested.
+        if (newVal && oldVal && newVal.length === oldVal.length) {
+            var i = 0, len = newVal.length;
+            while (i < len) {
+                if (dirtyCheckItemTemplate(newVal[i], oldVal[i])) {
+                    return true;
+                }
+                i += 1;
+            }
+        }
+        return false;
+    }
+    /**
+     * ###<a name="dirtyCheckItemTemplate">dirtyCheckItemTemplate</a>###
+     * check to see if the template for the item has changed
+     * @param {*} newItem
+     * @param {*} oldItem
+     */
+    function dirtyCheckItemTemplate(newItem, oldItem) {
+        if (inst.templateModel.getTemplate(newItem) !== inst.templateModel.getTemplate(oldItem)) {
+            return true;
+        }
+        return false;
+    }
+    /**
+     * ###<a name="mapData">mapData</a>###
+     * map the new data to the old data object and update the scopes.
+     */
+    function mapData(newVal) {
+        inst.grouped = scope.$eval(attr.grouped);
+        inst.data = inst.setData(newVal, inst.grouped) || [];
+        exports.each(inst.getData(), updateScope);
+    }
+    /**
+     * ###<a name="updateScope">updateScope</a>###
+     * update the scope at that index with the new item.
+     */
+    function updateScope(item, index) {
+        var tpl;
+        if (scopes[index]) {
+            tpl = inst.templateModel.getTemplate(item);
+            scopes[index][tpl.item] = item;
+        }
+    }
+    /**
      * ###<a name="onDataChanged">onDataChanged</a>###
      * when the data changes. It is compared by reference, not value for speed
      * (this is the default angular setting).
      */
     function onDataChanged(newVal, oldVal) {
-        var evt = dispatch(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, newVal, oldVal);
-        if (evt.defaultPrevented && evt.newValue) {
-            newVal = evt.newValue;
+        if (!inst.data.length || dirtyCheckData(newVal, oldVal)) {
+            var evt = dispatch(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, newVal, oldVal);
+            if (evt.defaultPrevented && evt.newValue) {
+                newVal = evt.newValue;
+            }
+            values.dirty = true;
+            inst.log("dataChanged");
+            flow.add(changeData, [ newVal, oldVal ]);
+        } else {
+            // we just want to update the data values and scope values, because no tempaltes changed.
+            mapData(newVal);
+            render();
         }
-        values.dirty = true;
-        inst.log("dataChanged");
-        flow.add(changeData, [ newVal, oldVal ]);
     }
     function changeData(newVal, oldVal) {
         dispatch(exports.datagrid.events.ON_BEFORE_RESET);
         inst.grouped = scope.$eval(attr.grouped);
-        inst.data = inst.setData(newVal || attr.list, inst.grouped) || [];
+        inst.data = inst.setData(newVal, inst.grouped) || [];
         dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal);
         reset();
     }
@@ -1831,6 +1913,8 @@ function Datagrid(scope, element, attr, $compile) {
                 s.$destroy();
             }
         });
+        scope.$$childHead = undefined;
+        scope.$$childTail = undefined;
         scopes.length = 0;
     }
     /**
@@ -1863,6 +1947,7 @@ function Datagrid(scope, element, attr, $compile) {
         destroyScopes();
         element.remove();
         // this seems to be the most memory efficient way to remove elements.
+        delete scope.$parent[inst.name];
         inst = null;
         scope = null;
         element = null;
@@ -1891,6 +1976,7 @@ function Datagrid(scope, element, attr, $compile) {
 module.directive("uxDatagrid", [ "$compile", "gridAddons", function($compile, gridAddons) {
     return {
         restrict: "AE",
+        scope: true,
         link: {
             pre: function(scope, element, attr) {
                 var inst = new Datagrid(scope, element, attr, $compile);
@@ -2320,8 +2406,8 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         if (!unwatchers.length) {
             unwatchers.push(inst.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
             unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
-            unwatchers.push(inst.scope.$on(exports.datagrid.events.TOUCH_DOWN, onBeforeRender));
-            unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_START, onBeforeRender));
+            unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_TOUCH_DOWN, onBeforeRender));
+            unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_SCROLL_START, onBeforeRender));
             unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
         }
     };
@@ -2443,16 +2529,16 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.normalizeModel);
 
 /*global ux */
-exports.datagrid.events.SCROLL_START = "datagrid:scrollStart";
+exports.datagrid.events.ON_SCROLL_START = "datagrid:scrollStart";
 
-exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
+exports.datagrid.events.ON_SCROLL_STOP = "datagrid:scrollStop";
 
-exports.datagrid.events.TOUCH_DOWN = "datagrid:touchDown";
+exports.datagrid.events.ON_TOUCH_DOWN = "datagrid:touchDown";
 
-exports.datagrid.events.TOUCH_UP = "datagrid:touchUp";
+exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
 
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
-    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, waitForStopIntv, hasScrollListener = false;
+    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, waitForStopIntv, hasScrollListener = false, lastScroll;
     /**
      * Listen for scrollingEvents.
      */
@@ -2501,6 +2587,12 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         content.bind("touchend", result.onTouchEnd);
         content.bind("touchcancel", result.onTouchEnd);
     }
+    result.fireOnScroll = function fireOnScroll() {
+        if (inst.values.scroll !== lastScroll) {
+            lastScroll = inst.values.scroll;
+            inst.dispatch(exports.datagrid.events.ON_SCROLL, inst.values);
+        }
+    };
     result.removeScrollListener = function removeScrollListener() {
         result.log("removeScrollListener");
         inst.element[0].removeEventListener("scroll", onUpdateScrollHandler);
@@ -2516,11 +2608,11 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
     result.onTouchStart = function onTouchStart(event) {
         inst.values.touchDown = true;
-        inst.dispatch(exports.datagrid.events.TOUCH_DOWN, event);
+        inst.dispatch(exports.datagrid.events.ON_TOUCH_DOWN, event);
     };
     result.onTouchEnd = function onTouchEnd(event) {
         inst.values.touchDown = false;
-        inst.dispatch(exports.datagrid.events.TOUCH_UP, event);
+        inst.dispatch(exports.datagrid.events.ON_TOUCH_UP, event);
     };
     result.getScroll = function getScroll(el) {
         return (el || inst.element[0]).scrollTop;
@@ -2539,14 +2631,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.onUpdateScroll = function onUpdateScroll(event) {
         var val = inst.scrollModel.getScroll(event.target || event.srcElement);
         if (inst.values.scroll !== val) {
-            inst.dispatch(exports.datagrid.events.SCROLL_START, val);
+            inst.dispatch(exports.datagrid.events.ON_SCROLL_START, val);
             inst.values.speed = val - inst.values.scroll;
             inst.values.absSpeed = Math.abs(inst.values.speed);
             inst.values.scroll = val;
             inst.values.scrollPercent = (inst.values.scroll / inst.getContentHeight() * 100).toFixed(2);
         }
         inst.scrollModel.waitForStop();
-        inst.dispatch(exports.datagrid.events.ON_SCROLL, inst.values);
+        result.fireOnScroll();
     };
     /**
      * Scroll to the numeric value.
@@ -2585,7 +2677,8 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         inst.values.speed = 0;
         inst.values.absSpeed = 0;
         inst.render();
-        inst.dispatch(exports.datagrid.events.SCROLL_STOP, inst.values.scroll);
+        result.fireOnScroll();
+        inst.dispatch(exports.datagrid.events.ON_SCROLL_STOP, inst.values);
     };
     /**
      * Scroll to the normalized index.

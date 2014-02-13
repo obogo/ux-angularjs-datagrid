@@ -35,8 +35,8 @@ angular.module('ux').factory('disableHoverWhileScrolling', function () {
             inst.element[0].classList.remove(name);
         }
 
-        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.SCROLL_START, scrollStart));
-        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.SCROLL_STOP, scrollStop));
+        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_SCROLL_START, scrollStart));
+        inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_SCROLL_STOP, scrollStop));
 
         init();
 

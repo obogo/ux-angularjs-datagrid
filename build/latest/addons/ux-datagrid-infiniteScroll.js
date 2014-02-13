@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.3.2-alpha
+* uxDatagrid v.0.4.0-alpha
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -76,13 +76,13 @@ angular.module("ux").factory("infiniteScroll", function() {
          * @param event
          * @param scroll
          */
-        result.onUpdateScroll = function onUpdateScroll(event, scroll) {
+        result.onUpdateScroll = function onUpdateScroll(event, values) {
             if (!bottomOffset) {
                 result.calculateBottomOffset();
             }
-            if (scroll >= bottomOffset) {
+            if (values.scroll >= bottomOffset) {
                 inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_BOTTOM);
-            } else if (scroll <= 0) {
+            } else if (values.scroll <= 0) {
                 inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_TOP);
             }
         };
@@ -93,7 +93,7 @@ angular.module("ux").factory("infiniteScroll", function() {
         result.enable = function() {
             unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_BEFORE_DATA_CHANGE, result.onBeforeDataChange));
             unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
-            unwatchers.push(inst.scope.$on(ux.datagrid.events.SCROLL_STOP, result.onUpdateScroll));
+            unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_SCROLL_STOP, result.onUpdateScroll));
         };
         /**
          * ###<a name="disable">disable</a>###

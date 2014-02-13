@@ -1,4 +1,5 @@
 angular.module('ux').factory('expandRows', function () {
+    //TODO: on change row template. This needs to collapse the row.
     return function (inst) {
         var result = {},
             lastGetIndex,

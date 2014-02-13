@@ -186,8 +186,8 @@ app.config(function ($routeProvider) {
                 $scope.name = "Addons >> Sort Model Server";
                 $scope.items = createSimpleFieldList(100, 0, {name: 1, description: 10, type:['red','green','blue'], weight: [0.1, 0.2, 0.3, 0.4, 0.5]});
                 $scope.$on(ux.datagrid.events.ON_BEFORE_SORT, function (event, key) {
-                    if (!$scope.datagrid.sortModel.getCache(key)) {
-                        $scope.datagrid.sortModel.setCache(key, []);
+                    if (!grid().sortModel.getCache(key)) {
+                        grid().datagrid.sortModel.setCache(key, []);
                         // let's wait to simulate a server call. Then let's change the color of the data
                         // to verify that it works.
                         setTimeout(function () {
@@ -203,7 +203,7 @@ app.config(function ($routeProvider) {
                             } else if (key.indexOf('weight') !== -1) {
                                 colors = ['purple','violet','lavender'];
                             }
-                            $scope.datagrid.sortModel.setCache(key, createSimpleFieldList(100, 0, {name: 1, description: 10, type:colors, weight: [0.1, 0.2, 0.3, 0.4, 0.5]}))
+                            grid().sortModel.setCache(key, createSimpleFieldList(100, 0, {name: 1, description: 10, type:colors, weight: [0.1, 0.2, 0.3, 0.4, 0.5]}))
                             $scope.$apply();
                         }, 1000);
                     }
@@ -227,7 +227,7 @@ app.config(function ($routeProvider) {
                 $scope.name = "Addons >> InfiniteScroll";
                 $scope.items = createSimpleList(20);
                 $scope.$on(ux.datagrid.events.ON_SCROLL_TO_BOTTOM, function () {
-                    if ($scope.items.length < $scope.datagrid.options.infiniteScroll.limit) {
+                    if ($scope.items.length < grid().options.infiniteScroll.limit) {
                         // we are doing a timeout here to simulate time that an ajax call may need to get the paginated data.
                         $timeout(function () {
                             $scope.items = $scope.items.concat(createSimpleList(20, $scope.items.length));

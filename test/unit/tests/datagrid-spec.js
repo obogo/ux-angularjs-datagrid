@@ -1,6 +1,5 @@
 describe('datagrid', function () {
-    var element,
-        scope;
+    var element, scope, grid;
 
     describe("options", function () {
         var template = '<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10, async:false}" style="width:100px;height:400px;">' +
@@ -20,15 +19,17 @@ describe('datagrid', function () {
                 document.body.appendChild(element[0]);
                 $compile(element)(scope);
                 $rootScope.$digest();
+                grid = scope.$$childHead.datagrid;
             });
         });
 
         afterEach(function() {
             element.remove();
+            grid = null;
         });
 
         it("should read options from the html options attribute", function() {
-            expect(scope.datagrid.options.chunkSize).toBe(10);
+            expect(grid.options.chunkSize).toBe(10);
         });
     });
 
@@ -39,7 +40,8 @@ describe('datagrid', function () {
         angular.module('ux').filter('myFilter2', function () {
 
         });
-        var template = '<div data-ux-datagrid="items" class="datagrid" data-options="{debug:1, chunkSize:10, async:false}" filters="myFilter1, myFilter2" style="width:100px;height:400px;">' +
+        var grid,
+            template = '<div data-ux-datagrid="items" class="datagrid" data-options="{debug:1, chunkSize:10, async:false}" filters="myFilter1, myFilter2" style="width:100px;height:400px;">' +
                             '<script type="template/html" data-template-name="default" data-template-item="item">' +
                                 '<div class="mock-row" style="height:10px;">{{item.id}}</div>' +
                             '</script>' +
@@ -56,11 +58,13 @@ describe('datagrid', function () {
                 document.body.appendChild(element[0]);
                 $compile(element)(scope);
                 $rootScope.$digest();
+                grid = scope.$$childHead.datagrid;
             });
         });
 
         afterEach(function () {
             element.remove();
+            grid = null;
         });
 
         it("should add a content div", function() {
@@ -90,22 +94,22 @@ describe('datagrid', function () {
             var firstChunk = content.childNodes[0];
             firstChunk.beforeReset = true;
             expect(firstChunk.beforeReset).toBe(true);
-            scope.datagrid.reset();
-            content = scope.datagrid.getContent()[0];
+            grid.reset();
+            content = grid.getContent()[0];
             expect(content.childNodes[0].beforeReset).toBe(undefined);
         });
 
         it("scrollToIndex should scroll to 40 when scrolling to index 4 at 10px height rows", function() {
-            expect(scope.datagrid.scrollModel.scrollToIndex(4)).toBe(40);
+            expect(grid.scrollModel.scrollToIndex(4)).toBe(40);
         });
 
         it("scrollToItem should scroll to the item", function () {
-            expect(scope.datagrid.scrollModel.scrollToItem(scope.items[5])).toBe(50);
+            expect(grid.scrollModel.scrollToItem(scope.items[5])).toBe(50);
         });
 
         it("getNormalizedIndex should get the index in the normalized array of the item that is passed", function () {
-            var nIndex = scope.datagrid.getNormalizedIndex(scope.items[10]);
-            expect(scope.datagrid.data[nIndex]).toBe(scope.items[10]);
+            var nIndex = grid.getNormalizedIndex(scope.items[10]);
+            expect(grid.data[nIndex]).toBe(scope.items[10]);
         });
 
         it("should convert a string to an array of injections", function() {
@@ -116,6 +120,7 @@ describe('datagrid', function () {
     describe("grouped template", function () {
 
         var size = 10,
+            grid,
             template = '<div data-ux-datagrid="items" class="datagrid" data-grouped="\'children\'" data-options="{chunkSize:10, async:false}" style="width:100px;height:400px;">' +
                             '<script type="template/html" data-template-name="group" data-template-item="item">' +
                                 '<div class="mock-row" style="height:20px;">{{item.id}</div>' +
@@ -148,11 +153,13 @@ describe('datagrid', function () {
                 document.body.appendChild(element[0]);
                 $compile(element)(scope);
                 $rootScope.$digest();
+                grid = scope.$$childHead.datagrid;
             });
         });
 
         afterEach(function () {
             element.remove();
+            grid = null;
         });
 
         it("should add a content div", function() {
@@ -168,7 +175,7 @@ describe('datagrid', function () {
                 groupIndex = Math.floor(index / size),
                 rowIndex = index % size,
                 item = scope.items[groupIndex].children[rowIndex],
-                normalizedIndex = scope.datagrid.getNormalizedIndex(item);
+                normalizedIndex = grid.getNormalizedIndex(item);
             var rows = angular.element(element[0].getElementsByClassName('mock-row')[normalizedIndex]);
             expect(rows.text()).toBe(scope.items[Math.floor(index / size)].children[index % size].id);
         });
@@ -190,23 +197,23 @@ describe('datagrid', function () {
             var firstChunk = content.childNodes[0];
             firstChunk.beforeReset = true;
             expect(firstChunk.beforeReset).toBe(true);
-            scope.datagrid.reset();
-            content = scope.datagrid.getContent()[0];// oldContent is removing.
+            grid.reset();
+            content = grid.getContent()[0];// oldContent is removing.
             expect(content.childNodes[0].beforeReset).toBe(undefined);
         });
 
         it("scrollToIndex should scroll to 140 when scrolling to index 4 at 40px height rows and 20px height group headers", function() {
-            expect(scope.datagrid.scrollModel.scrollToIndex(4)).toBe(140);
+            expect(grid.scrollModel.scrollToIndex(4)).toBe(140);
         });
 
         it("scrollToItem should scroll to the item", function () {
             var item = scope.items[1].children[0];
-            expect(scope.datagrid.scrollModel.scrollToItem(item)).toBe(440);
+            expect(grid.scrollModel.scrollToItem(item)).toBe(440);
         });
 
         it("getNormalizedIndex should get the index in the normalized array of the item that is passed", function () {
-            var nIndex = scope.datagrid.getNormalizedIndex(scope.items[1].children[0]);
-            expect(scope.datagrid.data[nIndex]).toBe(scope.items[1].children[0]);
+            var nIndex = grid.getNormalizedIndex(scope.items[1].children[0]);
+            expect(grid.data[nIndex]).toBe(scope.items[1].children[0]);
             expect(nIndex).toBe(12); // one header for each group.
         });
     });

@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.3.2-alpha
+* uxDatagrid v.0.4.0-alpha
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -29,7 +29,15 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                 }
             }
             function updateScrollModel() {
-                scrollModel = scope.datagrid && scope.datagrid.scrollModel || {};
+                var s = scope.$$childHead;
+                while (s) {
+                    if (s.datagrid) {
+                        scrollModel = s.datagrid && s.datagrid.scrollModel || {};
+                        return scrollModel;
+                    }
+                    s = s.$$nextSibling;
+                }
+                return scrollModel;
             }
             function onScroll(event) {
                 result.log("onScroll");
@@ -63,7 +71,7 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                 if (value === 0) {
                     s = angular.element(target).scope();
                     if (s) {
-                        onTargetScrollToTop(event, s.datagrid.scrollModel, 0);
+                        onTargetScrollToTop(event, updateScrollModel(), 0);
                     }
                 }
             }

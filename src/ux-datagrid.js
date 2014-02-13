@@ -89,6 +89,7 @@ function Datagrid(scope, element, attr, $compile) {
      * Build out the public api variables for the datagrid.
      */
     function setupExports() {
+        inst.name = scope.$eval(attr.gridName) || 'datagrid';
         inst.scope = scope;
         inst.element = element;
         inst.attr = attr;
@@ -110,6 +111,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.getOffsetIndex = getOffsetIndex;
         inst.isActive = isActive;
         inst.isCompiled = isCompiled;
+        inst.swapItem = swapItem;
         inst.getScope = getScope;
         inst.getRowItem = getRowItem;
         inst.getRowElm = getRowElm;
@@ -307,6 +309,29 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function onResize(event) {
         dispatch(exports.datagrid.events.RESIZE, {event: event});
+    }
+
+    /**
+     * ##<a name="swapItem">swapItem</a>##
+     * swap out an old item with a new item without causing a data change. Quick swap of items.
+     * this will only work if the item already exists in the datagrid. You cannot add or remove items
+     * this way. Only change them to a different reference. Adding or Removing requires a re-chunking.
+     */
+    function swapItem(oldItem, newItem) {
+        //TODO: needs unit test.
+        var index = getRowIndex(oldItem), oldTpl, newTpl;
+        if (inst.data.hasOwnProperty(index)) {
+            oldTpl = inst.templateModel.getTemplate(oldItem);
+            newTpl = inst.templateModel.getTemplate(newItem);
+            inst.data[index] = newItem;
+            if (oldTpl !== newTpl) {
+                inst.templateModel.setTemplate(index, newTpl);
+            } else {
+                // nothing changed except the reference. So just update the scope and digest.
+                scopes[index][newTpl.item] = newItem;
+                safeDigest(scopes[index]);
+            }
+        }
     }
 
     /**
@@ -912,24 +937,86 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     /**
+     * ###<a name="dirtyCheckData">dirtyCheckData</a>###
+     * Compare the new and the old value. If the item number is the same, and no templates
+     * have changed. Than just update the scopes and run the watchers instead of doing a reset.
+     * @param {Array} newVal
+     * @param {Array} oldVal
+     */
+    function dirtyCheckData(newVal, oldVal) {
+        //TODO: this needs unit tested.
+        if (newVal && oldVal && newVal.length === oldVal.length) {
+            var i = 0, len = newVal.length;
+            while (i < len) {
+                if (dirtyCheckItemTemplate(newVal[i], oldVal[i])) {
+                    return true;
+                }
+                i += 1;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * ###<a name="dirtyCheckItemTemplate">dirtyCheckItemTemplate</a>###
+     * check to see if the template for the item has changed
+     * @param {*} newItem
+     * @param {*} oldItem
+     */
+    function dirtyCheckItemTemplate(newItem, oldItem) {
+        if (inst.templateModel.getTemplate(newItem) !== inst.templateModel.getTemplate(oldItem)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * ###<a name="mapData">mapData</a>###
+     * map the new data to the old data object and update the scopes.
+     */
+    function mapData(newVal) {
+        inst.grouped = scope.$eval(attr.grouped);
+        inst.data = inst.setData(newVal, inst.grouped) || [];
+        exports.each(inst.getData(), updateScope);
+    }
+
+    /**
+     * ###<a name="updateScope">updateScope</a>###
+     * update the scope at that index with the new item.
+     */
+    function updateScope(item, index) {
+        var tpl;
+        if (scopes[index]) {
+            tpl = inst.templateModel.getTemplate(item);
+            scopes[index][tpl.item] = item;
+        }
+    }
+
+    /**
      * ###<a name="onDataChanged">onDataChanged</a>###
      * when the data changes. It is compared by reference, not value for speed
      * (this is the default angular setting).
      */
     function onDataChanged(newVal, oldVal) {
-        var evt = dispatch(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, newVal, oldVal);
-        if (evt.defaultPrevented && evt.newValue) {
-            newVal = evt.newValue;
+        if (!inst.data.length || dirtyCheckData(newVal, oldVal)) {
+            var evt = dispatch(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, newVal, oldVal);
+            if (evt.defaultPrevented && evt.newValue) {
+                newVal = evt.newValue;
+            }
+            values.dirty = true;
+            inst.log("dataChanged");
+            flow.add(changeData, [newVal, oldVal]);
+        } else {
+            // we just want to update the data values and scope values, because no tempaltes changed.
+            mapData(newVal);
+            render();
         }
-        values.dirty = true;
-        inst.log("dataChanged");
-        flow.add(changeData, [newVal, oldVal]);
     }
 
     function changeData(newVal, oldVal) {
         dispatch(exports.datagrid.events.ON_BEFORE_RESET);
         inst.grouped = scope.$eval(attr.grouped);
-        inst.data = inst.setData((newVal || attr.list), inst.grouped) || [];
+        inst.data = inst.setData(newVal, inst.grouped) || [];
         dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal);
         reset();
     }
@@ -1057,6 +1144,8 @@ function Datagrid(scope, element, attr, $compile) {
                 s.$destroy();
             }
         });
+        scope.$$childHead = undefined;
+        scope.$$childTail = undefined;
         scopes.length = 0;
     }
 
@@ -1088,6 +1177,7 @@ function Datagrid(scope, element, attr, $compile) {
         //activate scopes so they can be destroyed by angular.
         destroyScopes();
         element.remove();// this seems to be the most memory efficient way to remove elements.
+        delete scope.$parent[inst.name];
         inst = null;
         scope = null;
         element = null;
@@ -1118,6 +1208,7 @@ function Datagrid(scope, element, attr, $compile) {
 module.directive('uxDatagrid', ['$compile', 'gridAddons', function ($compile, gridAddons) {
     return {
         restrict: 'AE',
+        scope: true,
         link: {
             pre: function (scope, element, attr) {
                 var inst = new Datagrid(scope, element, attr, $compile);
@@ -1125,6 +1216,7 @@ module.directive('uxDatagrid', ['$compile', 'gridAddons', function ($compile, gr
                     method.apply(inst, [inst]);
                 });
                 gridAddons(inst, attr.addons);
+//                scope.$parent[inst.name] = inst;
             },
             post: function (scope, element, attr) {
                 scope.datagrid.start();

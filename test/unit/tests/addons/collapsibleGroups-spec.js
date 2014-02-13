@@ -21,7 +21,7 @@ describe("collapsibleGroups", function () {
             document.body.appendChild(element[0]);
             $compile(element)(scope);
             $rootScope.$digest();
-            grid = scope.datagrid;
+            grid = scope.$$childHead.datagrid;
         });
     });
 

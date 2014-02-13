@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.3.2-alpha
+* uxDatagrid v.0.4.0-alpha
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -555,10 +555,14 @@ angular.module("ux").factory("gridFocusManager", function() {
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, removeListeners));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, addListeners));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME, function() {
-            focusToPrevRowElement(document.activeElement);
+            if (inst.element[0].contains(document.activeElement)) {
+                focusToPrevRowElement(document.activeElement);
+            }
         }));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME, function() {
-            focusToNextRowElement(document.activeElement);
+            if (inst.element[0].contains(document.activeElement)) {
+                focusToNextRowElement(document.activeElement);
+            }
         }));
         inst.gridFocusManager = result;
         return inst;

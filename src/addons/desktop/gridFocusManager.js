@@ -365,10 +365,14 @@ angular.module('ux').factory('gridFocusManager', function () {
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, removeListeners));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, addListeners));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME, function () {
-            focusToPrevRowElement(document.activeElement);
+            if (inst.element[0].contains(document.activeElement)) {
+                focusToPrevRowElement(document.activeElement);
+            }
         }));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME, function () {
-            focusToNextRowElement(document.activeElement);
+            if (inst.element[0].contains(document.activeElement)) {
+                focusToNextRowElement(document.activeElement);
+            }
         }));
 
         inst.gridFocusManager = result;

@@ -39,7 +39,7 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, up
     function setup() {
         element.css({overflow: 'hidden'});
         if (scope.datagrid && element === scope.datagrid.element) {
-            scope.$on(exports.datagrid.events.TOUCH_DOWN, onTouchStartNg);
+            scope.$on(exports.datagrid.events.ON_TOUCH_DOWN, onTouchStartNg);
         } else {
             result.content.bind(touchStart, onTouchStart);
         }
@@ -156,8 +156,8 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, up
         ux.each(result.content, function (el) {
             el.addEventListener(touchMove, onTouchMove, true);
             if (scope.datagrid && element === scope.datagrid.element) {
-                result.log("\tlisten for TOUCH_UP");
-                offTouchEnd = scope.$on(exports.datagrid.events.TOUCH_UP, onTouchEndNg);
+                result.log("\tlisten for ON_TOUCH_UP");
+                offTouchEnd = scope.$on(exports.datagrid.events.ON_TOUCH_UP, onTouchEndNg);
             } else {
                 result.log("\tlisten for touchend");
                 el.addEventListener(touchEnd, onTouchEnd, true);
@@ -171,7 +171,7 @@ exports.datagrid.VirtualScroll = function VirtualScroll(scope, element, vals, up
         ux.each(result.content, function (el) {
             el.removeEventListener(touchMove, onTouchMove, true);
             if (offTouchEnd) {
-                result.log("\tremove TOUCH_UP");
+                result.log("\tremove ON_TOUCH_UP");
                 offTouchEnd();
                 offTouchEnd = null;
             } else {

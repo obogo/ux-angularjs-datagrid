@@ -1,15 +1,16 @@
 /*global ux */
-exports.datagrid.events.SCROLL_START = "datagrid:scrollStart";
-exports.datagrid.events.SCROLL_STOP = "datagrid:scrollStop";
-exports.datagrid.events.TOUCH_DOWN = "datagrid:touchDown";
-exports.datagrid.events.TOUCH_UP = "datagrid:touchUp";
+exports.datagrid.events.ON_SCROLL_START = "datagrid:scrollStart";
+exports.datagrid.events.ON_SCROLL_STOP = "datagrid:scrollStop";
+exports.datagrid.events.ON_TOUCH_DOWN = "datagrid:touchDown";
+exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
     var result = exports.logWrapper('scrollModel', {}, 'orange', inst.dispatch),
         setup = false,
         unwatchSetup,
         waitForStopIntv,
-        hasScrollListener = false;
+        hasScrollListener = false,
+        lastScroll;
 
     /**
      * Listen for scrollingEvents.
@@ -62,6 +63,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         content.bind('touchcancel', result.onTouchEnd);
     }
 
+    result.fireOnScroll = function fireOnScroll() {
+        if (inst.values.scroll !== lastScroll) {
+            lastScroll = inst.values.scroll;
+            inst.dispatch(exports.datagrid.events.ON_SCROLL, inst.values);
+        }
+    };
+
     result.removeScrollListener = function removeScrollListener() {
         result.log('removeScrollListener');
         inst.element[0].removeEventListener('scroll', onUpdateScrollHandler);
@@ -79,12 +87,12 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
     result.onTouchStart = function onTouchStart(event) {
         inst.values.touchDown = true;
-        inst.dispatch(exports.datagrid.events.TOUCH_DOWN, event);
+        inst.dispatch(exports.datagrid.events.ON_TOUCH_DOWN, event);
     };
 
     result.onTouchEnd = function onTouchEnd(event) {
         inst.values.touchDown = false;
-        inst.dispatch(exports.datagrid.events.TOUCH_UP, event);
+        inst.dispatch(exports.datagrid.events.ON_TOUCH_UP, event);
     };
 
     result.getScroll = function getScroll(el) {
@@ -107,14 +115,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.onUpdateScroll = function onUpdateScroll(event) {
         var val = inst.scrollModel.getScroll(event.target || event.srcElement);
         if (inst.values.scroll !== val) {
-            inst.dispatch(exports.datagrid.events.SCROLL_START, val);
+            inst.dispatch(exports.datagrid.events.ON_SCROLL_START, val);
             inst.values.speed = val - inst.values.scroll;
             inst.values.absSpeed = Math.abs(inst.values.speed);
             inst.values.scroll = val;
             inst.values.scrollPercent = ((inst.values.scroll / inst.getContentHeight()) * 100).toFixed(2);
         }
         inst.scrollModel.waitForStop();
-        inst.dispatch(exports.datagrid.events.ON_SCROLL, inst.values);
+        result.fireOnScroll();
     };
 
     /**
@@ -158,7 +166,8 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         inst.values.speed = 0;
         inst.values.absSpeed = 0;
         inst.render();
-        inst.dispatch(exports.datagrid.events.SCROLL_STOP, inst.values.scroll);
+        result.fireOnScroll();
+        inst.dispatch(exports.datagrid.events.ON_SCROLL_STOP, inst.values);
     };
 
     /**

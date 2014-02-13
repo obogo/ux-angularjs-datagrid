@@ -18,7 +18,7 @@ describe("disableHoverWhileScrolling", function () {
             document.body.appendChild(element[0]);
             $compile(element)(scope);
             $rootScope.$digest();
-            grid = scope.datagrid;
+            grid = scope.$$childHead.datagrid;
         });
     });
 
@@ -27,13 +27,13 @@ describe("disableHoverWhileScrolling", function () {
     });
 
     it("should disable hover while scrolling", function() {
-        grid.dispatch(ux.datagrid.events.SCROLL_START, 10);
+        grid.dispatch(ux.datagrid.events.ON_SCROLL_START, 10);
         expect(element[0].classList[element[0].classList.length - 1]).toBe('disable-hover-while-scrolling');
     });
 
     it("should re-enable hover when done scrolling", function() {
-        grid.dispatch(ux.datagrid.events.SCROLL_START, 10);
-        grid.dispatch(ux.datagrid.events.SCROLL_STOP, 10);
+        grid.dispatch(ux.datagrid.events.ON_SCROLL_START, 10);
+        grid.dispatch(ux.datagrid.events.ON_SCROLL_STOP, 10);
         expect(element[0].classList[element[0].classList.length - 1]).not.toBe('disable-hover-while-scrolling');
     });
 

@@ -36,7 +36,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.3.2-alpha
+  <div class="summary"><p>uxDatagrid v.0.4.0-alpha
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -99,7 +99,15 @@ License: MIT.</p>
                 <span class="p">}</span>
             <span class="p">}</span>
             <span class="kd">function</span> <span class="nx">updateScrollModel</span><span class="p">()</span> <span class="p">{</span>
-                <span class="nx">scrollModel</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span> <span class="o">&amp;&amp;</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">scrollModel</span> <span class="o">||</span> <span class="p">{};</span>
+                <span class="kd">var</span> <span class="nx">s</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$$childHead</span><span class="p">;</span>
+                <span class="k">while</span> <span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">scrollModel</span> <span class="o">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">datagrid</span> <span class="o">&amp;&amp;</span> <span class="nx">s</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">scrollModel</span> <span class="o">||</span> <span class="p">{};</span>
+                        <span class="k">return</span> <span class="nx">scrollModel</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    <span class="nx">s</span> <span class="o">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">$$nextSibling</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="k">return</span> <span class="nx">scrollModel</span><span class="p">;</span>
             <span class="p">}</span>
             <span class="kd">function</span> <span class="nx">onScroll</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;onScroll&quot;</span><span class="p">);</span>
@@ -133,7 +141,7 @@ License: MIT.</p>
                 <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
                     <span class="nx">s</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">target</span><span class="p">).</span><span class="nx">scope</span><span class="p">();</span>
                     <span class="k">if</span> <span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="nx">onTargetScrollToTop</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">s</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+                        <span class="nx">onTargetScrollToTop</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">updateScrollModel</span><span class="p">(),</span> <span class="mi">0</span><span class="p">);</span>
                     <span class="p">}</span>
                 <span class="p">}</span>
             <span class="p">}</span>

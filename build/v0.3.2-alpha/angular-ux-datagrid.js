@@ -1891,6 +1891,7 @@ function Datagrid(scope, element, attr, $compile) {
 module.directive("uxDatagrid", [ "$compile", "gridAddons", function($compile, gridAddons) {
     return {
         restrict: "AE",
+        scope: {},
         link: {
             pre: function(scope, element, attr) {
                 var inst = new Datagrid(scope, element, attr, $compile);

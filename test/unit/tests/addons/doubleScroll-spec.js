@@ -22,19 +22,20 @@ describe("doubleScroll", function () {
             document.body.appendChild(element[0]);
             $compile(element)(scope);
             $rootScope.$digest();
-            grid = scope.datagrid;
+            grid = scope.$$childHead.datagrid;
         });
     });
 
     afterEach(function () {
         element.remove();
+        grid = null;
     });
 
     it("should scroll the main container", function(done) {
         element[0].scrollTop = 10;
         setTimeout(function () {
-            expect(scope.datagrid.values.scroll).toBe(0);
-            expect(scope.datagrid.element[0].style.overflowY).toBe("hidden");
+            expect(grid.values.scroll).toBe(0);
+            expect(grid.element[0].style.overflowY).toBe("hidden");
             done();
         }, 100);
     });
@@ -42,7 +43,7 @@ describe("doubleScroll", function () {
     it("should scroll the target container when the main container is disabled", function(done) {
         element[0].scrollTop = 400;
         setTimeout(function () {
-            expect(scope.datagrid.element[0].style.overflowY).toBe("auto");
+            expect(grid.element[0].style.overflowY).toBe("auto");
             done();
         }, 100);
     });
@@ -75,7 +76,7 @@ describe('iosDoubleScroll', function () {
             document.body.appendChild(element[0]);
             $compile(element)(scope);
             $rootScope.$digest();
-            grid = scope.datagrid;
+            grid = scope.$$childHead.datagrid;
             scope.doubleScroll.virtualScroll.async = grid.options.async;
         });
     });
@@ -83,6 +84,7 @@ describe('iosDoubleScroll', function () {
     afterEach(function () {
         ux.datagrid.isIOS = false;
         element.remove();
+        grid = null;
     });
 
     function trigger(el, name, eventData) {
@@ -105,7 +107,7 @@ describe('iosDoubleScroll', function () {
         trigger(el, 'touchmove', {changedTouches: [
             {pageX: 200, pageY: 190}
         ]});
-        expect(scope.datagrid.scrollModel.enable()).toBe(false);
+        expect(grid.scrollModel.enable()).toBe(false);
         trigger(el, 'touchend', {});
     });
 
@@ -119,7 +121,7 @@ describe('iosDoubleScroll', function () {
             {pageX: 200, pageY: 90}
         ]});
         trigger(el, 'touchend', {});
-        expect(scope.datagrid.scrollModel.enable()).toBe(true);
+        expect(grid.scrollModel.enable()).toBe(true);
     });
 
     it("should disable the main container while scrolling the target container", function () {
@@ -133,15 +135,15 @@ describe('iosDoubleScroll', function () {
         ]});
         trigger(el, 'touchend', {});
         // now change to the datagrid content.
-        el = scope.datagrid.getContent()[0];
+        el = grid.getContent()[0];
         trigger(el, 'touchstart', {touches: [
             {pageX: 200, pageY: 200}
         ]});
         trigger(el, 'touchmove', {changedTouches: [
             {pageX: 200, pageY: 50}
         ]});
-        expect(scope.datagrid.scrollModel.enable()).toBe(true);
-        expect(scope.datagrid.scrollModel.getValues().scroll).toBe(150);
+        expect(grid.scrollModel.enable()).toBe(true);
+        expect(grid.scrollModel.getValues().scroll).toBe(150);
         trigger(el, 'touchend', {});
     });
 
@@ -157,7 +159,7 @@ describe('iosDoubleScroll', function () {
             ]});
             trigger(el, 'touchend', {});
             // now change to the datagrid content.
-            el = scope.datagrid.getContent()[0];
+            el = grid.getContent()[0];
             trigger(el, 'touchstart', {touches: [
                 {pageX: 200, pageY: 200}
             ]});
@@ -177,8 +179,8 @@ describe('iosDoubleScroll', function () {
             },100);
         }, 100);
         setTimeout(function () {
-            expect(scope.datagrid.scrollModel.enable()).toBe(false);
-            expect(scope.datagrid.scrollModel.getValues().scroll).toBe(0);
+            expect(grid.scrollModel.enable()).toBe(false);
+            expect(grid.scrollModel.getValues().scroll).toBe(0);
             setTimeout(done, 100);
         }, 500);
     });

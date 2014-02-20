@@ -115,11 +115,13 @@ exports.datagrid = {
         // while faster times on this make it render faster, it can cause it to rencer multiple times because the scrollbar is not completely stopped and may decrease
         // scrolling performance. if < 100ms this fires too often.
         updateDelay: 100,
-        // - **<a name="options.enableCreepRender">enableCreepRender</a>** allow the rendering after the scrolling has stopped to creep in both directions away from the
+        // - **<a name="options.creepRender.enable">creepRender.enable</a>** allow the rendering after the scrolling has stopped to creep in both directions away from the
         // visible area. This can affect performance in a couple of ways. It will make it so more rows are rendered so scrolling will not have to wait for them, however if
         // the device is slower this may affect performance in scrolling because the render has to finish before the touch events will work causing a delay in reaction to
         // touch events.
-        enableCreepRender: true,
+        creepRender: {
+            enable: true
+        },
         // - **<a name="creepStartDelay">creepStartDelay</a>**
         // when the creep render starts. How long after the scrolling has stopped.
         creepStartDelay: 1000,
@@ -155,7 +157,10 @@ exports.datagrid = {
         renderThresholdWait: 50,
         // - **<a name="options.creepLimit">creepLimit</a>** used with options.renderThreshold and options.renderThresholdWait this will give a maximum amount of renders
         // that can be done before the creep render is turned off.
-        creepLimit: 500
+        creepLimit: 500,
+        // - **<a name="options.smartUpdate">smartUpdate</a>** when this is enabled if the array changes the order of things but not the templates that they render in then
+        // this will not do a reset, but will just re-render the visible area with the changes and as you scroll the changes will update.
+        smartUpdate: true
         //TODO: need to create global addons object.
     },
     /**

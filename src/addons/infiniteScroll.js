@@ -7,7 +7,7 @@ ux.datagrid.events.ON_SCROLL_TO_TOP = "datagrid:onScrollToTop";
 ux.datagrid.events.ON_SCROLL_TO_BOTTOM = 'datagrid:onScrollToBottom';
 angular.module('ux').factory('infiniteScroll', function () {
     return function infiniteScroll(inst, $filter) {
-        var result = {}, bottomOffset = 0, scrollOffset = 0, loadingRow = {_template: 'loadingRow'},
+        var result = {}, bottomOffset = 0, scrollOffset = -1, loadingRow = {_template: 'loadingRow'},
             unwatchers = [];
 
         /**
@@ -61,7 +61,6 @@ angular.module('ux').factory('infiniteScroll', function () {
             if (inst.rowsLength) {
                 var i = inst.rowsLength - 1;
                 bottomOffset = (inst.getRowOffset(i) - inst.getViewportHeight()) + inst.getRowHeight(i);
-                inst.scrollModel.scrollTo(scrollOffset, true);
             }
         };
 
@@ -74,6 +73,7 @@ angular.module('ux').factory('infiniteScroll', function () {
         result.onUpdateScroll = function onUpdateScroll(event, values) {
             if (!bottomOffset) {
                 result.calculateBottomOffset();
+                inst.scrollModel.scrollTo(scrollOffset !== -1 ? scrollOffset : values.scroll, true);
             }
             if (values.scroll >= bottomOffset) {
                 inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_BOTTOM);

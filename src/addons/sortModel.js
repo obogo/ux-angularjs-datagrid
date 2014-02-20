@@ -402,7 +402,7 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
             var i, len;
             if (data.grouped && data.ary.length && data.ary[0].hasOwnProperty(data.grouped)) {
                 len = data.ary.length;
-                for(i = 0; i < len; i += 1) {
+                for (i = 0; i < len; i += 1) {
                     data.ary[i] = angular.extend({}, data.ary[i]);// shallow copy
                     data.ary[i][data.grouped] = sortArray(data.ary[i][data.grouped].slice(0), columnName, data.pathState);
                 }
@@ -430,8 +430,10 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
                     if (typeof inst.options.sorts[i] === 'object') {
                         sortStatesModel.setState(i, inst.options.sorts[i].value, pathState);// value is the default sort state.
                         methods = inst.options.sorts[i];// allow them to pass in their own sort methods.
-                    } else if (!alreadyHasState) {
-                        sortStatesModel.setState(i, inst.options.sorts[i], pathState); // set the default sort state.
+                    } else {
+                        if (!alreadyHasState) {
+                            sortStatesModel.setState(i, inst.options.sorts[i], pathState); // set the default sort state.
+                        }
                         methods = {
                             asc: sortStatesModel.createAscSort(i),
                             desc: sortStatesModel.createDescSort(i),

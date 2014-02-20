@@ -115,8 +115,8 @@ angular.module('ux').factory('iScrollAddon', function () {
         result.scrollToIndex = originalScrollModel.scrollToIndex;
         result.scrollToItem = originalScrollModel.scrollToItem;
         result.scrollIntoView = function (itemOrIndex) {
-            originalScrollModel.scrollIntoView(itemOrIndex);
             inst.element[0].scrollTop = 0;
+            return originalScrollModel.scrollIntoView(itemOrIndex);
         };
         result.onScrollingStop = originalScrollModel.onScrollingStop;
         result.onUpdateScroll = onUpdateScroll;

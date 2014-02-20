@@ -3,25 +3,25 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
 //TODO: this needs to be put on exp.normalizedModel
     var originalData, normalizedData, result = exports.logWrapper('normalizeModel', {}, 'grey', inst.dispatch);
 
-    function normalize(data, grouped, normalized) {
+    inst.normalize = function normalize(data, grouped, normalized) {
         data = data || [];
         var i = 0, len = data.length;
         normalized = normalized || [];
         while (i < len) {
             normalized.push(data[i]);
             if (data[i] && data[i][grouped]) {
-                normalize(data[i][grouped], grouped, normalized);
+                inst.normalize(data[i][grouped], grouped, normalized);
             }
             i += 1;
         }
         return normalized;
-    }
+    };
 
     inst.setData = function (data, grouped) {
         result.log('setData');
         originalData = data;
         if (grouped) {
-            normalizedData = normalize(data, grouped);
+            normalizedData = inst.normalize(data, grouped);
         } else {
             normalizedData = data && data.slice(0) || []; // no need to normalize it is it is not grouped.
         }

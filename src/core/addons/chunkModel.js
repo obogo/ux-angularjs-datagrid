@@ -81,22 +81,49 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         }
     }
 
-    function updateAllChunkHeights(rowIndex) {
-        var indexes = getRowIndexes(rowIndex, _list), ary = getArrayFromIndexes(indexes, _list);
+    /**
+     * ###<a name="updateAllChunkHeights">updateAllChunkHeights</a>###
+     * Go through each of the chunks affected by the row index and range and update their heights.
+     * It starts as that bottom chunk and moves up. So all parents get updated when that row changes.
+     * @param {Number} rowIndex
+     * @param {Number=} range
+     */
+    function updateAllChunkHeights(rowIndex, range) {
+        var indexes, ary, allIndexes, i = 0, len, j, jLen, merged;
+        if (range !== undefined) {
+            //TODO: unit test needed.
+            _list.forceHeightReCalc(inst.templateModel, _rows);
+            updateChunkHeights(_el, _list);
+        }
+        indexes = getRowIndexes(rowIndex, _list);
+        ary = getArrayFromIndexes(indexes, _list);
+        updateChunkArrayHeights(ary, indexes);
+    }
+
+    function updateChunkArrayHeights(ary, indexes) {
         ary.updateHeight(inst.templateModel, _rows);
         updateChunkHeights(_el, _list, indexes);
     }
 
     function updateChunkHeights(el, ary) {
-        var i = 0, len = ary.length;
+        el = el[0] || el;
+        var i = 0, len = ary.length, children = el.childNodes;
         while (i < len) {
-            if (ary.dirtyHeight) {
-                ary.dirtyHeight = false;
-                el[0].style.height = ary.height + 'px';
-                updateChunkHeights(angular.element(el.children()[i]), ary[i]);
+            if (children.length && updateChunkStyle(children[i], ary[i])) {
+                updateChunkHeights(children[i], ary[i]);
             }
             i += 1;
         }
+        updateChunkStyle(el, ary);
+    }
+
+    function updateChunkStyle(el, chunk) {
+        if (chunk.dirtyHeight) {
+            chunk.dirtyHeight = false;
+            el.style.height = chunk.height + 'px';
+            return true;
+        }
+        return false;
     }
 
     function getArrayFromIndexes(indexes, ary) {
@@ -270,7 +297,7 @@ ChunkArray.prototype.getChildrenStr = function (deep) {
     this.rendered = true;
     return str;
 };
-ChunkArray.prototype.updateHeight = function(templateModel, _rows) {
+ChunkArray.prototype.updateHeight = function (templateModel, _rows) {
     var i = 0, len, height = 0;
     if (this[0] instanceof ChunkArray) {
         len = this.length;
@@ -288,6 +315,42 @@ ChunkArray.prototype.updateHeight = function(templateModel, _rows) {
     if (this.dirtyHeight) {
         if (this.parent) this.parent.updateHeight(templateModel, _rows);
     }
+};
+ChunkArray.prototype.forceHeightReCalc = function (templateModel, _rows) {
+    var i = 0, len, height = 0;
+        if (this[0] instanceof ChunkArray) {
+        len = this.length;
+        while (i < len) {
+            height += this[i].forceHeightReCalc(templateModel, _rows);
+            i += 1;
+        }
+    } else {
+        height = templateModel.getHeight(_rows, this.min, this.max);
+    }
+    if (this.height !== height) {
+//        console.log('forceHeightReCalc %s from %s to %s', this.getId(), this.height, height);
+        this.height = height;
+        this.setDirtyHeight();
+    }
+    return this.height;
+};
+ChunkArray.prototype.setDirtyHeight = function () {
+    var p = this;
+    while (p) {
+        p.dirtyHeight = true;
+        p = p.parent;
+    }
+};
+ChunkArray.prototype.getId = function () {
+    if (!this._id) {
+        var p = this, s = '';
+        while (p) {
+            s = '.' + (p.index || '0') + s;
+            p = p.parent;
+        }
+        this._id = s.substr(1, s.length);
+    }
+    return this._id;
 };
 /**
  * Perform proper cleanup.

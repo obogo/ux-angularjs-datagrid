@@ -189,11 +189,21 @@ License: MIT.</p>
       <span class="dox_type">DOMElement</span>
       <span>the DOMElement to check if is visible</span>
     </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">when</span>
+      <span class="dox_type">maxParent</span>
+      <span>max parent is reached it will stop.</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">if</span>
+      <span class="dox_type">allowOpacity=</span>
+      <span>true then opacity will not return a false if it is 0.</span>
+    </div>
   </div>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="kd">function</span> <span class="nx">isVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">function</span> <span class="nx">isVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">maxParent</span><span class="p">,</span> <span class="nx">allowOpacity</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">;</span>
         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">elementInDocument</span><span class="p">(</span><span class="nx">el</span><span class="p">))</span> <span class="p">{</span>
             <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
@@ -225,10 +235,13 @@ License: MIT.</p>
 <p>Return false if our element is invisible</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;0&quot;</span> <span class="o">===</span> <span class="nx">getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;opacity&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;none&quot;</span> <span class="o">===</span> <span class="nx">getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;display&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;hidden&quot;</span> <span class="o">===</span> <span class="nx">getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;visibility&quot;</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">allowOpacity</span> <span class="o">&amp;&amp;</span> <span class="nx">getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;opacity&quot;</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;0&quot;</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
         <span class="p">}</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nx">p</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;none&quot;</span> <span class="o">===</span> <span class="nx">getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;display&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;hidden&quot;</span> <span class="o">===</span> <span class="nx">getStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="s2">&quot;visibility&quot;</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">p</span> <span class="o">&amp;&amp;</span> <span class="nx">p</span> <span class="o">!==</span> <span class="nx">maxParent</span><span class="p">)</span> <span class="p">{</span>
 
 </pre></div>
         </td>
@@ -242,7 +255,7 @@ License: MIT.</p>
 -- Let's recursively check upwards:</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-            <span class="k">return</span> <span class="nx">isVisible</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">isVisible</span><span class="p">(</span><span class="nx">p</span><span class="p">,</span> <span class="nx">maxParent</span><span class="p">,</span> <span class="nx">allowOpacity</span><span class="p">);</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
     <span class="p">}</span>
@@ -604,7 +617,7 @@ License: MIT.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">keys</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;gridFocusManager&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;redOrange&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">keys</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nx">ENTER</span><span class="o">:</span> <span class="mi">13</span><span class="p">,</span>
             <span class="nx">UP</span><span class="o">:</span> <span class="mi">38</span><span class="p">,</span>
             <span class="nx">DOWN</span><span class="o">:</span> <span class="mi">40</span>
@@ -668,6 +681,7 @@ License: MIT.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">addListeners</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;addListeners&quot;</span><span class="p">);</span>
             <span class="nx">applyToListeners</span><span class="p">(</span><span class="nx">addListenersToRow</span><span class="p">);</span>
         <span class="p">}</span>
 
@@ -705,6 +719,7 @@ License: MIT.</p>
 <p>this needs executed before the activeRange changes.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;removeListeners&quot;</span><span class="p">);</span>
             <span class="nx">applyToListeners</span><span class="p">(</span><span class="nx">removeListenersToRow</span><span class="p">);</span>
         <span class="p">}</span>
 
@@ -741,6 +756,7 @@ License: MIT.</p>
             <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">||</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
                 <span class="k">return</span><span class="p">;</span>
             <span class="p">}</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  applyTo: %s - %s&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span><span class="p">);</span>
             <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span><span class="p">,</span> <span class="nx">row</span><span class="p">;</span>
             <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">row</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
@@ -779,6 +795,7 @@ License: MIT.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">getFocusableElements</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">focusable</span> <span class="o">=</span> <span class="p">[].</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">querySelectorAll</span><span class="p">(</span><span class="s2">&quot;input,a,select&quot;</span><span class="p">));</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  getFocusableElements %s&quot;</span><span class="p">,</span> <span class="nx">focusable</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
             <span class="k">return</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">focusable</span><span class="p">,</span> <span class="nx">filterVisible</span><span class="p">);</span>
         <span class="p">}</span>
 
@@ -811,7 +828,8 @@ License: MIT.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">filterVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">visibility</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">);</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;    isVisible %s&quot;</span><span class="p">,</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">visibility</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">));</span>
+            <span class="k">return</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">visibility</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getContent</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">true</span><span class="p">);</span>
         <span class="p">}</span>
 
 </pre></div>
@@ -1094,8 +1112,11 @@ you can filter these out from causing selections to not be made.</p>
         <span class="kd">function</span> <span class="nx">addListenersToRow</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">getFocusableElements</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">);</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">focusable</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;    addListenersToRow&quot;</span><span class="p">);</span>
                 <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">focusable</span><span class="p">);</span>
                 <span class="nx">focusable</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="s2">&quot;keydown&quot;</span><span class="p">,</span> <span class="nx">onKeyDown</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;    no focusable elements found in row&quot;</span><span class="p">);</span>
             <span class="p">}</span>
         <span class="p">}</span>
 
@@ -1132,8 +1153,11 @@ you can filter these out from causing selections to not be made.</p>
         <span class="kd">function</span> <span class="nx">removeListenersToRow</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">getFocusableElements</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">);</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">focusable</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;    removeListenersToRow&quot;</span><span class="p">);</span>
                 <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">focusable</span><span class="p">);</span>
                 <span class="nx">focusable</span><span class="p">.</span><span class="nx">unbind</span><span class="p">(</span><span class="s2">&quot;keydown&quot;</span><span class="p">,</span> <span class="nx">onKeyDown</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;    no focusable elements found in row&quot;</span><span class="p">);</span>
             <span class="p">}</span>
         <span class="p">}</span>
 
@@ -1168,7 +1192,7 @@ you can filter these out from causing selections to not be made.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">onKeyDown</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">target</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">);</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;FM: onKeyDown&quot;</span><span class="p">);</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;FM: onKeyDown&quot;</span><span class="p">);</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">shiftKey</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">ENTER</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">UP</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">focusToPrevRowElement</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
             <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">ENTER</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">DOWN</span><span class="p">)</span> <span class="p">{</span>
@@ -1240,7 +1264,7 @@ you can filter these out from causing selections to not be made.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">focusToNextRowElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot; FM: focusToNextRowElement&quot;</span><span class="p">);</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  FM: focusToNextRowElement&quot;</span><span class="p">);</span>
             <span class="kd">var</span> <span class="nx">focusEl</span> <span class="o">=</span> <span class="nx">getNextRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">);</span>
             <span class="nx">performFocus</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">);</span>
         <span class="p">}</span>
@@ -1370,7 +1394,7 @@ you can filter these out from causing selections to not be made.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">getNextRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot; FM: getNextRowFocusElement&quot;</span><span class="p">);</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  FM: getNextRowFocusElement&quot;</span><span class="p">);</span>
             <span class="k">return</span> <span class="nx">focusToRowElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
         <span class="p">}</span>
 
@@ -1422,7 +1446,7 @@ to increment.</p>
 <p>dir should be 1 or -1</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot; FM: focusToRowElement&quot;</span><span class="p">);</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  focusToRowElement&quot;</span><span class="p">);</span>
             <span class="nx">focusedEl</span> <span class="o">=</span> <span class="nx">wrap</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">);</span>
             <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">contains</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="p">{</span>
                 <span class="k">return</span><span class="p">;</span>
@@ -1432,7 +1456,7 @@ to increment.</p>
                 <span class="k">return</span> <span class="nx">focusedEl</span><span class="p">;</span>
             <span class="p">}</span>
             <span class="nx">selector</span> <span class="o">=</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">selector</span><span class="p">.</span><span class="nx">getSelector</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">rowEl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">filterClasses</span><span class="p">);</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot; FM: selector: %s&quot;</span><span class="p">,</span> <span class="nx">selector</span><span class="p">);</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  selector: %s&quot;</span><span class="p">,</span> <span class="nx">selector</span><span class="p">);</span>
             <span class="nx">resultEl</span> <span class="o">=</span> <span class="nx">findNextRowWithSelection</span><span class="p">(</span><span class="nx">nextIndex</span><span class="p">,</span> <span class="nx">dir</span><span class="p">,</span> <span class="nx">selector</span><span class="p">);</span>
             <span class="k">return</span> <span class="nx">resultEl</span> <span class="o">&amp;&amp;</span> <span class="nx">resultEl</span><span class="p">.</span><span class="nx">length</span> <span class="o">?</span> <span class="nx">resultEl</span> <span class="o">:</span> <span class="nx">focusedEl</span><span class="p">;</span>
         <span class="p">}</span>
@@ -1467,7 +1491,7 @@ to increment.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">performFocus</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot; FM: performFocus %o&quot;</span><span class="p">,</span> <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  performFocus %o&quot;</span><span class="p">,</span> <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">select</span><span class="p">)</span> <span class="p">{</span>
 
 </pre></div>
@@ -1540,7 +1564,7 @@ However, possible bug here if a selector similar to this one doesn't exist for a
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">findNextRowWithSelection</span><span class="p">(</span><span class="nx">nextIndex</span><span class="p">,</span> <span class="nx">dir</span><span class="p">,</span> <span class="nx">selector</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot; FM: findNextRowWithSelection&quot;</span><span class="p">);</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  findNextRowWithSelection&quot;</span><span class="p">);</span>
             <span class="kd">var</span> <span class="nx">nextEl</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">nextIndex</span><span class="p">),</span> <span class="nx">focusEl</span> <span class="o">=</span> <span class="nx">query</span><span class="p">(</span><span class="nx">nextEl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">selector</span><span class="p">);</span>
             <span class="kd">var</span> <span class="nx">content</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getContent</span><span class="p">();</span>
             <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">dir</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">nextIndex</span> <span class="o">&lt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">rowsLength</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">||</span> <span class="nx">dir</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">nextIndex</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span> <span class="p">{</span>
@@ -1566,7 +1590,8 @@ However, possible bug here if a selector similar to this one doesn't exist for a
             <span class="nx">result</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
         <span class="p">};</span>
         <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_RESET</span><span class="p">,</span> <span class="nx">removeListeners</span><span class="p">));</span>
-        <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_UPDATE_WATCHERS</span><span class="p">,</span> <span class="nx">addListeners</span><span class="p">));</span>
+        <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_RENDER</span><span class="p">,</span> <span class="nx">removeListeners</span><span class="p">));</span>
+        <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_RENDER</span><span class="p">,</span> <span class="nx">addListeners</span><span class="p">));</span>
         <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_PREV_ELEMENT_OF_SAME</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">contains</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">activeElement</span><span class="p">))</span> <span class="p">{</span>
                 <span class="nx">focusToPrevRowElement</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">activeElement</span><span class="p">);</span>

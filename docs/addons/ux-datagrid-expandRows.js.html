@@ -46,7 +46,25 @@ License: MIT.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">COLLAPSE_ROW</span> <span class="o">=</span> <span class="s2">&quot;datagrid:collapseRow&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">EXPAND_ROW</span> <span class="o">=</span> <span class="s2">&quot;datagrid:expandRow&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">TOGGLE_ROW</span> <span class="o">=</span> <span class="s2">&quot;datagrid:toggleRow&quot;</span><span class="p">;</span>
+
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;expandRows&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>TODO: on change row template. This needs to collapse the row.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
     <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">lastGetIndex</span><span class="p">,</span> <span class="nx">cache</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">opened</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">states</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nx">opened</span><span class="o">:</span> <span class="s2">&quot;opened&quot;</span><span class="p">,</span>
@@ -192,7 +210,7 @@ License: MIT.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
 </div>
 <p>override the getTemplateHeight to return the result with the expanded height.</p>
         </td>
@@ -205,7 +223,16 @@ License: MIT.</p>
         <span class="nx">result</span><span class="p">.</span><span class="nx">collapse</span> <span class="o">=</span> <span class="nx">collapse</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">isExpanded</span> <span class="o">=</span> <span class="nx">isExpanded</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">destroy</span> <span class="o">=</span> <span class="nx">destroy</span><span class="p">;</span>
-        <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_READY</span><span class="p">,</span> <span class="nx">setupTemplates</span><span class="p">);</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_READY</span><span class="p">,</span> <span class="nx">setupTemplates</span><span class="p">));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">EXPAND_ROW</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">itemOrIndex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">expand</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">);</span>
+        <span class="p">}));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">COLLAPSE_ROW</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">itemOrIndex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">collapse</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">);</span>
+        <span class="p">}));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">TOGGLE_ROW</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">itemOrIndex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">toggle</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">);</span>
+        <span class="p">}));</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">expandRows</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
         <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
     <span class="p">};</span>

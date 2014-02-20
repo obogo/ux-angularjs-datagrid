@@ -204,7 +204,8 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.scrollIntoView = function scrollIntoView(itemOrIndex, immediately) {
         result.log('scrollIntoView');
         var index = typeof itemOrIndex === 'number' ? itemOrIndex : inst.getNormalizedIndex(itemOrIndex),
-            offset = inst.getRowOffset(index), rowHeight, viewHeight;
+            offset = inst.getRowOffset(index), rowHeight, viewHeight, absCushion = Math.abs(inst.options.cushion);
+        compileRowSiblings(index);
         if (offset < inst.values.scroll) { // it is above the view.
             inst.scrollModel.scrollTo(offset, immediately);
             return;
@@ -212,10 +213,19 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         viewHeight = inst.getViewportHeight();
         rowHeight = inst.templateModel.getTemplateHeight(inst.getData()[index]);
         if (offset >= inst.values.scroll + viewHeight - rowHeight) { // it is below the view.
-            inst.scrollModel.scrollTo(offset - viewHeight + rowHeight, true);
+            inst.scrollModel.scrollTo(offset - viewHeight + rowHeight, immediately);
         }
         // otherwise it is in view so do nothing.
     };
+
+    function compileRowSiblings(index) {
+        if (inst.data[index - 1] && !inst.isCompiled(index - 1)) {
+            inst.forceRenderScope(index - 1);
+        }
+        if (inst.data[index + 1] && !inst.isCompiled(index + 1)) {
+            inst.forceRenderScope(index + 1);
+        }
+    }
 
     /**
      * Scroll to top.

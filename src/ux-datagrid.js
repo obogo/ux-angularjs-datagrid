@@ -457,7 +457,7 @@ function Datagrid(scope, element, attr, $compile) {
         var len = list.length;
         content = createContent();
         // this async is important because it allows the updateRowWatchers on first digest to escape the current digest.
-        flow.insert(inst.chunkModel.chunkDom, [list, options.chunkSize, '<div class="' + options.chunkClass + '">', '</div>', content], 0);
+        flow.insert(inst.chunkModel.chunkDom, [list, options.chunkSize, '<div class="' + options.chunkClass + '">', '</div>', content]);
         inst.rowsLength = len;
         inst.log("created %s dom elements", len);
     }
@@ -498,7 +498,7 @@ function Datagrid(scope, element, attr, $compile) {
     function buildRows(list) {
         inst.log("\tbuildRows %s", list.length);
         state = states.BUILDING;
-        flow.insert(createDom, [list], 0);
+        flow.insert(createDom, [list]);
     }
 
     /**
@@ -688,13 +688,13 @@ function Datagrid(scope, element, attr, $compile) {
     function getOffsetIndex(offset) {
         // updateHeightValues must be called before this.
         var est = Math.floor(offset / inst.templateModel.averageTemplateHeight()),
-            i = 0;
+            i = 0, len = inst.rowsLength;
         if (rowOffsets[est] && rowOffsets[est] <= offset) {
             i = est;
         }
-        while (i < inst.rowsLength) {
-            if (rowOffsets[i] > offset) {
-                return i - 1;
+        while (i < len) {
+            if (rowOffsets[i] <= offset && (!rowOffsets[i] || rowOffsets[i + 1] > offset)) {
+                return i;
             }
             i += 1;
         }
@@ -857,7 +857,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function afterRenderAfterDataChange() {
         var tplHeight;
-        if (values.dirty && values.activeRange.max > 0) {
+        if (values.dirty && values.activeRange.max >= 0) {
             values.dirty = false;
             tplHeight = getRowElm(values.activeRange.min)[0].offsetHeight;
             if (inst.getData().length && tplHeight !== inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min])) {
@@ -905,8 +905,8 @@ function Datagrid(scope, element, attr, $compile) {
             if (state === states.BUILDING) {
                 if (flow.length()) {
                     flow.insert(ready);
-                    flow.insert(updateHeightValues);
-                    flow.insert(buildRows, [inst.data], 0);
+                    flow.insert(updateHeightValues, null, 0);// wait after to allow heights to update.
+                    flow.insert(buildRows, [inst.data]);
                 } else {
                     flow.add(buildRows, [inst.data], 0);
                     flow.add(updateHeightValues);
@@ -953,6 +953,11 @@ function Datagrid(scope, element, attr, $compile) {
                 }
                 i += 1;
             }
+
+            if (inst.data.length !== inst.normalize(newVal, inst.grouped).length) {
+                inst.log("\tdirtyCheckData length is different");
+                return true;
+            }
         }
         return false;
     }
@@ -965,6 +970,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function dirtyCheckItemTemplate(newItem, oldItem) {
         if (inst.templateModel.getTemplate(newItem) !== inst.templateModel.getTemplate(oldItem)) {
+            inst.log("\tdirtyCheckData row template changed");
             return true;
         }
         return false;
@@ -975,6 +981,7 @@ function Datagrid(scope, element, attr, $compile) {
      * map the new data to the old data object and update the scopes.
      */
     function mapData(newVal) {
+        inst.log("\tmapData()");
         inst.grouped = scope.$eval(attr.grouped);
         inst.data = inst.setData(newVal, inst.grouped) || [];
         exports.each(inst.getData(), updateScope);
@@ -998,22 +1005,24 @@ function Datagrid(scope, element, attr, $compile) {
      * (this is the default angular setting).
      */
     function onDataChanged(newVal, oldVal) {
-        if (!inst.data.length || dirtyCheckData(newVal, oldVal)) {
+        inst.log("onDataChanged");
+        if (!inst.options.smartUpdate || !inst.data.length || dirtyCheckData(newVal, oldVal)) {
             var evt = dispatch(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, newVal, oldVal);
             if (evt.defaultPrevented && evt.newValue) {
                 newVal = evt.newValue;
             }
             values.dirty = true;
-            inst.log("dataChanged");
             flow.add(changeData, [newVal, oldVal]);
         } else {
             // we just want to update the data values and scope values, because no tempaltes changed.
+            values.dirty = true;
             mapData(newVal);
             render();
         }
     }
 
     function changeData(newVal, oldVal) {
+        inst.log("\tchangeData");
         dispatch(exports.datagrid.events.ON_BEFORE_RESET);
         inst.grouped = scope.$eval(attr.grouped);
         inst.data = inst.setData(newVal, inst.grouped) || [];
@@ -1082,6 +1091,10 @@ function Datagrid(scope, element, attr, $compile) {
     /**
      * ###<a name="onRowTemplateChange">onRowTemplateChange</a>###
      * when changing the template for an individual row.
+     * @param {Event} evt
+     * @param {*) item
+     * @param {Object} oldTemplate
+     * @param {Object} newTemplate
      */
     function onRowTemplateChange(evt, item, oldTemplate, newTemplate) {
         var index = inst.getNormalizedIndex(item),
@@ -1098,9 +1111,11 @@ function Datagrid(scope, element, attr, $compile) {
     /**
      * ###<a name="updateHeights">updateHeights</a>###
      * force invalidation of heights and recalculate them then render.
+     * @param {Number} rowIndex
+     * @param {Number=} range
      */
-    function updateHeights(rowIndex) {
-        flow.add(inst.chunkModel.updateAllChunkHeights, [rowIndex]);
+    function updateHeights(rowIndex, range) {
+        flow.add(inst.chunkModel.updateAllChunkHeights, [rowIndex, range]);
         flow.add(updateHeightValues);
         flow.add(render);
     }
@@ -1108,6 +1123,8 @@ function Datagrid(scope, element, attr, $compile) {
     /**
      * ###<a name="isLogEvent">isLogEvent</a>###
      * used to compare events to detect log events.
+     * @param {String} evt
+     * @returns {boolean}
      */
     function isLogEvent(evt) {
         return logEvents.indexOf(evt) !== -1;
@@ -1116,6 +1133,8 @@ function Datagrid(scope, element, attr, $compile) {
     /**
      * ###<a name="dispatch">dispatch</a>###
      * handle dispaching of events from the datagrid.
+     * @param {String} event
+     * @returns {Object}
      */
     function dispatch(event) {
         if (!isLogEvent(event) && options.debug && options.debug.all === 1) inst.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.

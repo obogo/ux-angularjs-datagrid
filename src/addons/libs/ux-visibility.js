@@ -8,8 +8,10 @@ exports.visibility = (function () {
      * ###<a name="isVisible">isVisible</a>###
      * Checks if a DOM element is visible. Takes into consideration its parents.
      * @param {DOMElement} el the DOMElement to check if is visible
+     * @param {maxParent} when max parent is reached it will stop.
+     * @param {allowOpacity=} if true then opacity will not return a false if it is 0.
      */
-    function isVisible(el) {
+    function isVisible(el, maxParent, allowOpacity) {
         var p = el.parentNode;
 
         if (!elementInDocument(el)) {
@@ -21,13 +23,16 @@ exports.visibility = (function () {
         }
 
         // Return false if our element is invisible
-        if ('0' === getStyle(el, 'opacity') || 'none' === getStyle(el, 'display') || 'hidden' === getStyle(el, 'visibility')) {
+        if (!allowOpacity && getStyle(el, 'opacity') === '0') {
+            return false;
+        }
+        if ('none' === getStyle(el, 'display') || 'hidden' === getStyle(el, 'visibility')) {
             return false;
         }
 
-        if (p) {//-- If we have a parent, let's continue:
+        if (p && p !== maxParent) {//-- If we have a parent, let's continue:
             //-- Let's recursively check upwards:
-            return isVisible(p);
+            return isVisible(p, maxParent, allowOpacity);
         }
         return true;
     }

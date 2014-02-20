@@ -1,3 +1,6 @@
+exports.datagrid.events.COLLAPSE_GROUP = "datagrid:collapseGroup";
+exports.datagrid.events.EXPAND_GROUP = "datagrid:expandGroup";
+exports.datagrid.events.TOGGLE_GROUP = "datagrid:toggleGroup";
 angular.module('ux').factory('collapsibleGroups', function () {
    return function (inst) {
        var result = exports.logWrapper('collapsibleGroups', {}, 'orange', inst.dispatch),
@@ -34,13 +37,13 @@ angular.module('ux').factory('collapsibleGroups', function () {
                } else {
                    changed = expand(rowIndex + i + 1);
                }
-               if (changed) {
-                   inst.chunkModel.updateAllChunkHeights(rowIndex);
-               }
+//               if (changed) {
+//                   inst.chunkModel.updateAllChunkHeights(rowIndex);
+//               }
                changed = false;
                i += 1;
            }
-           inst.updateHeights();
+           inst.updateHeights(rowIndex, i);
        }
 
        function collapse(index) {
@@ -71,13 +74,11 @@ angular.module('ux').factory('collapsibleGroups', function () {
        result.collapse = function (rowIndexOrGroup) {
            var index = getIndex(rowIndexOrGroup);
            setRowStatesInGroup(index, states.COLLAPSE);
-           inst.render();
        };
 
        result.expand = function (rowIndexOrGroup) {
            var index = getIndex(rowIndexOrGroup);
            setRowStatesInGroup(index, states.EXPAND);
-           inst.render();
        };
 
        result.toggle = function toggle(itemOrIndex) {
@@ -95,6 +96,16 @@ angular.module('ux').factory('collapsibleGroups', function () {
            }
            return superGetTemplateHeight(item);
        };
+
+       inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.EXPAND_GROUP, function (event, index) {
+           result.expand(index);
+       }));
+       inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.COLLAPSE_GROUP, function (event, index) {
+           result.collapse(index);
+       }));
+       inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.TOGGLE_GROUP, function (event, index) {
+           result.toggle(index);
+       }));
 
        inst.collapsibleGroups = result;
 

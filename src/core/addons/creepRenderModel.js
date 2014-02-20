@@ -115,7 +115,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
 
     function onBeforeReset() {
         onBeforeRender(event);
-        if (inst.options.enableCreepRender) {
+        if (inst.options.creepRender && inst.options.creepRender.enable !== false) {
             model.enable();
         }
     }
@@ -150,7 +150,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
 
     inst.creepRenderModel = model;
     // do not add listeners if it is not enabled.
-    if (inst.options.enableCreepRender) {
+    if (inst.options.creepRender && inst.options.creepRender.enable) {
         model.enable();
     } else {
         model.disable();

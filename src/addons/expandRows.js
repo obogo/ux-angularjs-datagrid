@@ -1,3 +1,6 @@
+exports.datagrid.events.COLLAPSE_ROW = "datagrid:collapseRow";
+exports.datagrid.events.EXPAND_ROW = "datagrid:expandRow";
+exports.datagrid.events.TOGGLE_ROW = "datagrid:toggleRow";
 angular.module('ux').factory('expandRows', function () {
     //TODO: on change row template. This needs to collapse the row.
     return function (inst) {
@@ -177,7 +180,16 @@ angular.module('ux').factory('expandRows', function () {
         result.isExpanded = isExpanded;
         result.destroy = destroy;
 
-        inst.scope.$on(ux.datagrid.events.ON_READY, setupTemplates);
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_READY, setupTemplates));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.EXPAND_ROW, function (event, itemOrIndex) {
+            result.expand(itemOrIndex);
+        }));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.COLLAPSE_ROW, function (event, itemOrIndex) {
+            result.collapse(itemOrIndex);
+        }));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.TOGGLE_ROW, function (event, itemOrIndex) {
+            result.toggle(itemOrIndex);
+        }));
 
         inst.expandRows = result;
 

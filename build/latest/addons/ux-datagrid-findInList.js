@@ -11,7 +11,7 @@ cmdKey;
 // if the cmdKey is pressed on a mac.
 angular.module("ux").factory("findInList", [ "$window", "$compile", function($window, $compile) {
     return function(inst) {
-        var result = {}, term = "", input, lowerCaseTerm, lastFiltered, searchIndex = 0, matchCount, searchIntv, scrollToItemActive = false, itemTexts = {}, findInListTemplate = '<div data-ux-datagrid-find-in-list="datagrid" class="findInList"></div>', templateTexts = {}, workingScope = inst.scope.$new();
+        var result = {}, term = "", input, lowerCaseTerm, lastFiltered, searchIndex = 0, matchCount, searchIntv, scrollToItemActive = false, itemTexts = {}, findInListTemplate = '<div data-ux-datagrid-find-in-list="datagrid" class="findInList"></div>', templateTexts = {}, spanClass = "uxDatagridFindInListHighlight", workingScope = inst.scope.$new();
         function onKeyDown(event) {
             inst.flow.info("onKeyDown %s", event.keyCode);
             detectCmdKey(event);
@@ -93,6 +93,9 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
                 finder = angular.element(findInListTemplate);
                 inst.element[0].parentNode.insertBefore(finder[0], inst.element[0]);
                 $compile(finder)(inst.scope);
+                finder.css({
+                    top: parseInt(inst.element.css("top"), 10) - finder[0].offsetHeight
+                });
                 input = finder[0].getElementsByClassName("findInListInput")[0];
                 if (input.select) {
                     input.select();
@@ -220,10 +223,12 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
         }
         function highlightMatches(filtered) {
             var selected;
-            ux.each(filtered, highlight);
-            selected = filtered.selected;
-            if (scrollToItemActive && (selected.rowIndex < inst.values.activeRange.min + 2 || selected.rowIndex > inst.values.activeRange.max - 2)) {
-                inst.scrollModel.scrollIntoView(selected.rowIndex, true);
+            if (filtered.length) {
+                ux.each(filtered, highlight);
+                selected = filtered.selected;
+                if (scrollToItemActive && (selected.rowIndex < inst.values.activeRange.min + 2 || selected.rowIndex > inst.values.activeRange.max - 2)) {
+                    inst.scrollModel.scrollIntoView(selected.rowIndex, true);
+                }
             }
         }
         function highlight(match, index, list) {
@@ -254,37 +259,46 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
         }
         function highlightTextRange(el, match, index) {
             //TODO: needs to be injected.
-            var range = document.createRange(), selectionContents, span = document.createElement("span"), i = 0, len = 0, startIndex = match.matchIndex, endIndex = match.matchIndex + term.length, siblings = el.parentNode.childNodes;
-            while (i < siblings.length - 1) {
-                el = siblings[i];
-                if (el.childNodes.length) {
-                    // these are already matches that have been turned into spans.
-                    len = el.childNodes[0].nodeValue ? el.childNodes[0].nodeValue.length : 0;
-                } else {
-                    len = el.nodeValue ? el.nodeValue.length : 0;
+            if (el) {
+                var range = document.createRange(), selectionContents, span = document.createElement("span"), i = 0, len = 0, startIndex = match.matchIndex, endIndex = match.matchIndex + term.length, siblings = el.parentNode.childNodes;
+                while (i < siblings.length - 1) {
+                    el = siblings[i];
+                    if (el.className && el.className.indexOf(spanClass) !== -1) {
+                        // these are already matches that have been turned into spans.
+                        len = el.innerText.length;
+                    } else if (match.matchIndex && el.nodeType === 3) {
+                        // text node.
+                        len = el.nodeValue ? el.nodeValue.length : 0;
+                        if (len < startIndex) {
+                            len = 0;
+                        }
+                    } else {
+                        len = 0;
+                    }
+                    startIndex -= len;
+                    endIndex -= len;
+                    i += 1;
                 }
-                startIndex -= len;
-                endIndex -= len;
-                i += 1;
+                el = siblings[siblings.length - 1];
+                if (el.nodeType === 3 && el.nodeValue.length >= endIndex) {
+                    try {
+                        range.setStart(el, startIndex);
+                        range.setEnd(el, endIndex);
+                    } catch (e) {
+                        throw new Error("OOPS! Something went wrong with the highlighting!");
+                    }
+                    selectionContents = range.extractContents();
+                    span.appendChild(selectionContents);
+                    span.className = spanClass + (match.absIndex === searchIndex ? " selectedHighlight" : "");
+                    range.insertNode(span);
+                }
             }
-            el = siblings[siblings.length - 1];
-            //            if (startIndex >= 0) {
-            try {
-                range.setStart(el, startIndex);
-                range.setEnd(el, endIndex);
-            } catch (e) {
-                throw new Error("OOPS! Something went wrong with the highlighting!");
-            }
-            selectionContents = range.extractContents();
-            span.appendChild(selectionContents);
-            span.className = "uxDatagridFindInListHighlight" + (match.absIndex === searchIndex ? " selectedHighlight" : "");
-            range.insertNode(span);
         }
         function clearHighlights() {
             if (lastFiltered) {
                 // we want to digest every row that had one.
                 ux.each(lastFiltered, clearHighlightsForRow);
-                lastFiltered = null;
+                lastFiltered = [];
             }
         }
         function clearHighlightsForRow(match, force) {
@@ -295,8 +309,26 @@ angular.module("ux").factory("findInList", [ "$window", "$compile", function($wi
             }
         }
         function clearHighlightsForRowMatches(match, index, list, row) {
-            var node = getNodeFromMatch(row, match);
-            node.parentNode.innerText = match.itemText.text;
+            var node = getNodeFromMatch(row, match), parent, children, i = 0, len, child, str, sib;
+            if (node) {
+                parent = node.parentNode;
+                children = parent.childNodes;
+                len = children.length;
+                while (i < len) {
+                    child = children[i];
+                    isSpan = child.className && child.className.indexOf(spanClass) !== -1;
+                    if (isSpan || child.nodeType === 3 && child.previousSibling) {
+                        str = isSpan ? child.innerText : child.nodeValue;
+                        sib = child.previousSibling;
+                        parent.removeChild(child);
+                        sib.nodeValue += str;
+                        children = parent.childNodes;
+                        len = children.length;
+                        i -= 1;
+                    }
+                    i += 1;
+                }
+            }
         }
         function setup() {
             inst.flow.info("setup");

@@ -46,6 +46,12 @@ License: MIT.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">COLLAPSE_GROUP</span> <span class="o">=</span> <span class="s2">&quot;datagrid:collapseGroup&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">EXPAND_GROUP</span> <span class="o">=</span> <span class="s2">&quot;datagrid:expandGroup&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">TOGGLE_GROUP</span> <span class="o">=</span> <span class="s2">&quot;datagrid:toggleGroup&quot;</span><span class="p">;</span>
+
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;collapsibleGroups&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;collapsibleGroups&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;orange&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">lastIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">collapsed</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">superGetTemplateHeight</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplateHeight</span><span class="p">,</span> <span class="nx">states</span> <span class="o">=</span> <span class="p">{</span>
@@ -75,13 +81,28 @@ License: MIT.</p>
                 <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
                     <span class="nx">changed</span> <span class="o">=</span> <span class="nx">expand</span><span class="p">(</span><span class="nx">rowIndex</span> <span class="o">+</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
                 <span class="p">}</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">changed</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="nx">inst</span><span class="p">.</span><span class="nx">chunkModel</span><span class="p">.</span><span class="nx">updateAllChunkHeights</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">);</span>
-                <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+
+<div class="highlight"><pre><code>          <span class="k">if</span> <span class="p">(</span><span class="n">changed</span><span class="p">)</span> <span class="p">{</span>
+              <span class="n">inst</span><span class="p">.</span><span class="n">chunkModel</span><span class="p">.</span><span class="n">updateAllChunkHeights</span><span class="p">(</span><span class="n">rowIndex</span><span class="p">);</span>
+          <span class="p">}</span>
+</code></pre></div>
+
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
                 <span class="nx">changed</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
                 <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
             <span class="p">}</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">updateHeights</span><span class="p">();</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">updateHeights</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">,</span> <span class="nx">i</span><span class="p">);</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">collapse</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">el</span><span class="p">;</span>
@@ -109,12 +130,10 @@ License: MIT.</p>
         <span class="nx">result</span><span class="p">.</span><span class="nx">collapse</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">rowIndexOrGroup</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">getIndex</span><span class="p">(</span><span class="nx">rowIndexOrGroup</span><span class="p">);</span>
             <span class="nx">setRowStatesInGroup</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="nx">states</span><span class="p">.</span><span class="nx">COLLAPSE</span><span class="p">);</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">render</span><span class="p">();</span>
         <span class="p">};</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">expand</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">rowIndexOrGroup</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">getIndex</span><span class="p">(</span><span class="nx">rowIndexOrGroup</span><span class="p">);</span>
             <span class="nx">setRowStatesInGroup</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="nx">states</span><span class="p">.</span><span class="nx">EXPAND</span><span class="p">);</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">render</span><span class="p">();</span>
         <span class="p">};</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">toggle</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">toggle</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">getIndex</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">);</span>
@@ -130,6 +149,15 @@ License: MIT.</p>
             <span class="p">}</span>
             <span class="k">return</span> <span class="nx">superGetTemplateHeight</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
         <span class="p">};</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">EXPAND_GROUP</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">expand</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+        <span class="p">}));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">COLLAPSE_GROUP</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">collapse</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+        <span class="p">}));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">TOGGLE_GROUP</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">toggle</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+        <span class="p">}));</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">collapsibleGroups</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
         <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
     <span class="p">};</span>

@@ -17,7 +17,7 @@ angular.module('ux').factory('iScrollAddon', function () {
             myScroll,
             originalScrollModel = inst.scrollModel,
             unwatchRefreshRender,
-            pollTimer,
+            scrollToIntv,
             unwatchSetup,
             lastY = 0;
 
@@ -25,23 +25,24 @@ angular.module('ux').factory('iScrollAddon', function () {
             originalScrollModel.removeScrollListener();
             unwatchSetup();
         });
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_RESET, refresh));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER, refresh));
 
         function refresh() {
+            var options = {
+                mouseWheel: true,
+                scrollbars: true,
+                bounce: true,
+                bindToWrapper: true,
+                tap: true,
+                interactiveScrollbars: true,
+                deceleration: 0.005,
+                click: true,
+                startY: -(inst.values.scroll || 0)
+            };
             if (!myScroll) {
                 inst.element[0].style.overflowY = 'hidden';
                 //TODO: these options need to be passed in.
-                myScroll = new IScroll(inst.element[0], {
-                    mouseWheel: true,
-                    scrollbars: true,
-                    bounce: true,
-                    bindToWrapper: true,
-                    tap: true,
-                    interactiveScrollbars: true,
-                    deceleration: 0.005,
-                    click: true
-                });
-//                pollTimer = setInterval(speedUpdate, 100);
+                myScroll = new IScroll(inst.element[0], options);
                 myScroll.on('beforeScrollStart', beforeScrollStart);
                 myScroll.on('scrollStart', beforeScrollStart);
                 myScroll.on('scrollEnd', onScrollEnd);
@@ -50,6 +51,8 @@ angular.module('ux').factory('iScrollAddon', function () {
             myScroll.scroller = inst.getContent()[0];
             myScroll.scrollerStyle = myScroll.scroller.style;
             myScroll._initEvents();
+            myScroll.scrollTo(0, options.startY);// update the transform.
+            result.iScroll = myScroll;
             refeshRender();
         }
 
@@ -78,7 +81,6 @@ angular.module('ux').factory('iScrollAddon', function () {
             inst.values.scroll = -myScroll.y;
             originalScrollModel.onScrollingStop();
             scrolling = false;
-            refeshRender();
         }
 
         function clearRefreshRender() {
@@ -94,12 +96,13 @@ angular.module('ux').factory('iScrollAddon', function () {
             }
         }
 
-        function onUpdateScroll() {
-            if (scrolling && myScroll.y !== lastY) {
-                inst.values.speed = myScroll.y - lastY;
+        function onUpdateScroll(forceValue) {
+            var value = forceValue !== undefined ? -forceValue : myScroll.y;
+            if (scrolling && value !== lastY) {
+                inst.values.speed = value - lastY;
                 inst.values.absSpeed = Math.abs(inst.values.speed);
-                inst.values.scroll = -myScroll.y;
-                lastY = myScroll.y;
+                inst.values.scroll = -value;
+                lastY = value;
                 inst.values.scrollPercent = ((inst.values.scroll / inst.getContentHeight()) * 100).toFixed(2);
                 result.fireOnScroll();
             }
@@ -110,20 +113,40 @@ angular.module('ux').factory('iScrollAddon', function () {
         };
         result.waitForStop = originalScrollModel.waitForStop;
         result.scrollTo = function (value, immediately) {
+            if (inst.element[0].scrollTop) {
+                inst.element[0].scrollTop = 0;
+            }
             myScroll.scrollTo(0, -value, immediately ? 0 : 200);
+            clearTimeout(scrollToIntv);
+            if (immediately) {
+                scrolling = true;
+                result.onUpdateScroll(value);
+                scrolling = false;
+                result.onScrollingStop();
+            } else {
+                scrollToIntv = setTimeout(function () {
+                    result.onScrollingStop();
+                }, 200);
+            }
+            // otherwise iscroll will cause the onScrollStop to fire.
         };
         result.scrollToIndex = originalScrollModel.scrollToIndex;
         result.scrollToItem = originalScrollModel.scrollToItem;
-        result.scrollIntoView = function (itemOrIndex) {
-            inst.element[0].scrollTop = 0;
-            return originalScrollModel.scrollIntoView(itemOrIndex);
+        result.scrollIntoView = originalScrollModel.scrollIntoView;
+        result.scrollToBottom = function (immediately) {
+            var value = inst.getContentHeight() - inst.getViewportHeight();
+            myScroll.scrollTo(0, -value, immediately ? 0 : 200);
         };
         result.onScrollingStop = originalScrollModel.onScrollingStop;
         result.onUpdateScroll = onUpdateScroll;
         result.fireOnScroll = originalScrollModel.fireOnScroll;
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.RESIZE, function () {
+            inst.element[0].scrollTop = 0;
+            myScroll.refresh();
+        }));
         result.destroy = function destroy() {
             unwatchSetup();
-            clearInterval(pollTimer);
+            clearTimeout(scrollToIntv);
             stop();
             originalScrollModel.destroy();
             if (myScroll) {

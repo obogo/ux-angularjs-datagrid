@@ -82,13 +82,20 @@ angular.module('ux').factory('scrollHistory', function () {
         };
 
         // watch only once to have it start at that scrolling position on startup.
-        var unwatch = inst.scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, function () {
+        var unwatch = inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, function () {
+            // need to set the scroll before the data is changed.
             result.log("found scrollHistory so scrollTo %s", result.getCurrentScroll());
-            inst.scrollModel.scrollTo(result.getCurrentScroll(), true);
             // remove the listener. So that it will only have been captured once.
             unwatch();
-            unwatch = null;
-            inst.dispatch(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL);
+            inst.scrollModel.setScroll(result.getCurrentScroll());
+            // we then need to scroll to after the render because otherwise the content isn't able to set
+            // the scroll top value because the content doesn't have a height yet.
+            unwatch = inst.scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, function () {
+                inst.scrollModel.scrollTo(result.getCurrentScroll(), true);
+                unwatch();
+                unwatch = null;
+                inst.dispatch(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL);
+            });
         });
 
         // add the listener to the main unwatchers array to make sure it gets cleaned up later before the destroy to

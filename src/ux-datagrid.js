@@ -123,7 +123,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.getContent = getContent;
         inst.safeDigest = safeDigest;
         inst.getRowIndexFromElement = getRowIndexFromElement;
-        inst.upateViewportHeight = updateViewportHeight;
+        inst.updateViewportHeight = updateViewportHeight;
         inst.calculateViewportHeight = calculateViewportHeight;
         inst.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
         inst.flow = flow = new Flow({async: options.hasOwnProperty('async') ? !!options.async : true, debug: options.hasOwnProperty('debug') ? options.debug : 0}, inst.dispatch);
@@ -308,7 +308,11 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Event} event
      */
     function onResize(event) {
-        dispatch(exports.datagrid.events.RESIZE, {event: event});
+        // we need to wait a moment for the browser to finish the resize, then adjust and fire the event.
+        setTimeout(function () {
+            updateHeights();
+            dispatch(exports.datagrid.events.RESIZE, {event: event});
+        }, 100);
     }
 
     /**
@@ -394,7 +398,7 @@ function Datagrid(scope, element, attr, $compile) {
         if (element[0].contains(el[0] || el)) {
             var s = el.scope ? el.scope() : angular.element(el).scope();
             // make sure we get the right scope to grab the index from. We need to get it from a row.
-            while (s && s.$parent !== inst.scope) {
+            while (s && s.$parent && s.$parent !== inst.scope) {
                 s = s.$parent;
             }
             return s.$index;
@@ -689,11 +693,14 @@ function Datagrid(scope, element, attr, $compile) {
         // updateHeightValues must be called before this.
         var est = Math.floor(offset / inst.templateModel.averageTemplateHeight()),
             i = 0, len = inst.rowsLength;
+        if (!offset || inst.rowsLength < 2) {
+            return i;
+        }
         if (rowOffsets[est] && rowOffsets[est] <= offset) {
             i = est;
         }
         while (i < len) {
-            if (rowOffsets[i] <= offset && (!rowOffsets[i] || rowOffsets[i + 1] > offset)) {
+            if (rowOffsets[i] <= offset && rowOffsets[i + 1] > offset) {
                 return i;
             }
             i += 1;
@@ -712,15 +719,16 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function getStartingIndex() {
         var height = viewHeight,
+            scroll = values.scroll || 0,
             result = {
                 startIndex: 0,
                 i: 0,
                 inc: 1,
                 end: inst.rowsLength,
-                visibleScrollStart: values.scroll + options.cushion,
-                visibleScrollEnd: values.scroll + height - options.cushion
+                visibleScrollStart: scroll + options.cushion,
+                visibleScrollEnd: scroll + height - options.cushion
             };
-        result.startIndex = result.i = getOffsetIndex(values.scroll);
+        result.startIndex = result.i = getOffsetIndex(scroll);
         return result;
     }
 
@@ -875,11 +883,11 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function readyToRender() {
         if (!viewHeight) {
-            inst.upateViewportHeight();
             waitCount += 1;
             if (waitCount < 2) {
                 inst.info("datagrid is waiting for element to have a height.");
-                flow.add(render, null, 0);// have it wait a moment for the height to change.
+                flow.add(inst.updateViewportHeight, null, 0);// have it wait a moment for the height to change.
+                flow.add(render);
             } else {
                 flow.warn("Datagrid: Unable to determine a height for the datagrid. Cannot render. Exiting.");
             }
@@ -958,8 +966,9 @@ function Datagrid(scope, element, attr, $compile) {
                 inst.log("\tdirtyCheckData length is different");
                 return true;
             }
+            return false;
         }
-        return false;
+        return true; // lengths do not match.
     }
 
     /**
@@ -1006,6 +1015,9 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function onDataChanged(newVal, oldVal) {
         inst.log("onDataChanged");
+        if (oldVal !== inst.getOriginalData()) {
+            oldVal = inst.getOriginalData();
+        }
         if (!inst.options.smartUpdate || !inst.data.length || dirtyCheckData(newVal, oldVal)) {
             var evt = dispatch(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, newVal, oldVal);
             if (evt.defaultPrevented && evt.newValue) {
@@ -1037,27 +1049,30 @@ function Datagrid(scope, element, attr, $compile) {
     function reset() {
         inst.info("reset start");
 //        flow.clear();// we are going to clear all in the flow before doing a reset.
-        state = states.BUILDING;
-        destroyScopes();
+//        state = states.BUILDING;
+//        destroyScopes();
         // now destroy all of the dom.
         rowOffsets = {};
         active.length = 0;
-        scopes.length = 0;
+//        scopes.length = 0;
         // keep reference to the old content and add a class to it so we can tell it is old. We will remove it after the render.
         destroyOldContent();
         oldContent = content;
         oldContent.addClass('old-' + options.contentClass);
         oldContent.children().unbind();
         // make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.
-        inst.chunkModel.reset();
+        inst.chunkModel.reset(inst.data, content = createContent(), scopes);
+        inst.rowsLength = inst.data.length;
+        updateHeightValues();
         flow.add(updateViewportHeight);
         flow.add(render);
         flow.add(inst.info, ["reset complete"]);
         flow.add(dispatch, [exports.datagrid.events.ON_AFTER_RESET]);
+        flow.add(dispatch, [exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER]);
     }
 
     /**
-     * ###<a name="removeOldContent">removeOldContent</a>###
+     * ###<a name="destroyOldContent">destroyOldContent</a>###
      * remove the old content div that is staying util the new one
      * is rendered.
      */
@@ -1111,13 +1126,15 @@ function Datagrid(scope, element, attr, $compile) {
     /**
      * ###<a name="updateHeights">updateHeights</a>###
      * force invalidation of heights and recalculate them then render.
-     * @param {Number} rowIndex
-     * @param {Number=} range
+     * If a rowIndex is specified, only update ones affected by that row, otherwise update all.
+     * @param {Number=} rowIndex
      */
-    function updateHeights(rowIndex, range) {
-        flow.add(inst.chunkModel.updateAllChunkHeights, [rowIndex, range]);
+    function updateHeights(rowIndex) {
+        flow.add(updateViewportHeight);
+        flow.add(inst.chunkModel.updateAllChunkHeights, [rowIndex]);
         flow.add(updateHeightValues);
         flow.add(render);
+        flow.add(inst.dispatch, [exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER]);
     }
 
     /**

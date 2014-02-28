@@ -9,6 +9,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         waitHandle,
         waitingOnReset,
         time,
+        lastPercent,
         unwatchers = [];
 
     function digest(index) {
@@ -55,18 +56,28 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         return waitHandle;
     }
 
+    function findUncompiledIndex(index, dir) {
+        while (index >= 0 && index < inst.rowsLength && inst.isCompiled(index)) {
+            index += dir;
+        }
+        if (index >= 0 && index < inst.rowsLength) {
+            return index;
+        }
+        return dir > 0 ? inst.rowsLength : -1;
+    }
+
     function render(complete, force) {
-        var changed = false, now = Date.now();
-        if (time > now && (upIndex >= 0 || downIndex < inst.rowsLength)) {
+        var now = Date.now();
+        if (time > now && hasIndexesLeft()) {
+            upIndex = force ? upIndex : findUncompiledIndex(upIndex, -1);
             if (upIndex >= 0) {
-                changed = force || !inst.isCompiled(upIndex);
-                if (changed) digest(upIndex);
-                upIndex -= 1;
+                digest(upIndex);
+                if (force) upIndex -= 1;
             }
-            if (downIndex < inst.rowsLength) {
-                changed = force || changed || !inst.isCompiled(downIndex);
-                if (changed) digest(downIndex);
-                downIndex += 1;
+            downIndex = force ? downIndex : findUncompiledIndex(downIndex, 1);
+            if (downIndex !== inst.rowsLength) {
+                digest(downIndex);
+                if (force) downIndex += 1;
             }
             render(complete, force);// making this async was counter effective on performance.
         } else {
@@ -77,10 +88,20 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     function onComplete() {
         stop();
         creepCount += 1;
-        if (!inst.values.touchDown && !inst.values.speed && inst.scopes.length < inst.rowsLength) {
+        if (!inst.values.touchDown && !inst.values.speed && hasIndexesLeft()) {
             resetInterval(upIndex, downIndex);
         }
-        inst.dispatch(exports.datagrid.events.ON_RENDER_PROGRESS, calculatePercent());
+        var percent = calculatePercent();
+        if (percent !== lastPercent) {
+            inst.dispatch(exports.datagrid.events.ON_RENDER_PROGRESS, percent);
+        }
+        if (!hasIndexesLeft()) {
+            model.disable();
+        }
+    }
+
+    function hasIndexesLeft() {
+        return !!(upIndex !== -1 || downIndex !== inst.rowsLength);
     }
 
     function stop() {
@@ -102,7 +123,6 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     }
 
     function onBeforeRender(event) {
-        creepCount = inst.options.creepLimit;
         stop();
     }
 
@@ -113,7 +133,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         renderLater(event, forceCompileRowRender);
     }
 
-    function onBeforeReset() {
+    function onBeforeReset(event) {
         onBeforeRender(event);
         if (inst.options.creepRender && inst.options.creepRender.enable !== false) {
             model.enable();

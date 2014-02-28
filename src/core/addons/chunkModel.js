@@ -13,7 +13,8 @@
  */
 exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
 
-    var _list, _rows, _chunkSize, _el, result = exports.logWrapper('chunkModel', {}, 'purple', inst.dispatch);
+    var _list, _rows, _chunkSize, _el, result = exports.logWrapper('chunkModel', {}, 'purple', inst.dispatch),
+        _templateStartCache, _templateEndCache, _cachedDomRows = [];
 
     /**
      * **getChunkList**
@@ -83,28 +84,40 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
 
     /**
      * ###<a name="updateAllChunkHeights">updateAllChunkHeights</a>###
-     * Go through each of the chunks affected by the row index and range and update their heights.
-     * It starts as that bottom chunk and moves up. So all parents get updated when that row changes.
-     * @param {Number} rowIndex
-     * @param {Number=} range
+     * Update rows affected by this particular index change. if rowIndex is undefined, update all.
+     * @param {Number=} rowIndex
      */
-    function updateAllChunkHeights(rowIndex, range) {
-        var indexes, ary, allIndexes, i = 0, len, j, jLen, merged;
-        if (range !== undefined) {
+    function updateAllChunkHeights(rowIndex) {
+        var indexes, ary;
+        if (rowIndex === undefined) {
             //TODO: unit test needed.
-            _list.forceHeightReCalc(inst.templateModel, _rows);
-            updateChunkHeights(_el, _list);
+            if (_list) {
+                _list.forceHeightReCalc(inst.templateModel, _rows);
+                updateChunkHeights(_el, _list);
+            }
+        } else {
+            indexes = getRowIndexes(rowIndex, _list);
+            ary = getArrayFromIndexes(indexes, _list);
+            updateChunkArrayHeights(ary, indexes);
         }
-        indexes = getRowIndexes(rowIndex, _list);
-        ary = getArrayFromIndexes(indexes, _list);
-        updateChunkArrayHeights(ary, indexes);
     }
 
+    /**
+     * ###<a name="updateChunkArrayHeights">updateChunkArrayHeights</a>###
+     * @param {ChunkArray} ary
+     * @param {Array} indexes
+     */
     function updateChunkArrayHeights(ary, indexes) {
         ary.updateHeight(inst.templateModel, _rows);
         updateChunkHeights(_el, _list, indexes);
     }
 
+    /**
+     * ###<a name="updateChunkHeights">updateChunkHeights</a>###
+     * Recalculate the chunk heights.
+     * @param {DOMElement} el
+     * @param ary
+     */
     function updateChunkHeights(el, ary) {
         el = el[0] || el;
         var i = 0, len = ary.length, children = el.childNodes;
@@ -117,6 +130,13 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         updateChunkStyle(el, ary);
     }
 
+    /**
+     * ###<a name="updateChunkStyle">updateChunkStyle</a>###
+     * Update the style of a chunk DOMElement from the chunk Array.
+     * @param {DOMElement} el
+     * @param {ChunkArray} chunk
+     * @returns {boolean}
+     */
     function updateChunkStyle(el, chunk) {
         if (chunk.dirtyHeight) {
             chunk.dirtyHeight = false;
@@ -126,6 +146,13 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         return false;
     }
 
+    /**
+     * ###<a name="getArrayFromIndexes">getArrayFromIndexes</a>###
+     * Look up the chunkArray given an indexes array.
+     * @param {Array} indexes
+     * @param {ChunkArray} ary
+     * @returns {*}
+     */
     function getArrayFromIndexes(indexes, ary) {
         var index;
         while (indexes.length) {
@@ -152,6 +179,8 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         _el = el;
         _chunkSize = size;
         _rows = list;
+        _templateStartCache = templateStart;
+        _templateEndCache = templateEnd;
         _list = chunkList(list, size, templateStart, templateEnd);
         return el;
     }
@@ -194,27 +223,75 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     }
 
     /**
-     * Get the domElement by indexes, create the dom if it doesn't exist.
-     * @param indexes {Number}
+     * ###<a name="getDomRowByIndexes">getDomRowByIndexes</a>###
+     * Get the dom element given the indexes array. This cannot be exposed because public api should use the
+     * buildDomByIndexes that is called from getRow.
+     * @param {Array} indexes
+     * @param {Function} unrendered
      * @returns {*}
      */
-    function buildDomByIndexes(indexes) {
+    function getDomRowByIndexes(indexes, unrendered) {
         var i = 0, index, indxs = indexes.slice(0), ca = _list, el = _el, children;
         while (i < indxs.length) {
             index = indxs.shift();
-            if (!ca.rendered) {
-                el.html(ca.getChildrenStr());
-                children = el.children();
-                exports.each(children, computeStyles);
-                if (children[0].className.indexOf(inst.options.chunkClass) !== -1) {
-                    // need to calculate css styles before adding this class to make transitions work.
-                    children.addClass(inst.options.chunkReadyClass);
-                }
+            if (!ca.rendered && unrendered) {
+                unrendered(el, ca);
             }
             ca = ca[index];
             el = angular.element(el.children()[index]);
         }
         return el;
+    }
+
+    /**
+     * ###<a name="unrendered">unrendered</a>###
+     * How to handle array chunks that have not been rendered yet. They may copy from cache or even create new
+     * dom from html strings.
+     * @param {JQLite} el
+     * @param {ChunkArray} ca
+     */
+    function unrendered(el, ca) {
+        var children;
+        if (ca[0] && !(ca[0] instanceof ChunkArray) && _cachedDomRows.length) {
+            exports.each(ca, appendCachedDom, el);
+            ca.rendered = true;
+        } else {
+            el.html(ca.getChildrenStr());
+        }
+        children = el.children();
+        exports.each(children, computeStyles);
+        if (children[0].className.indexOf(inst.options.chunkClass) !== -1) {
+            // need to calculate css styles before adding this class to make transitions work.
+            children.addClass(inst.options.chunkReadyClass);
+        }
+    }
+
+    /**
+     * ###<a name="appendCachedDom">appendCachedDom</a>###
+     * When an item is requested. If it exists in the cache then it needs to be added to the current
+     * chunked dom. If not then add the string template that will be compiled by datagrid.
+     * @param {*} item
+     * @param {Number} index
+     * @param {ChunkArray} list
+     * @param {JQLite} el
+     */
+    function appendCachedDom(item, index, list, el) {
+        var i = list.min + index, row = _cachedDomRows[i];
+        _cachedDomRows[i] = undefined;
+        if (!row) {
+            // we need to make a row. Because a cached one does not exist.
+            row = inst.templateModel.getTemplate(list[i]).template;
+        }
+        el.append(row);
+    }
+
+    /**
+     * Get the domElement by indexes, create the dom if it doesn't exist.
+     * @param {Array} indexes - an array of int values.
+     * @returns {*}
+     */
+    function buildDomByIndexes(indexes) {
+        return getDomRowByIndexes(indexes, unrendered);
     }
 
     /**
@@ -226,20 +303,77 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     }
 
     /**
+     * ###<a name="reset">reset</a>###
      * Remove all dom, and all other references.
+     * @param {Array} newList
+     * @param {JQLite} content
+     * @param {Array} scopes
      */
-    function reset() {
+    function reset(newList, content, scopes) {
         result.log("reset");
+        _cachedDomRows.length = 0;
+        newList = newList || [];
+        exports.each(newList, recycleRows, {domRows: _cachedDomRows, oldList: _rows, oldChunks: _list, scopes: scopes});
         //TODO: this needs to make sure it destroys things properly
         if (_list) _list.destroy();
-        _rows = null;
-        _list = null;
-        _chunkSize = null;
-        _el = null;
+        chunkDom(newList, _chunkSize, _templateStartCache, _templateEndCache, content);
+        // copy over the active rows.
+        for (var i = inst.values.activeRange.min; i < inst.values.activeRange.max; i += 1) {
+            result.getRow(i);
+        }
+        clearRecycledCache();
     }
 
+    /**
+     * ###<a name="recycleRows">recycleRows</a>###
+     * Store the dom from the content being destoryed so that we can detach and reattach to the new dom chunks.
+     * @param {*} rowData
+     * @param {Number} rowIndex
+     * @param {ChunkArray} rowList
+     * @param {Object} data
+     */
+    function recycleRows(rowData, rowIndex, rowList, data) {
+        // compare objects to make sure they are exact so if not it will update the row with a new template when it compiles it.
+        // rows that are exact, will not be compiled.
+        if (data.oldList[rowIndex] && rowData === data.oldList[rowIndex]) {
+            var indexes = getRowIndexes(rowIndex, data.oldChunks);
+            data.domRows.push(getDomRowByIndexes(indexes));
+        } else {
+            data.scopes[rowIndex] = undefined;
+        }
+    }
+
+    /**
+     * ###<a name="clearRecycledCache">clearRecycledCache</a>###
+     * Remove the items left in the cache.
+     */
+    function clearRecycledCache() {
+        exports.each(_cachedDomRows, clearRecycledItem);
+        _cachedDomRows.length = 0;
+    }
+
+    /**
+     * ###<a name="clearRecycledItem">clearRecycledItem</a>###
+     * Items left in the recycling need to be destroyed properly.
+     * @param {JQLite} el
+     */
+    function clearRecycledItem(el) {
+        if (el) {
+            var s = el.scope();
+            if (s !== inst.scope) {
+                s.$destroy();
+                el.unbind();
+            }
+        }
+    }
+
+    /**
+     * ###<a name="destroy">destroy</a>###
+     * Clean up the chunking and recycling.
+     */
     function destroy() {
         reset();
+        clearRecycledCache();
         result.destroyLogger();
     }
 
@@ -250,6 +384,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     };
     result.getRow = getRow;
     result.reset = reset;
+    result.clearRecycledCache = clearRecycledCache;
     result.updateAllChunkHeights = updateAllChunkHeights;
     result.destroy = destroy;
 
@@ -278,7 +413,7 @@ ChunkArray.prototype.getStub = function getStub(str) {
     return this.templateStart + str + this.templateEnd;
 };
 /**
- * **ChunkArray.prototype.getChildStr**
+ * #####ChunkArray.prototype.getChildStr#####
  * Get the HTML string representation of the children in this array.
  * If deep then return this and all children down.
  * @param deep
@@ -297,6 +432,12 @@ ChunkArray.prototype.getChildrenStr = function (deep) {
     this.rendered = true;
     return str;
 };
+/**
+ * #####<a name="updateHeight">updateHeight</a>#####
+ * Recalculate the height of this chunk.
+ * @param templateModel
+ * @param _rows
+ */
 ChunkArray.prototype.updateHeight = function (templateModel, _rows) {
     var i = 0, len, height = 0;
     if (this[0] instanceof ChunkArray) {
@@ -316,6 +457,13 @@ ChunkArray.prototype.updateHeight = function (templateModel, _rows) {
         if (this.parent) this.parent.updateHeight(templateModel, _rows);
     }
 };
+/**
+ * #####<a name="forceHeightReCalc">forceHeightReCal</a>#####
+ * Ignore any cached values and update the height of this chunk.
+ * @param templateModel
+ * @param _rows
+ * @returns {number|*|height}
+ */
 ChunkArray.prototype.forceHeightReCalc = function (templateModel, _rows) {
     var i = 0, len, height = 0;
         if (this[0] instanceof ChunkArray) {
@@ -334,6 +482,10 @@ ChunkArray.prototype.forceHeightReCalc = function (templateModel, _rows) {
     }
     return this.height;
 };
+/**
+ * #####<a name="setDirtyHeight">setDirtyHeight</a>#####
+ * Set this chunk as dirty so heights need calculated.
+ */
 ChunkArray.prototype.setDirtyHeight = function () {
     var p = this;
     while (p) {
@@ -341,6 +493,10 @@ ChunkArray.prototype.setDirtyHeight = function () {
         p = p.parent;
     }
 };
+/**
+ * #####<a name="getId">getId</a>#####
+ * @returns {string|*|_id}
+ */
 ChunkArray.prototype.getId = function () {
     if (!this._id) {
         var p = this, s = '';
@@ -353,6 +509,7 @@ ChunkArray.prototype.getId = function () {
     return this._id;
 };
 /**
+ * #####<a name="destroy">destroy</a>#####
  * Perform proper cleanup.
  */
 ChunkArray.prototype.destroy = function () {

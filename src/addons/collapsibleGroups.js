@@ -43,7 +43,7 @@ angular.module('ux').factory('collapsibleGroups', function () {
                changed = false;
                i += 1;
            }
-           inst.updateHeights(rowIndex, i);
+           inst.updateHeights();
        }
 
        function collapse(index) {

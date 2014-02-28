@@ -147,6 +147,10 @@ angular.module('ux').factory('expandRows', function () {
             }
             s.$digest();
             inst.updateHeights(index);
+            // check for last row. On expansion it needs to scroll down.
+            if (state === states.opened && index === inst.data.length - 1) {
+                inst.scrollModel.scrollToBottom(true);
+            }
         }
 
         function isExpanded(itemOrIndex) {

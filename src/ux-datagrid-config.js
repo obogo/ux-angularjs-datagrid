@@ -80,6 +80,7 @@ exports.datagrid = {
         ON_SCROLL: 'datagrid:onScroll',
         ON_BEFORE_RESET: 'datagrid:onBeforeReset',
         ON_AFTER_RESET: 'datagrid:onAfterReset',
+        ON_AFTER_HEIGHTS_UPDATED_RENDER: 'datagrid:onAfterHeightsUpdatedRender',
         /**
          * #### Driving Events ####
          * - **<a name="events.RESIZE">RESIZE</a>** tells the datagrid to resize. This will update all height calculations.

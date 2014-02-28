@@ -69,9 +69,9 @@ module.exports = function (grunt) {
                     'build/latest/addons/ux-<%= pkg.filename %>-expandRows.js': [
                         'src/addons/expandRows.js'
                     ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-findInList.js': [
-                        'src/addons/findInList.js'
-                    ],
+//                    'build/latest/addons/ux-<%= pkg.filename %>-findInList.js': [
+//                        'src/addons/findInList.js'
+//                    ],
                     'build/latest/addons/ux-<%= pkg.filename %>-gridLogger.js': [
                         'src/addons/gridLogger.js'
                     ],

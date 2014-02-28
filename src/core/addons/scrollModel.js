@@ -210,6 +210,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             inst.scrollModel.scrollTo(offset, immediately);
             return;
         }
+        inst.updateViewportHeight();// always update the height before calculating. onResize is not reliable
         viewHeight = inst.getViewportHeight();
         rowHeight = inst.templateModel.getTemplateHeight(inst.getData()[index]);
         if (offset >= inst.values.scroll + viewHeight - rowHeight) { // it is below the view.

@@ -8,7 +8,7 @@ ux.datagrid.events.ON_SCROLL_TO_BOTTOM = 'datagrid:onScrollToBottom';
 angular.module('ux').factory('infiniteScroll', function () {
     return function infiniteScroll(inst, $filter) {
         var result = {}, bottomOffset = 0, scrollOffset = -1, loadingRow = {_template: 'loadingRow'},
-            unwatchers = [];
+            unwatchers = [], lastScroll = -1;
 
         /**
          * Set the default values for the infiniteScroll options.
@@ -30,13 +30,28 @@ angular.module('ux').factory('infiniteScroll', function () {
          */
         result.onBeforeDataChange = function (event, newVal, oldVal) {
             if (inst.options.infiniteScroll.enable && newVal) {
-                if (inst.options.infiniteScroll.limit && newVal.length < inst.options.infiniteScroll.limit) {
-                    event.newValue = $filter('limitTo')(newVal, inst.options.infiniteScroll.limit);
-                    event.preventDefault();
-                    result.addExtraRow(event.newValue);
+                var limit = getLimit();
+                if (limit) {
+                    event.newValue = $filter('limitTo')(newVal, limit);
+                    if (event.newValue.length < limit) {
+                        event.preventDefault();
+                        result.addExtraRow(event.newValue);
+                    }
                 }
             }
         };
+
+        /**
+         * ###<a name="getLimit">getLimit</a>
+         * Return the limit of the options. Execute function or number to return limit.
+         * @returns {limit|*|limit|number|limit|limit}
+         */
+        function getLimit() {
+            if (typeof inst.options.infiniteScroll.limit === "function") {
+                return inst.options.infiniteScroll.limit();
+            }
+            return inst.options.infiniteScroll.limit || 0;
+        }
 
         /**
          * ###<a name="addExtraRow">addExtraRow</a>###
@@ -71,14 +86,17 @@ angular.module('ux').factory('infiniteScroll', function () {
          * @param scroll
          */
         result.onUpdateScroll = function onUpdateScroll(event, values) {
-            if (!bottomOffset) {
-                result.calculateBottomOffset();
-                inst.scrollModel.scrollTo(scrollOffset !== -1 ? scrollOffset : values.scroll, true);
-            }
-            if (values.scroll >= bottomOffset) {
-                inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_BOTTOM);
-            } else if (values.scroll <= 0) {
-                inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_TOP);
+            if (values.scroll !== lastScroll) {
+                lastScroll = values.scroll;
+                if (!bottomOffset) {
+                    result.calculateBottomOffset();
+                    inst.scrollModel.scrollTo(scrollOffset !== -1 ? scrollOffset : values.scroll, true);
+                }
+                if (values.scroll >= bottomOffset) {
+                    inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_BOTTOM);
+                } else if (values.scroll <= 0) {
+                    inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_TOP);
+                }
             }
         };
 

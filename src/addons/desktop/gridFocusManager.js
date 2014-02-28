@@ -1,5 +1,7 @@
 exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME = "ux-datagrid:focusToPrevElementOfSame";
 exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME = "ux-datagrid:focusToNextElementOfSame";
+exports.datagrid.events.ON_SCROLL_TO_TOP_ENTER = "ux-datagrid:onScrollToTopEnter";
+exports.datagrid.events.ON_SCROLL_TO_BOTTOM_ENTER = "ux-datagrid:onScrollToBottomEnter";
 /**
  * ##<a name="gridFocusManager">gridFocusManager</a>##
  * Handle focus for enterKey to move down the correct columns.
@@ -220,12 +222,18 @@ angular.module('ux').factory('gridFocusManager', function () {
          * @param {Event} event
          */
         function onKeyDown(event) {
-            var target = angular.element(event.currentTarget);
+            var target = angular.element(event.currentTarget), atTop = false, atBottom = false;
             result.log('FM: onKeyDown');
             if ((event.shiftKey && event.keyCode === keys.ENTER) || event.keyCode === keys.UP) {
-                focusToPrevRowElement(target);
+                atTop = !focusToPrevRowElement(target);
+                if (atTop) {
+                    inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_TOP_ENTER);
+                }
             } else if (event.keyCode === keys.ENTER || event.keyCode === keys.DOWN) {
-                focusToNextRowElement(target);
+                atBottom = !focusToNextRowElement(target);
+                if (atBottom) {
+                    inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_BOTTOM_ENTER);
+                }
             }
         }
 
@@ -236,7 +244,10 @@ angular.module('ux').factory('gridFocusManager', function () {
          */
         function focusToPrevRowElement(focusedEl) {
             var focusEl = getPrevRowFocusElement(focusedEl, -1);
-            performFocus(focusEl);
+            if (isSame(focusEl, focusedEl)) {
+                return false;
+            }
+            return performFocus(focusEl);
         }
 
         /**
@@ -245,9 +256,22 @@ angular.module('ux').factory('gridFocusManager', function () {
          * @param {JQLite} focusedEl
          */
         function focusToNextRowElement(focusedEl) {
-            result.log("\tFM: focusToNextRowElement");
             var focusEl = getNextRowFocusElement(focusedEl);
-            performFocus(focusEl);
+            if (isSame(focusEl, focusedEl)) {
+                return false;
+            }
+            return performFocus(focusEl);
+        }
+
+        /**
+         * ###<a name="isSame">isSame</a>###
+         * Compare to JQLite/DOMElements objects to see if they reference the same DOMElement.
+         * @param {JQLite|DOMElement} el
+         * @param {JQLite|DOMElement} el2
+         * @returns {boolean}
+         */
+        function isSame(el, el2) {
+            return (el[0] || el) === (el2[0] || el2);
         }
 
         /**
@@ -307,8 +331,8 @@ angular.module('ux').factory('gridFocusManager', function () {
                 return; // the focusedEl is not inside the datagrid.
             }
             var resultEl,
-                rowEl = getRowElmFromChildElm(focusedEl),
                 currentIndex = inst.getRowIndexFromElement(focusedEl),
+                rowEl = inst.getRowElm(currentIndex),
                 nextIndex = currentIndex + dir, selector;
             if (nextIndex < 0 || nextIndex >= inst.rowsLength) {
                 return focusedEl;
@@ -326,14 +350,17 @@ angular.module('ux').factory('gridFocusManager', function () {
          */
         function performFocus(focusEl) {
             result.log("\tperformFocus %o", focusEl[0]);
+            var success = false;
             if (focusEl[0].select) {// TODO: if no jquery. There may be no select.
                 focusEl[0].select();
             }
             if (focusEl[0]) {
                 focusEl[0].focus();
+                success = true;
             }
             // we now need to scroll the row into view if it is not.
             inst.scrollModel.scrollIntoView(inst.getRowIndexFromElement(focusEl), true);
+            return success;
         }
 
         /**
@@ -359,6 +386,14 @@ angular.module('ux').factory('gridFocusManager', function () {
                 focusEl = query(nextEl[0], selector);
             }
             return focusEl;
+        }
+
+        function onResize(event) {
+            var index;
+            if (inst.element[0].contains(document.activeElement)) {
+                index = inst.getRowIndexFromElement(document.activeElement);
+                inst.scrollModel.scrollIntoView(index);
+            }
         }
 
         result.hasPrevRowFocusElement = hasPrevRowFocusElement;
@@ -387,6 +422,7 @@ angular.module('ux').factory('gridFocusManager', function () {
                 focusToNextRowElement(document.activeElement);
             }
         }));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.RESIZE, onResize));
 
         inst.gridFocusManager = result;
 

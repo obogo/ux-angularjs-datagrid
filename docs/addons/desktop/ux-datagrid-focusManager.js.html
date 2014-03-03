@@ -91,6 +91,9 @@
         <a href="#focustonextrowelement">focusToNextRowElement</a>
       </div>
       <div class="heading h3">
+        <a href="#issame">isSame</a>
+      </div>
+      <div class="heading h3">
         <a href="#hasprevrowfocuselement">hasPrevRowFocusElement</a>
       </div>
       <div class="heading h3">
@@ -129,7 +132,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.4.0-alpha
+  <div class="summary"><p>uxDatagrid v.0.5.0-alpha
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -567,6 +570,10 @@ License: MIT.</p>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_PREV_ELEMENT_OF_SAME</span> <span class="o">=</span> <span class="s2">&quot;ux-datagrid:focusToPrevElementOfSame&quot;</span><span class="p">;</span>
 
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_NEXT_ELEMENT_OF_SAME</span> <span class="o">=</span> <span class="s2">&quot;ux-datagrid:focusToNextElementOfSame&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_TOP_ENTER</span> <span class="o">=</span> <span class="s2">&quot;ux-datagrid:onScrollToTopEnter&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_BOTTOM_ENTER</span> <span class="o">=</span> <span class="s2">&quot;ux-datagrid:onScrollToBottomEnter&quot;</span><span class="p">;</span>
 
 
 </pre></div>
@@ -1110,7 +1117,7 @@ you can filter these out from causing selections to not be made.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">addListenersToRow</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">)</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">getFocusableElements</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">getFocusableElements</span><span class="p">(</span><span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">));</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">focusable</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;    addListenersToRow&quot;</span><span class="p">);</span>
                 <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">focusable</span><span class="p">);</span>
@@ -1151,7 +1158,7 @@ you can filter these out from causing selections to not be made.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">removeListenersToRow</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">)</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">getFocusableElements</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">getFocusableElements</span><span class="p">(</span><span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">));</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">focusable</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;    removeListenersToRow&quot;</span><span class="p">);</span>
                 <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">focusable</span><span class="p">);</span>
@@ -1191,12 +1198,18 @@ you can filter these out from causing selections to not be made.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">onKeyDown</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">target</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">target</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">),</span> <span class="nx">atTop</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">atBottom</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;FM: onKeyDown&quot;</span><span class="p">);</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">shiftKey</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">ENTER</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">UP</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">focusToPrevRowElement</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
+                <span class="nx">atTop</span> <span class="o">=</span> <span class="o">!</span><span class="nx">focusToPrevRowElement</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">atTop</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_TOP_ENTER</span><span class="p">);</span>
+                <span class="p">}</span>
             <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">ENTER</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">DOWN</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">focusToNextRowElement</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
+                <span class="nx">atBottom</span> <span class="o">=</span> <span class="o">!</span><span class="nx">focusToNextRowElement</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">atBottom</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_BOTTOM_ENTER</span><span class="p">);</span>
+                <span class="p">}</span>
             <span class="p">}</span>
         <span class="p">}</span>
 
@@ -1231,7 +1244,10 @@ you can filter these out from causing selections to not be made.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">focusToPrevRowElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">focusEl</span> <span class="o">=</span> <span class="nx">getPrevRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
-            <span class="nx">performFocus</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">isSame</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">,</span> <span class="nx">focusedEl</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">performFocus</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">);</span>
         <span class="p">}</span>
 
 </pre></div>
@@ -1264,9 +1280,49 @@ you can filter these out from causing selections to not be made.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">focusToNextRowElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  FM: focusToNextRowElement&quot;</span><span class="p">);</span>
             <span class="kd">var</span> <span class="nx">focusEl</span> <span class="o">=</span> <span class="nx">getNextRowFocusElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">);</span>
-            <span class="nx">performFocus</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">isSame</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">,</span> <span class="nx">focusedEl</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">performFocus</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">);</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="issame">
+  <h3>
+    <a href="#issame" name="issame" class="pilcrow">&#182;</a>
+    <a name="isSame">isSame</a>
+  </h3>
+</div>
+
+
+<p>Compare to JQLite/DOMElements objects to see if they reference the same DOMElement.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">el</span>
+      <span class="dox_type">JQLite</span>
+      <span class="dox_type">DOMElement</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">el2</span>
+      <span class="dox_type">JQLite</span>
+      <span class="dox_type">DOMElement</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">isSame</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">el2</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span><span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">||</span> <span class="nx">el</span><span class="p">)</span> <span class="o">===</span> <span class="p">(</span><span class="nx">el2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">||</span> <span class="nx">el2</span><span class="p">);</span>
         <span class="p">}</span>
 
 </pre></div>
@@ -1441,7 +1497,7 @@ to increment.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-39" id="section-39">&#182;</a>
+  <a class="pilcrow" href="#section-40" id="section-40">&#182;</a>
 </div>
 <p>dir should be 1 or -1</p>
         </td>
@@ -1451,7 +1507,7 @@ to increment.</p>
             <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">contains</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="p">{</span>
                 <span class="k">return</span><span class="p">;</span>
             <span class="p">}</span>
-            <span class="kd">var</span> <span class="nx">resultEl</span><span class="p">,</span> <span class="nx">rowEl</span> <span class="o">=</span> <span class="nx">getRowElmFromChildElm</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">),</span> <span class="nx">currentIndex</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowIndexFromElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">),</span> <span class="nx">nextIndex</span> <span class="o">=</span> <span class="nx">currentIndex</span> <span class="o">+</span> <span class="nx">dir</span><span class="p">,</span> <span class="nx">selector</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">resultEl</span><span class="p">,</span> <span class="nx">currentIndex</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowIndexFromElement</span><span class="p">(</span><span class="nx">focusedEl</span><span class="p">),</span> <span class="nx">rowEl</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">currentIndex</span><span class="p">),</span> <span class="nx">nextIndex</span> <span class="o">=</span> <span class="nx">currentIndex</span> <span class="o">+</span> <span class="nx">dir</span><span class="p">,</span> <span class="nx">selector</span><span class="p">;</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">nextIndex</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="nx">nextIndex</span> <span class="o">&gt;=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">rowsLength</span><span class="p">)</span> <span class="p">{</span>
                 <span class="k">return</span> <span class="nx">focusedEl</span><span class="p">;</span>
             <span class="p">}</span>
@@ -1492,24 +1548,8 @@ to increment.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">performFocus</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  performFocus %o&quot;</span><span class="p">,</span> <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+            <span class="kd">var</span> <span class="nx">success</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">select</span><span class="p">)</span> <span class="p">{</span>
-
-</pre></div>
-        </td>
-      </tr>
-      <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-41" id="section-41">&#182;</a>
-</div>
-<p>TODO: if no jquery. There may be no select.</p>
-        </td>
-        <td class="code highlight"><div class="highlight"><pre>
-                <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">select</span><span class="p">();</span>
-            <span class="p">}</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">{</span>
-                <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">focus</span><span class="p">();</span>
-            <span class="p">}</span>
 
 </pre></div>
         </td>
@@ -1519,10 +1559,29 @@ to increment.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-42" id="section-42">&#182;</a>
 </div>
+<p>TODO: if no jquery. There may be no select.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">select</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">{</span>
+                <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">focus</span><span class="p">();</span>
+                <span class="nx">success</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-43" id="section-43">&#182;</a>
+</div>
 <p>we now need to scroll the row into view if it is not.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollIntoView</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getRowIndexFromElement</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">),</span> <span class="kc">true</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">success</span><span class="p">;</span>
         <span class="p">}</span>
 
 </pre></div>
@@ -1577,6 +1636,13 @@ However, possible bug here if a selector similar to this one doesn't exist for a
             <span class="p">}</span>
             <span class="k">return</span> <span class="nx">focusEl</span><span class="p">;</span>
         <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">onResize</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">index</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">contains</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">activeElement</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">index</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowIndexFromElement</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">activeElement</span><span class="p">);</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollIntoView</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">hasPrevRowFocusElement</span> <span class="o">=</span> <span class="nx">hasPrevRowFocusElement</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">hasNextRowFocusElement</span> <span class="o">=</span> <span class="nx">hasNextRowFocusElement</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">focusToPrevRowElement</span> <span class="o">=</span> <span class="nx">focusToPrevRowElement</span><span class="p">;</span>
@@ -1602,6 +1668,7 @@ However, possible bug here if a selector similar to this one doesn't exist for a
                 <span class="nx">focusToNextRowElement</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">activeElement</span><span class="p">);</span>
             <span class="p">}</span>
         <span class="p">}));</span>
+        <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">RESIZE</span><span class="p">,</span> <span class="nx">onResize</span><span class="p">));</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">gridFocusManager</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
         <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
     <span class="p">};</span>

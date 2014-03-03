@@ -15,11 +15,10 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                 target,
                 targetOffset = scope.$eval(attr.targetOffset) || 0,
                 grid, // reference to the datagrid instance
-                myScroll, // iScroll or nativeScroll of this element
-                subScroll, // iScroll or nativeScroll of the datagrid.
+                myScroll,// iScroll for the doubleScroll.
                 scrollModel, // the grid scrollModel.
                 enabled, unwatchRender, unwatchOffset, lastOffsetTop = 0, intv,
-                lastY = 0, gridScrollIntv;
+                lastY = 0, momentum = 0, gridScrollIntv;
 
             function setup() {
                 element[0].style.overflowY = 'auto';
@@ -55,14 +54,33 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                         onScroll(null);
                     });
                 }
+                scope.$on(exports.datagrid.events.ON_SCROLL_STOP, function () {
+                    updateScrollModel();
+                    if (!grid.values.scroll) {
+                        gridScrollIntv = setInterval(function () {
+                            if (element[0].scrollTop > 0.1) {
+                                element[0].scrollTop *= 0.1;
+                            } else {
+                                element[0].scrollTop = 0;
+                                clearInterval(gridScrollIntv);
+                            }
+                        }, 10);
+                    }
+                });
             }
 
             function setupIScroll() {
                 myScroll = new IScroll(element[0], {
-                    bounce: true,
+                    bounce: false,
                     mouseWheel: true,
                     bindToWrapper: true,
                     click: true
+                });
+                myScroll.on('scrollStart', function () {
+                    if (enabled) {
+                        checkOffsetChange();
+                        updateLastScroll(scrollModel.iScroll, myScroll);
+                    }
                 });
                 myScroll.on('scrollEnd', function () {
                     var sm = scrollModel || updateScrollModel();
@@ -73,10 +91,18 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                 });
                 scope.$on(exports.datagrid.events.ON_SCROLL_START, function () {
                     var sm = scrollModel || updateScrollModel();
+                    if (sm.iScroll) {
+                        sm.iScroll.options.bounce = false;
+                    }
+                    if (!enabled && sm.iScroll.y >= 0) {
+                        enable();
+                    } else if (enabled && sm.iScroll.enabled) {
+                        sm.iScroll.disable();
+                    }
+                });
+                scope.$on(exports.datagrid.events.ON_SCROLL_STOP, function () {
                     if (!enabled && scrollModel.iScroll.y >= 0) {
                         enable();
-                    } else if (enabled && scrollModel.iScroll.enabled) {
-                        scrollModel.iScroll.disable();
                     }
                 });
 
@@ -93,6 +119,30 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                         enable();
                     });
                 });
+
+                function updateLastScroll(myIScroll, otherIScroll) {
+                    lastY = myIScroll.y;
+                    momentum = 0;
+                    clearInterval(gridScrollIntv);
+                    gridScrollIntv = setInterval(function () {
+                        var style = window.getComputedStyle(element[0].children[0]),
+                            y = parseInt(style.webkitTransform.match(/(\-?\d+)\)$/)[1], 10);
+                        if (y !== lastY) {
+                            momentum = y - lastY;
+                            console.log("style %s %s %s", y, momentum, otherIScroll.maxScrollY);
+                            lastY = y;
+                            if (y === otherIScroll.maxScrollY) {
+                                clearInterval(gridScrollIntv);
+                                gridScrollIntv = setTimeout(function () {
+                                    clearTimeout(gridScrollIntv);
+                                    console.log("\ttrigger grid scroll %s", momentum);
+                                    disable();
+                                    myIScroll.scrollBy(0, momentum * 5, 500);
+                                }, 0);
+                            }
+                        }
+                    }, 10);
+                }
             }
 
             function enable() {
@@ -101,8 +151,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                         scrollModel.iScroll.disable();
                     }
                     myScroll.enable();
-                    myScroll.scrollBy(0, -1);
-//                    updateLastScroll(myScroll, scrollModel.iScroll, myScroll.maxScrollY, -1);
+                    myScroll.scrollTo(0, 0, 500);
                 }
                 enabled = true;
             }
@@ -112,31 +161,9 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                     myScroll.disable();
                     scrollModel.iScroll.enable();
                     scrollModel.iScroll.scrollBy(0, -1);
-//                    updateLastScroll(scrollModel.iScroll, myScroll, 0);
                 }
                 enabled = false;
             }
-
-//            function updateLastScroll(myIScroll, otherIScroll, lastYVal, dir) {
-//                lastY = myIScroll.y;
-//                dir = dir || 1;
-//                clearInterval(gridScrollIntv);
-//                gridScrollIntv = setInterval(function () {
-//                    var dist, y = myIScroll.y;
-//                    if (y !== lastY) {
-//                        dist = lastY - y;
-//                        lastY = y;
-//                        if (lastY === lastYVal) {
-//                            console.log(dist);
-//                            otherIScroll.enable();
-//                            clearInterval(gridScrollIntv);
-//                            setTimeout(function () {
-//                                otherIScroll.scrollBy(0, dir * dist, 500);
-//                            }, 0);
-//                        }
-//                    }
-//                }, 10);
-//            }
 
             function updateTarget() {
                 if (!target) {

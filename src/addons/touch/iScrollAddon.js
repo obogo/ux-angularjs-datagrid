@@ -101,7 +101,7 @@ angular.module('ux').factory('iScrollAddon', function () {
             if (scrolling && value !== lastY) {
                 inst.values.speed = value - lastY;
                 inst.values.absSpeed = Math.abs(inst.values.speed);
-                inst.values.scroll = -value;
+                result.setScroll(-value);
                 lastY = value;
                 inst.values.scrollPercent = ((inst.values.scroll / inst.getContentHeight()) * 100).toFixed(2);
                 result.fireOnScroll();
@@ -110,6 +110,9 @@ angular.module('ux').factory('iScrollAddon', function () {
 
         result.getScroll = function () {
             return myScroll && myScroll.y || 0;
+        };
+        result.setScroll = function (value) {
+            inst.values.scroll = value;
         };
         result.waitForStop = originalScrollModel.waitForStop;
         result.scrollTo = function (value, immediately) {

@@ -1062,6 +1062,8 @@ function Datagrid(scope, element, attr, $compile) {
         oldContent.children().unbind();
         // make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.
         inst.chunkModel.reset(inst.data, content = createContent(), scopes);
+        // destroy all scopes that are not in the active range, because the active range get's recycled.
+        exports.each(scopes, emptyInactiveScope);
         inst.rowsLength = inst.data.length;
         updateHeightValues();
         flow.add(updateViewportHeight);
@@ -1069,6 +1071,24 @@ function Datagrid(scope, element, attr, $compile) {
         flow.add(inst.info, ["reset complete"]);
         flow.add(dispatch, [exports.datagrid.events.ON_AFTER_RESET]);
         flow.add(dispatch, [exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER]);
+    }
+
+    /**
+     * ###<a name="emptyInactiveScope">emptyInactiveScope</a>###
+     * If the scope is not in the active range then the chunk model did not recycle it.
+     * Therefore on a reset it needs to be destroyed.
+     * @param {Scope} s
+     * @param {Number} index
+     */
+    function emptyInactiveScope(s, index) {
+        if (index < values.activeRange.min || index > values.activeRange.max) {
+            if (s) {
+                s.$destroy();
+            }
+            scopes[index] = undefined;
+        } else if (s) {
+            s.$parent = scope;
+        }
     }
 
     /**

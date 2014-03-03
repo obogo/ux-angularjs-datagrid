@@ -25,6 +25,9 @@
         <a href="#onbeforedatachange">onBeforeDataChange</a>
       </div>
       <div class="heading h3">
+        <a href="#getlimit">getLimit</a>
+      </div>
+      <div class="heading h3">
         <a href="#addextrarow">addExtraRow</a>
       </div>
       <div class="heading h3">
@@ -60,7 +63,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.4.0-alpha
+  <div class="summary"><p>uxDatagrid v.0.5.0-alpha
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -107,7 +110,7 @@ License: MIT.</p>
     <span class="k">return</span> <span class="kd">function</span> <span class="nx">infiniteScroll</span><span class="p">(</span><span class="nx">inst</span><span class="p">,</span> <span class="nx">$filter</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">bottomOffset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">scrollOffset</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">loadingRow</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nx">_template</span><span class="o">:</span> <span class="s2">&quot;loadingRow&quot;</span>
-        <span class="p">},</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[];</span>
+        <span class="p">},</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">lastScroll</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
 
 </pre></div>
         </td>
@@ -178,13 +181,46 @@ To override these pass to the datagrid options in the template.
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">result</span><span class="p">.</span><span class="nx">onBeforeDataChange</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">newVal</span><span class="p">,</span> <span class="nx">oldVal</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">infiniteScroll</span><span class="p">.</span><span class="nx">enable</span> <span class="o">&amp;&amp;</span> <span class="nx">newVal</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">infiniteScroll</span><span class="p">.</span><span class="nx">limit</span> <span class="o">&amp;&amp;</span> <span class="nx">newVal</span><span class="p">.</span><span class="nx">length</span> <span class="o">&lt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">infiniteScroll</span><span class="p">.</span><span class="nx">limit</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="nx">event</span><span class="p">.</span><span class="nx">newValue</span> <span class="o">=</span> <span class="nx">$filter</span><span class="p">(</span><span class="s2">&quot;limitTo&quot;</span><span class="p">)(</span><span class="nx">newVal</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">infiniteScroll</span><span class="p">.</span><span class="nx">limit</span><span class="p">);</span>
-                    <span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
-                    <span class="nx">result</span><span class="p">.</span><span class="nx">addExtraRow</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">newValue</span><span class="p">);</span>
+                <span class="kd">var</span> <span class="nx">limit</span> <span class="o">=</span> <span class="nx">getLimit</span><span class="p">();</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">limit</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">event</span><span class="p">.</span><span class="nx">newValue</span> <span class="o">=</span> <span class="nx">$filter</span><span class="p">(</span><span class="s2">&quot;limitTo&quot;</span><span class="p">)(</span><span class="nx">newVal</span><span class="p">,</span> <span class="nx">limit</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">newValue</span><span class="p">.</span><span class="nx">length</span> <span class="o">&lt;</span> <span class="nx">limit</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+                        <span class="nx">result</span><span class="p">.</span><span class="nx">addExtraRow</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">newValue</span><span class="p">);</span>
+                    <span class="p">}</span>
                 <span class="p">}</span>
             <span class="p">}</span>
         <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getlimit">
+  <h3>
+    <a href="#getlimit" name="getlimit" class="pilcrow">&#182;</a>
+    <a name="getLimit">getLimit</a>
+  </h3>
+</div>
+
+
+<p>Return the limit of the options. Execute function or number to return limit.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getLimit</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">infiniteScroll</span><span class="p">.</span><span class="nx">limit</span> <span class="o">===</span> <span class="s2">&quot;function&quot;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">infiniteScroll</span><span class="p">.</span><span class="nx">limit</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">infiniteScroll</span><span class="p">.</span><span class="nx">limit</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
 
 </pre></div>
         </td>
@@ -284,14 +320,17 @@ to modify it to load the template for loading row matching on the _template prop
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">result</span><span class="p">.</span><span class="nx">onUpdateScroll</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">onUpdateScroll</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">values</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">bottomOffset</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">result</span><span class="p">.</span><span class="nx">calculateBottomOffset</span><span class="p">();</span>
-                <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="nx">scrollOffset</span> <span class="o">!==</span> <span class="o">-</span><span class="mi">1</span> <span class="o">?</span> <span class="nx">scrollOffset</span> <span class="o">:</span> <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-            <span class="p">}</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&gt;=</span> <span class="nx">bottomOffset</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_BOTTOM</span><span class="p">);</span>
-            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_TOP</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">!==</span> <span class="nx">lastScroll</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">lastScroll</span> <span class="o">=</span> <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">bottomOffset</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">result</span><span class="p">.</span><span class="nx">calculateBottomOffset</span><span class="p">();</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="nx">scrollOffset</span> <span class="o">!==</span> <span class="o">-</span><span class="mi">1</span> <span class="o">?</span> <span class="nx">scrollOffset</span> <span class="o">:</span> <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&gt;=</span> <span class="nx">bottomOffset</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_BOTTOM</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_TOP</span><span class="p">);</span>
+                <span class="p">}</span>
             <span class="p">}</span>
         <span class="p">};</span>
 

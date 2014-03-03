@@ -277,10 +277,13 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      */
     function appendCachedDom(item, index, list, el) {
         var i = list.min + index, row = _cachedDomRows[i];
-        _cachedDomRows[i] = undefined;
         if (!row) {
             // we need to make a row. Because a cached one does not exist.
             row = inst.templateModel.getTemplate(list[i]).template;
+        } else {
+            var s = angular.element(row).scope();
+            s.$recycled = s.$recycled ? s.$recycled + 1 : 1;
+            inst.scopes[index] = s;
         }
         el.append(row);
     }
@@ -335,9 +338,16 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     function recycleRows(rowData, rowIndex, rowList, data) {
         // compare objects to make sure they are exact so if not it will update the row with a new template when it compiles it.
         // rows that are exact, will not be compiled.
-        if (data.oldList[rowIndex] && rowData === data.oldList[rowIndex]) {
-            var indexes = getRowIndexes(rowIndex, data.oldChunks);
-            data.domRows.push(getDomRowByIndexes(indexes));
+        if (data.oldList[rowIndex] && inst.templateModel.getTemplate(rowData) === inst.templateModel.getTemplate(data.oldList[rowIndex])) {
+            var indexes = getRowIndexes(rowIndex, data.oldChunks),
+                el = getDomRowByIndexes(indexes),
+                tpl;
+            if (rowData !== data.oldList[rowIndex]) {
+                // the template is the same, but the object index is different. update the scope.
+                tpl = inst.templateModel.getTemplate(rowData);
+                angular.element(el).scope()[tpl.item] = rowData;
+            }
+            data.domRows.push(el);
         } else {
             data.scopes[rowIndex] = undefined;
         }
@@ -360,7 +370,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     function clearRecycledItem(el) {
         if (el) {
             var s = el.scope();
-            if (s !== inst.scope) {
+            if (s && s !== inst.scope) {
                 s.$destroy();
                 el.unbind();
             }

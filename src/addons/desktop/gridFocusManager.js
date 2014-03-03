@@ -190,7 +190,7 @@ angular.module('ux').factory('gridFocusManager', function () {
          * @param {JQLite|DOMElement} rowElm
          */
         function addListenersToRow(rowElm) {
-            var focusable = getFocusableElements(rowElm);
+            var focusable = getFocusableElements(angular.element(rowElm));
             if (focusable.length) {
                 result.log("\t\taddListenersToRow");
                 focusable = angular.element(focusable);
@@ -206,7 +206,7 @@ angular.module('ux').factory('gridFocusManager', function () {
          * @param {JQLite|DOMElement} rowElm
          */
         function removeListenersToRow(rowElm) {
-            var focusable = getFocusableElements(rowElm);
+            var focusable = getFocusableElements(angular.element(rowElm));
             if (focusable.length) {
                 result.log("\t\tremoveListenersToRow");
                 focusable = angular.element(focusable);

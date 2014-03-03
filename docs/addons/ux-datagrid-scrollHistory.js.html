@@ -36,7 +36,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.4.0-alpha
+  <div class="summary"><p>uxDatagrid v.0.5.0-alpha
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -253,9 +253,7 @@ on the current url path.</p>
 <p>watch only once to have it start at that scrolling position on startup.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-        <span class="kd">var</span> <span class="nx">unwatch</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_RENDER_AFTER_DATA_CHANGE</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;found scrollHistory so scrollTo %s&quot;</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">());</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">(),</span> <span class="kc">true</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">unwatch</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_DATA_CHANGE</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
 
 </pre></div>
         </td>
@@ -265,13 +263,10 @@ on the current url path.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-14" id="section-14">&#182;</a>
 </div>
-<p>remove the listener. So that it will only have been captured once.</p>
+<p>need to set the scroll before the data is changed.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-            <span class="nx">unwatch</span><span class="p">();</span>
-            <span class="nx">unwatch</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">AFTER_SCROLL_HISTORY_INIT_SCROLL</span><span class="p">);</span>
-        <span class="p">});</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;found scrollHistory so scrollTo %s&quot;</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">());</span>
 
 </pre></div>
         </td>
@@ -280,6 +275,40 @@ on the current url path.</p>
         <td class="docs">
 <div class="pilwrap">
   <a class="pilcrow" href="#section-15" id="section-15">&#182;</a>
+</div>
+<p>remove the listener. So that it will only have been captured once.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">unwatch</span><span class="p">();</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">setScroll</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">());</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-16" id="section-16">&#182;</a>
+</div>
+<p>we then need to scroll to after the render because otherwise the content isn't able to set
+the scroll top value because the content doesn't have a height yet.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">unwatch</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_RENDER_AFTER_DATA_CHANGE</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">(),</span> <span class="kc">true</span><span class="p">);</span>
+                <span class="nx">unwatch</span><span class="p">();</span>
+                <span class="nx">unwatch</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">AFTER_SCROLL_HISTORY_INIT_SCROLL</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">});</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-17" id="section-17">&#182;</a>
 </div>
 <p>add the listener to the main unwatchers array to make sure it gets cleaned up later before the destroy to
 keep events from firing during the destroy process.</p>

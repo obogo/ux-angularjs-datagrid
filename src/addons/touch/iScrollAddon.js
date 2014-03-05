@@ -119,6 +119,9 @@ angular.module('ux').factory('iScrollAddon', function () {
             if (inst.element[0].scrollTop) {
                 inst.element[0].scrollTop = 0;
             }
+            if (!myScroll) {
+                refresh();
+            }
             myScroll.scrollTo(0, -value, immediately ? 0 : 200);
             clearTimeout(scrollToIntv);
             if (immediately) {

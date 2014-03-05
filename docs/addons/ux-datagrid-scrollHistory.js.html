@@ -36,7 +36,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.5.0-alpha
+  <div class="summary"><p>uxDatagrid v.0.5.2
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -280,7 +280,9 @@ on the current url path.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
             <span class="nx">unwatch</span><span class="p">();</span>
+            <span class="nx">unwatch</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">setScroll</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">());</span>
+        <span class="p">});</span>
 
 </pre></div>
         </td>
@@ -294,13 +296,10 @@ on the current url path.</p>
 the scroll top value because the content doesn't have a height yet.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-            <span class="nx">unwatch</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_RENDER_AFTER_DATA_CHANGE</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-                <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">(),</span> <span class="kc">true</span><span class="p">);</span>
-                <span class="nx">unwatch</span><span class="p">();</span>
-                <span class="nx">unwatch</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-                <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">AFTER_SCROLL_HISTORY_INIT_SCROLL</span><span class="p">);</span>
-            <span class="p">});</span>
-        <span class="p">});</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_RENDER_AFTER_DATA_CHANGE</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">(),</span> <span class="kc">true</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">AFTER_SCROLL_HISTORY_INIT_SCROLL</span><span class="p">);</span>
+        <span class="p">}));</span>
 
 </pre></div>
         </td>
@@ -319,6 +318,9 @@ keep events from firing during the destroy process.</p>
                 <span class="nx">result</span><span class="p">.</span><span class="nx">storeCurrentScroll</span><span class="p">();</span>
             <span class="p">}</span>
         <span class="p">}));</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">destroy</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">unwatch</span><span class="p">)</span> <span class="nx">unwatch</span><span class="p">();</span>
+        <span class="p">};</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollHistory</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
         <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
     <span class="p">};</span>

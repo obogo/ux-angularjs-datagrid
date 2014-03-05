@@ -87,21 +87,25 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
 
     function onComplete() {
         stop();
-        creepCount += 1;
-        if (!inst.values.touchDown && !inst.values.speed && hasIndexesLeft()) {
-            resetInterval(upIndex, downIndex);
-        }
-        var percent = calculatePercent();
-        if (percent !== lastPercent) {
-            inst.dispatch(exports.datagrid.events.ON_RENDER_PROGRESS, percent);
-        }
         if (!hasIndexesLeft()) {
+            creepCount = 0;
             model.disable();
+            lastPercent = 1;
+            inst.dispatch(exports.datagrid.events.ON_RENDER_PROGRESS, 1);
+        } else {
+            creepCount += 1;
+            if (!inst.values.touchDown && !inst.values.speed && hasIndexesLeft()) {
+                resetInterval(upIndex, downIndex);
+            }
+            var percent = calculatePercent();
+            if (percent !== lastPercent) {
+                inst.dispatch(exports.datagrid.events.ON_RENDER_PROGRESS, percent);
+            }
         }
     }
 
     function hasIndexesLeft() {
-        return !!(upIndex !== -1 || downIndex !== inst.rowsLength);
+        return !!(upIndex > -1 || downIndex < inst.rowsLength);
     }
 
     function stop() {

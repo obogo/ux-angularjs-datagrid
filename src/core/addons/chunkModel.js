@@ -252,40 +252,13 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      */
     function unrendered(el, ca) {
         var children;
-        if (ca[0] && !(ca[0] instanceof ChunkArray) && _cachedDomRows.length) {
-            exports.each(ca, appendCachedDom, el);
-            ca.rendered = true;
-        } else {
-            el.html(ca.getChildrenStr());
-        }
+        el.html(ca.getChildrenStr());
         children = el.children();
         exports.each(children, computeStyles);
         if (children[0].className.indexOf(inst.options.chunkClass) !== -1) {
             // need to calculate css styles before adding this class to make transitions work.
             children.addClass(inst.options.chunkReadyClass);
         }
-    }
-
-    /**
-     * ###<a name="appendCachedDom">appendCachedDom</a>###
-     * When an item is requested. If it exists in the cache then it needs to be added to the current
-     * chunked dom. If not then add the string template that will be compiled by datagrid.
-     * @param {*} item
-     * @param {Number} index
-     * @param {ChunkArray} list
-     * @param {JQLite} el
-     */
-    function appendCachedDom(item, index, list, el) {
-        var i = list.min + index, row = _cachedDomRows[i];
-        if (!row) {
-            // we need to make a row. Because a cached one does not exist.
-            row = inst.templateModel.getTemplate(list[i]).template;
-        } else {
-            var s = angular.element(row).scope();
-            s.$recycled = s.$recycled ? s.$recycled + 1 : 1;
-            inst.scopes[index] = s;
-        }
-        el.append(row);
     }
 
     /**
@@ -308,73 +281,17 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     /**
      * ###<a name="reset">reset</a>###
      * Remove all dom, and all other references.
-     * @param {Array} newList
-     * @param {JQLite} content
-     * @param {Array} scopes
+     * @param {Array=} newList
+     * @param {JQLite=} content
+     * @param {Array=} scopes
      */
     function reset(newList, content, scopes) {
         result.log("reset");
         _cachedDomRows.length = 0;
         newList = newList || [];
-        exports.each(newList, recycleRows, {domRows: _cachedDomRows, oldList: _rows, oldChunks: _list, scopes: scopes});
         //TODO: this needs to make sure it destroys things properly
         if (_list) _list.destroy();
         chunkDom(newList, _chunkSize, _templateStartCache, _templateEndCache, content);
-        // copy over the active rows.
-        for (var i = inst.values.activeRange.min; i < inst.values.activeRange.max; i += 1) {
-            result.getRow(i);
-        }
-        clearRecycledCache();
-    }
-
-    /**
-     * ###<a name="recycleRows">recycleRows</a>###
-     * Store the dom from the content being destoryed so that we can detach and reattach to the new dom chunks.
-     * @param {*} rowData
-     * @param {Number} rowIndex
-     * @param {ChunkArray} rowList
-     * @param {Object} data
-     */
-    function recycleRows(rowData, rowIndex, rowList, data) {
-        // compare objects to make sure they are exact so if not it will update the row with a new template when it compiles it.
-        // rows that are exact, will not be compiled.
-        if (data.oldList[rowIndex] && inst.templateModel.getTemplate(rowData) === inst.templateModel.getTemplate(data.oldList[rowIndex])) {
-            var indexes = getRowIndexes(rowIndex, data.oldChunks),
-                el = getDomRowByIndexes(indexes),
-                tpl;
-            if (rowData !== data.oldList[rowIndex]) {
-                // the template is the same, but the object index is different. update the scope.
-                tpl = inst.templateModel.getTemplate(rowData);
-                angular.element(el).scope()[tpl.item] = rowData;
-            }
-            data.domRows.push(el);
-        } else {
-            data.scopes[rowIndex] = undefined;
-        }
-    }
-
-    /**
-     * ###<a name="clearRecycledCache">clearRecycledCache</a>###
-     * Remove the items left in the cache.
-     */
-    function clearRecycledCache() {
-        exports.each(_cachedDomRows, clearRecycledItem);
-        _cachedDomRows.length = 0;
-    }
-
-    /**
-     * ###<a name="clearRecycledItem">clearRecycledItem</a>###
-     * Items left in the recycling need to be destroyed properly.
-     * @param {JQLite} el
-     */
-    function clearRecycledItem(el) {
-        if (el) {
-            var s = el.scope();
-            if (s && s !== inst.scope) {
-                s.$destroy();
-                el.unbind();
-            }
-        }
     }
 
     /**
@@ -383,7 +300,6 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      */
     function destroy() {
         reset();
-        clearRecycledCache();
         result.destroyLogger();
     }
 
@@ -394,7 +310,6 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     };
     result.getRow = getRow;
     result.reset = reset;
-    result.clearRecycledCache = clearRecycledCache;
     result.updateAllChunkHeights = updateAllChunkHeights;
     result.destroy = destroy;
 

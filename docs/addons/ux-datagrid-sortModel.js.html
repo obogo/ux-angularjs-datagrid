@@ -18,6 +18,9 @@
     </div>
     <div id="tree"></div>
     <div id="headings">
+      <div class="heading h3">
+        <a href="#sortvaluecompare">sortValueCompare</a>
+      </div>
     </div>
   </div>
   <div id="sidebar-toggle"></div>
@@ -36,7 +39,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.5.0-alpha
+  <div class="summary"><p>uxDatagrid v.0.5.2
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -684,6 +687,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
             <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
             <span class="k">return</span> <span class="nx">pathState</span><span class="p">.</span><span class="nx">$dirty</span><span class="p">;</span>
         <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">cleanSortValue</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
 
 </pre></div>
         </td>
@@ -692,6 +696,61 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         <td class="docs">
 <div class="pilwrap">
   <a class="pilcrow" href="#section-21" id="section-21">&#182;</a>
+</div>
+<p>undefined and null should be compared as an empty string.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">return</span> <span class="nx">value</span> <span class="o">===</span> <span class="kc">undefined</span> <span class="o">||</span> <span class="nx">value</span> <span class="o">===</span> <span class="kc">null</span> <span class="o">?</span> <span class="s2">&quot;&quot;</span> <span class="o">:</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">getLocale</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s2">&quot;en&quot;</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="sortvaluecompare">
+  <h3>
+    <a href="#sortvaluecompare" name="sortvaluecompare" class="pilcrow">&#182;</a>
+    <a name="sortValueCompare">sortValueCompare</a>
+  </h3>
+</div>
+
+
+<p>Compare the string values for sorting.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">a</span>
+      <span class="dox_type">String</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">v</span>
+      <span class="dox_type">String</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">sortValueCompare</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">a</span> <span class="o">=</span> <span class="nx">cleanSortValue</span><span class="p">(</span><span class="nx">a</span><span class="p">);</span>
+            <span class="nx">b</span> <span class="o">=</span> <span class="nx">cleanSortValue</span><span class="p">(</span><span class="nx">b</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">a</span> <span class="o">&gt;</span> <span class="nx">b</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="nx">a</span> <span class="o">&lt;</span> <span class="nx">b</span> <span class="o">?</span> <span class="o">-</span><span class="mi">1</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-23" id="section-23">&#182;</a>
 </div>
 <p>sorts</p>
         </td>
@@ -702,13 +761,13 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         <span class="kd">function</span> <span class="nx">createAscSort</span><span class="p">(</span><span class="nx">property</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="kd">function</span> <span class="nx">asc</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
                 <span class="kd">var</span> <span class="nx">av</span> <span class="o">=</span> <span class="nx">a</span><span class="p">[</span><span class="nx">property</span><span class="p">],</span> <span class="nx">bv</span> <span class="o">=</span> <span class="nx">b</span><span class="p">[</span><span class="nx">property</span><span class="p">];</span>
-                <span class="k">return</span> <span class="nx">av</span> <span class="o">&gt;</span> <span class="nx">bv</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="nx">bv</span> <span class="o">&gt;</span> <span class="nx">av</span> <span class="o">?</span> <span class="o">-</span><span class="mi">1</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="k">return</span> <span class="nx">sortValueCompare</span><span class="p">(</span><span class="nx">av</span><span class="p">,</span> <span class="nx">bv</span><span class="p">);</span>
             <span class="p">};</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">createDescSort</span><span class="p">(</span><span class="nx">property</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="kd">function</span> <span class="nx">desc</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
                 <span class="kd">var</span> <span class="nx">av</span> <span class="o">=</span> <span class="nx">a</span><span class="p">[</span><span class="nx">property</span><span class="p">],</span> <span class="nx">bv</span> <span class="o">=</span> <span class="nx">b</span><span class="p">[</span><span class="nx">property</span><span class="p">];</span>
-                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="nx">av</span> <span class="o">&gt;</span> <span class="nx">bv</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="nx">bv</span> <span class="o">&gt;</span> <span class="nx">av</span> <span class="o">?</span> <span class="o">-</span><span class="mi">1</span> <span class="o">:</span> <span class="mi">0</span><span class="p">);</span>
+                <span class="k">return</span> <span class="o">-</span><span class="nx">sortValueCompare</span><span class="p">(</span><span class="nx">av</span><span class="p">,</span> <span class="nx">bv</span><span class="p">);</span>
             <span class="p">};</span>
         <span class="p">}</span>
 
@@ -718,7 +777,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-22" id="section-22">&#182;</a>
+  <a class="pilcrow" href="#section-24" id="section-24">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Clear the states for the currentPath.</p>
@@ -769,6 +828,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         <span class="nx">result</span><span class="p">.</span><span class="nx">hasDirtySortState</span> <span class="o">=</span> <span class="nx">hasDirtySortState</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">createKeyFromStates</span> <span class="o">=</span> <span class="nx">createKeyFromStates</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">isPrivate</span> <span class="o">=</span> <span class="nx">isPrivate</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getLocale</span> <span class="o">=</span> <span class="nx">getLocale</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">clear</span> <span class="o">=</span> <span class="nx">clear</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">clearAll</span> <span class="o">=</span> <span class="nx">clearAll</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">destroy</span> <span class="o">=</span> <span class="nx">destroy</span><span class="p">;</span>
@@ -786,7 +846,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-23" id="section-23">&#182;</a>
+  <a class="pilcrow" href="#section-25" id="section-25">&#182;</a>
 </div>
 <p>cache is the stored sort values. It needs to be cleared if the data changes.</p>
         </td>
@@ -817,7 +877,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-24" id="section-24">&#182;</a>
+  <a class="pilcrow" href="#section-26" id="section-26">&#182;</a>
 </div>
 <p>the original is always without any sort options.</p>
         </td>
@@ -830,7 +890,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-25" id="section-25">&#182;</a>
+  <a class="pilcrow" href="#section-27" id="section-27">&#182;</a>
 </div>
 <p>clone so they cannot mess with the data directly.</p>
         </td>
@@ -844,7 +904,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-26" id="section-26">&#182;</a>
+  <a class="pilcrow" href="#section-28" id="section-28">&#182;</a>
 </div>
 <p>prevent default on event to prevent sort.</p>
         </td>
@@ -860,7 +920,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-27" id="section-27">&#182;</a>
+  <a class="pilcrow" href="#section-29" id="section-29">&#182;</a>
 </div>
 <p>clone it</p>
         </td>
@@ -881,7 +941,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-28" id="section-28">&#182;</a>
+  <a class="pilcrow" href="#section-30" id="section-30">&#182;</a>
 </div>
 <p>TODO: need to unit test this to make sure it works with async sort.</p>
         </td>
@@ -912,7 +972,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-29" id="section-29">&#182;</a>
+  <a class="pilcrow" href="#section-31" id="section-31">&#182;</a>
 </div>
 <p>shallow copy</p>
         </td>
@@ -944,7 +1004,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-30" id="section-30">&#182;</a>
+  <a class="pilcrow" href="#section-32" id="section-32">&#182;</a>
 </div>
 <p>value is the default sort state.</p>
         </td>

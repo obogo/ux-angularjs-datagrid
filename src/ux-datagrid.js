@@ -311,7 +311,6 @@ function Datagrid(scope, element, attr, $compile) {
         // we need to wait a moment for the browser to finish the resize, then adjust and fire the event.
         setTimeout(function () {
             updateHeights();
-            dispatch(exports.datagrid.events.RESIZE, {event: event});
         }, 100);
     }
 
@@ -459,7 +458,6 @@ function Datagrid(scope, element, attr, $compile) {
         //TODO: if there is any dom. It needs destroyed first.
         inst.log("OVERWRITE DOM!!!");
         var len = list.length;
-        content = createContent();
         // this async is important because it allows the updateRowWatchers on first digest to escape the current digest.
         flow.insert(inst.chunkModel.chunkDom, [list, options.chunkSize, '<div class="' + options.chunkClass + '">', '</div>', content]);
         inst.rowsLength = len;
@@ -820,12 +818,14 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function updateLinks() {
         if (active.length) {
-            var lastIndex = active[active.length - 1], i = 0, len = active.length;
+            var lastIndex = active[active.length - 1], i = 0, len = active.length, s;
             scope.$$childHead = scopes[active[0]];
             scope.$$childTail = scopes[lastIndex];
             while (i < len) {
-                scopes[active[i]].$$prevSibling = scopes[active[i - 1]];
-                scopes[active[i]].$$nextSibling = scopes[active[i + 1]];
+                s = scopes[active[i]];
+                s.$$prevSibling = scopes[active[i - 1]];
+                s.$$nextSibling = scopes[active[i + 1]];
+                s.$parent = scope;
                 i += 1;
             }
         }
@@ -924,8 +924,9 @@ function Datagrid(scope, element, attr, $compile) {
                 inst.dispatch(exports.datagrid.events.ON_BEFORE_RENDER);
                 flow.add(beforeRenderAfterDataChange);
                 flow.add(updateRowWatchers);
-                flow.add(afterRenderAfterDataChange);
-                flow.add(destroyOldContent);
+                // this wait allows rows to finish calculating their heights and finish the digest before firing.
+                flow.add(afterRenderAfterDataChange, null, 0);
+//                flow.add(destroyOldContent);
                 flow.add(inst.dispatch, [exports.datagrid.events.ON_AFTER_RENDER]);
             } else {
                 throw new Error("RENDER STATE INVALID");
@@ -1050,57 +1051,23 @@ function Datagrid(scope, element, attr, $compile) {
         inst.info("reset start");
 //        flow.clear();// we are going to clear all in the flow before doing a reset.
 //        state = states.BUILDING;
-//        destroyScopes();
+        destroyScopes();
         // now destroy all of the dom.
         rowOffsets = {};
         active.length = 0;
-//        scopes.length = 0;
+        scopes.length = 0;
         // keep reference to the old content and add a class to it so we can tell it is old. We will remove it after the render.
-        destroyOldContent();
-        oldContent = content;
-        oldContent.addClass('old-' + options.contentClass);
-        oldContent.children().unbind();
+        content.children().unbind();
+        content.children().remove();
         // make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.
-        inst.chunkModel.reset(inst.data, content = createContent(), scopes);
-        // destroy all scopes that are not in the active range, because the active range get's recycled.
-        exports.each(scopes, emptyInactiveScope);
+        inst.chunkModel.reset(inst.data, content, scopes);
         inst.rowsLength = inst.data.length;
         updateHeightValues();
-        flow.add(updateViewportHeight);
-        flow.add(render);
+        updateViewportHeight();
+        render();
         flow.add(inst.info, ["reset complete"]);
-        flow.add(dispatch, [exports.datagrid.events.ON_AFTER_RESET]);
+        flow.add(dispatch, [exports.datagrid.events.ON_AFTER_RESET], 0);
         flow.add(dispatch, [exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER]);
-    }
-
-    /**
-     * ###<a name="emptyInactiveScope">emptyInactiveScope</a>###
-     * If the scope is not in the active range then the chunk model did not recycle it.
-     * Therefore on a reset it needs to be destroyed.
-     * @param {Scope} s
-     * @param {Number} index
-     */
-    function emptyInactiveScope(s, index) {
-        if (index < values.activeRange.min || index > values.activeRange.max) {
-            if (s) {
-                s.$destroy();
-            }
-            scopes[index] = undefined;
-        } else if (s) {
-            s.$parent = scope;
-        }
-    }
-
-    /**
-     * ###<a name="destroyOldContent">destroyOldContent</a>###
-     * remove the old content div that is staying util the new one
-     * is rendered.
-     */
-    function destroyOldContent() {
-        if (oldContent) {
-            oldContent.remove();
-            oldContent = null;
-        }
     }
 
     /**
@@ -1112,7 +1079,7 @@ function Datagrid(scope, element, attr, $compile) {
     function forceRenderScope(index) {
         var s = scopes[index];
 //        inst.log("\tforceRenderScope %s", index);
-        if (!s && index > 0 && index < inst.rowsLength) {
+        if (!s && index >= 0 && index < inst.rowsLength) {
             s = compileRow(index);
         }
         if (s && !scope.$$phase) {

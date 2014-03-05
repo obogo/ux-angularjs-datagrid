@@ -260,6 +260,28 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
             return pathState.$dirty;
         }
 
+        function cleanSortValue(value) {
+            // undefined and null should be compared as an empty string.
+            return value === undefined || value === null ? '' : value;
+        }
+
+        function getLocale() {
+            return 'en';
+        }
+
+        /**
+         * ###<a name="sortValueCompare">sortValueCompare</a>###
+         * Compare the string values for sorting.
+         * @param {String} a
+         * @param {String} v
+         * @returns {number}
+         */
+        function sortValueCompare(a, b) {
+            a = cleanSortValue(a);
+            b = cleanSortValue(b);
+            return a > b ? 1 : (a < b ? -1 : 0);
+        }
+
         // sorts
         function sortNone(a, b) {
             return 0;
@@ -268,14 +290,14 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
         function createAscSort(property) {
             return function asc(a, b) {
                 var av = a[property], bv = b[property];
-                return av > bv ? 1 : (bv > av ? -1 : 0);
+                return sortValueCompare(av, bv);
             };
         }
 
         function createDescSort(property) {
             return function desc(a, b) {
                 var av = a[property], bv = b[property];
-                return -1 * (av > bv ? 1 : (bv > av ? -1 : 0));
+                return -sortValueCompare(av, bv);
             };
         }
 
@@ -326,6 +348,7 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
         result.hasDirtySortState = hasDirtySortState;
         result.createKeyFromStates = createKeyFromStates;
         result.isPrivate = isPrivate;
+        result.getLocale = getLocale;
         result.clear = clear;
         result.clearAll = clearAll;
         result.destroy = destroy;

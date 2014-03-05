@@ -422,7 +422,7 @@ angular.module('ux').factory('gridFocusManager', function () {
                 focusToNextRowElement(document.activeElement);
             }
         }));
-        unwatchers.push(inst.scope.$on(exports.datagrid.events.RESIZE, onResize));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER, onResize));
 
         inst.gridFocusManager = result;
 

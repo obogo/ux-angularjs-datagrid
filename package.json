@@ -1,6 +1,6 @@
 {
     "name": "uxDatagrid",
-    "version": "0.5.1-alpha",
+    "version": "0.5.2",
     "filename": "datagrid",
     "packageName": "ux",
     "dependencies": {},

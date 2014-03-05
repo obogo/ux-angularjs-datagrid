@@ -87,16 +87,15 @@ angular.module('ux').factory('scrollHistory', function () {
             result.log("found scrollHistory so scrollTo %s", result.getCurrentScroll());
             // remove the listener. So that it will only have been captured once.
             unwatch();
+            unwatch = null;
             inst.scrollModel.setScroll(result.getCurrentScroll());
-            // we then need to scroll to after the render because otherwise the content isn't able to set
-            // the scroll top value because the content doesn't have a height yet.
-            unwatch = inst.scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, function () {
-                inst.scrollModel.scrollTo(result.getCurrentScroll(), true);
-                unwatch();
-                unwatch = null;
-                inst.dispatch(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL);
-            });
         });
+        // we then need to scroll to after the render because otherwise the content isn't able to set
+        // the scroll top value because the content doesn't have a height yet.
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, function () {
+            inst.scrollModel.scrollTo(result.getCurrentScroll(), true);
+            inst.dispatch(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL);
+        }));
 
         // add the listener to the main unwatchers array to make sure it gets cleaned up later before the destroy to
         // keep events from firing during the destroy process.
@@ -105,6 +104,10 @@ angular.module('ux').factory('scrollHistory', function () {
                 result.storeCurrentScroll();// this can be overridden if necessary.
             }
         }));
+
+        result.destroy = function () {
+            if (unwatch) unwatch();
+        };
 
         inst.scrollHistory = result;
         return inst;

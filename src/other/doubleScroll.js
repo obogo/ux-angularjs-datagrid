@@ -17,7 +17,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                 grid, // reference to the datagrid instance
                 myScroll,// iScroll for the doubleScroll.
                 scrollModel, // the grid scrollModel.
-                enabled, unwatchRender, unwatchOffset, lastOffsetTop = 0, intv,
+                enabled, unwatchRender, unwatchOffset, lastOffsetTop = 0, lastOffsetHeight, intv,
                 lastY = 0, momentum = 0, gridScrollIntv;
 
             function setup() {
@@ -56,6 +56,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                 }
                 scope.$on(exports.datagrid.events.ON_SCROLL_STOP, function () {
                     updateScrollModel();
+                    clearInterval(gridScrollIntv);
                     if (!grid.values.scroll) {
                         gridScrollIntv = setInterval(function () {
                             if (element[0].scrollTop > 0.1) {
@@ -65,6 +66,8 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                                 clearInterval(gridScrollIntv);
                             }
                         }, 10);
+                    } else {
+                        element[0].scrollTop = element[0].scrollHeight - element[0].offsetHeight;
                     }
                 });
             }
@@ -129,13 +132,11 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                             y = parseInt(style.webkitTransform.match(/(\-?\d+)\)$/)[1], 10);
                         if (y !== lastY) {
                             momentum = y - lastY;
-                            console.log("style %s %s %s", y, momentum, otherIScroll.maxScrollY);
                             lastY = y;
                             if (y === otherIScroll.maxScrollY) {
                                 clearInterval(gridScrollIntv);
                                 gridScrollIntv = setTimeout(function () {
                                     clearTimeout(gridScrollIntv);
-                                    console.log("\ttrigger grid scroll %s", momentum);
                                     disable();
                                     myIScroll.scrollBy(0, momentum * 5, 500);
                                 }, 0);
@@ -148,19 +149,26 @@ angular.module('ux').directive('uxDoubleScroll', function () {
             function enable() {
                 if (exports.datagrid.isIOS && !enabled) {
                     if (scrollModel && scrollModel.iScroll) {
+                        scrollModel.iScroll.scrollTo(0, 0);
                         scrollModel.iScroll.disable();
                     }
                     myScroll.enable();
                     myScroll.scrollTo(0, 0, 500);
+                } else if (!enabled) {
+                    element[0].scrollTop = 0;
+                    target.scrollTop = 0;
                 }
                 enabled = true;
             }
 
             function disable() {
                 if (exports.datagrid.isIOS && enabled) {
+                    myScroll.scrollTo(0, myScroll.maxScrollY);
                     myScroll.disable();
                     scrollModel.iScroll.enable();
                     scrollModel.iScroll.scrollBy(0, -1);
+                } else if (!exports.datagrid.isIOS) {
+                    element[0].scrollTop = element[0].scrollHeight - element[0].offsetHeight;
                 }
                 enabled = false;
             }
@@ -203,10 +211,12 @@ angular.module('ux').directive('uxDoubleScroll', function () {
             }
 
             function checkOffsetChange() {
-                var offsetTop = calculateOffsetTop();
-                if (lastOffsetTop !== offsetTop) {
+                var offsetTop = calculateOffsetTop(),
+                    offsetHeight = element[0].offsetHeight;
+                if (lastOffsetTop !== offsetTop || lastOffsetHeight !== offsetHeight) {
                     if (onSizeChange(offsetTop)) {
                         lastOffsetTop = offsetTop;
+                        lastOffsetHeight = offsetHeight;
                     }
                 }
             }
@@ -236,7 +246,7 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                     contentHeight = offsetTop + elHeight - targetOffset;
                     target.style.height = elHeight - targetOffset + 'px';
                     content[0].style.height = contentHeight + 'px';
-                    s.datagrid.updateViewportHeight();
+                    s.datagrid.updateHeights();
                     if (exports.datagrid.isIOS) {
                         myScroll.refresh();
                     }
@@ -252,6 +262,14 @@ angular.module('ux').directive('uxDoubleScroll', function () {
                     element[0].style.height = height + "px";
                 }
                 checkOffsetChange();
+            };
+
+            result.scrollToTop = function () {
+                enable();
+            };
+
+            result.scrollToBottom = function () {
+                disable();
             };
 
             scope.$on('$destroy', function () {

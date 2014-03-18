@@ -29,8 +29,6 @@ function Datagrid(scope, element, attr, $compile) {
     var oldContent;
     // **<a name="scopes">scopes</a>** the array of all scopes that have been compiled.
     var scopes = [];
-    // **<a name="oldScopes">oldScopes</a>** keeping the old scopes around while the oldContent exists.
-    var oldScopes;
     // **<a name="active">active</a>** the scopes that are currently active.
     var active = [];
     // **<a name="lastVisibleScrollStart">lastVisibleScrollStart</a>** cached index to improve render loop by starting where it left off.
@@ -125,8 +123,10 @@ function Datagrid(scope, element, attr, $compile) {
         inst.getRowIndexFromElement = getRowIndexFromElement;
         inst.updateViewportHeight = updateViewportHeight;
         inst.calculateViewportHeight = calculateViewportHeight;
-        inst.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
+        inst.options = options = exports.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
         inst.flow = flow = new Flow({async: options.hasOwnProperty('async') ? !!options.async : true, debug: options.hasOwnProperty('debug') ? options.debug : 0}, inst.dispatch);
+        // this needs to be set immediatly so that it will be available to other views.
+        inst.grouped = scope.$eval(attr.grouped);
         flow.add(init);// initialize core.
         flow.run();// start the flow manager.
     }
@@ -149,6 +149,9 @@ function Datagrid(scope, element, attr, $compile) {
         if (!cnt) {
             classes = getClassesFromOldContent() || classes;
             cnt = angular.element('<div class="' + classes + '"></div>');
+            if (inst.options.chunks.detachDom) {
+                cnt.css({position:'relative'});
+            }
             element.prepend(cnt);
         }
         if (!cnt[0]) {
@@ -446,7 +449,8 @@ function Datagrid(scope, element, attr, $compile) {
      * Return the total height of the content of the datagrid.
      */
     function getContentHeight() {
-        return inst.chunkModel.getChunkList().height;
+        var list = inst.chunkModel.getChunkList();
+        return list && list.height || 0;
     }
 
     /**
@@ -459,7 +463,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.log("OVERWRITE DOM!!!");
         var len = list.length;
         // this async is important because it allows the updateRowWatchers on first digest to escape the current digest.
-        flow.insert(inst.chunkModel.chunkDom, [list, options.chunkSize, '<div class="' + options.chunkClass + '">', '</div>', content]);
+        flow.insert(inst.chunkModel.chunkDom, [list, options.chunks.size, '<div class="' + options.chunks.chunkClass + '">', '</div>', content]);
         inst.rowsLength = len;
         inst.log("created %s dom elements", len);
     }
@@ -505,11 +509,11 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="ready">ready</a>###
-     * Set the state to <a href="states.ON_READY">states.ON_READY</a> and start the first render.
+     * Set the state to <a href="states.ON_READY">states.READY</a> and start the first render.
      */
     function ready() {
         inst.log("\tready");
-        state = states.ON_READY;
+        state = states.READY;
         flow.add(render);
         flow.add(fireReadyEvent);
         flow.add(safeDigest, [scope]);
@@ -616,6 +620,9 @@ function Datagrid(scope, element, attr, $compile) {
         depth = depth || 0;
         // if the scope is not created yet. just skip.
         if (s && !isActive(s)) { // do not deactivate one that is already deactivated.
+            if (!depth) {
+                s.$emit(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);
+            }
             s.$$$watchers = s.$$watchers;
             s.$$watchers = [];
             if (!depth) {
@@ -664,6 +671,9 @@ function Datagrid(scope, element, attr, $compile) {
                     activateScope(child, depth + 1);
                     child = child.$$nextSibling;
                 }
+            }
+            if (!depth) {
+                s.$emit(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);
             }
             return true;
         }
@@ -743,6 +753,7 @@ function Datagrid(scope, element, attr, $compile) {
             i += 1;
         }
         options.rowHeight = inst.rowsLength ? inst.templateModel.getTemplateHeight('default') : 0;
+        inst.getContent().css({height: getContentHeight()});
     }
 
     /**
@@ -920,7 +931,7 @@ function Datagrid(scope, element, attr, $compile) {
                     flow.add(updateHeightValues);
                     flow.add(ready);
                 }
-            } else if (state === states.ON_READY) {
+            } else if (state === states.READY) {
                 inst.dispatch(exports.datagrid.events.ON_BEFORE_RENDER);
                 flow.add(beforeRenderAfterDataChange);
                 flow.add(updateRowWatchers);
@@ -992,7 +1003,6 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function mapData(newVal) {
         inst.log("\tmapData()");
-        inst.grouped = scope.$eval(attr.grouped);
         inst.data = inst.setData(newVal, inst.grouped) || [];
         exports.each(inst.getData(), updateScope);
     }
@@ -1016,6 +1026,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function onDataChanged(newVal, oldVal) {
         inst.log("onDataChanged");
+        inst.grouped = scope.$eval(attr.grouped);
         if (oldVal !== inst.getOriginalData()) {
             oldVal = inst.getOriginalData();
         }
@@ -1037,7 +1048,6 @@ function Datagrid(scope, element, attr, $compile) {
     function changeData(newVal, oldVal) {
         inst.log("\tchangeData");
         dispatch(exports.datagrid.events.ON_BEFORE_RESET);
-        inst.grouped = scope.$eval(attr.grouped);
         inst.data = inst.setData(newVal, inst.grouped) || [];
         dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal);
         reset();
@@ -1049,7 +1059,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function reset() {
         inst.info("reset start");
-//        flow.clear();// we are going to clear all in the flow before doing a reset.
+        flow.clear();// we are going to clear all in the flow before doing a reset.
 //        state = states.BUILDING;
         destroyScopes();
         // now destroy all of the dom.
@@ -1201,6 +1211,7 @@ function Datagrid(scope, element, attr, $compile) {
         destroyScopes();
         element.remove();// this seems to be the most memory efficient way to remove elements.
         delete scope.$parent[inst.name];
+        rowOffsets = null;
         inst = null;
         scope = null;
         element = null;
@@ -1214,6 +1225,9 @@ function Datagrid(scope, element, attr, $compile) {
         values = null;
         states = null;
         events = null;
+        options = null;
+        values = null;
+        logEvents = null;
         $compile = null;
     }
 

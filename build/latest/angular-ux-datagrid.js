@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.5.2
+* uxDatagrid v.0.5.3
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -48,7 +48,7 @@ exports.datagrid = {
      */
     states: {
         BUILDING: "datagrid:building",
-        ON_READY: "datagrid:ready"
+        READY: "datagrid:ready"
     },
     /**
      * ###<a name="events">events</a>###
@@ -90,6 +90,10 @@ exports.datagrid = {
         ON_BEFORE_RESET: "datagrid:onBeforeReset",
         ON_AFTER_RESET: "datagrid:onAfterReset",
         ON_AFTER_HEIGHTS_UPDATED_RENDER: "datagrid:onAfterHeightsUpdatedRender",
+        ON_BEFORE_ROW_DEACTIVATE: "datagrid:onBeforeRowDeactivate",
+        // handy for knowing when to remove jquery listeners.
+        ON_AFTER_ROW_ACTIVATE: "datagrid:onAFterRowActivate",
+        // handy for turning jquery listeners back on.
         /**
          * #### Driving Events ####
          * - **<a name="events.RESIZE">RESIZE</a>** tells the datagrid to resize. This will update all height calculations.
@@ -140,6 +144,25 @@ exports.datagrid = {
         // rows are activated and which ones are not. Also a negative number will cause the grid to render past the viewable area and digest rows that are out of view.
         // In short it is a debugging cushion about what is activated to see them working.
         cushion: -100,
+        chunks: {
+            // - **<a name="options.chunks.detachDom">chunks.detachDom</a>** this is used when you want the chunks to be absolute positioned and
+            // chunks that are out of view are hidden to minimize the gpu snapshot. Values are numbers or boolean.
+            // 100 will 100 rows above and below the viewport area. A true will evaluate to 0 above and below. A 0 will equate to false and not do a detach.
+            // So the value must be true or a whole number to enable it.
+            detachDom: null,
+            // - **<a name="options.chunks.size">chunks.size</a>** this is used to determine how large each chunk should be. Chunks are made recursively
+            // so if you pass 8 items and they are chunked at 2 then you would have 2 chunks each with 2 chunks each with 2 rows.
+            size: 50,
+            // - **<a name="options.chunks.chunkClass">chunks.chunkClass</a>** the class assigned to each chunk in the datagrid. This can be customized on a per grid basis since options
+            // can be overridden so that styles or selection may differ from one grid to the next.
+            chunkClass: "datagrid-chunk",
+            // - **<a name="options.chunks.chunkDisabledClass">chunkDisabledClass</a>**
+            // a css class that is added to dom elements that are not containing visible rows.
+            chunkDisabledClass: "datagrid-chunk-disabled",
+            // - **<a name="options.chunks.chunkReadyClass">chunks.chunkReadyClass</a>** after the chunk is added. The chunk ready class is added to all for css
+            // transitions on newly created chunks.
+            chunkReadyClass: "datagrid-chunk-ready"
+        },
         // - **<a name="options.chunkSize">chunkSize</a>** this is used to determine how large each chunk should be. Chunks are made recursively
         // so if you pass 8 items and they are chunked at 2 then you would have 2 chunks each with 2 chunks each with 2 rows.
         chunkSize: 50,
@@ -153,18 +176,15 @@ exports.datagrid = {
         contentClass: "datagrid-content",
         // - **<a name="rowClass">rowClass</a>** the css class assigned to every row.
         rowClass: "datagrid-row",
-        // - **<a name="options.chunkClass">chunkClass</a>** the class assigned to each chunk in the datagrid. This can be customized on a per grid basis since options
-        // can be overridden so that styles or selection may differ from one grid to the next.
-        chunkClass: "datagrid-chunk",
-        // - **<a name="options.chunkReadyClass">chunkReadyClass</a>** after the chunk is added. The chunk ready class is added to all for css
-        // transitions on newly created chunks.
-        chunkReadyClass: "datagrid-chunk-ready",
         // - **<a name="options.renderThreshold">renderThreshold</a>** this value is used by the creepRenderModel to allow the render to process for this amount of ms in
         // both directions from the current visible area and then it will wait and process again as many rows as it can in this timeframe.
         renderThreshold: 1,
         // - **<a name="options.renderThresholdWait">renderThresholdWait</a>** used in conjunction with options.renderThreshold this will wait this amount of time before
         // trying to render more rows.
         renderThresholdWait: 50,
+        // - **<a name="options.renderWhileScrolling">renderWhileScrolling</a>** cause the grid to render while scrolling. This can will drastically reduce scrolling performance.
+        // this can be optimized by setting a number of milliseconds between each render while scrolling.
+        renderWhileScrolling: false,
         // - **<a name="options.creepLimit">creepLimit</a>** used with options.renderThreshold and options.renderThresholdWait this will give a maximum amount of renders
         // that can be done before the creep render is turned off.
         creepLimit: 500,
@@ -452,7 +472,7 @@ function each(list, method, data) {
             }
             i += 1;
         }
-    } else {
+    } else if (!(list instanceof Array)) {
         for (i in list) {
             if (list.hasOwnProperty(i)) {
                 result = method.apply(null, [ list[i], i, list ].concat(extraArgs));
@@ -582,6 +602,29 @@ function dispatcher(target, scope, map) {
         target.dispatch = dispatch;
     }
 }
+
+/**
+ * ###<a name="extend">extend</a>###
+ * Perform a deep extend.
+ * @param {Object} destination
+ * @param {Object=} source
+ * return {Object|destination}
+ */
+exports.extend = function(destination, source) {
+    var args = exports.util.array.toArray(arguments), i = 1, len = args.length, item, j;
+    while (i < len) {
+        item = args[i];
+        for (j in item) {
+            if (destination[j] && typeof destination[j] === "object") {
+                destination[j] = exports.extend(destination[j], item[j]);
+            } else {
+                destination[j] = item[j];
+            }
+        }
+        i += 1;
+    }
+    return destination;
+};
 
 /**
  * **toArray** Convert arguments or objects to an array.
@@ -851,8 +894,6 @@ function Datagrid(scope, element, attr, $compile) {
     var oldContent;
     // **<a name="scopes">scopes</a>** the array of all scopes that have been compiled.
     var scopes = [];
-    // **<a name="oldScopes">oldScopes</a>** keeping the old scopes around while the oldContent exists.
-    var oldScopes;
     // **<a name="active">active</a>** the scopes that are currently active.
     var active = [];
     // **<a name="lastVisibleScrollStart">lastVisibleScrollStart</a>** cached index to improve render loop by starting where it left off.
@@ -947,11 +988,13 @@ function Datagrid(scope, element, attr, $compile) {
         inst.getRowIndexFromElement = getRowIndexFromElement;
         inst.updateViewportHeight = updateViewportHeight;
         inst.calculateViewportHeight = calculateViewportHeight;
-        inst.options = options = angular.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
+        inst.options = options = exports.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
         inst.flow = flow = new Flow({
             async: options.hasOwnProperty("async") ? !!options.async : true,
             debug: options.hasOwnProperty("debug") ? options.debug : 0
         }, inst.dispatch);
+        // this needs to be set immediatly so that it will be available to other views.
+        inst.grouped = scope.$eval(attr.grouped);
         flow.add(init);
         // initialize core.
         flow.run();
@@ -975,6 +1018,11 @@ function Datagrid(scope, element, attr, $compile) {
         if (!cnt) {
             classes = getClassesFromOldContent() || classes;
             cnt = angular.element('<div class="' + classes + '"></div>');
+            if (inst.options.chunks.detachDom) {
+                cnt.css({
+                    position: "relative"
+                });
+            }
             element.prepend(cnt);
         }
         if (!cnt[0]) {
@@ -1253,7 +1301,8 @@ function Datagrid(scope, element, attr, $compile) {
      * Return the total height of the content of the datagrid.
      */
     function getContentHeight() {
-        return inst.chunkModel.getChunkList().height;
+        var list = inst.chunkModel.getChunkList();
+        return list && list.height || 0;
     }
     /**
      * ###<a name="createDom">createDom</a>###
@@ -1265,7 +1314,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.log("OVERWRITE DOM!!!");
         var len = list.length;
         // this async is important because it allows the updateRowWatchers on first digest to escape the current digest.
-        flow.insert(inst.chunkModel.chunkDom, [ list, options.chunkSize, '<div class="' + options.chunkClass + '">', "</div>", content ]);
+        flow.insert(inst.chunkModel.chunkDom, [ list, options.chunks.size, '<div class="' + options.chunks.chunkClass + '">', "</div>", content ]);
         inst.rowsLength = len;
         inst.log("created %s dom elements", len);
     }
@@ -1309,11 +1358,11 @@ function Datagrid(scope, element, attr, $compile) {
     }
     /**
      * ###<a name="ready">ready</a>###
-     * Set the state to <a href="states.ON_READY">states.ON_READY</a> and start the first render.
+     * Set the state to <a href="states.ON_READY">states.READY</a> and start the first render.
      */
     function ready() {
         inst.log("	ready");
-        state = states.ON_READY;
+        state = states.READY;
         flow.add(render);
         flow.add(fireReadyEvent);
         flow.add(safeDigest, [ scope ]);
@@ -1414,6 +1463,9 @@ function Datagrid(scope, element, attr, $compile) {
         // if the scope is not created yet. just skip.
         if (s && !isActive(s)) {
             // do not deactivate one that is already deactivated.
+            if (!depth) {
+                s.$emit(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);
+            }
             s.$$$watchers = s.$$watchers;
             s.$$watchers = [];
             if (!depth) {
@@ -1462,6 +1514,9 @@ function Datagrid(scope, element, attr, $compile) {
                     activateScope(child, depth + 1);
                     child = child.$$nextSibling;
                 }
+            }
+            if (!depth) {
+                s.$emit(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);
             }
             return true;
         }
@@ -1534,6 +1589,9 @@ function Datagrid(scope, element, attr, $compile) {
             i += 1;
         }
         options.rowHeight = inst.rowsLength ? inst.templateModel.getTemplateHeight("default") : 0;
+        inst.getContent().css({
+            height: getContentHeight()
+        });
     }
     /**
      * ###<a name="updateRowWatchers">updateRowWatchers</a>###
@@ -1709,7 +1767,7 @@ function Datagrid(scope, element, attr, $compile) {
                     flow.add(updateHeightValues);
                     flow.add(ready);
                 }
-            } else if (state === states.ON_READY) {
+            } else if (state === states.READY) {
                 inst.dispatch(exports.datagrid.events.ON_BEFORE_RENDER);
                 flow.add(beforeRenderAfterDataChange);
                 flow.add(updateRowWatchers);
@@ -1776,7 +1834,6 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function mapData(newVal) {
         inst.log("	mapData()");
-        inst.grouped = scope.$eval(attr.grouped);
         inst.data = inst.setData(newVal, inst.grouped) || [];
         exports.each(inst.getData(), updateScope);
     }
@@ -1798,6 +1855,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function onDataChanged(newVal, oldVal) {
         inst.log("onDataChanged");
+        inst.grouped = scope.$eval(attr.grouped);
         if (oldVal !== inst.getOriginalData()) {
             oldVal = inst.getOriginalData();
         }
@@ -1818,7 +1876,6 @@ function Datagrid(scope, element, attr, $compile) {
     function changeData(newVal, oldVal) {
         inst.log("	changeData");
         dispatch(exports.datagrid.events.ON_BEFORE_RESET);
-        inst.grouped = scope.$eval(attr.grouped);
         inst.data = inst.setData(newVal, inst.grouped) || [];
         dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal);
         reset();
@@ -1829,7 +1886,8 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function reset() {
         inst.info("reset start");
-        //        flow.clear();// we are going to clear all in the flow before doing a reset.
+        flow.clear();
+        // we are going to clear all in the flow before doing a reset.
         //        state = states.BUILDING;
         destroyScopes();
         // now destroy all of the dom.
@@ -1976,6 +2034,7 @@ function Datagrid(scope, element, attr, $compile) {
         element.remove();
         // this seems to be the most memory efficient way to remove elements.
         delete scope.$parent[inst.name];
+        rowOffsets = null;
         inst = null;
         scope = null;
         element = null;
@@ -1989,6 +2048,9 @@ function Datagrid(scope, element, attr, $compile) {
         values = null;
         states = null;
         events = null;
+        options = null;
+        values = null;
+        logEvents = null;
         $compile = null;
     }
     exports.logWrapper("datagrid", inst, "green", dispatch);
@@ -2030,7 +2092,7 @@ module.directive("uxDatagrid", [ "$compile", "gridAddons", function($compile, gr
  * This speeds up the browser significantly because a resize event from a dom element will not affect
  * all of them, but just those direct siblings and then it's parents siblings and so on up the chain.
  *
- * @param {ux.datagrid} inst
+ * @param {Datagrid} inst
  * @returns {{}}
  */
 exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
@@ -2054,14 +2116,14 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * @returns {ChunkArray}
      */
     function chunkList(list, size, templateStart, templateEnd) {
-        var i = 0, len = list.length, result = new ChunkArray(), childAry, item;
+        var i = 0, len = list.length, result = new ChunkArray(inst.options.chunks.detachDom), childAry, item;
         while (i < len) {
             item = list[i];
             if (i % size === 0) {
                 if (childAry) {
-                    calculateHeight(childAry);
+                    childAry.updateHeight(inst.templateModel, _rows);
                 }
-                childAry = new ChunkArray();
+                childAry = new ChunkArray(inst.options.chunks.detachDom);
                 childAry.min = item.min || i;
                 childAry.templateModel = inst.templateModel;
                 childAry.templateStart = templateStart;
@@ -2073,17 +2135,22 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
             if (item instanceof ChunkArray) {
                 item.parent = childAry;
             }
+            if (item instanceof ChunkArray) {
+                item.index = childAry.length;
+            }
             childAry.push(item);
             childAry.max = item.max || i;
             i += 1;
         }
-        if (childAry) calculateHeight(childAry);
+        if (childAry) {
+            childAry.updateHeight(inst.templateModel, _rows);
+        }
         if (!result.min) {
             result.min = result[0] ? result[0].min : 0;
             result.max = result[result.length - 1] ? result[result.length - 1].max : 0;
             result.templateStart = templateStart;
             result.templateEnd = templateEnd;
-            calculateHeight(result);
+            result.updateHeight(inst.templateModel, _rows);
             result.dirtyHeight = false;
         }
         return result.length > size ? chunkList(result, size, templateStart, templateEnd) : result;
@@ -2092,12 +2159,16 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * Using a ChunkArray calculate the heights of each array recursively.
      * @param ary {ChunkArray}
      */
-    function calculateHeight(ary) {
-        ary.updateHeight(inst.templateModel, _rows);
-        if (!ary.rendered) {
-            ary.templateStart = ary.templateStart.substr(0, ary.templateStart.length - 1) + ' style="width:100%;height:' + ary.height + 'px;">';
-        }
-    }
+    //    function calculateHeight(ary) {
+    //        var str;
+    //        if (!ary.rendered) {
+    //            str = ary.templateStart.substr(0, ary.templateStart.length - 1) + ' style="';
+    //            if (inst.options.chunks.detachDom) {
+    //                str += 'position:absolute;top:' + ary.top + 'px;left:0px;';
+    //            }
+    //            ary.templateStart = str + 'width:100%;height:' + ary.height + 'px;">';
+    //        }
+    //    }
     /**
      * ###<a name="updateAllChunkHeights">updateAllChunkHeights</a>###
      * Update rows affected by this particular index change. if rowIndex is undefined, update all.
@@ -2109,54 +2180,13 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
             //TODO: unit test needed.
             if (_list) {
                 _list.forceHeightReCalc(inst.templateModel, _rows);
-                updateChunkHeights(_el, _list);
+                _list.updateHeight(inst.templateModel, _rows, 1, true);
             }
         } else {
             indexes = getRowIndexes(rowIndex, _list);
             ary = getArrayFromIndexes(indexes, _list);
-            updateChunkArrayHeights(ary, indexes);
+            ary.updateHeight(inst.templateModel, _rows, -1, true);
         }
-    }
-    /**
-     * ###<a name="updateChunkArrayHeights">updateChunkArrayHeights</a>###
-     * @param {ChunkArray} ary
-     * @param {Array} indexes
-     */
-    function updateChunkArrayHeights(ary, indexes) {
-        ary.updateHeight(inst.templateModel, _rows);
-        updateChunkHeights(_el, _list, indexes);
-    }
-    /**
-     * ###<a name="updateChunkHeights">updateChunkHeights</a>###
-     * Recalculate the chunk heights.
-     * @param {DOMElement} el
-     * @param ary
-     */
-    function updateChunkHeights(el, ary) {
-        el = el[0] || el;
-        var i = 0, len = ary.length, children = el.childNodes;
-        while (i < len) {
-            if (children.length && updateChunkStyle(children[i], ary[i])) {
-                updateChunkHeights(children[i], ary[i]);
-            }
-            i += 1;
-        }
-        updateChunkStyle(el, ary);
-    }
-    /**
-     * ###<a name="updateChunkStyle">updateChunkStyle</a>###
-     * Update the style of a chunk DOMElement from the chunk Array.
-     * @param {DOMElement} el
-     * @param {ChunkArray} chunk
-     * @returns {boolean}
-     */
-    function updateChunkStyle(el, chunk) {
-        if (chunk.dirtyHeight) {
-            chunk.dirtyHeight = false;
-            el.style.height = chunk.height + "px";
-            return true;
-        }
-        return false;
     }
     /**
      * ###<a name="getArrayFromIndexes">getArrayFromIndexes</a>###
@@ -2193,6 +2223,8 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         _templateStartCache = templateStart;
         _templateEndCache = templateEnd;
         _list = chunkList(list, size, templateStart, templateEnd);
+        updateDom(_list);
+        _list.updateDomHeight(1);
         return el;
     }
     /**
@@ -2228,8 +2260,24 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * @returns {*}
      */
     function getRow(rowIndex) {
-        var indexes = getRowIndexes(rowIndex, _list);
-        return buildDomByIndexes(indexes);
+        var indexes = getRowIndexes(rowIndex, _list), el = buildDomByIndexes(indexes);
+        if (el && el.length && el.attr("row-id") === undefined) {
+            el.attr("row-id", rowIndex);
+        }
+        return el;
+    }
+    /**
+     * ###<a name="getItemByIndexes">getItemByIndexes</a>###
+     * Get the chunk or item given the indexes.
+     * @param {Array} indexes
+     * @returns {*}
+     */
+    function getItemByIndex(indexes) {
+        var indxs = indexes.slice(0), ca = _list;
+        while (indxs.length) {
+            ca = ca[indxs.shift()];
+        }
+        return ca;
     }
     /**
      * ###<a name="getDomRowByIndexes">getDomRowByIndexes</a>###
@@ -2240,14 +2288,19 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * @returns {*}
      */
     function getDomRowByIndexes(indexes, unrendered) {
-        var i = 0, index, indxs = indexes.slice(0), ca = _list, el = _el, children;
+        var i = 0, index, indxs = indexes.slice(0), ca = _list, el = _el;
         while (i < indxs.length) {
             index = indxs.shift();
             if (!ca.rendered && unrendered) {
                 unrendered(el, ca);
+                ca.rendered = el;
+                updateDom(ca);
+            }
+            if (!indxs.length) {
+                checkAllCompiled(ca);
             }
             ca = ca[index];
-            el = angular.element(el.children()[index]);
+            el = ca.rendered || angular.element(el.children()[index]);
         }
         return el;
     }
@@ -2263,9 +2316,9 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         el.html(ca.getChildrenStr());
         children = el.children();
         exports.each(children, computeStyles);
-        if (children[0].className.indexOf(inst.options.chunkClass) !== -1) {
+        if (children[0].className.indexOf(inst.options.chunks.chunkClass) !== -1) {
             // need to calculate css styles before adding this class to make transitions work.
-            children.addClass(inst.options.chunkReadyClass);
+            children.addClass(inst.options.chunks.chunkReadyClass);
         }
     }
     /**
@@ -2283,6 +2336,46 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     function computeStyles(elm) {
         window.getComputedStyle(elm).getPropertyValue("top");
     }
+    function checkAllCompiled(ca) {
+        if (!ca.compiled) {
+            ca.compiled = isCompiled(ca);
+            if (ca.compiled) {
+                if (ca.parent) {
+                    // a parent cannot be compiled till it's last child is done. So don't check until
+                    // a chunk child compiles.
+                    checkAllCompiled(ca.parent);
+                }
+                inst.flow.add(disableNonVisibleChunks);
+            }
+        }
+        return ca.compiled;
+    }
+    function isCompiled(ca) {
+        var min, max;
+        if (ca[0] instanceof ChunkArray) {
+            min = 0;
+            max = ca.length;
+            while (min < max) {
+                if (!ca[min].compiled) {
+                    return false;
+                }
+                min += 1;
+            }
+            return true;
+        }
+        min = ca.min;
+        max = ca.max;
+        while (min < max) {
+            if (!inst.isCompiled(min)) {
+                return false;
+            }
+            min += 1;
+        }
+        return true;
+    }
+    function updateDom(ca) {
+        ca.updateDom(inst.options.chunks.chunkDisabledClass);
+    }
     /**
      * ###<a name="reset">reset</a>###
      * Remove all dom, and all other references.
@@ -2295,8 +2388,21 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         _cachedDomRows.length = 0;
         newList = newList || [];
         //TODO: this needs to make sure it destroys things properly
-        if (_list) _list.destroy();
+        if (_list) {
+            _list.destroy();
+            _list = null;
+            _el = null;
+            _rows = null;
+        }
         chunkDom(newList, _chunkSize, _templateStartCache, _templateEndCache, content);
+    }
+    function disableNonVisibleChunks() {
+        var r = inst.values.activeRange, o = inst.options.chunks;
+        _list.enableRange(r.min, r.max, o.chunkDisabledClass);
+        if (o.detachDom) {
+            // we need to update which chunks are compiled.
+            updateDom(_list);
+        }
     }
     /**
      * ###<a name="destroy">destroy</a>###
@@ -2304,8 +2410,20 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      */
     function destroy() {
         reset();
+        _list = null;
+        _rows = null;
+        _chunkSize = null;
+        _el = null;
+        _templateStartCache = null;
+        _templateEndCache = null;
+        _cachedDomRows.length = 0;
+        _cachedDomRows = null;
+        inst.chunkModel = null;
         result.destroyLogger();
+        result = null;
+        inst = null;
     }
+    inst.flow.unique(updateDom);
     result.chunkDom = chunkDom;
     result.getChunkList = getChunkList;
     result.getRowIndexes = function(rowIndex) {
@@ -2315,6 +2433,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     result.reset = reset;
     result.updateAllChunkHeights = updateAllChunkHeights;
     result.destroy = destroy;
+    inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, disableNonVisibleChunks);
     // apply event dispatching.
     dispatcher(result);
     inst.chunkModel = result;
@@ -2329,20 +2448,56 @@ exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);
  * of the dom with high performance.
  * @constructor
  */
-var ChunkArray = function() {};
+function ChunkArray(detachDom) {
+    this.uid = ChunkArray.uid++;
+    this.enabled = true;
+    this.min = 0;
+    this.max = 0;
+    this.templateStart = "";
+    this.templateEnd = "";
+    this.parent = null;
+    this.mode = detachDom ? ChunkArray.DETACHED : ChunkArray.ATTACHED;
+    this.detachDom = detachDom;
+    this.index = 0;
+}
+
+ChunkArray.uid = 0;
+
+ChunkArray.DETACHED = "chunkArray:detached";
+
+ChunkArray.ATTACHED = "chunkArray:attached";
 
 ChunkArray.prototype = [];
 
-ChunkArray.prototype.min = 0;
-
-ChunkArray.prototype.max = 0;
-
-ChunkArray.prototype.templateStart = "";
-
-ChunkArray.prototype.templateEnd = "";
-
 ChunkArray.prototype.getStub = function getStub(str) {
     return this.templateStart + str + this.templateEnd;
+};
+
+ChunkArray.prototype.inRange = function(value) {
+    return value >= this.min && value <= this.max;
+};
+
+ChunkArray.prototype.rangeOverlap = function(min, max, cushion) {
+    var overlap = false;
+    cushion = cushion > 0 ? cushion : 0;
+    min -= cushion;
+    max += cushion;
+    while (min < max) {
+        if (this.inRange(min)) {
+            overlap = true;
+            break;
+        }
+        min += 1;
+    }
+    return overlap;
+};
+
+ChunkArray.prototype.each = function(method, args) {
+    var i = 0, len = this.length;
+    while (i < len) {
+        method.apply(this[i], args);
+        i += 1;
+    }
 };
 
 /**
@@ -2362,7 +2517,6 @@ ChunkArray.prototype.getChildrenStr = function(deep) {
         }
         i += 1;
     }
-    this.rendered = true;
     return str;
 };
 
@@ -2372,11 +2526,14 @@ ChunkArray.prototype.getChildrenStr = function(deep) {
  * @param templateModel
  * @param _rows
  */
-ChunkArray.prototype.updateHeight = function(templateModel, _rows) {
+ChunkArray.prototype.updateHeight = function(templateModel, _rows, recurse, updateDomHeight) {
     var i = 0, len, height = 0;
     if (this[0] instanceof ChunkArray) {
         len = this.length;
         while (i < len) {
+            if (recurse === 1) {
+                this[i].updateHeight(templateModel, _rows, recurse, updateDomHeight);
+            }
             height += this[i].height;
             i += 1;
         }
@@ -2385,11 +2542,75 @@ ChunkArray.prototype.updateHeight = function(templateModel, _rows) {
     }
     if (this.height !== height) {
         this.dirtyHeight = true;
+        this.height = height;
     }
-    this.height = height;
-    if (this.dirtyHeight) {
-        if (this.parent) this.parent.updateHeight(templateModel, _rows);
+    if (recurse == -1 && this.dirtyHeight && this.parent) {
+        this.parent.updateHeight(templateModel, _rows, recurse, updateDomHeight);
     }
+    if (updateDomHeight && this.dirtyHeight) {
+        this.updateDomHeight();
+    }
+};
+
+ChunkArray.prototype.getPreviousSibling = function() {
+    var prevSibling, prevIndex;
+    if (this.parent) {
+        prevIndex = this.index - 1;
+        prevSibling = this.parent[prevIndex];
+        if (!prevSibling || prevSibling.index !== this.index - 1) {
+            // we must the first in the array. so we have to jump up higher. Or we are the first item in the first chunk.
+            if (this.parent.parent) {
+                prevSibling = this.parent.getPreviousSibling();
+                if (prevSibling) {
+                    prevSibling = prevSibling.last();
+                }
+            }
+        }
+    }
+    return prevSibling;
+};
+
+ChunkArray.prototype.getNextSibling = function() {
+    var nextSibling, nextIndex;
+    if (this.parent) {
+        nextIndex = this.index + 1;
+        nextSibling = this.parent[nextIndex];
+        if (!nextSibling || nextSibling.index !== this.index + 1) {
+            // we must be at the end of the array. So we need to jump up higher. Or we could be at the very end.
+            if (this.parent.parent) {
+                nextSibling = this.parent.getNextSibling();
+                if (nextSibling) {
+                    nextSibling = nextSibling.first();
+                }
+            }
+        }
+    }
+    return nextSibling;
+};
+
+ChunkArray.prototype.first = function() {
+    return this[0];
+};
+
+ChunkArray.prototype.last = function() {
+    return this[this.length - 1];
+};
+
+/**
+ * #####<a name="calculateTop">calculateTop</a>#####
+ * Calculate the top value relative to it's parent.
+ * @returns {number|top}
+ */
+ChunkArray.prototype.calculateTop = function() {
+    var top = 0, prevSibling;
+    if (this.index && this.parent) {
+        prevSibling = this.getPreviousSibling();
+        if (prevSibling) {
+            top = prevSibling.top + prevSibling.height;
+        }
+    }
+    this.top = top;
+    return this.top;
 };
 
 /**
@@ -2411,7 +2632,6 @@ ChunkArray.prototype.forceHeightReCalc = function(templateModel, _rows) {
         height = templateModel.getHeight(_rows, this.min, this.max);
     }
     if (this.height !== height) {
-        //        console.log('forceHeightReCalc %s from %s to %s', this.getId(), this.height, height);
         this.height = height;
         this.setDirtyHeight();
     }
@@ -2435,10 +2655,12 @@ ChunkArray.prototype.setDirtyHeight = function() {
  * @returns {string|*|_id}
  */
 ChunkArray.prototype.getId = function() {
-    if (!this._id) {
+    if (this._index !== this.index || !this._id) {
         var p = this, s = "";
+        this._index = this.index;
+        // keep the last index so if it changes. We change the id.
         while (p) {
-            s = "." + (p.index || "0") + s;
+            s = "." + p.index + s;
             p = p.parent;
         }
         this._id = s.substr(1, s.length);
@@ -2446,16 +2668,142 @@ ChunkArray.prototype.getId = function() {
     return this._id;
 };
 
+ChunkArray.prototype.hasChildChunks = function() {
+    if (!this._hasChildChunks) {
+        this._hasChildChunks = this.first() instanceof ChunkArray;
+    }
+    return this._hasChildChunks;
+};
+
+ChunkArray.prototype.enableRange = function(min, max, disabledClass) {
+    if (this.rangeOverlap(min, max, this.detachDom)) {
+        this.enable(disabledClass);
+    } else {
+        this.disable(disabledClass);
+    }
+    if (this.hasChildChunks()) {
+        this.each(this.enableRange, [ min, max, disabledClass ]);
+    }
+};
+
+ChunkArray.prototype.enable = function(disabledClass) {
+    if (!this.enabled) {
+        this.enabled = true;
+        this.updateDom(disabledClass);
+        if (this.parent) {
+            this.parent.enable(disabledClass);
+        }
+    }
+};
+
+ChunkArray.prototype.disable = function(disabledClass) {
+    var i = 0, len;
+    if (this.compiled) {
+        if (this.hasChildChunks()) {
+            len = this.length;
+            while (i < len) {
+                this[i].disable(disabledClass);
+                i += 1;
+            }
+        }
+        if (this.enabled) {
+            this.enabled = false;
+            this.updateDom(disabledClass);
+        }
+    }
+};
+
+ChunkArray.prototype.updateDom = function(disabledClass) {
+    if (this.rendered) {
+        if (!this.rendered.attr("chunk-id")) {}
+        if (this.compiled && !this.rendered.attr("compiled")) {
+            this.rendered.attr("compiled", true);
+        }
+        if (this.detachDom) {
+            if (this.enabled) {
+                if (this.detached) {
+                    this.detached = false;
+                    this.parent.rendered.append(this.rendered);
+                }
+            } else if (!this.enabled && !this.detached) {
+                if (this.parent && this.parent.compiled && this.rendered.parent().length) {
+                    this.detached = true;
+                    this.rendered.remove();
+                }
+            }
+        } else {
+            this.rendered.attr("enabled", this.enabled);
+            if (this.enabled) {
+                this.rendered.removeAttr("disabled");
+                this.rendered.removeAttr("read-only");
+                this.rendered.removeClass(disabledClass);
+            } else {
+                this.rendered.attr("disabled", "disabled");
+                this.rendered.attr("read-only", true);
+                this.rendered.addClass(disabledClass);
+            }
+        }
+        this.each(this.updateDom, [ disabledClass ]);
+    }
+};
+
+ChunkArray.prototype.updateDomHeight = function(recursiveDirection) {
+    if (this.mode === ChunkArray.DETACHED) {
+        this.calculateTop();
+    }
+    if (this.rendered) {
+        this.dirtyHeight = false;
+        if (this.mode === ChunkArray.DETACHED) {
+            this.rendered[0].style.top = this.top + "px";
+        }
+        this.rendered[0].style.height = this.height + "px";
+    } else {
+        this.createDomTemplates();
+    }
+    if (recursiveDirection === -1 && this.parent) {
+        this.parent.updateDomHeight(recursiveDirection);
+    } else if (recursiveDirection && this.hasChildChunks()) {
+        this.each(this.updateDomHeight, [ recursiveDirection ]);
+    }
+};
+
+ChunkArray.prototype.createDomTemplates = function() {
+    if (!this.templateReady) {
+        var str = this.templateStart.substr(0, this.templateStart.length - 1) + ' style="';
+        if (this.mode === ChunkArray.DETACHED) {
+            str += "position:absolute;top:" + this.top + "px;left:0px;";
+        }
+        this.templateStart = str + "width:100%;height:" + this.height + 'px;">';
+        this.templateReady = true;
+    }
+};
+
+/**
+ * Return an array of the children created from the rendered properties of the children.
+ */
+ChunkArray.prototype.children = function() {
+    var children = [];
+    this.each(function() {
+        children.push(this.rendered);
+    }, []);
+};
+
 /**
  * #####<a name="destroy">destroy</a>#####
  * Perform proper cleanup.
  */
 ChunkArray.prototype.destroy = function() {
+    if (this.hasChildChunks()) {
+        this.each(this.destroy);
+    }
     this.templateStart = "";
     this.templateEnd = "";
     this.templateModel = null;
-    this.rendered = false;
+    this.rendered = null;
     this.parent = null;
+    while (this.length) {
+        this.pop();
+    }
     this.length = 0;
 };
 
@@ -2625,6 +2973,15 @@ exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.creepRenderModel);
 exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
     //TODO: this needs to be put on exp.normalizedModel
     var originalData, normalizedData, result = exports.logWrapper("normalizeModel", {}, "grey", inst.dispatch);
+    /**
+     * ###<a name="normalize">normalize</a>###
+     * Convert a hierarchical data structure into a flattened array so that headers, rows, and however deep the data is
+     * will all be able to represented by template rows.
+     * @param {Array} data
+     * @param {String} grouped
+     * @param {Array=} normalized
+     * @returns {Array}
+     */
     inst.normalize = function normalize(data, grouped, normalized) {
         data = data || [];
         var i = 0, len = data.length;
@@ -2638,6 +2995,13 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
         }
         return normalized;
     };
+    /**
+     * ###<a name="setData">setData</a>###
+     * Set the data so that it can be normalized.
+     * @param {Array} data
+     * @param {String} grouped
+     * @returns {*}
+     */
     inst.setData = function(data, grouped) {
         result.log("setData");
         originalData = data;
@@ -2648,9 +3012,19 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
         }
         return normalizedData;
     };
+    /**
+     * ###<a name="getData">getData</a>###
+     * Get the data the datagrid is using. This is normalized data.
+     * @returns {Array}
+     */
     inst.getData = function() {
         return normalizedData;
     };
+    /**
+     * ###<a name="getOriginalData">getOriginalData</a>###
+     * Get the data that the normalized data was created from.
+     * @returns {Array}
+     */
     inst.getOriginalData = function() {
         return originalData;
     };
@@ -2663,7 +3037,7 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
         return indexes && indexes !== originalData ? indexes : [];
     };
     /**
-     * ##<a name="findItem">findItem</a>##
+     * ###<a name="findItem">findItem</a>###
      * find the item in the list of items and recursively search the child arrays if they have the grouped property
      * @param {*} item
      * @param {Number} index
@@ -2687,8 +3061,9 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
         return undefined;
     }
     /**
+     * ###<a name="getNormalizedIndex">getNormalizedIndex</a>###
      * Get the normalized index for an item.
-     * @param item
+     * @param {*} item
      * @param {Number=} startIndex
      */
     inst.getNormalizedIndex = function getNormalizedIndex(item, startIndex) {
@@ -2710,8 +3085,16 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
         }
         return -1;
     };
+    /**
+     * ###<a name="destroy">destroy</a>###
+     * Make sure all variables are cleaned up.
+     */
     result.destroy = function destroy() {
         result.destroyLogger();
+        originalData = null;
+        normalizedData = null;
+        inst.normalizeModel = null;
+        inst = null;
         result = null;
     };
     inst.normalizeModel = result;
@@ -2730,7 +3113,7 @@ exports.datagrid.events.ON_TOUCH_DOWN = "datagrid:touchDown";
 exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
 
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
-    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, waitForStopIntv, hasScrollListener = false, lastScroll;
+    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, waitForStopIntv, hasScrollListener = false, lastScroll, lastRenderTime;
     /**
      * Listen for scrollingEvents.
      */
@@ -2788,7 +3171,6 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.removeScrollListener = function removeScrollListener() {
         result.log("removeScrollListener");
         inst.element[0].removeEventListener("scroll", onUpdateScrollHandler);
-        hasScrollListner = false;
     };
     result.removeTouchEvents = function removeTouchEvents() {
         if (setup) {
@@ -2849,14 +3231,21 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         result.onScrollingStop();
     };
     function flowWaitForStop() {
+        lastRenderTime = Date.now();
         inst.scrollModel.onScrollingStop();
     }
     /**
      * Wait for the datagrid to slow down enough to render.
      */
     result.waitForStop = function waitForStop() {
-        if (inst.flow.async || inst.values.touchDown) {
-            clearTimeout(waitForStopIntv);
+        var forceRender = false;
+        clearTimeout(waitForStopIntv);
+        if (inst.options.renderWhileScrolling) {
+            if (Date.now() - (inst.options.renderWhileScrolling > 0 || 0) > lastRenderTime) {
+                forceRender = true;
+            }
+        }
+        if (!forceRender && (inst.flow.async || inst.values.touchDown)) {
             waitForStopIntv = setTimeout(flowWaitForStop, inst.options.updateDelay);
         } else {
             flowWaitForStop();
@@ -3081,7 +3470,8 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             return templates.length;
         }
         function getTemplateHeight(item) {
-            return result.getTemplate(item).height;
+            var tpl = result.getTemplate(item);
+            return tpl ? tpl.height : 0;
         }
         function getHeight(list, startRowIndex, endRowIndex) {
             var i = startRowIndex, height = 0;

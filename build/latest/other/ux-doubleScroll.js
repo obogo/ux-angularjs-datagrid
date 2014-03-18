@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.5.2
+* uxDatagrid v.0.5.3
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -12,7 +12,7 @@ exports.datagrid.events.DOUBLE_SCROLL_SCROLL_TO_BOTTOM = "datagrid:doubleScrollS
 /**
  * Allow a header to scroll out before scrolling the content. Nested scrollers.
  */
-angular.module("ux").directive("uxDoubleScroll", function() {
+angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) {
     return {
         link: function(scope, element, attr) {
             var result = exports.logWrapper("doubleScroll", {}, "red", function() {
@@ -33,11 +33,16 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                 } else {
                     setupNativeScroll();
                 }
-                unwatchOffset = scope.$watch(function() {
-                    // wait until a render is all done. Then check the heights.
-                    clearTimeout(intv);
-                    intv = setTimeout(checkOffsetChange, 100);
-                });
+                unwatchOffset = scope.$watch(onWatchOffset);
+            }
+            function onWatchOffset() {
+                // wait until a render is all done. Then check the heights.
+                clearTimeout(intv);
+                intv = setTimeout(function() {
+                    if (checkOffsetChange()) {
+                        onWatchOffset();
+                    }
+                }, 100);
             }
             function setupNativeScroll() {
                 element[0].addEventListener("scroll", onScroll, true);
@@ -124,17 +129,22 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                     momentum = 0;
                     clearInterval(gridScrollIntv);
                     gridScrollIntv = setInterval(function() {
-                        var style = window.getComputedStyle(element[0].children[0]), y = parseInt(style.webkitTransform.match(/(\-?\d+)\)$/)[1], 10);
-                        if (y !== lastY) {
-                            momentum = y - lastY;
-                            lastY = y;
-                            if (y === otherIScroll.maxScrollY) {
-                                clearInterval(gridScrollIntv);
-                                gridScrollIntv = setTimeout(function() {
-                                    clearTimeout(gridScrollIntv);
-                                    disable();
-                                    myIScroll.scrollBy(0, momentum * 5, 500);
-                                }, 0);
+                        var style = window.getComputedStyle(element[0].children[0]), y;
+                        if (!style) {
+                            clearInterval(gridScrollIntv);
+                        } else {
+                            y = parseInt(style.webkitTransform.match(/(\-?\d+)\)$/)[1], 10);
+                            if (y !== lastY) {
+                                momentum = y - lastY;
+                                lastY = y;
+                                if (y === otherIScroll.maxScrollY) {
+                                    clearInterval(gridScrollIntv);
+                                    gridScrollIntv = setTimeout(function() {
+                                        clearTimeout(gridScrollIntv);
+                                        disable();
+                                        myIScroll.scrollBy(0, momentum * 5, 500);
+                                    }, 0);
+                                }
                             }
                         }
                     }, 10);
@@ -147,7 +157,9 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                         scrollModel.iScroll.disable();
                     }
                     myScroll.enable();
-                    myScroll.scrollTo(0, 0, 500);
+                    if (grid.getContentHeight() > grid.getViewportHeight()) {
+                        myScroll.scrollTo(0, 0, 500);
+                    }
                 } else if (!enabled) {
                     element[0].scrollTop = 0;
                     target.scrollTop = 0;
@@ -205,16 +217,22 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                     if (onSizeChange(offsetTop)) {
                         lastOffsetTop = offsetTop;
                         lastOffsetHeight = offsetHeight;
+                        return true;
                     }
                 }
+                return false;
             }
             function calculateOffsetTop() {
-                var content = element.children(), children = content.children(), i = 0, len = children.length, offsetTop = 0;
+                var cpStyle, paddingTop, paddingBottom, content = element.children(), children = content.children(), i = 0, len = children.length, offsetTop = 0;
                 while (i < len) {
                     if (children[i] === target || children[i].contains(target)) {
                         break;
                     }
-                    offsetTop += children[i].offsetHeight;
+                    //TODO: need to add padding and margin as well.
+                    cpStyle = $window.getComputedStyle(children[i]);
+                    paddingTop = parseInt(cpStyle.paddingTop, 10);
+                    paddingBottom = parseInt(cpStyle.paddingBottom, 10);
+                    offsetTop += children[i].offsetHeight + paddingTop + paddingBottom;
                     i += 1;
                 }
                 return offsetTop;
@@ -251,6 +269,7 @@ angular.module("ux").directive("uxDoubleScroll", function() {
             scope.$on("$destroy", function() {
                 unwatchOffset();
                 clearTimeout(intv);
+                clearInterval(gridScrollIntv);
                 result.destroyLogger();
                 result = null;
                 if (exports.datagrid.isIOS) {
@@ -263,5 +282,5 @@ angular.module("ux").directive("uxDoubleScroll", function() {
             setup();
         }
     };
-});
+} ]);
 }(this.ux = this.ux || {}, function() {return this;}()));

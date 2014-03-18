@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.5.2
+* uxDatagrid v.0.5.3
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -123,7 +123,7 @@ angular.module("ux").factory("expandRows", function() {
             if (state === states.opened) {
                 opened[index] = {
                     index: index,
-                    height: parseInt(elm.css("height") || 0, 10)
+                    height: parseInt(elm[0].offsetHeight || 0, 10)
                 };
                 if (isNaN(opened[index].height)) {
                     throw new Error("Invalid Height");

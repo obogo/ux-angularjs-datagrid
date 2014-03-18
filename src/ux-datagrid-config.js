@@ -39,7 +39,7 @@ exports.datagrid = {
      */
     states: {
         BUILDING: 'datagrid:building',
-        ON_READY: 'datagrid:ready'
+        READY: 'datagrid:ready'
     },
     /**
      * ###<a name="events">events</a>###
@@ -81,6 +81,8 @@ exports.datagrid = {
         ON_BEFORE_RESET: 'datagrid:onBeforeReset',
         ON_AFTER_RESET: 'datagrid:onAfterReset',
         ON_AFTER_HEIGHTS_UPDATED_RENDER: 'datagrid:onAfterHeightsUpdatedRender',
+        ON_BEFORE_ROW_DEACTIVATE: 'datagrid:onBeforeRowDeactivate', // handy for knowing when to remove jquery listeners.
+        ON_AFTER_ROW_ACTIVATE: 'datagrid:onAFterRowActivate', // handy for turning jquery listeners back on.
         /**
          * #### Driving Events ####
          * - **<a name="events.RESIZE">RESIZE</a>** tells the datagrid to resize. This will update all height calculations.
@@ -131,6 +133,25 @@ exports.datagrid = {
         // rows are activated and which ones are not. Also a negative number will cause the grid to render past the viewable area and digest rows that are out of view.
         // In short it is a debugging cushion about what is activated to see them working.
         cushion: -100,
+        chunks: {
+            // - **<a name="options.chunks.detachDom">chunks.detachDom</a>** this is used when you want the chunks to be absolute positioned and
+            // chunks that are out of view are hidden to minimize the gpu snapshot. Values are numbers or boolean.
+            // 100 will 100 rows above and below the viewport area. A true will evaluate to 0 above and below. A 0 will equate to false and not do a detach.
+            // So the value must be true or a whole number to enable it.
+            detachDom: null,
+            // - **<a name="options.chunks.size">chunks.size</a>** this is used to determine how large each chunk should be. Chunks are made recursively
+            // so if you pass 8 items and they are chunked at 2 then you would have 2 chunks each with 2 chunks each with 2 rows.
+            size: 50,
+            // - **<a name="options.chunks.chunkClass">chunks.chunkClass</a>** the class assigned to each chunk in the datagrid. This can be customized on a per grid basis since options
+            // can be overridden so that styles or selection may differ from one grid to the next.
+            chunkClass: 'datagrid-chunk',
+            // - **<a name="options.chunks.chunkDisabledClass">chunkDisabledClass</a>**
+            // a css class that is added to dom elements that are not containing visible rows.
+            chunkDisabledClass: 'datagrid-chunk-disabled',
+            // - **<a name="options.chunks.chunkReadyClass">chunks.chunkReadyClass</a>** after the chunk is added. The chunk ready class is added to all for css
+            // transitions on newly created chunks.
+            chunkReadyClass: 'datagrid-chunk-ready'
+        },
         // - **<a name="options.chunkSize">chunkSize</a>** this is used to determine how large each chunk should be. Chunks are made recursively
         // so if you pass 8 items and they are chunked at 2 then you would have 2 chunks each with 2 chunks each with 2 rows.
         chunkSize: 50,
@@ -144,18 +165,15 @@ exports.datagrid = {
         contentClass: 'datagrid-content',
         // - **<a name="rowClass">rowClass</a>** the css class assigned to every row.
         rowClass: 'datagrid-row',
-        // - **<a name="options.chunkClass">chunkClass</a>** the class assigned to each chunk in the datagrid. This can be customized on a per grid basis since options
-        // can be overridden so that styles or selection may differ from one grid to the next.
-        chunkClass: 'datagrid-chunk',
-        // - **<a name="options.chunkReadyClass">chunkReadyClass</a>** after the chunk is added. The chunk ready class is added to all for css
-        // transitions on newly created chunks.
-        chunkReadyClass: 'datagrid-chunk-ready',
         // - **<a name="options.renderThreshold">renderThreshold</a>** this value is used by the creepRenderModel to allow the render to process for this amount of ms in
         // both directions from the current visible area and then it will wait and process again as many rows as it can in this timeframe.
         renderThreshold: 1,
         // - **<a name="options.renderThresholdWait">renderThresholdWait</a>** used in conjunction with options.renderThreshold this will wait this amount of time before
         // trying to render more rows.
         renderThresholdWait: 50,
+        // - **<a name="options.renderWhileScrolling">renderWhileScrolling</a>** cause the grid to render while scrolling. This can will drastically reduce scrolling performance.
+        // this can be optimized by setting a number of milliseconds between each render while scrolling.
+        renderWhileScrolling: false,
         // - **<a name="options.creepLimit">creepLimit</a>** used with options.renderThreshold and options.renderThresholdWait this will give a maximum amount of renders
         // that can be done before the creep render is turned off.
         creepLimit: 500,

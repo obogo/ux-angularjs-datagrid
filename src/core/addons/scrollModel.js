@@ -10,7 +10,8 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         unwatchSetup,
         waitForStopIntv,
         hasScrollListener = false,
-        lastScroll;
+        lastScroll,
+        lastRenderTime;
 
     /**
      * Listen for scrollingEvents.
@@ -73,7 +74,6 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.removeScrollListener = function removeScrollListener() {
         result.log('removeScrollListener');
         inst.element[0].removeEventListener('scroll', onUpdateScrollHandler);
-        hasScrollListner = false;
     };
 
     result.removeTouchEvents = function removeTouchEvents() {
@@ -144,6 +144,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
 
     function flowWaitForStop() {
+        lastRenderTime = Date.now();
         inst.scrollModel.onScrollingStop();
     }
 
@@ -151,8 +152,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * Wait for the datagrid to slow down enough to render.
      */
     result.waitForStop = function waitForStop() {
-        if (inst.flow.async || inst.values.touchDown) {
-            clearTimeout(waitForStopIntv);
+        var forceRender = false;
+        clearTimeout(waitForStopIntv);
+        if (inst.options.renderWhileScrolling) {
+            if (Date.now() - (inst.options.renderWhileScrolling > 0 || 0) > lastRenderTime) {
+                forceRender = true;
+            }
+        }
+        if (!forceRender && (inst.flow.async || inst.values.touchDown)) {
             waitForStopIntv = setTimeout(flowWaitForStop, inst.options.updateDelay);
         } else {
             flowWaitForStop();

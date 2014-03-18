@@ -3,6 +3,7 @@ describe("scrollModel", function () {
     var model, rendered;
 
     beforeEach(function () {
+        console.clear();
         rendered = false;
         model = ux.datagrid.coreAddons.scrollModel({
             unwatchers: [],
@@ -23,6 +24,7 @@ describe("scrollModel", function () {
             getContentHeight: function () {
                 return 0;
             },
+            options: ux.extend({}, ux.datagrid.options),
             dispatch: function () {
 
             }
@@ -51,7 +53,7 @@ describe("scrollModel", function () {
     it("should update the speed correctly", function() {
         // this needs to be async to run.
         model.flow.async = true;
-        model.options = {updateDelay: 1};
+        model.options = ux.extend({updateDelay: 1}, ux.datagrid.options);
         model.scrollModel.onUpdateScroll({
             target: {
                 scrollTop: 50

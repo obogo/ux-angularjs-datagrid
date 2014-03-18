@@ -3,6 +3,15 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
 //TODO: this needs to be put on exp.normalizedModel
     var originalData, normalizedData, result = exports.logWrapper('normalizeModel', {}, 'grey', inst.dispatch);
 
+    /**
+     * ###<a name="normalize">normalize</a>###
+     * Convert a hierarchical data structure into a flattened array so that headers, rows, and however deep the data is
+     * will all be able to represented by template rows.
+     * @param {Array} data
+     * @param {String} grouped
+     * @param {Array=} normalized
+     * @returns {Array}
+     */
     inst.normalize = function normalize(data, grouped, normalized) {
         data = data || [];
         var i = 0, len = data.length;
@@ -17,6 +26,13 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
         return normalized;
     };
 
+    /**
+     * ###<a name="setData">setData</a>###
+     * Set the data so that it can be normalized.
+     * @param {Array} data
+     * @param {String} grouped
+     * @returns {*}
+     */
     inst.setData = function (data, grouped) {
         result.log('setData');
         originalData = data;
@@ -27,9 +43,19 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
         }
         return normalizedData;
     };
+    /**
+     * ###<a name="getData">getData</a>###
+     * Get the data the datagrid is using. This is normalized data.
+     * @returns {Array}
+     */
     inst.getData = function () {
         return normalizedData;
     };
+    /**
+     * ###<a name="getOriginalData">getOriginalData</a>###
+     * Get the data that the normalized data was created from.
+     * @returns {Array}
+     */
     inst.getOriginalData = function () {
         return originalData;
     };
@@ -43,7 +69,7 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
     };
 
     /**
-     * ##<a name="findItem">findItem</a>##
+     * ###<a name="findItem">findItem</a>###
      * find the item in the list of items and recursively search the child arrays if they have the grouped property
      * @param {*} item
      * @param {Number} index
@@ -68,8 +94,9 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
     }
 
     /**
+     * ###<a name="getNormalizedIndex">getNormalizedIndex</a>###
      * Get the normalized index for an item.
-     * @param item
+     * @param {*} item
      * @param {Number=} startIndex
      */
     inst.getNormalizedIndex = function getNormalizedIndex(item, startIndex) {
@@ -92,8 +119,16 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
         return -1;
     };
 
+    /**
+     * ###<a name="destroy">destroy</a>###
+     * Make sure all variables are cleaned up.
+     */
     result.destroy = function destroy() {
         result.destroyLogger();
+        originalData = null;
+        normalizedData = null;
+        inst.normalizeModel = null;
+        inst = null;
         result = null;
     };
 

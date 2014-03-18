@@ -29,7 +29,7 @@ function each(list, method, data) {
             }
             i += 1;
         }
-    } else {
+    } else if(!(list instanceof Array)) {
         for (i in list) {
             if (list.hasOwnProperty(i)) {
                 result = method.apply(null, [list[i], i, list].concat(extraArgs));

@@ -63,7 +63,7 @@ angular.module('ux').factory('infiniteScroll', function () {
          */
         result.addExtraRow = function (data) {
             scrollOffset = inst.values.scroll;
-            if (data[data.length - 1] !== loadingRow) {
+            if (data.length && data[data.length - 1] !== loadingRow) {
                 data.push(loadingRow);
             }
         };

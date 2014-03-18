@@ -1,0 +1,311 @@
+.runner-overlay {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    font-family: arial;
+    overflow: hidden;
+    outline: 1px solid #333333;
+}
+
+.runner-overlay.minimize {
+    width: 562px;
+    height: 100px;
+}
+
+.runner-highlight-container, .runner-highlight-container * {
+    pointer-events: none;
+}
+
+.runner-highlighter {
+    z-index: 10001;
+    border: 4px solid #FF0000;
+    border-radius: 10px;
+    position: absolute;
+}
+
+.runner-highlighter-empty {
+    display: none;
+}
+
+.runner-tooltip {
+    position: absolute;
+    display: inline-block;
+    font-size: 12px;
+    background: #3498db;
+    padding: 4px;
+    border-radius: 12px;
+    color: #FFFFFF;
+    line-height: 12px;
+    margin-top: 10px;
+}
+.runner-tooltip-arrow {
+    position: absolute;
+    border: 10px transparent solid;
+    border-bottom-color: #3498db;
+    width: 0px;
+    height: 0px;
+    margin: auto;
+    margin-top: -20px;
+    left: 0px;
+    right: 0px;
+}
+
+.runner-scroller {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+.runner-content {
+    position: relative;
+    float: left;
+    width: auto;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.75);
+    padding-bottom: 40px;
+}
+
+.runner-content-title-spacer {
+    height: 40px;
+}
+
+.runner-overlay .runner-title {
+    position: absolute;
+    z-index: 10001;
+    float: left;
+    color: #FFFFFF;
+    background-color: rgba(0, 0, 0, 0.75);
+    width: auto;
+    vertical-align: middle;
+}
+
+.runner-clear {
+    clear: both;
+}
+
+.compact div {
+    display: inline-block;
+    margin: 1px !important;
+    line-height: 10px;
+    overflow: hidden;
+    cursor: default;
+}
+
+.runner-root {
+    font-size: 20px;
+    font-weight: bold;
+    background-color: rgba(00, 11, 33, 0.5);
+    text-indent: 2px;
+    border-bottom: 1px solid #000000;
+}
+
+.compact .runner-root {
+    width: 10px;
+    height: 10px;
+}
+
+.runner-scenario {
+    font-size: 16px;
+    font-weight: bold;
+    background-color: rgba(0, 33, 66, 0.25);
+    text-indent: 2px;
+    border-bottom: 1px solid #000000;
+}
+
+.compact .runner-scenario {
+    width: 8px;
+    height: 8px;
+}
+
+.runner-scene {
+    font-size: 14px;
+    font-weight: bold;
+    background-color: rgba(33, 33, 33, 0.25);
+    border-bottom: 1px solid #000000;
+}
+
+.compact .runner-scene {
+    width: 4px;
+    height: 4px;
+}
+
+.runner-step-chain {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: normal;
+    text-indent: 2px;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid #000000;
+}
+
+.compact .runner-step-chain {
+    width: 2px;
+    height: 2px;
+}
+
+.runner-overlay .runner-pending {
+    color: #3498db;
+}
+
+.runner-overlay .runner-pass {
+    color: #27ae60;
+}
+
+.runner-overlay .runner-fail {
+    color: #c0392b;
+}
+
+.runner-overlay .compact .runner-pending {
+    background-color: #3498db;
+}
+
+.runner-overlay .compact .runner-pass {
+    background-color: #27ae60;
+}
+
+.runner-overlay .compact .runner-fail {
+    background-color: #c0392b;
+}
+
+.runner-button-bar {
+    display: inline-block;
+    border: 1px solid #666666;
+    vertical-align: middle;
+    padding: 4px;
+    line-height: 16px;
+    background-color: rgba(50, 100, 150, 0.5);
+    border-radius: 6px;
+}
+
+.runner-step-count, .runner-timed-out, .runner-step-paused, .runner-close, .runner-pause, .runner-next, .runner-resume, .runner-complete, .runner-details, .runner-minimize .runner-plus, .runner-minus, .runner-restart {
+    display: inline-block;
+    font-size: 12px;
+    background: #000000;
+    padding: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+    border-radius: 12px;
+    color: #FFFFFF;
+    min-width: 10px;
+    line-height: 12px;
+}
+
+.runner-button {
+    width: 14px;
+    height: 14px;
+    font-weight: bold;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14;
+    padding: 2px;
+    line-height: 16px;
+    min-height: 16px;
+    min-width: 16px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.runner-timed-out {
+    background-color: #FFFFFF;
+    color: #FF0000;
+}
+
+.runner-step-paused {
+    background-color: #FF6600;
+    color: #FFFFFF;
+}
+
+.runner-step-paused-pass {
+    background-color: #FF6600;
+}
+
+.runner-step-paused-fail {
+    background-color: #FF0000;
+}
+
+.runner-close {
+    background: #FF0000;
+    color: #FFFFFF;
+    text-decoration: none;
+}
+
+.runner-pause {
+    background: #336699;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.runner-next, .runner-details, .runner-minimize, .runner-plus, .runner-minus, .runner-restart {
+    background: #336699;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.runner-resume.unpaused {
+    display: none;
+}
+
+.runner-resume.paused {
+    background-color: #33CC33;
+    color: #FFFFFF;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.runner-complete {
+    display: none;
+    color: #FFFFFF;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.runner-complete.passed {
+    display: inline;
+    background-color: #006600;
+}
+
+.runner-complete.failed {
+    display: inline;
+    background-color: #990000;
+}
+
+.runner-complete.paused {
+    display: inline;
+    background-color: #FF6600;
+}
+
+.runner-complete.passed.done {
+    background-color: #33CC33;
+}
+
+.runner-complete.failed.done {
+    background-color: #FF0000;
+}
+
+.runner-break {
+    display: block;
+    width: 0px;
+    height: 1px;
+}
+
+.runner-interval-label {
+    font-size: 12px;
+}
+
+.runner-interval {
+    display: inline-block;
+    font-size: 12px;
+    width: 30px;
+    line-height: 12px;
+    text-align: right;
+    color: #FFFFFF;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid #666666;
+}

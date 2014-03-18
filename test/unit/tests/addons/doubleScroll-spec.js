@@ -3,7 +3,7 @@ describe("doubleScroll", function () {
         template = '<div style="overflow: auto;width:100%;height:300px;border:1px solid #FF0000;" data-ux-double-scroll="\'.datagrid\'">' +
                     '<div class="doubleScrollContent" style="width: 100%;">' +
                             '<div class="header" style="height: 100px;">header text</div>' +
-                            '<div data-ux-datagrid="items" class="datagrid" data-options="{async:false,chunkSize:10}" style="width:100%;height:400px; overflow: auto;" data-addons="iosScroll">' +
+                            '<div data-ux-datagrid="items" class="datagrid" data-options="{async:false,chunkSize:10}" style="width:100%;height:400px; overflow: auto;" data-addons="iScrollAddon">' +
                                 '<script type="template/html" data-template-name="default" data-template-item="item">' +
                                     '<div class="mock-row" style="height: 16px;outline: 1px solid #000000;">{{$id}}</div>' +
                                 '</script>' +

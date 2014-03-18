@@ -2,7 +2,7 @@ describe('datagrid', function () {
     var element, scope, grid;
 
     describe("options", function () {
-        var template = '<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10, async:false}" style="width:100px;height:400px;">' +
+        var template = '<div data-ux-datagrid="items" class="datagrid" data-options="{chunks: {size:10}, async:false}" style="width:100px;height:400px;">' +
                             '<script type="template/html" data-template-name="default" data-template-item="item">' +
                                 '<div class="mock-row" style="height:10px;">{{item.id}}</div>' +
                             '</script>' +
@@ -29,7 +29,7 @@ describe('datagrid', function () {
         });
 
         it("should read options from the html options attribute", function() {
-            expect(grid.options.chunkSize).toBe(10);
+            expect(grid.options.chunks.size).toBe(10);
         });
     });
 
@@ -41,7 +41,7 @@ describe('datagrid', function () {
 
         });
         var grid,
-            template = '<div data-ux-datagrid="items" class="datagrid" data-options="{debug:1, chunkSize:10, async:false}" filters="myFilter1, myFilter2" style="width:100px;height:400px;">' +
+            template = '<div data-ux-datagrid="items" class="datagrid" data-options="{chunks:{size:10}, async:false}" filters="myFilter1, myFilter2" style="width:100px;height:400px;">' +
                             '<script type="template/html" data-template-name="default" data-template-item="item">' +
                                 '<div class="mock-row" style="height:10px;">{{item.id}}</div>' +
                             '</script>' +
@@ -121,7 +121,7 @@ describe('datagrid', function () {
 
         var size = 10,
             grid,
-            template = '<div data-ux-datagrid="items" class="datagrid" data-grouped="\'children\'" data-options="{chunkSize:10, async:false}" style="width:100px;height:400px;">' +
+            template = '<div data-ux-datagrid="items" class="datagrid" data-grouped="\'children\'" data-options="{chunks:{size:10}, async:false}" style="width:100px;height:400px;">' +
                             '<script type="template/html" data-template-name="group" data-template-item="item">' +
                                 '<div class="mock-row" style="height:20px;">{{item.id}</div>' +
                             '</script>' +

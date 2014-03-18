@@ -1,6 +1,6 @@
 describe("gridFocusManager", function () {
     var scope, element, grid, forceRenderAll,
-        template = '<div data-ux-datagrid="items" class="datagrid" data-options="{debug:{all:1}, chunkSize:10, async: false}" style="width:100px;height:400px;overflow:auto;" data-addons="gridFocusManager, gridLogger">' +
+        template = '<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10, async: false}" style="width:100px;height:400px;overflow:auto;" data-addons="gridFocusManager">' +
                         '<script type="template/html" data-template-name="default" data-template-item="item">' +
                             '<div class="mock-row">' +
                                 '<div class="col col1">{{item.id}}</div>' +

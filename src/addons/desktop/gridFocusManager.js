@@ -337,7 +337,7 @@ angular.module('ux').factory('gridFocusManager', function () {
             if (nextIndex < 0 || nextIndex >= inst.rowsLength) {
                 return focusedEl;
             }
-            selector = ux.selector.getSelector(focusedEl[0], rowEl[0], filterClasses);
+            selector = ux.selector.quickSelector(focusedEl[0], rowEl[0], filterClasses);
             result.log("\tselector: %s", selector);
             resultEl = findNextRowWithSelection(nextIndex, dir, selector);
             return resultEl && resultEl.length ? resultEl : focusedEl;// if the result cannot be found. return the current one.
@@ -395,6 +395,10 @@ angular.module('ux').factory('gridFocusManager', function () {
                 inst.scrollModel.scrollIntoView(index);
             }
         }
+
+        // it has to match a pattern for each row. These are too unique.
+        ux.selector.config.allowId = false;
+        ux.selector.config.allowAttributes = false;
 
         result.hasPrevRowFocusElement = hasPrevRowFocusElement;
         result.hasNextRowFocusElement = hasNextRowFocusElement;

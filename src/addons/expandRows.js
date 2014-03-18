@@ -137,7 +137,7 @@ angular.module('ux').factory('expandRows', function () {
             if (state === states.opened) {
                 opened[index] = {
                     index: index,
-                    height: parseInt(elm.css("height") || 0, 10)
+                    height: parseInt(elm[0].offsetHeight || 0, 10)
                 };
                 if (isNaN(opened[index].height)) {
                     throw new Error("Invalid Height");

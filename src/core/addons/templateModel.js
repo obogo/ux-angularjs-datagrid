@@ -127,7 +127,8 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         }
 
         function getTemplateHeight(item) {
-            return result.getTemplate(item).height;
+            var tpl = result.getTemplate(item);
+            return tpl ? tpl.height : 0;
         }
 
         function getHeight(list, startRowIndex, endRowIndex) {

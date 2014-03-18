@@ -5,8 +5,11 @@ describe("chunkModel", function () {
     beforeEach(function () {
         exports = {
             options: {
-                chunkClass: 'datagrid-chunk',
-                chunkReadyClass: 'datagrid-chunk-ready'
+                chunks: {
+                    detachDom: false,
+                    chunkClass: 'datagrid-chunk',
+                    chunkReadyClass: 'datagrid-chunk-ready'
+                }
             },
             templateModel: {
                 templates: {},
@@ -16,8 +19,17 @@ describe("chunkModel", function () {
                 getHeight: function (list, startIndex, endIndex) {
                     return (endIndex + 1 - startIndex) * rowHeight;
                 }
+            },
+            flow: new ux.datagrid.Flow({async:false}, function() {}),
+            isCompiled: function () {
+                return true;
+            },
+            scope: {
+                $on: function () {
+
+                }
             }
-        }
+        };
         rowHeight = 10;
         chunkModel = new ux.datagrid.coreAddons.chunkModel(exports);
     });
@@ -104,7 +116,7 @@ describe("chunkModel", function () {
 
     describe("changing row template", function () {
         var scope, element, grid,
-            template = '<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10, async:false}" style="width:100px;height:400px;">' +
+            template = '<div data-ux-datagrid="items" class="datagrid" data-options="{chunks: {size:10}, async:false}" style="width:100px;height:400px;">' +
                             '<script type="template/html" data-template-name="default" data-template-item="item">' +
                                 '<div class="mock-row" style="height:10px;">{{item.id}}</div>' +
                             '</script>' +

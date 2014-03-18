@@ -1,6 +1,6 @@
 describe("infiniteScrollModel", function () {
     var element, grid, scope,
-        template = '<div data-ux-datagrid="items" class="datagrid" data-options="{debug:{all:1, Flow:0}, chunkSize:10, async:false, infiniteScroll: {limit:21}}" data-addons="infiniteScroll, gridLogger" style="width:100px;height:100px;">' +
+        template = '<div data-ux-datagrid="items" class="datagrid" data-options="{chunkSize:10, async:false, infiniteScroll: {limit:21}}" data-addons="infiniteScroll" style="width:100px;height:100px;">' +
                         '<script type="template/html" data-template-name="default" data-template-item="item">' +
                             '<div class="mock-row" style="height:10px;">{{item.id}}</div>' +
                         '</script>' +

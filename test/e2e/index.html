@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RUNNER: Framed</title>
+    <link rel="stylesheet" type="text/css" href="runner.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+    <script src="lib/ux-runner.js"></script>
+    <script src="scenarios/scrolling-scenario.js"></script>
+    <script>
+
+        function setupFrame() {
+            var win = $('#targetFrame')[0].contentWindow,
+                angularRoot = win.angular.element(win.document);
+            ux.runner.options.window = win;
+            ux.runner.options.rootElement = angularRoot;
+        }
+
+        function getDescriptions() {
+            setupFrame();
+        }
+
+        ux.runner.config({
+            autoStart: function () {
+                setTimeout(function () {
+                    setupFrame();
+                    ux.runner.run();
+                }, 1000);
+            },
+            interval: 50,
+            defaultTimeout: 1000,
+            frame: {
+                width: 320,
+                height: 600,
+                float: "right"
+            },
+            timeouts: {
+                short: 1000,
+                medium: 10000,
+                long: 30000,
+                forever: 60000
+            }
+        });
+
+    </script>
+</head>
+<body>
+    <iframe id="targetFrame" src="../../samples/app/" onload="getDescriptions()"></iframe>
+</body>
+</html>

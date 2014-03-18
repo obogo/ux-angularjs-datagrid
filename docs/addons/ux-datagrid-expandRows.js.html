@@ -36,7 +36,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.5.2
+  <div class="summary"><p>uxDatagrid v.0.5.3
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -175,7 +175,7 @@ License: MIT.</p>
             <span class="k">if</span> <span class="p">(</span><span class="nx">state</span> <span class="o">===</span> <span class="nx">states</span><span class="p">.</span><span class="nx">opened</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">opened</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="nx">index</span><span class="o">:</span> <span class="nx">index</span><span class="p">,</span>
-                    <span class="nx">height</span><span class="o">:</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">elm</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s2">&quot;height&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+                    <span class="nx">height</span><span class="o">:</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">elm</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">offsetHeight</span> <span class="o">||</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
                 <span class="p">};</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nb">isNaN</span><span class="p">(</span><span class="nx">opened</span><span class="p">[</span><span class="nx">index</span><span class="p">].</span><span class="nx">height</span><span class="p">))</span> <span class="p">{</span>
                     <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;Invalid Height&quot;</span><span class="p">);</span>

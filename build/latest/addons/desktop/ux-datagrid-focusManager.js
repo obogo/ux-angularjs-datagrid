@@ -772,6 +772,7 @@ angular.module("ux").factory("gridFocusManager", function() {
         // it has to match a pattern for each row. These are too unique.
         ux.selector.config.allowId = false;
         ux.selector.config.allowAttributes = false;
+        ux.selector.config.addVisible = true;
         result.hasPrevRowFocusElement = hasPrevRowFocusElement;
         result.hasNextRowFocusElement = hasNextRowFocusElement;
         result.focusToPrevRowElement = focusToPrevRowElement;

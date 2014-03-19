@@ -148,7 +148,9 @@ angular.module('ux').factory('iScrollAddon', function () {
         result.fireOnScroll = originalScrollModel.fireOnScroll;
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.RESIZE, function () {
             inst.element[0].scrollTop = 0;
-            myScroll.refresh();
+            if (myScroll) {
+                myScroll.refresh();
+            }
         }));
         result.destroy = function destroy() {
             unwatchSetup();

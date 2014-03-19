@@ -460,29 +460,33 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
                 original = ary;
                 result.setCache("", original);
                 // the original is always without any sort options.
-                var key = sortStatesModel.createKeyFromStates(pathStateRef), event, pathState = angular.copy(pathStateRef);
-                // clone so they cannot mess with the data directly.
-                result.info("applySorts %s", key);
-                event = inst.dispatch(exports.datagrid.events.ON_BEFORE_SORT, key, currentPathState, pathState);
-                // prevent default on event to prevent sort.
-                if (!event.defaultPrevented) {
-                    if (!result.getCache(key) || result.getCache(key).length !== original.length) {
-                        result.log("	store sort %s", key);
-                        result.setCache(key, original && original.slice(0) || []);
-                        // clone it
-                        ux.each(pathState.$order, applyListSort, {
-                            grouped: inst.grouped,
-                            pathState: pathState,
-                            ary: result.getCache(key)
-                        });
+                if (!result.$processing) {
+                    result.$processing = true;
+                    var key = sortStatesModel.createKeyFromStates(pathStateRef), event, pathState = angular.copy(pathStateRef);
+                    // clone so they cannot mess with the data directly.
+                    result.info("applySorts %s", key);
+                    event = inst.dispatch(exports.datagrid.events.ON_BEFORE_SORT, key, currentPathState, pathState);
+                    // prevent default on event to prevent sort.
+                    if (!event.defaultPrevented) {
+                        if (!result.getCache(key) || result.getCache(key).length !== original.length) {
+                            result.log("	store sort %s", key);
+                            result.setCache(key, original && original.slice(0) || []);
+                            // clone it
+                            ux.each(pathState.$order, applyListSort, {
+                                grouped: inst.grouped,
+                                pathState: pathState,
+                                ary: result.getCache(key)
+                            });
+                        }
+                        lastSortResult = result.getCache(key);
+                        sortStatesModel.clearDirty(pathStateRef);
+                    } else {
+                        //TODO: need to unit test this to make sure it works with async sort.
+                        lastSortResult = original;
                     }
-                    lastSortResult = result.getCache(key);
-                    sortStatesModel.clearDirty(pathStateRef);
-                } else {
-                    //TODO: need to unit test this to make sure it works with async sort.
-                    lastSortResult = original;
+                    result.$processing = false;
+                    inst.dispatch(exports.datagrid.events.ON_AFTER_SORT, key, pathState, currentPathState);
                 }
-                inst.dispatch(exports.datagrid.events.ON_AFTER_SORT, key, pathState, currentPathState);
             }
             return lastSortResult;
         };

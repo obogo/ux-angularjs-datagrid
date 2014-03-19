@@ -5,6 +5,12 @@
 * License: MIT.
 */
 (function(exports, global){
+exports.errors = {
+    E1001: "RENDER STATE INVALID. The only valid render states are those on ux.datagrid.states",
+    E1101: "Script templates that are used for datagrid rows must have a height greater than 0. This may be because the grid is not yet attached to the dom preventing it from calculating heights.",
+    E1102: "at least one template is required. There were no row templates found for the datagrid."
+};
+
 /**
  * ## Configs ##
  * ux.datagrid is a highly performant scrolling list for desktop and mobile devices that leverages
@@ -1776,7 +1782,7 @@ function Datagrid(scope, element, attr, $compile) {
                 //                flow.add(destroyOldContent);
                 flow.add(inst.dispatch, [ exports.datagrid.events.ON_AFTER_RENDER ]);
             } else {
-                throw new Error("RENDER STATE INVALID");
+                throw new Error(exports.errors.E1001);
             }
         } else {
             inst.log("	not ready to render.");
@@ -3384,11 +3390,12 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             result.log("createTemplates");
             var i, scriptTemplates = inst.element[0].getElementsByTagName("script"), len = scriptTemplates.length;
             if (!len) {
-                throw new Error("at least one template is required.");
+                throw new Error(exports.errors.E1102);
             }
             for (i = 0; i < len; i += 1) {
                 createTemplate(scriptTemplates[i]);
             }
+            // remove the script templates.
             while (scriptTemplates.length) {
                 inst.element[0].removeChild(scriptTemplates[0]);
             }
@@ -3410,7 +3417,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             };
             result.log("template: %s %o", name, templateData);
             if (!templateData.height) {
-                throw new Error("Template height cannot be 0.");
+                throw new Error(exports.errors.E1101);
             }
             templates[templateData.name] = templateData;
             templates.push(templateData);

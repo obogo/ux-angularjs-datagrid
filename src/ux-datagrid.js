@@ -940,7 +940,7 @@ function Datagrid(scope, element, attr, $compile) {
 //                flow.add(destroyOldContent);
                 flow.add(inst.dispatch, [exports.datagrid.events.ON_AFTER_RENDER]);
             } else {
-                throw new Error("RENDER STATE INVALID");
+                throw new Error(exports.errors.E1001);
             }
         } else {
             inst.log("\tnot ready to render.");

@@ -41,6 +41,7 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'build/latest/angular-ux-<%= pkg.filename %>.js': [
+                        'src/errors/dev-errors.js',
                         'src/ux-datagrid-config.js',
                         'src/lib/*.js',
                         'src/core/logWrapper.js',
@@ -101,7 +102,15 @@ module.exports = function (grunt) {
                     banner: '<%= banner %>'
                 },
                 files: {
-                    'build/latest/angular-ux-<%= pkg.filename %>.min.js': ['build/latest/angular-ux-<%= pkg.filename %>.js']
+                    'build/latest/angular-ux-<%= pkg.filename %>.min.js': [
+                        'src/errors/prod-errors.js',
+                        'src/ux-datagrid-config.js',
+                        'src/lib/*.js',
+                        'src/core/logWrapper.js',
+                        'src/core/Flow.js',
+                        'src/ux-datagrid.js',
+                        'src/core/addons/*.js'
+                    ]
                 }
             }
         },

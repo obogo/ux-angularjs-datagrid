@@ -28,11 +28,12 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             result.log('createTemplates');
             var i, scriptTemplates = inst.element[0].getElementsByTagName('script'), len = scriptTemplates.length;
             if (!len) {
-                throw new Error("at least one template is required.");
+                throw new Error(exports.errors.E1102);
             }
             for (i = 0; i < len; i += 1) {
                 createTemplate(scriptTemplates[i]);
             }
+            // remove the script templates.
             while (scriptTemplates.length) {
                 inst.element[0].removeChild(scriptTemplates[0]);
             }
@@ -58,7 +59,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             };
             result.log('template: %s %o', name, templateData);
             if (!templateData.height) {
-                throw new Error("Template height cannot be 0.");
+                throw new Error(exports.errors.E1101);
             }
             templates[templateData.name] = templateData;
             templates.push(templateData);

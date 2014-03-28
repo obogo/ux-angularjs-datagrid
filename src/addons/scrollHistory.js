@@ -18,7 +18,8 @@ angular.module('ux').service('scrollHistoryModel', ['$location', '$rootScope', f
          * @returns {*}
          */
         function getPath() {
-            return $location.path();
+            // it should get the url with the params. if the params are different scroll history should be different.
+            return $location.url();
         }
 
         /**
@@ -35,10 +36,11 @@ angular.module('ux').service('scrollHistoryModel', ['$location', '$rootScope', f
         /**
          * ###<a name="getCurrentScroll">getCurrentScroll</a>###
          * get the stored value of the current path.
+         * @params {String=} path
          * @returns {*}
          */
-        function getCurrentScroll() {
-            return result.getScroll(result.getPath());
+        function getCurrentScroll(path) {
+            return result.getScroll(path || result.getPath());
         }
 
         /**
@@ -88,9 +90,16 @@ angular.module('ux').service('scrollHistoryModel', ['$location', '$rootScope', f
 angular.module('ux').factory('scrollHistory', function () {
 
     return function (inst, scrollHistoryModel) {
-        var result = exports.logWrapper('scrollHistory', {}, 'green', inst.dispatch);
+        var result = exports.logWrapper('scrollHistory', {}, 'green', inst.dispatch), ready,
+            path = inst.options.scrollHistory && inst.options.scrollHistory.path || '', scrollPos,
+            waitingForAfterDataChange = false, unwatchers = [];
+        if (inst.options.scrollHistory && inst.options.scrollHistory.ignoreParams) {
+            path = scrollHistoryModel.getPath().split('?').shift();
+        }
         // map methods from singleton to addon instance.
-        result.getPath = scrollHistoryModel.getPath;
+        result.getPath = path ? function () {
+            return path;// override the path if the options are passed for it.
+        } : scrollHistoryModel.getPath;
 
         /**
          * ###<a name="storeCurrentScroll">storeCurrentScroll</a>###
@@ -100,29 +109,48 @@ angular.module('ux').factory('scrollHistory', function () {
             result.storeScroll(result.getPath(), inst.values.scroll);
         };
         result.storeScroll = scrollHistoryModel.storeScroll;
-        result.getCurrentScroll = scrollHistoryModel.getCurrentScroll;
+        result.getCurrentScroll = path ? function () { return scrollHistoryModel.getCurrentScroll(path); } : scrollHistoryModel.getCurrentScroll;
         result.getScroll = scrollHistoryModel.getScroll;
         result.clearPath = scrollHistoryModel.clearPath;
+        result.setScrollValue = function () {
+            scrollPos = result.getCurrentScroll();
+            inst.scrollModel.setScroll(scrollPos);
+
+        };
+
+        /**
+         * ###<a name="scroll">scroll</a>###
+         * The only time we need to set the actual scrollTo is when the history is invalid. As in it wants to
+         * scroll to a value that is taller than the data will support. In that case it will scroll to 0.
+         */
+        result.scroll = function () {
+            if (inst.getContentHeight() - inst.getViewportHeight() < scrollPos && inst.values.scroll) {
+                inst.scrollModel.setScroll(0);
+                inst.scrollModel.scrollTo(0, true);
+            }
+        };
 
         /**
          * watch only once to have it start at that scrolling position on startup.
          */
-        var unwatch = inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, function () {
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, function () {
             // need to set the scroll before the data is changed.
             result.log("found scrollHistory so scrollTo %s", result.getCurrentScroll());
-            // remove the listener. So that it will only have been captured once.
-            unwatch();
-            unwatch = null;
-            inst.scrollModel.setScroll(result.getCurrentScroll());
-        });
+            ready = true;
+            result.setScrollValue();
+            waitingForAfterDataChange = true;
+            unwatchers.shift()();// this is for infinite scroll. We only need to update the scroll history on start. Then remove listener.
+        }));
 
         /**
          * we then need to scroll to after the render because otherwise the content isn't able to set
          * the scroll top value because the content doesn't have a height yet.
          */
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, function () {
-            inst.scrollModel.scrollTo(result.getCurrentScroll(), true);
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, function () {
+            waitingForAfterDataChange = false;
+            result.scroll();
             inst.dispatch(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL);
+            unwatchers.shift()();
         }));
 
         /**
@@ -130,13 +158,15 @@ angular.module('ux').factory('scrollHistory', function () {
          * keep events from firing during the destroy process.
          */
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, function () {
-            if (!unwatch) {
+            if (ready && !waitingForAfterDataChange) {
                 result.storeCurrentScroll();// this can be overridden if necessary.
             }
         }));
 
         result.destroy = function () {
-            if (unwatch) unwatch();
+            while (unwatchers.length) {
+                unwatchers.pop()();
+            }
             inst.scrollHistory = null;
             result = null;
             inst = null;

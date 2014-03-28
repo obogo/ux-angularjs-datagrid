@@ -54,8 +54,6 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
             }
             if (item instanceof ChunkArray) {
                 item.parent = childAry;
-            }
-            if (item instanceof ChunkArray) {
                 item.index = childAry.length;
             }
             childAry.push(item);
@@ -77,32 +75,22 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     }
 
     /**
-     * Using a ChunkArray calculate the heights of each array recursively.
-     * @param ary {ChunkArray}
-     */
-//    function calculateHeight(ary) {
-//        var str;
-//        if (!ary.rendered) {
-//            str = ary.templateStart.substr(0, ary.templateStart.length - 1) + ' style="';
-//            if (inst.options.chunks.detachDom) {
-//                str += 'position:absolute;top:' + ary.top + 'px;left:0px;';
-//            }
-//            ary.templateStart = str + 'width:100%;height:' + ary.height + 'px;">';
-//        }
-//    }
-
-    /**
      * ###<a name="updateAllChunkHeights">updateAllChunkHeights</a>###
      * Update rows affected by this particular index change. if rowIndex is undefined, update all.
      * @param {Number=} rowIndex
      */
     function updateAllChunkHeights(rowIndex) {
         var indexes, ary;
-        if (rowIndex === undefined) {
+        if (rowIndex === undefined || inst.options.chunks.detachDom) {
             //TODO: unit test needed.
+            // detach dom must enter here, because it is absolute positioned so it will not push down
+            // the other chunks automatically like relative positioning will.
             if (_list) {
                 _list.forceHeightReCalc(inst.templateModel, _rows);
-                _list.updateHeight(inst.templateModel, _rows, 1, true);
+                _list.updateHeight(inst.templateModel, _rows, 1);
+                if (_list.detachDom) {
+                    _list.updateDomHeight(1);
+                }
             }
         } else {
             indexes = getRowIndexes(rowIndex, _list);
@@ -221,7 +209,6 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
             index = indxs.shift();
             if (!ca.rendered && unrendered) {
                 unrendered(el, ca);
-                ca.rendered = el;
                 updateDom(ca);
             }
 
@@ -242,9 +229,20 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * @param {ChunkArray} ca
      */
     function unrendered(el, ca) {
-        var children;
+        var children, i = 0, iLen;
         el.html(ca.getChildrenStr());
         children = el.children();
+        ca.rendered = el;
+        if (ca.hasChildChunks()) {// assign the dom element.
+            iLen = children.length;
+            while (i < iLen) {
+                ca[i].dom = children[i];
+                i += 1;
+            }
+        }
+        if (ca.detachDom && ca.dirtyHeight) {
+            ca.updateDomHeight();
+        }
         exports.each(children, computeStyles);
         if (children[0].className.indexOf(inst.options.chunks.chunkClass) !== -1) {
             // need to calculate css styles before adding this class to make transitions work.
@@ -395,6 +393,7 @@ function ChunkArray (detachDom) {
     this.min = 0;
     this.max = 0;
     this.templateStart = '';
+    this.templateStartWithPos = '';
     this.templateEnd = '';
     this.parent = null;
     this.mode = detachDom ? ChunkArray.DETACHED : ChunkArray.ATTACHED;
@@ -406,7 +405,10 @@ ChunkArray.DETACHED = 'chunkArray:detached';
 ChunkArray.ATTACHED = 'chunkArray:attached';
 ChunkArray.prototype = [];
 ChunkArray.prototype.getStub = function getStub(str) {
-    return this.templateStart + str + this.templateEnd;
+    if (!this.templateStartWithPos) {
+        this.createDomTemplates();
+    }
+    return this.templateStartWithPos + str + this.templateEnd;
 };
 ChunkArray.prototype.inRange = function (value) {
     return value >= this.min && value <= this.max;
@@ -558,7 +560,11 @@ ChunkArray.prototype.forceHeightReCalc = function (templateModel, _rows) {
     }
     if (this.height !== height) {
         this.height = height;
-        this.setDirtyHeight();
+        if (this.detachDom) {// we need to update all siblings if we change.
+            this.dirtySiblings();
+        } else {
+            this.setDirtyHeight();
+        }
     }
     return this.height;
 };
@@ -571,6 +577,17 @@ ChunkArray.prototype.setDirtyHeight = function () {
     while (p) {
         p.dirtyHeight = true;
         p = p.parent;
+    }
+};
+ChunkArray.prototype.dirtySiblings = function () {
+    this.dirtyHeight = true;
+    if (this.parent) {
+        var i = 0, iLen = this.length;
+        while (i < iLen) {
+            this[i].dirtyHeight = true;
+            i += 1;
+        }
+        this.parent.dirtySiblings();
     }
 };
 /**
@@ -633,11 +650,6 @@ ChunkArray.prototype.disable = function (disabledClass) {
 };
 ChunkArray.prototype.updateDom = function (disabledClass) {
     if (this.rendered) {
-        if (!this.rendered.attr('chunk-id')) {
-            //TODO: this is only necessary for debugging.
-//            this.rendered.attr('chunk-id', this.getId());
-//            this.rendered.attr('range', this.min + ':' + this.max);
-        }
         if (this.compiled && !this.rendered.attr('compiled')) {
             this.rendered.attr('compiled', true);
         }
@@ -650,7 +662,8 @@ ChunkArray.prototype.updateDom = function (disabledClass) {
             } else if (!this.enabled && !this.detached) {
                 if (this.parent && this.parent.compiled && this.rendered.parent().length) {
                     this.detached = true;
-                    this.rendered.remove();
+                    //jquery detach is just 2nd param pass true to keep data around.
+                    this.rendered.remove(undefined, true);
                 }
             }
         } else {
@@ -669,15 +682,14 @@ ChunkArray.prototype.updateDom = function (disabledClass) {
     }
 };
 ChunkArray.prototype.updateDomHeight = function (recursiveDirection) {
-    if (this.mode === ChunkArray.DETACHED) {
-        this.calculateTop();
-    }
-    if (this.rendered) {
+    var dom = this.rendered && this.rendered[0] || this.dom;
+    if (dom) {
         this.dirtyHeight = false;
         if (this.mode === ChunkArray.DETACHED) {
-            this.rendered[0].style.top = this.top + 'px';
+            this.calculateTop();
+            dom.style.top = this.top + 'px';
         }
-        this.rendered[0].style.height = this.height + "px";
+        dom.style.height = this.height + "px";
     } else {
         this.createDomTemplates();
     }
@@ -691,9 +703,10 @@ ChunkArray.prototype.createDomTemplates = function() {
     if (!this.templateReady) {
         var str = this.templateStart.substr(0, this.templateStart.length - 1) + ' style="';
         if (this.mode === ChunkArray.DETACHED) {
+            this.calculateTop();
             str += 'position:absolute;top:' + this.top + 'px;left:0px;';
         }
-        this.templateStart = str + 'width:100%;height:' + this.height + 'px;">';
+        this.templateStartWithPos = str + 'width:100%;height:' + this.height + 'px;" chunk-id="' + this.getId() + '" range="' + this.min + ':' + this.max + '">';
         this.templateReady = true;
     }
 };

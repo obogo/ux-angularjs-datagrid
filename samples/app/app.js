@@ -94,6 +94,12 @@ app.config(function ($routeProvider) {
             controller: function SimpleCtrl($scope) {
                 $scope.name = "Simple Example";
                 $scope.items = createSimpleList();
+                $scope.clear = function () {
+                    $scope.items = [];
+                };
+                $scope.reset = function () {
+                    $scope.items = createSimpleList();
+                };
             }
         })
         .when('/grouped', {

@@ -30,6 +30,11 @@ describe("sortModel", function () {
         ux.datagrid.sortStatesModel.clearAll();
     });
 
+    it("should default all sort columns to none and not null", function() {
+        var pathState = ux.datagrid.sortStatesModel.getPathState();
+        expect(pathState.id).toBe(ux.datagrid.sortStatesModel.sortOptions.NONE);
+    });
+
     it("should sort the data asc by name", function () {
         var result = sorter.applySorts(scope.items);
         expect(result[0].name).toBe('0');

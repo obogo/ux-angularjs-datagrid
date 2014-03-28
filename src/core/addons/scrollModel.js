@@ -100,7 +100,16 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
 
     result.setScroll = function setScroll(value) {
-        inst.element[0].scrollTop = value;
+        var unwatch, chunkList = inst.chunkModel.getChunkList();
+        if (!chunkList || !chunkList.height) {
+            // wait until that height is ready then scroll.
+            unwatch = inst.scope.$on(exports.datagrid.events.ON_AFTER_RENDER, function () {
+                unwatch();
+                result.setScroll(value);
+            });
+        } else if (inst.element[0].scrollHeight >= value) {
+            inst.element[0].scrollTop = value;
+        }
         inst.values.scroll = value;
     };
 
@@ -125,12 +134,20 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         result.fireOnScroll();
     };
 
+    result.capScrollValue = function (value) {
+        if (inst.getContentHeight() < inst.getViewportHeight()) {
+            value = 0;// couldn't make it. just scroll to the bottom.
+        }
+        return value;
+    };
+
     /**
      * Scroll to the numeric value.
      * @param value
      * @param {Boolean=} immediately
      */
     result.scrollTo = function scrollTo(value, immediately) {
+        value = result.capScrollValue(value);
         inst.scrollModel.setScroll(value);
         if (immediately) {
             inst.scrollModel.onScrollingStop();

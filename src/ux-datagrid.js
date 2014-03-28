@@ -263,7 +263,10 @@ function Datagrid(scope, element, attr, $compile) {
             changeWatcherSet = true;
             unwatchers.push(scope.$watchCollection(attr.uxDatagrid, onDataChangeFromWatcher));
             // force intial watcher.
-            flow.add(render);
+            var d = scope.$eval(attr.uxDatagrid);
+            if (d && d.length) {
+                flow.add(render);
+            }
         }
     }
 
@@ -398,7 +401,19 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function getRowIndexFromElement(el) {
         if (element[0].contains(el[0] || el)) {
-            var s = el.scope ? el.scope() : angular.element(el).scope();
+            el = el.scope ? el : angular.element(el);
+            var s = el.scope();
+            if (s === inst.scope) {
+                throw new Error("Unable to get row scope... something went wrong.");
+                // This is only likely to happen if we are running in options.chunks.detachDom mode. And only
+                // when jumping from one chunk to the next in detached mode.
+                // this means that the scope of the element isn't active. So it is picking up the parent.
+                // that's ok. We have a backup plan. It just isn't as fast.
+//                while (el.length && !el[0].getAttribute('row-id')) {
+//                    el = el.parent();// moving up dom parents in the browser is slow. So we avoid it if we can.
+//                }
+//                return parseInt(el[0].getAttribute('row-id'), 10);
+            }
             // make sure we get the right scope to grab the index from. We need to get it from a row.
             while (s && s.$parent && s.$parent !== inst.scope) {
                 s = s.$parent;
@@ -463,7 +478,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.log("OVERWRITE DOM!!!");
         var len = list.length;
         // this async is important because it allows the updateRowWatchers on first digest to escape the current digest.
-        flow.insert(inst.chunkModel.chunkDom, [list, options.chunks.size, '<div class="' + options.chunks.chunkClass + '">', '</div>', content]);
+        inst.chunkModel.chunkDom(list, options.chunks.size, '<div class="' + options.chunks.chunkClass + '">', '</div>', content);
         inst.rowsLength = len;
         inst.log("created %s dom elements", len);
     }
@@ -500,11 +515,19 @@ function Datagrid(scope, element, attr, $compile) {
      * ###<a name="buildRows">buildRows</a>###
      * Set the state to <a name="states.BUILDING">states.BUILDING</a>. Then build the dom.
      * @param {Array} list
+     * @param {Boolean=} forceRender
      */
-    function buildRows(list) {
+    function buildRows(list, forceRender) {
         inst.log("\tbuildRows %s", list.length);
         state = states.BUILDING;
-        flow.insert(createDom, [list]);
+        createDom(list);
+        flow.add(updateHeightValues, 0);
+        if (!isReady()) {
+            flow.add(ready);
+        }
+        if (forceRender) {
+            flow.add(render);
+        }
     }
 
     /**
@@ -514,7 +537,6 @@ function Datagrid(scope, element, attr, $compile) {
     function ready() {
         inst.log("\tready");
         state = states.READY;
-        flow.add(render);
         flow.add(fireReadyEvent);
         flow.add(safeDigest, [scope]);
     }
@@ -726,6 +748,11 @@ function Datagrid(scope, element, attr, $compile) {
      * @returns {{startIndex: number, i: number, inc: number, end: number, visibleScrollStart: number, visibleScrollEnd: number}}
      */
     function getStartingIndex() {
+        if (inst.chunkModel.getChunkList().height - inst.getViewportHeight() < values.scroll) {
+            // We are trying to start the scroll off at a height that is taller than we have in the list.
+            // reset scroll to 0.
+            values.scroll = 0;
+        }
         var height = viewHeight,
             scroll = values.scroll || 0,
             result = {
@@ -782,6 +809,7 @@ function Datagrid(scope, element, attr, $compile) {
                 }
                 updateMinMax(loop.i);
                 if (activateScope(s)) {
+                    inst.getRowElm(loop.i).attr('status', 'active');
                     lastActiveIndex = lastActive.indexOf(loop.i);
                     if (lastActiveIndex !== -1) {
                         lastActive.splice(lastActiveIndex, 1);
@@ -799,6 +827,9 @@ function Datagrid(scope, element, attr, $compile) {
             }
         }
         loop.ended = loop.i - 1;
+        if (inst.rowsLength && values.activeRange.min < 0 && values.activeRange.max < 0) {
+            throw new Error(errors.E1002);
+        }
         inst.log("\tstartIndex %s endIndex %s", loop.startIndex, loop.i);
         deactivateList(lastActive);
         lastVisibleScrollStart = loop.visibleScrollStart;
@@ -818,6 +849,7 @@ function Datagrid(scope, element, attr, $compile) {
             lastActiveIndex = lastActive.pop();
             deactivated.push(lastActiveIndex);
             deactivateScope(scopes[lastActiveIndex]);
+            inst.getRowElm(lastActiveIndex).attr('status', 'inactive');
         }
         inst.log("\tdeactivated %s", deactivated.join(', '));
     }
@@ -922,15 +954,7 @@ function Datagrid(scope, element, attr, $compile) {
             inst.log("\trender %s", state);
             // Where [states.BUILDING](#states.BUILDING) is used
             if (state === states.BUILDING) {
-                if (flow.length()) {
-                    flow.insert(ready);
-                    flow.insert(updateHeightValues, null, 0);// wait after to allow heights to update.
-                    flow.insert(buildRows, [inst.data]);
-                } else {
-                    flow.add(buildRows, [inst.data], 0);
-                    flow.add(updateHeightValues);
-                    flow.add(ready);
-                }
+                buildRows(inst.data);
             } else if (state === states.READY) {
                 inst.dispatch(exports.datagrid.events.ON_BEFORE_RENDER);
                 flow.add(beforeRenderAfterDataChange);
@@ -1070,11 +1094,15 @@ function Datagrid(scope, element, attr, $compile) {
         content.children().unbind();
         content.children().remove();
         // make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.
-        inst.chunkModel.reset(inst.data, content, scopes);
-        inst.rowsLength = inst.data.length;
-        updateHeightValues();
-        updateViewportHeight();
-        render();
+        if (inst.chunkModel.getChunkList()) {
+            inst.chunkModel.reset(inst.data, content, scopes);
+            inst.rowsLength = inst.data.length;
+            updateHeightValues();
+            updateViewportHeight();
+            render();
+        } else {
+            buildRows(inst.data, true);
+        }
         flow.add(inst.info, ["reset complete"]);
         flow.add(dispatch, [exports.datagrid.events.ON_AFTER_RESET], 0);
         flow.add(dispatch, [exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER]);

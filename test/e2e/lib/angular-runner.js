@@ -50,6 +50,433 @@ function dispatcher(target, scope, map) {
     }
 }
 
+(function(exports, global) {
+    function each(list, method, data) {
+        var i = 0, len, result, extraArgs;
+        if (arguments.length > 2) {
+            extraArgs = exports.util.array.toArray(arguments);
+            extraArgs.splice(0, 2);
+        }
+        if (list && list.length) {
+            len = list.length;
+            while (i < len) {
+                result = method.apply(null, [ list[i], i, list ].concat(extraArgs));
+                if (result !== undefined) {
+                    return result;
+                }
+                i += 1;
+            }
+        } else if (!(list instanceof Array)) {
+            for (i in list) {
+                if (list.hasOwnProperty(i)) {
+                    result = method.apply(null, [ list[i], i, list ].concat(extraArgs));
+                    if (result !== undefined) {
+                        return result;
+                    }
+                }
+            }
+        }
+        return list;
+    }
+    exports.each = each;
+    function filter(list, method, data) {
+        var i = 0, len, result = [], extraArgs, response;
+        if (arguments.length > 2) {
+            extraArgs = exports.util.array.toArray(arguments);
+            extraArgs.splice(0, 2);
+        }
+        if (list && list.length) {
+            len = list.length;
+            while (i < len) {
+                response = method.apply(null, [ list[i], i, list ].concat(extraArgs));
+                if (response) {
+                    result.push(list[i]);
+                }
+                i += 1;
+            }
+        } else {
+            for (i in list) {
+                if (list.hasOwnProperty(i)) {
+                    response = method.apply(null, [ list[i], i, list ].concat(extraArgs));
+                    if (response) {
+                        result.push(list[i]);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    exports.filter = filter;
+    exports.file = exports.file || {};
+    exports.file.getContents = function(url, asyncCallback, method, win) {
+        var xmlhttp;
+        win = win || window;
+        if (win.XMLHttpRequest) {
+            xmlhttp = new XMLHttpRequest();
+        }
+        xmlhttp.open(method || "GET", url, !!asyncCallback);
+        xmlhttp.send();
+        if (!asyncCallback) {
+            return xmlhttp.responseText;
+        } else {
+            throw new Error("Incomplete");
+        }
+    };
+    function toArray(obj) {
+        var result = [], i = 0, len = obj.length;
+        if (obj.length !== undefined) {
+            while (i < len) {
+                result.push(obj[i]);
+                i += 1;
+            }
+        } else {
+            for (i in obj) {
+                if (obj.hasOwnProperty(i)) {
+                    result.push(obj[i]);
+                }
+            }
+        }
+        return result;
+    }
+    function sort(ary, compareFn) {
+        var c, len, v, rlen, holder;
+        if (!compareFn) {
+            compareFn = function(a, b) {
+                return a > b ? 1 : a < b ? -1 : 0;
+            };
+        }
+        len = ary.length;
+        rlen = len - 1;
+        for (c = 0; c < len; c += 1) {
+            for (v = 0; v < rlen; v += 1) {
+                if (compareFn(ary[v], ary[v + 1]) > 0) {
+                    holder = ary[v + 1];
+                    ary[v + 1] = ary[v];
+                    ary[v] = holder;
+                }
+            }
+        }
+        return ary;
+    }
+    exports.util = exports.util || {};
+    exports.util.array = exports.util.array || {};
+    exports.util.array.toArray = toArray;
+    exports.util.array.sort = sort;
+    exports.selector = function() {
+        var omitAttrs, uniqueAttrs, classFilters, classFiltersFctn, api;
+        function query(selectorStr, el) {
+            el = el || api.config.doc.body;
+            var rx = /:eq\((\d+)\)$/, match = selectorStr.match(rx), result, count;
+            if (match && match.length) {
+                selectorStr = selectorStr.replace(rx, "");
+                count = match[1];
+            }
+            result = el.querySelectorAll(selectorStr);
+            if (result && count !== undefined) {
+                return result[count];
+            }
+            return result;
+        }
+        function getCleanSelector(el, ignoreClass) {
+            if (validateEl(el)) {
+                var ignore = buildIgnoreFunction(ignoreClass), matches, index, str, maxParent = api.config.doc.body, selector = getSelectorData(el, maxParent, ignore, null, true);
+                while (selector.count > selector.totalCount) {
+                    selector = selector.parent;
+                }
+                selector = selector.parent || selector;
+                str = selector.str || selectorToString(selector);
+                if (selector.str) {
+                    var child = selector.child;
+                    while (child) {
+                        str += " " + child.str;
+                        child = child.child;
+                    }
+                }
+                if (selector.count > 1 || selector.child && selector.child.count) {
+                    matches = exports.util.array.toArray(query(str, maxParent));
+                    index = matches.indexOf(el);
+                    str += ":eq(" + index + ")";
+                }
+                str += getVisible();
+                return str;
+            }
+            return "";
+        }
+        function quickSelector(element, maxParent, ignoreClass) {
+            if (validateEl(element)) {
+                var ignore = buildIgnoreFunction(ignoreClass), selector = getSelectorData(element, maxParent, ignore);
+                return selectorToString(selector) + getVisible();
+            }
+            return "";
+        }
+        function validateEl(el) {
+            if (!el) {
+                return "";
+            }
+            if (el && el.length) {
+                throw new Error("selector can only build a selection to a single DOMElement. A list was passed.");
+            }
+            return true;
+        }
+        function getVisible() {
+            return api.config.addVisible ? ":visible" : "";
+        }
+        function matchesClass(item, matcher) {
+            if (typeof matcher === "string" && matcher === item) {
+                return true;
+            }
+            if (typeof matcher === "object" && item.match(matcher)) {
+                return true;
+            }
+            return false;
+        }
+        function getSelectorData(element, maxParent, ignoreClass, child, smartSelector) {
+            var result;
+            if (!element) {
+                return "";
+            }
+            maxParent = maxParent || api.config.doc;
+            result = {
+                element: element,
+                ignoreClass: ignoreClass,
+                maxParent: maxParent,
+                classes: getClasses(element, ignoreClass),
+                attributes: getAttributes(element, child),
+                type: element.nodeName && element.nodeName.toLowerCase() || "",
+                child: child
+            };
+            if (!result.attributes.$unique || child) {
+                if (smartSelector) {
+                    result.str = selectorToString(result, 0, null, true);
+                    result.count = maxParent.querySelectorAll(result.str).length;
+                    if (result.count > 1) {
+                        result.parent = getParentSelector(element, maxParent, ignoreClass, result, smartSelector);
+                    }
+                } else {
+                    result.parent = getParentSelector(element, maxParent, ignoreClass, result, smartSelector);
+                }
+            }
+            return result;
+        }
+        function filterNumbers(item) {
+            return typeof item !== "number";
+        }
+        function buildIgnoreFunction(ignoreClasses) {
+            ignoreClasses = ignoreClasses || [];
+            if (typeof ignoreClasses === "function") {
+                return ignoreClasses;
+            }
+            return function(cls) {
+                if (ignoreClasses instanceof Array) {
+                    var i = 0, iLen = ignoreClasses.length;
+                    while (i < iLen) {
+                        if (matchesClass(cls, ignoreClasses[i])) {
+                            return false;
+                        }
+                        i += 1;
+                    }
+                } else if (matchesClass(cls, ignoreClasses)) {
+                    return false;
+                }
+                return true;
+            };
+        }
+        function getClasses(element, ignoreClass) {
+            var classes = ux.filter(element.classList, filterNumbers);
+            classes = ux.filter(classes, classFiltersFctn);
+            return ux.filter(classes, ignoreClass);
+        }
+        function getAttributes(element, child) {
+            var i = 0, len = element.attributes ? element.attributes.length : 0, attr, attributes = [], uniqueAttr = getUniqueAttribute(element.attributes);
+            if (uniqueAttr) {
+                if (uniqueAttr.name === "id" && api.config.allowId) {
+                    attributes.push("#" + uniqueAttr.value);
+                } else if (uniqueAttr.name !== "id") {
+                    attributes.push(createAttrStr(uniqueAttr));
+                }
+                if (attributes.length) {
+                    attributes.$unique = true;
+                    return attributes;
+                }
+            }
+            if (api.config.allowAttributes) {
+                while (i < len) {
+                    attr = element.attributes[i];
+                    if (!omitAttrs[attr.name] && !uniqueAttrs[attr.name]) {
+                        attributes.push(createAttrStr(attr));
+                    }
+                    i += 1;
+                }
+            }
+            return attributes;
+        }
+        function createAttrStr(attr) {
+            return "[" + attr.name + "='" + escapeQuotes(attr.value) + "']";
+        }
+        function getUniqueAttribute(attributes) {
+            var attr, i = 0, len = attributes ? attributes.length : 0;
+            while (i < len) {
+                attr = attributes[i];
+                if (uniqueAttrs[attr.name]) {
+                    return attr;
+                }
+                i += 1;
+            }
+            return null;
+        }
+        function camelCase(name) {
+            var ary, i = 1, len;
+            if (name.indexOf("-")) {
+                ary = name.split("-");
+                len = ary.length;
+                while (i < len) {
+                    ary[i] = ary[i].charAt(0).toUpperCase() + ary[i].substr(1);
+                    i += 1;
+                }
+                name = ary.join("");
+            }
+            return name;
+        }
+        function escapeQuotes(str) {
+            return str.replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+        }
+        function selectorToString(selector, depth, overrideMaxParent, skipCount) {
+            var matches, str, parent;
+            depth = depth || 0;
+            str = selector && !selector.attributes.$unique ? selectorToString(selector.parent, depth + 1) : "";
+            if (selector) {
+                str += (str.length ? " " : "") + getSelectorString(selector);
+            }
+            if (!depth && !skipCount) {
+                parent = overrideMaxParent || selector.maxParent;
+                matches = parent.querySelectorAll && parent.querySelectorAll(str) || [];
+                if (matches.length > 1) {
+                    str += ":eq(" + getIndexOfTarget(matches, selector.element) + ")";
+                }
+            }
+            return str;
+        }
+        function getSelectorString(selector) {
+            if (selector.attributes.$unique) {
+                return selector.attributes[0];
+            }
+            return selector.type + selector.attributes.join("") + (selector.classes.length ? "." + selector.classes.join(".") : "");
+        }
+        function getParentSelector(element, maxParent, ignoreClass, child, detailed) {
+            var parent = element.parentNode;
+            if (parent && parent !== maxParent) {
+                return getSelectorData(element.parentNode, maxParent, ignoreClass, child, detailed);
+            }
+            return null;
+        }
+        function getIndexOfTarget(list, element) {
+            var i, iLen = list.length;
+            for (i = 0; i < iLen; i += 1) {
+                if (element === list[i]) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        function getList(obj) {
+            var ary = [], i;
+            for (i in obj) {
+                if (obj.hasOwnProperty(i)) {
+                    ary.push(obj[i]);
+                }
+            }
+            return ary;
+        }
+        api = {
+            config: {
+                doc: window.document,
+                allowId: true,
+                allowAttributes: true,
+                addVisible: false
+            },
+            query: query,
+            addOmitAttrs: function(name) {
+                exports.each(arguments, function(name) {
+                    omitAttrs[name] = true;
+                });
+                return this;
+            },
+            removeOmitAttrs: function(name) {
+                exports.each(arguments, function(name) {
+                    delete omitAttrs[name];
+                });
+                return this;
+            },
+            getOmitAttrs: function() {
+                return getList(omitAttrs);
+            },
+            resetOmitAttrs: function() {
+                omitAttrs = {
+                    "class": true,
+                    style: true
+                };
+            },
+            addUniqueAttrs: function(name) {
+                exports.each(arguments, function(name) {
+                    uniqueAttrs[name] = true;
+                });
+                return this;
+            },
+            removeUniqueAttrs: function(name) {
+                exports.each(arguments, function(name) {
+                    delete uniqueAttrs[name];
+                });
+                return this;
+            },
+            getUniqueAttrs: function() {
+                return getList(uniqueAttrs);
+            },
+            resetUniqueAttrs: function() {
+                uniqueAttrs = {
+                    id: true,
+                    uid: true
+                };
+            },
+            addClassOmitFilters: function() {
+                exports.each(arguments, function(filter) {
+                    classFilters.push(filter);
+                });
+                classFiltersFctn = buildIgnoreFunction(classFilters);
+                return this;
+            },
+            removeClassOmitFilters: function() {
+                exports.each(arguments, function(filter) {
+                    var index = classFilters.indexOf(filter);
+                    if (index !== -1) {
+                        classFilters.splice(index, 1);
+                    }
+                });
+                classFiltersFctn = buildIgnoreFunction(classFilters);
+                return this;
+            },
+            getClassOmitFilters: function() {
+                return classFilters.slice(0);
+            },
+            resetClassOmitFilters: function() {
+                classFilters = [];
+                classFiltersFctn = buildIgnoreFunction(classFilters);
+            },
+            get: getCleanSelector,
+            getCleanSelector: getCleanSelector,
+            quickSelector: quickSelector,
+            reset: function() {
+                api.resetOmitAttrs();
+                api.resetUniqueAttrs();
+                api.resetClassOmitFilters();
+            }
+        };
+        api.reset();
+        return api;
+    }();
+})(this.ux = this.ux || {}, function() {
+    return this;
+}());
+
 function toArray(obj) {
     var result = [], i = 0, len = obj.length;
     while (i < len) {
@@ -75,6 +502,7 @@ var module = {}, runner, locals = {}, events = {
 }, options = {
     async: true,
     interval: 100,
+    chainInterval: 10,
     defaultTimeout: 1e3,
     frame: {
         top: 0,
@@ -133,6 +561,11 @@ function setupValues() {
         invoke: invoke
     };
     runner.locals.injector = injector;
+    runner.locals.$ = function(selection) {
+        var win = runner.options.window;
+        return win.$ ? win.$(selection) : $(selection);
+    };
+    $.extend(runner.locals.$, $);
 }
 
 function init() {
@@ -142,7 +575,33 @@ function init() {
     applyInPageMethods();
 }
 
+function loadJSFile(win, src) {
+    var xmlhttp;
+    if (win.XMLHttpRequest) {
+        xmlhttp = new XMLHttpRequest();
+    }
+    xmlhttp.open("GET", src, false);
+    xmlhttp.send();
+    var se = win.document.createElement("script");
+    se.type = "text/javascript";
+    se.text = xmlhttp.responseText;
+    win.document.getElementsByTagName("body")[0].appendChild(se);
+}
+
+function forceJQueryLoad() {
+    var win = runner.options.window;
+    if (!win.$ && win.angular.element) {
+        for (var i in $.prototype) {
+            win.angular.element.prototype[i] = $.prototype[i];
+        }
+    }
+    if (!win.$) {
+        loadJSFile(win, "//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js");
+    }
+}
+
 function applyInPageMethods() {
+    forceJQueryLoad();
     if (runner.inPageMethods.length) {
         each(runner.inPageMethods, function(method) {
             method.apply(runner.options.window, []);
@@ -297,7 +756,7 @@ function step(exports) {
             log("%s%s: checking %s", charPack("	", exports.depth), exports.type, exports.label);
             clearTimeout(intv);
             dispatch(events.STEP_UPDATE, exports);
-            intv = options.async ? setTimeout(finalize, options.interval) : finalize();
+            createInterval(exports, finalize);
         } else {
             log('%s%s: %s, value:"%s" (%s)', charPack("	", exports.depth), exports.type, exports.label, exports.value, exports.pass ? "pass" : "fail");
             walkStep = exports;
@@ -311,8 +770,19 @@ function step(exports) {
             } else {
                 clearTimeout(intv);
                 dispatch(events.STEP_UPDATE, exports);
-                intv = options.async ? setTimeout(next, options.interval) : next();
+                createInterval(exports, next);
             }
+        }
+    }
+    function createInterval(exports, callback) {
+        if (options.async) {
+            if (exports.type === types.STEP && exports.steps && exports.steps.length) {
+                intv = setTimeout(callback, options.chainInterval);
+            } else {
+                intv = setTimeout(callback, options.interval);
+            }
+        } else {
+            callback();
         }
     }
     function custom(label, method, validate, timeout) {
@@ -398,7 +868,7 @@ step.COMPLETE = 2;
 function create(params) {
     params.type = params.type || types.STEP;
     params.parent = params.parent || activeStep;
-    activeStep.add(step(params));
+    params.parent.add(step(params));
     return params;
 }
 
@@ -431,13 +901,14 @@ function scene(label, method, validate, timeout) {
 }
 
 function assert(label, validate) {
-    create({
-        type: types.SCENE,
-        parentType: types.SCENARIO,
+    var params = {
+        type: activeStep.type === types.STEP || activeStep.type === types.SCENE ? types.STEP : types.SCENE,
+        parentType: activeStep.type,
         label: label,
         method: function() {},
         validate: validate
-    });
+    };
+    return activeStep.type === types.STEP ? createElementStep(params, activeStep) : create(params);
 }
 
 function wait(timeout) {
@@ -811,6 +1282,7 @@ runner = {
     elementMethods: [],
     scenarios: {},
     locals: locals,
+    $: null,
     dispatcher: null,
     each: each,
     repeat: repeat,
@@ -836,6 +1308,8 @@ locals.wait = wait;
 locals.waitFor = waitFor;
 
 locals.waitForNgEvent = waitForNgEvent;
+
+locals.repeat = repeat;
 
 dispatcher(runner);
 
@@ -942,7 +1416,7 @@ function renderer() {
         }
     }
     function isChainStep(step) {
-        return step.type === ux.runner.types.STEP;
+        return step && step.type === ux.runner.types.STEP;
     }
     function writeLabel(step, paused, el) {
         var isChain = isChainStep(step.parent) && isChainStep(step);
@@ -952,7 +1426,7 @@ function renderer() {
         updateHighlight(step);
         if (!$("#" + step.id).length) {
             var parentIsChain = isChainStep(step.parent), indent = parentIsChain ? 4 : step.depth * 20, isChain = isChainStep(step);
-            if (isChain && lastStep && lastStep.depth >= step.depth && step !== step.parent.steps[0]) {
+            if (isChain && lastStep && lastStep.depth >= step.depth && step.parent && step !== step.parent.steps[0]) {
                 content.append('<div class="runner-break"></div>');
             }
             content.append('<div id="' + step.id + '" class="runner-pending runner-' + step.type + (isChain ? "-chain" : "") + '" style="margin-left: ' + indent + 'px;margin-right: 0px;"></div>');
@@ -1116,7 +1590,7 @@ runner.elementMethods.push(function(target) {
 });
 
 function Keyboard(el, lock) {
-    this.el = el;
+    this.el = el = ux.runner.locals.$(el);
     if (el.scope) {
         this.scope = el.scope();
     }
@@ -1409,7 +1883,7 @@ proto.capsLock = function() {
 };
 
 proto.lock = function() {
-    var doc = $(document);
+    var doc = ux.runner.locals.$(document);
     doc.bind("mousedown", this.killEvent);
     doc.bind("keydown", this.killEvent);
     doc.bind("focus", this.killEvent);
@@ -1418,7 +1892,7 @@ proto.lock = function() {
 };
 
 proto.release = function() {
-    var doc = $(document);
+    var doc = ux.runner.locals.$(document);
     doc.unbind("mousedown", this.killEvent);
     doc.unbind("keydown", this.killEvent);
     doc.unbind("focus", this.killEvent);
@@ -1442,7 +1916,7 @@ proto.dispatchEvent = function(el, type, evt) {
 
 proto.createEvent = function(type, options) {
     var evt, e;
-    e = $.extend({
+    e = ux.runner.locals.$.extend({
         bubbles: true,
         cancelable: true,
         view: window,
@@ -1453,7 +1927,7 @@ proto.createEvent = function(type, options) {
         keyCode: 0,
         charCode: 0
     }, options);
-    if ($.isFunction(document.createEvent)) {
+    if (ux.runner.locals.$.isFunction(document.createEvent)) {
         if (type.indexOf("key") !== -1) {
             try {
                 evt = document.createEvent("KeyEvents");
@@ -1461,7 +1935,7 @@ proto.createEvent = function(type, options) {
             } catch (err) {
                 evt = document.createEvent("Events");
                 evt.initEvent(type, e.bubbles, e.cancelable);
-                $.extend(evt, {
+                ux.runner.locals.$.extend(evt, {
                     view: e.view,
                     ctrlKey: e.ctrlKey,
                     altKey: e.altKey,
@@ -1477,9 +1951,9 @@ proto.createEvent = function(type, options) {
         }
     } else if (document.createEventObject) {
         evt = document.createEventObject();
-        $.extend(evt, e);
+        ux.runner.locals.$.extend(evt, e);
     }
-    if ($.browser !== undefined && ($.browser.msie || $.browser.opera)) {
+    if (ux.runner.locals.$.browser !== undefined && (ux.runner.locals.$.browser.msie || ux.runner.locals.$.browser.opera)) {
         evt.keyCode = e.charCode > 0 ? e.charCode : e.keyCode;
         evt.charCode = undefined;
     }
@@ -1514,20 +1988,17 @@ function sendKeys(str, assertValue) {
     return s;
 }
 
-runner.elementMethods.push({
-    name: "sendKeys",
-    method: function(target) {
-        return function(str, strToCompare) {
-            var s = sendKeys.apply(null, arguments);
-            runner.createElementStep(s, target);
-            return s;
-        };
-    }
+runner.elementMethods.push(function(target) {
+    target.sendKeys = function(str, strToCompare) {
+        var s = sendKeys.apply(null, arguments);
+        runner.createElementStep(s, target);
+        return s;
+    };
 });
 
 runner.inPageMethods.push(function() {
     "use strict";
-    var $fn = this.jQuery.fn, input;
+    var $fn = this.jQuery ? this.jQuery.fn : this.angular.element.prototype, $ = this.jQuery || this.angular.element;
     $fn.getCursorPosition = function() {
         if (this.length === 0) {
             return -1;
@@ -1551,10 +2022,10 @@ runner.inPageMethods.push(function() {
         if (this.length === 0) {
             return -1;
         }
-        input = this[0];
+        var input = this[0];
         var pos = input.value.length, r;
         if (input.createTextRange) {
-            r = document.selection.createRange().duplicate();
+            r = ux.runner.locals.window.document.selection.createRange().duplicate();
             r.moveEnd("character", input.value.length);
             if (r.text === "") {
                 pos = input.value.length;
@@ -1569,7 +2040,7 @@ runner.inPageMethods.push(function() {
         if (this.length === 0) {
             return -1;
         }
-        input = this[0];
+        var input = this[0];
         var pos = input.value.length, r;
         if (input.createTextRange) {
             r = document.selection.createRange().duplicate();
@@ -1587,7 +2058,7 @@ runner.inPageMethods.push(function() {
         if (this.length === 0) {
             return this;
         }
-        input = this[0];
+        var input = this[0];
         if (input.createTextRange) {
             var range = input.createTextRange();
             range.collapse(true);
@@ -1603,13 +2074,34 @@ runner.inPageMethods.push(function() {
 });
 
 runner.elementMethods.push(function(target) {
-    target.sendMouse = function(focus, namespace) {
-        namespace = namespace ? "." + namespace : "";
-        var step = target.trigger("mousedown" + namespace);
-        if (focus) {
-            step.focus();
+    function anchorClick(anchorObj) {
+        if (anchorObj.click) {
+            anchorObj.click();
+        } else if (document.createEvent) {
+            var evt = document.createEvent("MouseEvents");
+            evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            var allowDefault = anchorObj.dispatchEvent(evt);
         }
-        return step.trigger("mouseup" + namespace).trigger("click" + namespace);
+    }
+    target.sendMouse = function(focus, namespace) {
+        var step, s = runner.createElementStep({
+            label: "sendMouse",
+            method: function() {
+                if (this.element[0].href && this.element[0].href.length) {
+                    anchorClick(this.element[0]);
+                }
+                return s;
+            }
+        }, this);
+        namespace = namespace ? "." + namespace : "";
+        if (namespace) {
+            step = s.trigger("mousedown" + namespace);
+            if (focus) {
+                step = step.focus();
+            }
+            return step.trigger("mouseup" + namespace).trigger("click" + namespace);
+        }
+        return s.mousedown().focus().mouseup().click();
     };
 });
 
@@ -1634,9 +2126,9 @@ runner.elementMethods.push(function(target) {
             validate: function() {
                 var result = $.trim(target.value) === value;
                 if (!result) {
-                    s.label = "expected " + target.value + " to be " + value;
+                    s.label = 'expected "' + target.value + '" to be "' + value + '"';
                 } else {
-                    s.label = "toBe " + value;
+                    s.label = 'toBe "' + value + '"';
                 }
                 return result;
             }

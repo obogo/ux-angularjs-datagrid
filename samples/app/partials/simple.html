@@ -1,6 +1,8 @@
 <div class="stats">
     <div class="page-title">{{name}}</div>
     <div progress-bar class="progress-bar"></div>
+    <!--<a href="javascript:void(0)" data-ng-click="clear()">Clear</a> |-->
+    <!--<a href="javascript:void(0)" data-ng-click="reset()">Reset</a>-->
     <span>SCROLL TO:</span>
     <span data-ng-repeat="p in percents"><a href="" data-ng-click="scrollToPercent(p/100)">{{p}}%</a> </span>
 </div>

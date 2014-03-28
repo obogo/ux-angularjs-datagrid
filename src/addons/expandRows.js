@@ -1,10 +1,12 @@
 exports.datagrid.events.COLLAPSE_ROW = "datagrid:collapseRow";
 exports.datagrid.events.EXPAND_ROW = "datagrid:expandRow";
 exports.datagrid.events.TOGGLE_ROW = "datagrid:toggleRow";
+exports.datagrid.events.ROW_TRANSITION_COMPLETE = "datagrid:rowTransitionComplete";
 angular.module('ux').factory('expandRows', function () {
     //TODO: on change row template. This needs to collapse the row.
     return function (inst) {
-        var result = {},
+        var intv,
+            result = exports.logWrapper('expandRows', {}, 'green', inst.dispatch),
             lastGetIndex,
             cache = {},
             opened = {},
@@ -110,10 +112,17 @@ angular.module('ux').factory('expandRows', function () {
                     elm.addClass('animating');
                 }
                 if (tpl.transition === false) {
-                    onTransitionEnd({target: elm[0]});
+                    // we need to wait for the heights to update before updating positions.
+                    if (inst.options.chunks.detachDom) {
+                        setTimeout(function () {
+                            onTransitionEnd({target: elm[0]});
+                        }, 0);
+                    } else {
+                        onTransitionEnd({target: elm[0]});
+                    }
                 }
             } else {
-                throw new Error("unable to toggle template. cls for template %s was not set.", template.name);
+                throw new Error("unable to toggle template. cls for template '" + template.name + "' was not set.");
             }
         }
 
@@ -145,12 +154,18 @@ angular.module('ux').factory('expandRows', function () {
             } else {
                 delete opened[index];
             }
-            s.$digest();
+            inst.safeDigest(s);
             inst.updateHeights(index);
-            // check for last row. On expansion it needs to scroll down.
-            if (state === states.opened && index === inst.data.length - 1) {
-                inst.scrollModel.scrollToBottom(true);
-            }
+            // we told the heights to update. Give time for them to change then fire the event.
+            clearTimeout(intv);
+            intv = setTimeout(function () {
+                clearTimeout(intv);
+                // check for last row. On expansion it needs to scroll down.
+                if (state === states.opened && index === inst.data.length - 1) {
+                    inst.scrollModel.scrollToBottom(true);
+                }
+                inst.dispatch(exports.datagrid.events.ROW_TRANSITION_COMPLETE);
+            }, 0);
         }
 
         function isExpanded(itemOrIndex) {

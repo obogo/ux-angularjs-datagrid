@@ -122,13 +122,16 @@ angular.module('ux').factory('iScrollAddon', function () {
             if (!myScroll) {
                 refresh();
             }
+            value = originalScrollModel.capScrollValue(value);
             myScroll.scrollTo(0, -value, immediately ? 0 : 200);
             clearTimeout(scrollToIntv);
             if (immediately) {
-                scrolling = true;
-                result.onUpdateScroll(value);
-                scrolling = false;
-                result.onScrollingStop();
+                if (inst.values.scroll || value) {
+                    scrolling = true;
+                    result.onUpdateScroll(value);
+                    scrolling = false;
+                    result.onScrollingStop();
+                }
             } else {
                 scrollToIntv = setTimeout(function () {
                     result.onScrollingStop();

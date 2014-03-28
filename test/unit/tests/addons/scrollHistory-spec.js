@@ -6,7 +6,7 @@ describe("scrollHistory", function () {
         injector = angular.injector(['ngMock', 'ng', 'ux']);
         injector.invoke(function ($location, $rootScope, scrollHistory) {
             scope = $rootScope.$new();
-            $location.path = function () {
+            $location.url = function () {
                 return '/myPath';
             };
             scope.items = [];
@@ -34,6 +34,12 @@ describe("scrollHistory", function () {
                     scrollTo: function (value) {
                         this.scrolledTo = value;
                     }
+                },
+                getContentHeight: function () {
+                    return 10000;
+                },
+                getViewportHeight: function () {
+                    return 200;
                 }
             };
             exp = injector.invoke(scrollHistory, exp, {inst: exp});
@@ -89,10 +95,9 @@ describe("scrollHistory", function () {
         expect(sh.getScroll('path')).toBe(10);
     });
 
-    it("should update the value after the first render if there is a value in the scroll history.", function () {
-        sh.storeScroll('/myPath', 10);// needs to be the current path.
+    it("should update the value before the initial render.", function () {
+        sh.storeScroll('/myPath', 20);// needs to be the current path.
         exp.dispatch(ux.datagrid.events.ON_BEFORE_DATA_CHANGE);
-        exp.dispatch(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE);
-        expect(exp.scrollModel.scrolledTo).toBe(10);
+        expect(exp.values.scroll).toBe(20);
     });
 })

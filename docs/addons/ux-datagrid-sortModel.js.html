@@ -1319,6 +1319,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         <span class="nx">result</span><span class="p">.</span><span class="nx">getLocale</span> <span class="o">=</span> <span class="nx">getLocale</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">clear</span> <span class="o">=</span> <span class="nx">clear</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">clearAll</span> <span class="o">=</span> <span class="nx">clearAll</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">sortOptions</span> <span class="o">=</span> <span class="nx">sortOptions</span><span class="p">;</span>
         <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
     <span class="p">}();</span>
     <span class="k">return</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">sortStatesModel</span><span class="p">;</span>
@@ -1406,6 +1407,8 @@ It stores the sorted state on the sortStatesModel to keep around until cleared.<
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">result</span><span class="p">.</span><span class="nx">addSortColumn</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">addSortColumn</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">methods</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">sorts</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">methods</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">();</span>
+            <span class="nx">pathState</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">||</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">;</span>
         <span class="p">};</span>
 
 </pre></div>
@@ -1528,7 +1531,9 @@ It stores the sorted state on the sortStatesModel to keep around until cleared.<
 <p>the original is always without any sort options.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-                <span class="kd">var</span> <span class="nx">key</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">createKeyFromStates</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">),</span> <span class="nx">event</span><span class="p">,</span> <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">copy</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">result</span><span class="p">.</span><span class="nx">$processing</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">result</span><span class="p">.</span><span class="nx">$processing</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                    <span class="kd">var</span> <span class="nx">key</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">createKeyFromStates</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">),</span> <span class="nx">event</span><span class="p">,</span> <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">copy</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">);</span>
 
 </pre></div>
         </td>
@@ -1541,8 +1546,8 @@ It stores the sorted state on the sortStatesModel to keep around until cleared.<
 <p>clone so they cannot mess with the data directly.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-                <span class="nx">result</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;applySorts %s&quot;</span><span class="p">,</span> <span class="nx">key</span><span class="p">);</span>
-                <span class="nx">event</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_SORT</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">currentPathState</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
+                    <span class="nx">result</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;applySorts %s&quot;</span><span class="p">,</span> <span class="nx">key</span><span class="p">);</span>
+                    <span class="nx">event</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_SORT</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">currentPathState</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
 
 </pre></div>
         </td>
@@ -1555,10 +1560,10 @@ It stores the sorted state on the sortStatesModel to keep around until cleared.<
 <p>prevent default on event to prevent sort.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">defaultPrevented</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="o">||</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">).</span><span class="nx">length</span> <span class="o">!==</span> <span class="nx">original</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  store sort %s&quot;</span><span class="p">,</span> <span class="nx">key</span><span class="p">);</span>
-                        <span class="nx">result</span><span class="p">.</span><span class="nx">setCache</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">original</span> <span class="o">&amp;&amp;</span> <span class="nx">original</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">||</span> <span class="p">[]);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">defaultPrevented</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="o">||</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">).</span><span class="nx">length</span> <span class="o">!==</span> <span class="nx">original</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  store sort %s&quot;</span><span class="p">,</span> <span class="nx">key</span><span class="p">);</span>
+                            <span class="nx">result</span><span class="p">.</span><span class="nx">setCache</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">original</span> <span class="o">&amp;&amp;</span> <span class="nx">original</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">||</span> <span class="p">[]);</span>
 
 </pre></div>
         </td>
@@ -1571,15 +1576,15 @@ It stores the sorted state on the sortStatesModel to keep around until cleared.<
 <p>clone it</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-                        <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">,</span> <span class="nx">applyListSort</span><span class="p">,</span> <span class="p">{</span>
-                            <span class="nx">grouped</span><span class="o">:</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">grouped</span><span class="p">,</span>
-                            <span class="nx">pathState</span><span class="o">:</span> <span class="nx">pathState</span><span class="p">,</span>
-                            <span class="nx">ary</span><span class="o">:</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span>
-                        <span class="p">});</span>
-                    <span class="p">}</span>
-                    <span class="nx">lastSortResult</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
-                    <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">clearDirty</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">);</span>
-                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                            <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">,</span> <span class="nx">applyListSort</span><span class="p">,</span> <span class="p">{</span>
+                                <span class="nx">grouped</span><span class="o">:</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">grouped</span><span class="p">,</span>
+                                <span class="nx">pathState</span><span class="o">:</span> <span class="nx">pathState</span><span class="p">,</span>
+                                <span class="nx">ary</span><span class="o">:</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span>
+                            <span class="p">});</span>
+                        <span class="p">}</span>
+                        <span class="nx">lastSortResult</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
+                        <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">clearDirty</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">);</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 
 </pre></div>
         </td>
@@ -1592,9 +1597,11 @@ It stores the sorted state on the sortStatesModel to keep around until cleared.<
 <p>TODO: need to unit test this to make sure it works with async sort.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-                    <span class="nx">lastSortResult</span> <span class="o">=</span> <span class="nx">original</span><span class="p">;</span>
+                        <span class="nx">lastSortResult</span> <span class="o">=</span> <span class="nx">original</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    <span class="nx">result</span><span class="p">.</span><span class="nx">$processing</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_SORT</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">,</span> <span class="nx">currentPathState</span><span class="p">);</span>
                 <span class="p">}</span>
-                <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_SORT</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">,</span> <span class="nx">currentPathState</span><span class="p">);</span>
             <span class="p">}</span>
             <span class="k">return</span> <span class="nx">lastSortResult</span><span class="p">;</span>
         <span class="p">};</span>

@@ -1,49 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html data-ng-app="app">
 <head>
     <title>RUNNER: Framed</title>
-    <link rel="stylesheet" type="text/css" href="runner.css">
+    <link rel="stylesheet" type="text/css" href="css/runner.css">
+    <link rel="stylesheet" type="text/css" href="css/e2e.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
-    <script src="lib/ux-runner.js"></script>
-    <script src="scenarios/scrolling-scenario.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.10/angular.min.js"></script>
     <script>
 
-        function setupFrame() {
-            var win = $('#targetFrame')[0].contentWindow,
-                angularRoot = win.angular.element(win.document);
-            ux.runner.options.window = win;
-            ux.runner.options.rootElement = angularRoot;
-        }
-
-        function getDescriptions() {
-            setupFrame();
-        }
-
-        ux.runner.config({
-            autoStart: function () {
-                setTimeout(function () {
-                    setupFrame();
-                    ux.runner.run();
-                }, 1000);
-            },
-            interval: 50,
-            defaultTimeout: 1000,
-            frame: {
-                width: 320,
-                height: 600,
-                float: "right"
-            },
-            timeouts: {
-                short: 1000,
-                medium: 10000,
-                long: 30000,
-                forever: 60000
-            }
-        });
+        var pointed = false,
+            config = {
+                interval: 50,
+                defaultTimeout: 1000,
+                frame: {
+                    width: 320,
+                    height: 600,
+                    float: "right"
+                },
+                timeouts: {
+                    short: 1000,
+                    medium: 10000,
+                    long: 30000,
+                    forever: 60000
+                }
+            };
 
     </script>
+    <script src="lib/launch-runner.js"></script>
+    <script src="lib/angular-runner.js"></script>
+    <script src="actions/goHome.js"></script>
+
+    <script src="scenarios/scrolling-scenario.js"></script>
+    <script src="scenarios/scrollingHistory-scenario.js"></script>
+    <script src="scenarios/focusManager-scenario.js"></script>
+    <script>
+        ux.runner.config(config);
+    </script>
 </head>
-<body>
-    <iframe id="targetFrame" src="../../samples/app/" onload="getDescriptions()"></iframe>
+<body onload="loadFrame('../../samples/app/')">
+<div class="frameContainer"></div>
+<div ng-controller="root" class="scenarios">
+    <h3>Scenarios</h3>
+
+    <div class="button-stack">
+        <div class="button" ng-show="scenarios.length" ng-click="start()"><a href="javascript:void(0)">Run All</a></div>
+        <div ng-repeat="scenario in scenarios" class="button" ng-click="start(scenario)"><a href="javascript:void(0)">{{scenario}}</a></div>
+    </div>
+
+    <div class="descriptions">
+        <div ng-repeat="desc in descriptions" class="description {{desc.type}}">{{desc.label}}</div>
+    </div>
+</div>
 </body>
 </html>

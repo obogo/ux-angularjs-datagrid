@@ -11,20 +11,20 @@
             return ng(el).scope().$index == index && el.offset().top <= $('.datagrid').offset().top;
         }
 
-        scenario("ux-datagrid scrolling", function (goHome) {
+        scenario("Scrolling History", function (goHome) {
             goHome();
 
             scene("should load the simple grid example", function () {
-                find("a[href='#/simple']").sendMouse();
+                find("a[href='#/addons/scrollHistory']").sendMouse();
                 find('.datagrid').until('scrolled to', function () {
                     var s = ng(this.element[0]).scope();
-                    s.datagrid.scrollModel.scrollTo(s.datagrid.values.scroll + 50);
-                    return s.datagrid.values.scroll > 5000;
+                    s.datagrid.scrollModel.scrollTo(s.datagrid.values.scroll + 20);
+                    return s.datagrid.values.scroll > 2000;
                 }, options.timeouts.medium);
                 wait(500); // wait for grid to render.
 
                 assert("row 25 should be at the top of the viewport.", function () {
-                    return isRowAtTop(126);
+                    return isRowAtTop(7);
                 }, this);
             });
 
@@ -39,6 +39,6 @@
         });
     }
 
-    ux.runner.addScenario('Scrolling', scenarios);
+    ux.runner.addScenario('Scrolling History', scenarios);
 
 }());

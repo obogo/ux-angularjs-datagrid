@@ -4,6 +4,21 @@ exports.selector = (function () {
 
     var omitAttrs, uniqueAttrs, classFilters, classFiltersFctn, api;
 
+    function query(selectorStr, el) {
+        el = el || api.config.doc.body;
+        var rx = /:eq\((\d+)\)$/, match = selectorStr.match(rx), result, count;
+        // filter out eq.
+        if (match && match.length) {
+            selectorStr = selectorStr.replace(rx, '');
+            count = match[1];
+        }
+        result = el.querySelectorAll(selectorStr);
+        if (result && count !== undefined) {
+            return result[count];
+        }
+        return result;
+    }
+
     /**
      * ##getCleanSelector##
      * Generate a clean readable selector. This is accurate, but NOT performant.
@@ -15,14 +30,22 @@ exports.selector = (function () {
     function getCleanSelector(el, ignoreClass) {
         if (validateEl(el)) {
             var ignore = buildIgnoreFunction(ignoreClass), matches, index, str,
-                selector = getSelectorData(el, api.config.doc.body, ignore, null, true);
+                maxParent = api.config.doc.body,
+                selector = getSelectorData(el, maxParent, ignore, null, true);
             while (selector.count > selector.totalCount) {
                 selector = selector.parent;
             }
             selector = selector.parent || selector;// once we find the top level. we need to move up one.
             str = selector.str || selectorToString(selector);
-            if (selector.count > 1) {
-                matches = exports.util.array.toArray(selector.maxParent.querySelectorAll(selector.relativeSelector));
+            if (selector.str) {
+                var child = selector.child;
+                while (child) {
+                    str += ' ' + child.str;
+                    child = child.child;
+                }
+            }
+            if (selector.count > 1 || (selector.child && selector.child.count)) {
+                    matches = exports.util.array.toArray(query(str, maxParent));
                 index = matches.indexOf(el);
                 str += ':eq(' + index + ')';
             }
@@ -89,11 +112,11 @@ exports.selector = (function () {
             ignoreClass: ignoreClass,
             maxParent: maxParent,
             classes: getClasses(element, ignoreClass),
-            attributes: getAttributes(element),
+            attributes: getAttributes(element, child),
             type: element.nodeName && element.nodeName.toLowerCase() || '',
             child: child
         };
-        if (!result.attributes.$unique) {
+        if(!result.attributes.$unique || child) {
             if (smartSelector) {
                 result.str = selectorToString(result, 0, null, true);
                 result.count = maxParent.querySelectorAll(result.str).length;
@@ -138,7 +161,7 @@ exports.selector = (function () {
         return ux.filter(classes, ignoreClass);
     }
 
-    function getAttributes(element) {
+    function getAttributes(element, child) {
         var i = 0, len = element.attributes ? element.attributes.length : 0, attr, attributes = [], uniqueAttr = getUniqueAttribute(element.attributes);
         // first see if it has a unique attribute.
         if (uniqueAttr) {
@@ -155,7 +178,7 @@ exports.selector = (function () {
         if (api.config.allowAttributes) {
             while (i < len) {
                 attr = element.attributes[i];
-                if (!omitAttrs[attr.name] && uniqueAttrs[attr.name]) {
+                if (!omitAttrs[attr.name] && !uniqueAttrs[attr.name]) {
                     attributes.push(createAttrStr(attr));
                 }
                 i += 1;
@@ -202,7 +225,7 @@ exports.selector = (function () {
     function selectorToString(selector, depth, overrideMaxParent, skipCount) {
         var matches, str, parent;
         depth = depth || 0;
-        str = selector ? selectorToString(selector.parent, depth + 1) : '';
+        str = selector && !selector.attributes.$unique ? selectorToString(selector.parent, depth + 1) : '';
         if (selector) {
             str += (str.length ? ' ' : '') + getSelectorString(selector);
         }

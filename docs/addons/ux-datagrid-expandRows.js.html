@@ -52,6 +52,8 @@ License: MIT.</p>
 
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">TOGGLE_ROW</span> <span class="o">=</span> <span class="s2">&quot;datagrid:toggleRow&quot;</span><span class="p">;</span>
 
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ROW_TRANSITION_COMPLETE</span> <span class="o">=</span> <span class="s2">&quot;datagrid:rowTransitionComplete&quot;</span><span class="p">;</span>
+
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;expandRows&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
 
 </pre></div>
@@ -66,7 +68,7 @@ License: MIT.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">lastGetIndex</span><span class="p">,</span> <span class="nx">cache</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">opened</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">states</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">intv</span><span class="p">,</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;expandRows&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">lastGetIndex</span><span class="p">,</span> <span class="nx">cache</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">opened</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">states</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nx">opened</span><span class="o">:</span> <span class="s2">&quot;opened&quot;</span><span class="p">,</span>
             <span class="nx">closed</span><span class="o">:</span> <span class="s2">&quot;closed&quot;</span>
         <span class="p">},</span> <span class="nx">superGetTemplateHeight</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplateHeight</span><span class="p">,</span> <span class="c1">// transition end lookup.</span>
@@ -148,12 +150,32 @@ License: MIT.</p>
                     <span class="nx">elm</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;animating&quot;</span><span class="p">);</span>
                 <span class="p">}</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">transition</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="nx">onTransitionEnd</span><span class="p">({</span>
-                        <span class="nx">target</span><span class="o">:</span> <span class="nx">elm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="p">});</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>we need to wait for the heights to update before updating positions.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">chunks</span><span class="p">.</span><span class="nx">detachDom</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                            <span class="nx">onTransitionEnd</span><span class="p">({</span>
+                                <span class="nx">target</span><span class="o">:</span> <span class="nx">elm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="p">});</span>
+                        <span class="p">},</span> <span class="mi">0</span><span class="p">);</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="nx">onTransitionEnd</span><span class="p">({</span>
+                            <span class="nx">target</span><span class="o">:</span> <span class="nx">elm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="p">});</span>
+                    <span class="p">}</span>
                 <span class="p">}</span>
             <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;unable to toggle template. cls for template %s was not set.&quot;</span><span class="p">,</span> <span class="nx">template</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;unable to toggle template. cls for template &#39;&quot;</span> <span class="o">+</span> <span class="nx">template</span><span class="p">.</span><span class="nx">name</span> <span class="o">+</span> <span class="s2">&quot;&#39; was not set.&quot;</span><span class="p">);</span>
             <span class="p">}</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">makeReverseStyle</span><span class="p">(</span><span class="nx">elm</span><span class="p">,</span> <span class="nx">style</span><span class="p">)</span> <span class="p">{</span>
@@ -183,7 +205,7 @@ License: MIT.</p>
             <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
                 <span class="k">delete</span> <span class="nx">opened</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
             <span class="p">}</span>
-            <span class="nx">s</span><span class="p">.</span><span class="nx">$digest</span><span class="p">();</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">safeDigest</span><span class="p">(</span><span class="nx">s</span><span class="p">);</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">updateHeights</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
 
 </pre></div>
@@ -192,14 +214,31 @@ License: MIT.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>we told the heights to update. Give time for them to change then fire the event.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">intv</span><span class="p">);</span>
+            <span class="nx">intv</span> <span class="o">=</span> <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">intv</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
 </div>
 <p>check for last row. On expansion it needs to scroll down.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">state</span> <span class="o">===</span> <span class="nx">states</span><span class="p">.</span><span class="nx">opened</span> <span class="o">&amp;&amp;</span> <span class="nx">index</span> <span class="o">===</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollToBottom</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-            <span class="p">}</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">state</span> <span class="o">===</span> <span class="nx">states</span><span class="p">.</span><span class="nx">opened</span> <span class="o">&amp;&amp;</span> <span class="nx">index</span> <span class="o">===</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollToBottom</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ROW_TRANSITION_COMPLETE</span><span class="p">);</span>
+            <span class="p">},</span> <span class="mi">0</span><span class="p">);</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">isExpanded</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">getIndex</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">);</span>
@@ -225,7 +264,7 @@ License: MIT.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
 </div>
 <p>override the getTemplateHeight to return the result with the expanded height.</p>
         </td>

@@ -91,6 +91,11 @@ Also notice that I only implemented this for the iOS. Android works well with na
 ## No JQuery ##
 AngularJS Datagrid doesn't have any JQuery dependencies. This helps to keep your application light weight.
 
+## options.chunks.detachDom mode ##
+Some browsers cannot handle a large amount of dom in the page (Cough... IE). So to improve performance in those browsers I added the detachDom mode. It still renders the chunks, but will detach the ones out of view.
+The number passed to the detachDom mode is how many dom rows to render in each direction of the current visible area. So if your chunks were 10 rows per chunk and you wanted to have one chunk in either direction from the view area then you would set detachDom = 10.
+I have used this in other places to optimize browser responsiveness. Slower devices benefit from this as well.
+
 ## Running Unit Tests Locally ##
 You can run the unit tests and samples locally by running
 

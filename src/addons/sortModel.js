@@ -420,6 +420,7 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
         result.getLocale = getLocale;
         result.clear = clear;
         result.clearAll = clearAll;
+        result.sortOptions = sortOptions;
 
         return result;
     }());
@@ -448,6 +449,8 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
          */
         result.addSortColumn = function addSortColumn(name, methods) {
             sorts[name] = methods;
+            var pathState = sortStatesModel.getPathState();
+            pathState[name] = pathState[name] || sortStatesModel.sortOptions.NONE;
         };
 
         /**

@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.5.3
+* uxDatagrid v.0.5.4
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -56,6 +56,10 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                         updateTarget();
                         checkOffsetChange();
                         onScroll(null);
+                        enable();
+                        if (grid.scrollHistory && grid.scrollHistory.getCurrentScroll()) {
+                            disable();
+                        }
                     });
                 }
                 scope.$on(exports.datagrid.events.ON_SCROLL_STOP, function() {
@@ -122,6 +126,9 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                         unwatchRender();
                         checkOffsetChange();
                         enable();
+                        if (grid.scrollHistory && grid.scrollHistory.getCurrentScroll()) {
+                            disable();
+                        }
                     });
                 });
                 function updateLastScroll(myIScroll, otherIScroll) {

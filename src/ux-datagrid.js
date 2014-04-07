@@ -1135,15 +1135,27 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {*) item
      * @param {Object} oldTemplate
      * @param {Object} newTemplate
+     * @param {Array} classes
      */
-    function onRowTemplateChange(evt, item, oldTemplate, newTemplate) {
-        var index = inst.getNormalizedIndex(item),
-            el = getRowElm(index), s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope();
+    function onRowTemplateChange(evt, item, oldTemplate, newTemplate, classes) {
+        var index = inst.getNormalizedIndex(item), el = getRowElm(index),
+            s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope(), replaceEl, newScope;
         if (s !== scope) {
+            replaceEl = angular.element(inst.templateModel.getTemplateByName(newTemplate).template);
+            while (classes && classes.length) {
+                replaceEl.addClass(classes.shift());
+            }
+            el.parent()[0].insertBefore(replaceEl[0], el[0]);
             s.$destroy();
             scopes[index] = null;
-            el.replaceWith(inst.templateModel.getTemplate(item).template);
-            scopes[index] = compileRow(index);
+            newScope = scopes[index] = compileRow(index);
+            for(var i in s) {
+                if (s.hasOwnProperty(i) && !newScope.hasOwnProperty(i)) {
+                    newScope[i] = s[i];
+                }
+            }
+            el.remove();
+            newScope.$digested = false;
             updateHeights(index);
         }
     }
@@ -1215,6 +1227,7 @@ function Datagrid(scope, element, attr, $compile) {
      * needs to put all watcher back before destroying or it will not destroy child scopes, or remove watchers.
      */
     function destroy() {
+        getContent().css({display: 'none'});
         scope.datagrid = null; // we have a circular reference. break it on destroy.
         inst.log('destroying grid');
         window.removeEventListener('resize', onResize);

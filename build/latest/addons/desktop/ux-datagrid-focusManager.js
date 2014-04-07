@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.5.3
+* uxDatagrid v.0.5.4
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -785,7 +785,7 @@ angular.module("ux").factory("gridFocusManager", function() {
         }
         function onResize(event) {
             var index;
-            if (inst.element[0].contains(document.activeElement)) {
+            if (document.activeElement !== inst.element[0] && inst.element[0].contains(document.activeElement)) {
                 index = inst.getRowIndexFromElement(document.activeElement);
                 inst.scrollModel.scrollIntoView(index);
             }

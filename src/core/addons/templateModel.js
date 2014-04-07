@@ -41,12 +41,17 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
 
         function createTemplate(scriptTemplate) {
             var template = trim(angular.element(scriptTemplate).html()),
+                originalTemplate = template,
                 wrapper = document.createElement('div'),
                 name = getScriptTemplateAttribute(scriptTemplate, 'template-name') || defaultName,
+                base = getScriptTemplateAttribute(scriptTemplate, 'template-base') || null,
                 templateData;
             wrapper.className = 'grid-template-wrapper';
+            template = result.prepTemplate(name, template, base);
             template = angular.element(template)[0];
-            template.className += ' ' + inst.options.rowClass + ' ' + inst.options.uncompiledClass + ' {{$status}}';
+            if (!base) {
+                template.className += ' ' + inst.options.rowClass + ' ' + inst.options.uncompiledClass + ' {{$status}}';
+            }
             template.setAttribute('template', name);
             inst.getContent()[0].appendChild(wrapper);
             wrapper.appendChild(template);
@@ -55,6 +60,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
                 name: name,
                 item: getScriptTemplateAttribute(scriptTemplate, 'template-item'),
                 template: template,
+                originalTemplate: originalTemplate,
                 height: wrapper.offsetHeight
             };
             result.log('template: %s %o', name, templateData);
@@ -66,6 +72,17 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             inst.getContent()[0].removeChild(wrapper);
             totalHeight = 0;// reset cached value.
             return templateData;
+        }
+
+        function prepTemplate(name, templateStr, base) {
+            var str = '', baseTemplate;
+            if (base) {
+                baseTemplate = result.getTemplateByName(base);
+                str = baseTemplate.originalTemplate;
+                str = str.replace(new RegExp('#{3}' + name + '#{3}', 'gi'), templateStr);
+                return str;
+            }
+            return templateStr.replace(/\#{3}[\w\d\W]+\#{3}/, '');
         }
 
         function getScriptTemplateAttribute(scriptTemplate, attrStr) {
@@ -148,12 +165,12 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             item._template = templateName;
         }
 
-        function setTemplate(itemOrIndex, newTemplateName) {
+        function setTemplate(itemOrIndex, newTemplateName, classes) {
             result.log('setTemplate %s %s', itemOrIndex, newTemplateName);
             var item = typeof itemOrIndex === "number" ? inst.data[itemOrIndex] : itemOrIndex;
             var oldTemplate = result.getTemplate(item).name;
             result.setTemplateName(item, newTemplateName);
-            inst.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName);
+            inst.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName, classes);
         }
 
         function updateTemplateHeights() {
@@ -185,6 +202,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         }
 
         result.defaultName = defaultName;
+        result.prepTemplate = prepTemplate;
         result.createTemplates = createTemplates;
         result.getTemplates = getTemplates;
         result.getTemplateName = getTemplateName;

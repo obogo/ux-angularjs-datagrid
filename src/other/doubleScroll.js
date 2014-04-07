@@ -58,6 +58,10 @@ angular.module('ux').directive('uxDoubleScroll', ['$window', function ($window) 
                         updateTarget();
                         checkOffsetChange();
                         onScroll(null);
+                        enable();
+                        if (grid.scrollHistory && grid.scrollHistory.getCurrentScroll()) {
+                            disable();
+                        }
                     });
                 }
                 scope.$on(exports.datagrid.events.ON_SCROLL_STOP, function () {
@@ -126,6 +130,9 @@ angular.module('ux').directive('uxDoubleScroll', ['$window', function ($window) 
                         unwatchRender();
                         checkOffsetChange();
                         enable();
+                        if (grid.scrollHistory && grid.scrollHistory.getCurrentScroll()) {
+                            disable();
+                        }
                     });
                 });
 

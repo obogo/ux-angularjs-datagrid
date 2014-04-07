@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.5.3
+* uxDatagrid v.0.5.4
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -1959,14 +1959,26 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {*) item
      * @param {Object} oldTemplate
      * @param {Object} newTemplate
+     * @param {Array} classes
      */
-    function onRowTemplateChange(evt, item, oldTemplate, newTemplate) {
-        var index = inst.getNormalizedIndex(item), el = getRowElm(index), s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope();
+    function onRowTemplateChange(evt, item, oldTemplate, newTemplate, classes) {
+        var index = inst.getNormalizedIndex(item), el = getRowElm(index), s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope(), replaceEl, newScope;
         if (s !== scope) {
+            replaceEl = angular.element(inst.templateModel.getTemplateByName(newTemplate).template);
+            while (classes && classes.length) {
+                replaceEl.addClass(classes.shift());
+            }
+            el.parent()[0].insertBefore(replaceEl[0], el[0]);
             s.$destroy();
             scopes[index] = null;
-            el.replaceWith(inst.templateModel.getTemplate(item).template);
-            scopes[index] = compileRow(index);
+            newScope = scopes[index] = compileRow(index);
+            for (var i in s) {
+                if (s.hasOwnProperty(i) && !newScope.hasOwnProperty(i)) {
+                    newScope[i] = s[i];
+                }
+            }
+            el.remove();
+            newScope.$digested = false;
             updateHeights(index);
         }
     }
@@ -2034,6 +2046,9 @@ function Datagrid(scope, element, attr, $compile) {
      * needs to put all watcher back before destroying or it will not destroy child scopes, or remove watchers.
      */
     function destroy() {
+        getContent().css({
+            display: "none"
+        });
         scope.datagrid = null;
         // we have a circular reference. break it on destroy.
         inst.log("destroying grid");
@@ -3273,6 +3288,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.capScrollValue = function(value) {
         if (inst.getContentHeight() < inst.getViewportHeight()) {
             value = 0;
+        } else if (inst.getContentHeight() - value < inst.getViewportHeight()) {
+            // don't allow to scroll past the bottom.
+            value = inst.getContentHeight() - inst.getViewportHeight();
         }
         return value;
     };
@@ -3458,10 +3476,13 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             }
         }
         function createTemplate(scriptTemplate) {
-            var template = trim(angular.element(scriptTemplate).html()), wrapper = document.createElement("div"), name = getScriptTemplateAttribute(scriptTemplate, "template-name") || defaultName, templateData;
+            var template = trim(angular.element(scriptTemplate).html()), originalTemplate = template, wrapper = document.createElement("div"), name = getScriptTemplateAttribute(scriptTemplate, "template-name") || defaultName, base = getScriptTemplateAttribute(scriptTemplate, "template-base") || null, templateData;
             wrapper.className = "grid-template-wrapper";
+            template = result.prepTemplate(name, template, base);
             template = angular.element(template)[0];
-            template.className += " " + inst.options.rowClass + " " + inst.options.uncompiledClass + " {{$status}}";
+            if (!base) {
+                template.className += " " + inst.options.rowClass + " " + inst.options.uncompiledClass + " {{$status}}";
+            }
             template.setAttribute("template", name);
             inst.getContent()[0].appendChild(wrapper);
             wrapper.appendChild(template);
@@ -3470,6 +3491,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
                 name: name,
                 item: getScriptTemplateAttribute(scriptTemplate, "template-item"),
                 template: template,
+                originalTemplate: originalTemplate,
                 height: wrapper.offsetHeight
             };
             result.log("template: %s %o", name, templateData);
@@ -3482,6 +3504,16 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             totalHeight = 0;
             // reset cached value.
             return templateData;
+        }
+        function prepTemplate(name, templateStr, base) {
+            var str = "", baseTemplate;
+            if (base) {
+                baseTemplate = result.getTemplateByName(base);
+                str = baseTemplate.originalTemplate;
+                str = str.replace(new RegExp("#{3}" + name + "#{3}", "gi"), templateStr);
+                return str;
+            }
+            return templateStr.replace(/\#{3}[\w\d\W]+\#{3}/, "");
         }
         function getScriptTemplateAttribute(scriptTemplate, attrStr) {
             var node = scriptTemplate.attributes["data-" + attrStr] || scriptTemplate.attributes[attrStr];
@@ -3551,12 +3583,12 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         function setTemplateName(item, templateName) {
             item._template = templateName;
         }
-        function setTemplate(itemOrIndex, newTemplateName) {
+        function setTemplate(itemOrIndex, newTemplateName, classes) {
             result.log("setTemplate %s %s", itemOrIndex, newTemplateName);
             var item = typeof itemOrIndex === "number" ? inst.data[itemOrIndex] : itemOrIndex;
             var oldTemplate = result.getTemplate(item).name;
             result.setTemplateName(item, newTemplateName);
-            inst.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName);
+            inst.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName, classes);
         }
         function updateTemplateHeights() {
             //TODO: needs unit tested.
@@ -3584,6 +3616,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             templates = null;
         }
         result.defaultName = defaultName;
+        result.prepTemplate = prepTemplate;
         result.createTemplates = createTemplates;
         result.getTemplates = getTemplates;
         result.getTemplateName = getTemplateName;

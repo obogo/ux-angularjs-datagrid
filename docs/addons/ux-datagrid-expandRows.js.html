@@ -36,7 +36,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.5.3
+  <div class="summary"><p>uxDatagrid v.0.5.4
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -99,8 +99,8 @@ License: MIT.</p>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">setup</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">item</span><span class="p">.</span><span class="nx">template</span> <span class="o">=</span> <span class="nx">item</span><span class="p">.</span><span class="nx">template</span> <span class="o">||</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">defaultName</span><span class="p">;</span>
-            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">item</span><span class="p">.</span><span class="nx">cls</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">item</span><span class="p">.</span><span class="nx">style</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;expandRows will not work without an cls property&quot;</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">item</span><span class="p">.</span><span class="nx">cls</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">item</span><span class="p">.</span><span class="nx">style</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">item</span><span class="p">.</span><span class="nx">swap</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;expandRows will not work without an cls|style|swap property&quot;</span><span class="p">);</span>
             <span class="p">}</span>
             <span class="nx">cache</span><span class="p">[</span><span class="nx">item</span><span class="p">.</span><span class="nx">template</span><span class="p">]</span> <span class="o">=</span> <span class="nx">item</span><span class="p">;</span>
         <span class="p">}</span>
@@ -131,7 +131,7 @@ License: MIT.</p>
             <span class="p">}</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">setState</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">index</span><span class="p">]),</span> <span class="nx">elm</span><span class="p">,</span> <span class="nx">tpl</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">index</span><span class="p">]),</span> <span class="nx">elm</span><span class="p">,</span> <span class="nx">tpl</span><span class="p">,</span> <span class="nx">swapTpl</span><span class="p">;</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">cache</span><span class="p">[</span><span class="nx">template</span><span class="p">.</span><span class="nx">name</span><span class="p">])</span> <span class="p">{</span>
                 <span class="nx">elm</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
                 <span class="nx">elm</span><span class="p">.</span><span class="nx">scope</span><span class="p">().</span><span class="nx">$state</span> <span class="o">=</span> <span class="nx">state</span><span class="p">;</span>
@@ -145,7 +145,11 @@ License: MIT.</p>
                     <span class="p">}</span>
                     <span class="nx">elm</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">state</span> <span class="o">===</span> <span class="nx">states</span><span class="p">.</span><span class="nx">opened</span> <span class="o">?</span> <span class="nx">tpl</span><span class="p">.</span><span class="nx">style</span> <span class="o">:</span> <span class="nx">tpl</span><span class="p">.</span><span class="nx">reverse</span><span class="p">);</span>
                 <span class="p">}</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">cls</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">swap</span> <span class="o">&amp;&amp;</span> <span class="nx">tpl</span><span class="p">.</span><span class="nx">state</span> <span class="o">!==</span> <span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">swapTpl</span> <span class="o">=</span> <span class="nx">cache</span><span class="p">[</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">swap</span><span class="p">];</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">setTemplate</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="nx">tpl</span><span class="p">.</span><span class="nx">swap</span><span class="p">,</span> <span class="p">[</span> <span class="nx">swapTpl</span><span class="p">.</span><span class="nx">cls</span> <span class="p">]);</span>
+                    <span class="nx">elm</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">cls</span><span class="p">)</span> <span class="p">{</span>
                     <span class="nx">elm</span><span class="p">[</span><span class="nx">state</span> <span class="o">===</span> <span class="nx">states</span><span class="p">.</span><span class="nx">opened</span> <span class="o">?</span> <span class="s2">&quot;addClass&quot;</span> <span class="o">:</span> <span class="s2">&quot;removeClass&quot;</span><span class="p">](</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">cls</span><span class="p">);</span>
                     <span class="nx">elm</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;animating&quot;</span><span class="p">);</span>
                 <span class="p">}</span>

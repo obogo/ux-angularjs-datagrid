@@ -137,6 +137,8 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.capScrollValue = function (value) {
         if (inst.getContentHeight() < inst.getViewportHeight()) {
             value = 0;// couldn't make it. just scroll to the bottom.
+        } else if (inst.getContentHeight() - value < inst.getViewportHeight()) { // don't allow to scroll past the bottom.
+            value = inst.getContentHeight() - inst.getViewportHeight(); // this will be the bottom scroll.
         }
         return value;
     };

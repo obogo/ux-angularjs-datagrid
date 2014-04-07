@@ -1288,7 +1288,7 @@ runner = {
     repeat: repeat,
     inPageMethods: [],
     jqMethods: [ "focus", "blur", "click", "mousedown", "mouseover", "mouseup", "select", "touchstart", "touchend", "trigger", "hasClass", "closest", "find" ],
-    jqAccessors: [ "val", "text", "html", "scrollTop" ]
+    jqAccessors: [ "val", "text", "html", "scrollTop","height","width"]
 };
 
 locals.scenario = scenario;

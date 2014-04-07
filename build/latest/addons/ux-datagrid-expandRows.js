@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.5.3
+* uxDatagrid v.0.5.4
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -47,8 +47,8 @@ angular.module("ux").factory("expandRows", function() {
         }
         function setup(item) {
             item.template = item.template || inst.templateModel.defaultName;
-            if (!item.cls && !item.style) {
-                throw new Error("expandRows will not work without an cls property");
+            if (!item.cls && !item.style && !item.swap) {
+                throw new Error("expandRows will not work without an cls|style|swap property");
             }
             cache[item.template] = item;
         }
@@ -79,7 +79,7 @@ angular.module("ux").factory("expandRows", function() {
             }
         }
         function setState(index, state) {
-            var template = inst.templateModel.getTemplate(inst.data[index]), elm, tpl;
+            var template = inst.templateModel.getTemplate(inst.data[index]), elm, tpl, swapTpl;
             if (cache[template.name]) {
                 elm = inst.getRowElm(index);
                 elm.scope().$state = state;
@@ -93,7 +93,11 @@ angular.module("ux").factory("expandRows", function() {
                     }
                     elm.css(state === states.opened ? tpl.style : tpl.reverse);
                 }
-                if (tpl.cls) {
+                if (tpl.swap && tpl.state !== state) {
+                    swapTpl = cache[tpl.swap];
+                    inst.templateModel.setTemplate(index, tpl.swap, [ swapTpl.cls ]);
+                    elm = inst.getRowElm(index);
+                } else if (tpl.cls) {
                     elm[state === states.opened ? "addClass" : "removeClass"](tpl.cls);
                     elm.addClass("animating");
                 }

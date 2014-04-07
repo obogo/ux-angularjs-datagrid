@@ -360,7 +360,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.5.3
+  <div class="summary"><p>uxDatagrid v.0.5.4
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -5548,21 +5548,36 @@ the <a href="#values.activeRange">activeRange</a></p>
       <span class="dox_type">Object</span>
     </div>
     <div class="dox_tag_detail">
-      <span class="dox_tag_name">newTemplate
-</span>
+      <span class="dox_tag_name">newTemplate</span>
       <span class="dox_type">Object</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">classes
+</span>
+      <span class="dox_type">Array</span>
     </div>
   </div>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="kd">function</span> <span class="nx">onRowTemplateChange</span><span class="p">(</span><span class="nx">evt</span><span class="p">,</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">oldTemplate</span><span class="p">,</span> <span class="nx">newTemplate</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getNormalizedIndex</span><span class="p">(</span><span class="nx">item</span><span class="p">),</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">getRowElm</span><span class="p">(</span><span class="nx">index</span><span class="p">),</span> <span class="nx">s</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">hasClass</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">uncompiledClass</span><span class="p">)</span> <span class="o">?</span> <span class="nx">compileRow</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="o">:</span> <span class="nx">el</span><span class="p">.</span><span class="nx">scope</span><span class="p">();</span>
+    <span class="kd">function</span> <span class="nx">onRowTemplateChange</span><span class="p">(</span><span class="nx">evt</span><span class="p">,</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">oldTemplate</span><span class="p">,</span> <span class="nx">newTemplate</span><span class="p">,</span> <span class="nx">classes</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getNormalizedIndex</span><span class="p">(</span><span class="nx">item</span><span class="p">),</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">getRowElm</span><span class="p">(</span><span class="nx">index</span><span class="p">),</span> <span class="nx">s</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">hasClass</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">uncompiledClass</span><span class="p">)</span> <span class="o">?</span> <span class="nx">compileRow</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="o">:</span> <span class="nx">el</span><span class="p">.</span><span class="nx">scope</span><span class="p">(),</span> <span class="nx">replaceEl</span><span class="p">,</span> <span class="nx">newScope</span><span class="p">;</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">s</span> <span class="o">!==</span> <span class="nx">scope</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">replaceEl</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplateByName</span><span class="p">(</span><span class="nx">newTemplate</span><span class="p">).</span><span class="nx">template</span><span class="p">);</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">classes</span> <span class="o">&amp;&amp;</span> <span class="nx">classes</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">replaceEl</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">shift</span><span class="p">());</span>
+            <span class="p">}</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">parent</span><span class="p">()[</span><span class="mi">0</span><span class="p">].</span><span class="nx">insertBefore</span><span class="p">(</span><span class="nx">replaceEl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
             <span class="nx">s</span><span class="p">.</span><span class="nx">$destroy</span><span class="p">();</span>
             <span class="nx">scopes</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-            <span class="nx">el</span><span class="p">.</span><span class="nx">replaceWith</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="nx">item</span><span class="p">).</span><span class="nx">template</span><span class="p">);</span>
-            <span class="nx">scopes</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="nx">compileRow</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+            <span class="nx">newScope</span> <span class="o">=</span> <span class="nx">scopes</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="nx">compileRow</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="k">in</span> <span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">newScope</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nx">newScope</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">s</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">remove</span><span class="p">();</span>
+            <span class="nx">newScope</span><span class="p">.</span><span class="nx">$digested</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
             <span class="nx">updateHeights</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
         <span class="p">}</span>
     <span class="p">}</span>
@@ -5770,6 +5785,9 @@ all scopes and destroy them manually.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">destroy</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">getContent</span><span class="p">().</span><span class="nx">css</span><span class="p">({</span>
+            <span class="nx">display</span><span class="o">:</span> <span class="s2">&quot;none&quot;</span>
+        <span class="p">});</span>
         <span class="nx">scope</span><span class="p">.</span><span class="nx">datagrid</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
 
 </pre></div>
@@ -8048,6 +8066,20 @@ will all be able to represented by template rows.</p>
     <span class="nx">result</span><span class="p">.</span><span class="nx">capScrollValue</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getContentHeight</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getViewportHeight</span><span class="p">())</span> <span class="p">{</span>
             <span class="nx">value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getContentHeight</span><span class="p">()</span> <span class="o">-</span> <span class="nx">value</span> <span class="o">&lt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getViewportHeight</span><span class="p">())</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-265" id="section-265">&#182;</a>
+</div>
+<p>don't allow to scroll past the bottom.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">value</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getContentHeight</span><span class="p">()</span> <span class="o">-</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getViewportHeight</span><span class="p">();</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
     <span class="p">};</span>
@@ -8058,7 +8090,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-265" id="section-265">&#182;</a>
+  <a class="pilcrow" href="#section-266" id="section-266">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Scroll to the numeric value.</p>
@@ -8102,7 +8134,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-266" id="section-266">&#182;</a>
+  <a class="pilcrow" href="#section-267" id="section-267">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Wait for the datagrid to slow down enough to render.</p>
@@ -8133,7 +8165,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-267" id="section-267">&#182;</a>
+  <a class="pilcrow" href="#section-268" id="section-268">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>When it stops render.</p>
@@ -8157,7 +8189,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-268" id="section-268">&#182;</a>
+  <a class="pilcrow" href="#section-269" id="section-269">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Scroll to the normalized index.</p>
@@ -8191,7 +8223,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-269" id="section-269">&#182;</a>
+  <a class="pilcrow" href="#section-270" id="section-270">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Scroll to an item by finding it's normalized index.</p>
@@ -8227,7 +8259,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-270" id="section-270">&#182;</a>
+  <a class="pilcrow" href="#section-271" id="section-271">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>If the item is above or below the viewable area, scroll till it is in view.</p>
@@ -8259,7 +8291,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-271" id="section-271">&#182;</a>
+  <a class="pilcrow" href="#section-272" id="section-272">&#182;</a>
 </div>
 <p>it is above the view.</p>
         </td>
@@ -8275,7 +8307,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-272" id="section-272">&#182;</a>
+  <a class="pilcrow" href="#section-273" id="section-273">&#182;</a>
 </div>
 <p>always update the height before calculating. onResize is not reliable</p>
         </td>
@@ -8290,7 +8322,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-273" id="section-273">&#182;</a>
+  <a class="pilcrow" href="#section-274" id="section-274">&#182;</a>
 </div>
 <p>it is below the view.</p>
         </td>
@@ -8313,7 +8345,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-274" id="section-274">&#182;</a>
+  <a class="pilcrow" href="#section-275" id="section-275">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Scroll to top.</p>
@@ -8341,7 +8373,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-275" id="section-275">&#182;</a>
+  <a class="pilcrow" href="#section-276" id="section-276">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Scroll to bottom.</p>
@@ -8381,7 +8413,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-276" id="section-276">&#182;</a>
+  <a class="pilcrow" href="#section-277" id="section-277">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Wait till the grid is ready before we setup our listeners.</p>
@@ -8403,7 +8435,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-277" id="section-277">&#182;</a>
+  <a class="pilcrow" href="#section-278" id="section-278">&#182;</a>
 </div>
 <p>all models should try not to pollute the main model to keep it clean.</p>
         </td>
@@ -8452,7 +8484,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-279" id="section-279">&#182;</a>
+  <a class="pilcrow" href="#section-280" id="section-280">&#182;</a>
 </div>
 <p>remove newline / carriage return</p>
         </td>
@@ -8465,7 +8497,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-280" id="section-280">&#182;</a>
+  <a class="pilcrow" href="#section-281" id="section-281">&#182;</a>
 </div>
 <p>remove whitespace (space and tabs) before tags</p>
         </td>
@@ -8478,7 +8510,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-281" id="section-281">&#182;</a>
+  <a class="pilcrow" href="#section-282" id="section-282">&#182;</a>
 </div>
 <p>remove whitespace between tags</p>
         </td>
@@ -8491,7 +8523,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-282" id="section-282">&#182;</a>
+  <a class="pilcrow" href="#section-283" id="section-283">&#182;</a>
 </div>
 <p>remove whitespace after tags</p>
         </td>
@@ -8517,7 +8549,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-283" id="section-283">&#182;</a>
+  <a class="pilcrow" href="#section-284" id="section-284">&#182;</a>
 </div>
 <p>remove the script templates.</p>
         </td>
@@ -8527,10 +8559,13 @@ will all be able to represented by template rows.</p>
             <span class="p">}</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">createTemplate</span><span class="p">(</span><span class="nx">scriptTemplate</span><span class="p">)</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="nx">trim</span><span class="p">(</span><span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">scriptTemplate</span><span class="p">).</span><span class="nx">html</span><span class="p">()),</span> <span class="nx">wrapper</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">&quot;div&quot;</span><span class="p">),</span> <span class="nx">name</span> <span class="o">=</span> <span class="nx">getScriptTemplateAttribute</span><span class="p">(</span><span class="nx">scriptTemplate</span><span class="p">,</span> <span class="s2">&quot;template-name&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="nx">defaultName</span><span class="p">,</span> <span class="nx">templateData</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="nx">trim</span><span class="p">(</span><span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">scriptTemplate</span><span class="p">).</span><span class="nx">html</span><span class="p">()),</span> <span class="nx">originalTemplate</span> <span class="o">=</span> <span class="nx">template</span><span class="p">,</span> <span class="nx">wrapper</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">&quot;div&quot;</span><span class="p">),</span> <span class="nx">name</span> <span class="o">=</span> <span class="nx">getScriptTemplateAttribute</span><span class="p">(</span><span class="nx">scriptTemplate</span><span class="p">,</span> <span class="s2">&quot;template-name&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="nx">defaultName</span><span class="p">,</span> <span class="nx">base</span> <span class="o">=</span> <span class="nx">getScriptTemplateAttribute</span><span class="p">(</span><span class="nx">scriptTemplate</span><span class="p">,</span> <span class="s2">&quot;template-base&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">templateData</span><span class="p">;</span>
             <span class="nx">wrapper</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="s2">&quot;grid-template-wrapper&quot;</span><span class="p">;</span>
+            <span class="nx">template</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">prepTemplate</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">template</span><span class="p">,</span> <span class="nx">base</span><span class="p">);</span>
             <span class="nx">template</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">template</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
-            <span class="nx">template</span><span class="p">.</span><span class="nx">className</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">rowClass</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">uncompiledClass</span> <span class="o">+</span> <span class="s2">&quot; {{$status}}&quot;</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">base</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">template</span><span class="p">.</span><span class="nx">className</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">rowClass</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">uncompiledClass</span> <span class="o">+</span> <span class="s2">&quot; {{$status}}&quot;</span><span class="p">;</span>
+            <span class="p">}</span>
             <span class="nx">template</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="s2">&quot;template&quot;</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">getContent</span><span class="p">()[</span><span class="mi">0</span><span class="p">].</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">wrapper</span><span class="p">);</span>
             <span class="nx">wrapper</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">template</span><span class="p">);</span>
@@ -8539,6 +8574,7 @@ will all be able to represented by template rows.</p>
                 <span class="nx">name</span><span class="o">:</span> <span class="nx">name</span><span class="p">,</span>
                 <span class="nx">item</span><span class="o">:</span> <span class="nx">getScriptTemplateAttribute</span><span class="p">(</span><span class="nx">scriptTemplate</span><span class="p">,</span> <span class="s2">&quot;template-item&quot;</span><span class="p">),</span>
                 <span class="nx">template</span><span class="o">:</span> <span class="nx">template</span><span class="p">,</span>
+                <span class="nx">originalTemplate</span><span class="o">:</span> <span class="nx">originalTemplate</span><span class="p">,</span>
                 <span class="nx">height</span><span class="o">:</span> <span class="nx">wrapper</span><span class="p">.</span><span class="nx">offsetHeight</span>
             <span class="p">};</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;template: %s %o&quot;</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">templateData</span><span class="p">);</span>
@@ -8556,12 +8592,22 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-284" id="section-284">&#182;</a>
+  <a class="pilcrow" href="#section-285" id="section-285">&#182;</a>
 </div>
 <p>reset cached value.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
             <span class="k">return</span> <span class="nx">templateData</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">prepTemplate</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">templateStr</span><span class="p">,</span> <span class="nx">base</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nx">baseTemplate</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">base</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">baseTemplate</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getTemplateByName</span><span class="p">(</span><span class="nx">base</span><span class="p">);</span>
+                <span class="nx">str</span> <span class="o">=</span> <span class="nx">baseTemplate</span><span class="p">.</span><span class="nx">originalTemplate</span><span class="p">;</span>
+                <span class="nx">str</span> <span class="o">=</span> <span class="nx">str</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;#{3}&quot;</span> <span class="o">+</span> <span class="nx">name</span> <span class="o">+</span> <span class="s2">&quot;#{3}&quot;</span><span class="p">,</span> <span class="s2">&quot;gi&quot;</span><span class="p">),</span> <span class="nx">templateStr</span><span class="p">);</span>
+                <span class="k">return</span> <span class="nx">str</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">templateStr</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\#{3}[\w\d\W]+\#{3}/</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">);</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">getScriptTemplateAttribute</span><span class="p">(</span><span class="nx">scriptTemplate</span><span class="p">,</span> <span class="nx">attrStr</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">scriptTemplate</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="s2">&quot;data-&quot;</span> <span class="o">+</span> <span class="nx">attrStr</span><span class="p">]</span> <span class="o">||</span> <span class="nx">scriptTemplate</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attrStr</span><span class="p">];</span>
@@ -8609,7 +8655,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-286" id="section-286">&#182;</a>
+  <a class="pilcrow" href="#section-287" id="section-287">&#182;</a>
 </div>
 <p>TODO: need to make this method so it can be overwritten to look up templates a different way.</p>
         </td>
@@ -8666,12 +8712,12 @@ will all be able to represented by template rows.</p>
         <span class="kd">function</span> <span class="nx">setTemplateName</span><span class="p">(</span><span class="nx">item</span><span class="p">,</span> <span class="nx">templateName</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">item</span><span class="p">.</span><span class="nx">_template</span> <span class="o">=</span> <span class="nx">templateName</span><span class="p">;</span>
         <span class="p">}</span>
-        <span class="kd">function</span> <span class="nx">setTemplate</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">,</span> <span class="nx">newTemplateName</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">function</span> <span class="nx">setTemplate</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">,</span> <span class="nx">newTemplateName</span><span class="p">,</span> <span class="nx">classes</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setTemplate %s %s&quot;</span><span class="p">,</span> <span class="nx">itemOrIndex</span><span class="p">,</span> <span class="nx">newTemplateName</span><span class="p">);</span>
             <span class="kd">var</span> <span class="nx">item</span> <span class="o">=</span> <span class="k">typeof</span> <span class="nx">itemOrIndex</span> <span class="o">===</span> <span class="s2">&quot;number&quot;</span> <span class="o">?</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">itemOrIndex</span><span class="p">]</span> <span class="o">:</span> <span class="nx">itemOrIndex</span><span class="p">;</span>
             <span class="kd">var</span> <span class="nx">oldTemplate</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="nx">item</span><span class="p">).</span><span class="nx">name</span><span class="p">;</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">setTemplateName</span><span class="p">(</span><span class="nx">item</span><span class="p">,</span> <span class="nx">newTemplateName</span><span class="p">);</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_ROW_TEMPLATE_CHANGE</span><span class="p">,</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">oldTemplate</span><span class="p">,</span> <span class="nx">newTemplateName</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_ROW_TEMPLATE_CHANGE</span><span class="p">,</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">oldTemplate</span><span class="p">,</span> <span class="nx">newTemplateName</span><span class="p">,</span> <span class="nx">classes</span><span class="p">);</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">updateTemplateHeights</span><span class="p">()</span> <span class="p">{</span>
 
@@ -8681,7 +8727,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-287" id="section-287">&#182;</a>
+  <a class="pilcrow" href="#section-288" id="section-288">&#182;</a>
 </div>
 <p>TODO: needs unit tested.</p>
         </td>
@@ -8710,6 +8756,7 @@ will all be able to represented by template rows.</p>
             <span class="nx">templates</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
         <span class="p">}</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">defaultName</span> <span class="o">=</span> <span class="nx">defaultName</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">prepTemplate</span> <span class="o">=</span> <span class="nx">prepTemplate</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">createTemplates</span> <span class="o">=</span> <span class="nx">createTemplates</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">getTemplates</span> <span class="o">=</span> <span class="nx">getTemplates</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">getTemplateName</span> <span class="o">=</span> <span class="nx">getTemplateName</span><span class="p">;</span>

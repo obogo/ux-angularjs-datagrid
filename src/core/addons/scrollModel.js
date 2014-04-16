@@ -12,10 +12,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         hasScrollListener = false,
         lastScroll,
         lastRenderTime,
+        // start easing
         startOffset,
         offset,
         speed = 0,
+        startTime,
+        distance,
         scrollingIntv,
+        // end easing
         listenerData = [
             {event: 'touchstart', method: 'onTouchStart', enabled: true},
             {event: 'touchmove', method: 'onTouchMove', enabled: false},
@@ -128,6 +132,8 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             if (Math.abs(startOffset - offset) < 5) {
                 result.click(event);
             } else {
+                startTime = Date.now();
+                distance = speed * 10;
                 result.scrollSlowDown(true);
             }
         }
@@ -135,22 +141,30 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
     result.scrollSlowDown = function (wait) {
         clearTimeout(scrollingIntv);
-        speed = Math.abs(speed) > 0.01 ? speed : 0;
-        if (!wait && speed) {
-            speed *= 0.9;
-            inst.element[0].scrollTop += speed;
+        var duration = Math.abs(speed) * 10, t = duration - (Date.now() - startTime), prevDistance = distance, change;
+        distance = result.easeOut(t, distance, speed || 0, duration);
+        change = distance - prevDistance;
+        if (Math.abs(change) < 1) {
+            t = 0;
         }
-
-        if (speed) {
+        result.log("\tduration:%s, time: %s, distance: %s", duration, t, change);
+        if (t > 0) {
+            if (!wait) {
+                inst.element[0].scrollTop += change;
+            }
             scrollingIntv = setTimeout(result.scrollSlowDown, 20);
         }
+    };
+
+    result.easeOut = function easeOutQuad(t, b, c, d) {
+        return -c * (t/=d)*(t-2) + b;
     };
 
     result.click = function (e) {
         var target = e.target,
             ev;
 
-        if ( !(/(SELECT|INPUT|TEXTAREA)/i).test(target.tagName) ) {
+        if (!(/(SELECT|INPUT|TEXTAREA)/i).test(target.tagName)) {
             ev = document.createEvent('MouseEvents');
             ev.initMouseEvent('click', true, true, e.view, 1,
                 target.screenX, target.screenY, target.clientX, target.clientY,

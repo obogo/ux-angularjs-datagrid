@@ -3217,7 +3217,9 @@ exports.datagrid.events.ON_TOUCH_DOWN = "datagrid:touchDown";
 exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
 
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
-    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, waitForStopIntv, hasScrollListener = false, lastScroll, lastRenderTime, startOffset, offset, speed = 0, scrollingIntv, listenerData = [ {
+    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, waitForStopIntv, hasScrollListener = false, lastScroll, lastRenderTime, // start easing
+    startOffset, offset, speed = 0, startTime, distance, scrollingIntv, // end easing
+    listenerData = [ {
         event: "touchstart",
         method: "onTouchStart",
         enabled: true
@@ -3330,20 +3332,30 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             if (Math.abs(startOffset - offset) < 5) {
                 result.click(event);
             } else {
+                startTime = Date.now();
+                distance = speed * 10;
                 result.scrollSlowDown(true);
             }
         }
     };
     result.scrollSlowDown = function(wait) {
         clearTimeout(scrollingIntv);
-        speed = Math.abs(speed) > .01 ? speed : 0;
-        if (!wait && speed) {
-            speed *= .9;
-            inst.element[0].scrollTop += speed;
+        var duration = Math.abs(speed) * 10, t = duration - (Date.now() - startTime), prevDistance = distance, change;
+        distance = result.easeOut(t, distance, speed || 0, duration);
+        change = distance - prevDistance;
+        if (Math.abs(change) < 1) {
+            t = 0;
         }
-        if (speed) {
+        result.log("	duration:%s, time: %s, distance: %s", duration, t, change);
+        if (t > 0) {
+            if (!wait) {
+                inst.element[0].scrollTop += change;
+            }
             scrollingIntv = setTimeout(result.scrollSlowDown, 20);
         }
+    };
+    result.easeOut = function easeOutQuad(t, b, c, d) {
+        return -c * (t /= d) * (t - 2) + b;
     };
     result.click = function(e) {
         var target = e.target, ev;

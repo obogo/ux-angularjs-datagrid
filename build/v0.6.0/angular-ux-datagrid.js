@@ -3336,6 +3336,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
     result.scrollSlowDown = function(wait) {
         clearTimeout(scrollingIntv);
+        result.log("	speed:%s", speed);
         speed = Math.abs(speed) > .01 ? speed : 0;
         if (!wait && speed) {
             speed *= .9;

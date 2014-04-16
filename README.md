@@ -88,6 +88,11 @@ It is also handy to have addons that will update based on events. Here is an exa
 I had my own version of a scroller. However, datagrid is not a scrolling solution, it is a long list rendering solution. Scrolling can be done with any javascript scrolling solution. IScroll is a popular scroller so I used it to leverage the reuse of other libraries with the addition of addons to make them compatible.
 Also notice that I only implemented this for the iOS. Android works well with native scrolling.
 
+##Without iScroll##
+I found that in some really long lists in a project that I was using the datagrid in that iScroll would crash in Safari on mobile devices. These lists were over 7k items and had very complex rows. However, I made an addition so that we have ux-datagrid-scrollBar.js now so you can make your app work without iScroll and avoid the memory leak.
+I am not sure if the memory leak is the fault of Safari or iScroll, but the combination of the two was crashing with an out of memory error on iOS devices.
+To use the scrollbar on iOS devices (Android 4.0 devices do not need an extra addon because they already handle much of the scrolling natively) you need to add to the options {scrollModel:{manual:true}}. This will enable touch events to cause the iOS devices to work with their native scroll and still be able to flick. And of course, don't forget to add the scrollBar addon in your addons.
+
 ## No JQuery ##
 AngularJS Datagrid doesn't have any JQuery dependencies. This helps to keep your application light weight.
 

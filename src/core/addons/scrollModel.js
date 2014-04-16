@@ -147,7 +147,6 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         if (Math.abs(change) < 1) {
             t = 0;
         }
-        result.log("\tduration:%s, time: %s, distance: %s", duration, t, change);
         if (t > 0) {
             if (!wait) {
                 inst.element[0].scrollTop += change;

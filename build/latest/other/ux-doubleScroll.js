@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.5.4
+* uxDatagrid v.0.6.0
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -115,6 +115,12 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                         enable();
                     }
                 });
+                scope.$on(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL, function() {
+                    if (scrollModel.scrollHistory && scrollModel.scrollHistory.getCurrentScroll()) {
+                        myScroll.enable();
+                        myScroll.scrollTo(0, myScroll.maxScrollY);
+                    }
+                });
                 unwatchRender = scope.$on(exports.datagrid.events.ON_LISTENERS_READY, function() {
                     // it needs to start off with the target disabled.
                     unwatchRender();
@@ -158,14 +164,16 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                 }
             }
             function enable() {
+                result.log("enable doubleScroll disable scroll");
                 if (exports.datagrid.isIOS && !enabled) {
-                    if (scrollModel && scrollModel.iScroll) {
+                    if (scrollModel && scrollModel.iScroll && (!grid.scrollHistory || !grid.scrollHistory.getCurrentScroll())) {
+                        result.log("	scroll grid to 0");
                         scrollModel.iScroll.scrollTo(0, 0);
                         scrollModel.iScroll.disable();
                     }
                     myScroll.enable();
                     if (grid.getContentHeight() > grid.getViewportHeight()) {
-                        myScroll.scrollTo(0, 0, 500);
+                        myScroll.scrollTo(0, 0);
                     }
                 } else if (!enabled) {
                     element[0].scrollTop = 0;
@@ -174,6 +182,7 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                 enabled = true;
             }
             function disable() {
+                result.log("disable doubleScroll enable scroll");
                 if (exports.datagrid.isIOS && enabled) {
                     myScroll.scrollTo(0, myScroll.maxScrollY);
                     myScroll.disable();
@@ -254,6 +263,9 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                     s.datagrid.updateHeights();
                     if (exports.datagrid.isIOS) {
                         myScroll.refresh();
+                        if (s.datagrid.scrollHistory && !s.datagrid.scrollHistory.isComplete()) {
+                            myScroll.scrollTo(0, myScroll.maxScrollY);
+                        }
                     }
                     return true;
                 }

@@ -90,7 +90,7 @@ angular.module('ux').service('scrollHistoryModel', ['$location', '$rootScope', f
 angular.module('ux').factory('scrollHistory', function () {
 
     return function (inst, scrollHistoryModel) {
-        var result = exports.logWrapper('scrollHistory', {}, 'green', inst.dispatch), ready,
+        var result = exports.logWrapper('scrollHistory', {}, 'blue', inst.dispatch), ready,
             path = inst.options.scrollHistory && inst.options.scrollHistory.path || '', scrollPos,
             waitingForAfterDataChange = false, unwatchers = [];
         if (inst.options.scrollHistory && inst.options.scrollHistory.ignoreParams) {
@@ -109,13 +109,29 @@ angular.module('ux').factory('scrollHistory', function () {
             result.storeScroll(result.getPath(), inst.values.scroll);
         };
         result.storeScroll = scrollHistoryModel.storeScroll;
-        result.getCurrentScroll = path ? function () { return scrollHistoryModel.getCurrentScroll(path); } : scrollHistoryModel.getCurrentScroll;
+        result.getCurrentScroll = path ? function () {
+            return scrollHistoryModel.getCurrentScroll(path);
+        } : scrollHistoryModel.getCurrentScroll;
         result.getScroll = scrollHistoryModel.getScroll;
         result.clearPath = scrollHistoryModel.clearPath;
         result.setScrollValue = function () {
             scrollPos = result.getCurrentScroll();
             inst.scrollModel.setScroll(scrollPos);
+        };
+        result.setScroll = function (value) {
+            scrollHistoryModel.storeScroll(result.getPath(), value);
+        };
 
+        /**
+         * ###<a name="isComplete">isComplete</a>###
+         * Tell weather the scrollHistory is still processing or if it is complete.
+         * @returns {boolean}
+         */
+        result.isComplete = function () {
+            if (scrollPos === undefined) {
+                result.setScrollValue();
+            }
+            return scrollPos === 0; // when this is set to 0. Then we are complete.
         };
 
         /**
@@ -125,6 +141,7 @@ angular.module('ux').factory('scrollHistory', function () {
          */
         result.scroll = function () {
             if (inst.getContentHeight() - inst.getViewportHeight() < scrollPos && inst.values.scroll) {
+                result.log("\tscrollTo 0 because scroll %s is too tall for the content", scrollPos);
                 inst.scrollModel.setScroll(0);
                 inst.scrollModel.scrollTo(0, true);
             }
@@ -134,8 +151,8 @@ angular.module('ux').factory('scrollHistory', function () {
          * watch only once to have it start at that scrolling position on startup.
          */
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, function () {
-            // need to set the scroll before the data is changed.
             result.log("found scrollHistory so scrollTo %s", result.getCurrentScroll());
+            // need to set the scroll before the data is changed.
             ready = true;
             result.setScrollValue();
             waitingForAfterDataChange = true;
@@ -147,10 +164,17 @@ angular.module('ux').factory('scrollHistory', function () {
          * the scroll top value because the content doesn't have a height yet.
          */
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, function () {
-            waitingForAfterDataChange = false;
-            result.scroll();
-            inst.dispatch(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL);
-            unwatchers.shift()();
+            if (inst.getContentHeight()) {
+                result.log("onRenderAfterDataChange");
+                waitingForAfterDataChange = false;
+                result.scroll();
+                if (!exports.datagrid.isIOS) {
+                    inst.dispatch(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL);
+                }
+                unwatchers.shift()();
+            } else {
+                result.log("onRenderAfterDataChange skipped because there is no contentHeight");
+            }
         }));
 
         /**
@@ -159,6 +183,7 @@ angular.module('ux').factory('scrollHistory', function () {
          */
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, function () {
             if (ready && !waitingForAfterDataChange) {
+                scrollPos = 0;
                 result.storeCurrentScroll();// this can be overridden if necessary.
             }
         }));

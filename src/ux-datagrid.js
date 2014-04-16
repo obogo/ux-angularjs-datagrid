@@ -67,7 +67,7 @@ function Datagrid(scope, element, attr, $compile) {
     // <a name="logEvents"></a>listing the log events so they can be ignored if needed.
     var logEvents = [exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR];
     // <a name="inst"></a>the instance of the datagrid that will be referenced by all addons.
-    var inst = {};
+    var inst = {}, eventLogger = {}, startupComplete = false, gcIntv;
 
     // wrap the instance for logging.
     exports.logWrapper('datagrid event', inst, 'grey', dispatch);
@@ -100,8 +100,11 @@ function Datagrid(scope, element, attr, $compile) {
         inst.update = update;
         inst.reset = reset;
         inst.isReady = isReady;
+        inst.isStartupComplete = isStartupComplete;
         inst.forceRenderScope = forceRenderScope;
         inst.dispatch = dispatch;
+        inst.activateScope = activateScope;
+        inst.deactivateScope = deactivateScope;
         inst.render = function () {
             flow.add(render);
         };
@@ -127,6 +130,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.flow = flow = new Flow({async: options.hasOwnProperty('async') ? !!options.async : true, debug: options.hasOwnProperty('debug') ? options.debug : 0}, inst.dispatch);
         // this needs to be set immediatly so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
+        inst.gc = forceGarbageCollection;
         flow.add(init);// initialize core.
         flow.run();// start the flow manager.
     }
@@ -150,7 +154,7 @@ function Datagrid(scope, element, attr, $compile) {
             classes = getClassesFromOldContent() || classes;
             cnt = angular.element('<div class="' + classes + '"></div>');
             if (inst.options.chunks.detachDom) {
-                cnt.css({position:'relative'});
+                cnt[0].style.position = 'relative';
             }
             element.prepend(cnt);
         }
@@ -243,7 +247,7 @@ function Datagrid(scope, element, attr, $compile) {
     function addListeners() {
         var unwatchFirstRender = scope.$on(exports.datagrid.events.ON_BEFORE_RENDER_AFTER_DATA_CHANGE, function () {
             unwatchFirstRender();
-            flow.add(dispatch, [exports.datagrid.events.ON_STARTUP_COMPLETE]);
+            flow.add(onStartupComplete);
         });
         window.addEventListener('resize', onResize);
         unwatchers.push(scope.$on(exports.datagrid.events.UPDATE, update));
@@ -251,6 +255,15 @@ function Datagrid(scope, element, attr, $compile) {
         unwatchers.push(scope.$on('$destroy', destroy));
         flow.add(setupChangeWatcher, [], 0);
         inst.dispatch(exports.datagrid.events.ON_LISTENERS_READY);
+    }
+
+    function isStartupComplete() {
+        return startupComplete;
+    }
+
+    function onStartupComplete() {
+        startupComplete = true;
+        dispatch(exports.datagrid.events.ON_STARTUP_COMPLETE);
     }
 
     /**
@@ -315,9 +328,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function onResize(event) {
         // we need to wait a moment for the browser to finish the resize, then adjust and fire the event.
-        setTimeout(function () {
-            updateHeights();
-        }, 100);
+        flow.add(updateHeights, 100);
     }
 
     /**
@@ -748,13 +759,14 @@ function Datagrid(scope, element, attr, $compile) {
      * @returns {{startIndex: number, i: number, inc: number, end: number, visibleScrollStart: number, visibleScrollEnd: number}}
      */
     function getStartingIndex() {
-        if (inst.chunkModel.getChunkList().height - inst.getViewportHeight() < values.scroll) {
+        if (startupComplete && inst.chunkModel.getChunkList().height - inst.getViewportHeight() < values.scroll) {
             // We are trying to start the scroll off at a height that is taller than we have in the list.
             // reset scroll to 0.
+            inst.info("Scroll reset because either there is no data or the scroll is taller than there is scroll area");
             values.scroll = 0;
         }
         var height = viewHeight,
-            scroll = values.scroll || 0,
+            scroll = startupComplete && values.scroll || 0,
             result = {
                 startIndex: 0,
                 i: 0,
@@ -773,14 +785,16 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function updateHeightValues() {
         //TODO: this is going to be updated to use ChunkArray data to be faster.
-        var height = 0, i = 0;
+        var height = 0, i = 0, contentHeight;
         while (i < inst.rowsLength) {
             rowOffsets[i] = height;
             height += inst.templateModel.getTemplateHeight(inst.data[i]);
             i += 1;
         }
         options.rowHeight = inst.rowsLength ? inst.templateModel.getTemplateHeight('default') : 0;
-        inst.getContent().css({height: getContentHeight()});
+        contentHeight = getContentHeight();
+        inst.getContent()[0].style.height = contentHeight + 'px';
+        inst.log("heights: viewport %s content %s", inst.getViewportHeight(), contentHeight);
     }
 
     /**
@@ -798,7 +812,7 @@ function Datagrid(scope, element, attr, $compile) {
         // we only want to update stuff if we are scrolling slow.
         resetMinMax();// this needs to always be set after the dispatch of before update watchers in case they need the before activeRange.
         active.length = 0; // make sure not to reset until after getStartingIndex.
-        inst.log("\tvisibleScrollStart %s visibleScrollEnd %s", loop.visibleScrollStart, loop.visibleScrollEnd);
+        inst.log("\tscroll %s visibleScrollStart %s visibleScrollEnd %s", values.scroll, loop.visibleScrollStart, loop.visibleScrollEnd);
         while (loop.i < inst.rowsLength) {
             prevS = scope.$$childHead ? scopes[loop.i - 1] : null;
             offset = getRowOffset(loop.i); // this is where the chunks and rows get created is when they are requested if they don't exist.
@@ -1097,15 +1111,12 @@ function Datagrid(scope, element, attr, $compile) {
         if (inst.chunkModel.getChunkList()) {
             inst.chunkModel.reset(inst.data, content, scopes);
             inst.rowsLength = inst.data.length;
-            updateHeightValues();
-            updateViewportHeight();
-            render();
+            updateHeights();
         } else {
             buildRows(inst.data, true);
         }
         flow.add(inst.info, ["reset complete"]);
         flow.add(dispatch, [exports.datagrid.events.ON_AFTER_RESET], 0);
-        flow.add(dispatch, [exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER]);
     }
 
     /**
@@ -1169,7 +1180,8 @@ function Datagrid(scope, element, attr, $compile) {
     function updateHeights(rowIndex) {
         flow.add(updateViewportHeight);
         flow.add(inst.chunkModel.updateAllChunkHeights, [rowIndex]);
-        flow.add(updateHeightValues);
+        flow.add(updateHeightValues, 0);
+        flow.add(updateViewportHeight);
         flow.add(render);
         flow.add(inst.dispatch, [exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER]);
     }
@@ -1191,8 +1203,23 @@ function Datagrid(scope, element, attr, $compile) {
      * @returns {Object}
      */
     function dispatch(event) {
-        if (!isLogEvent(event) && options.debug && options.debug.all === 1) inst.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
+        if (!isLogEvent(event) && options.debug) eventLogger.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
         return scope.$emit.apply(scope, arguments);
+    }
+
+    function forceGarbageCollection() {
+        // concept is to crate a large object that will cause the browser to garbage collect before creating it.
+        // then since it has no reference it gets removed.
+        clearInterval(gcIntv);
+        gcIntv = setTimeout(function () {
+            if (inst) {
+                inst.info("GC");
+                var a, i, total = 1024 * 1024;
+                for (i = 0; i < total; i += 1) {
+                    a = 0.5;
+                }
+            }
+        }, 1000);
     }
 
     /**
@@ -1273,6 +1300,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     exports.logWrapper('datagrid', inst, 'green', dispatch);
+    exports.logWrapper('events', eventLogger, 'light', dispatch);
     scope.datagrid = inst;
     setupExports();
 

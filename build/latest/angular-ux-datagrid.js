@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.5.4
+* uxDatagrid v.0.6.0
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -444,7 +444,8 @@ exports.css = function CSS() {
         createStyleSheet: createStyleSheet,
         createClass: createClass,
         getCSSValue: getCSSValue,
-        setCSSValue: setCSSValue
+        setCSSValue: setCSSValue,
+        getSelector: getSelector
     };
 }();
 
@@ -942,7 +943,7 @@ function Datagrid(scope, element, attr, $compile) {
     // <a name="logEvents"></a>listing the log events so they can be ignored if needed.
     var logEvents = [ exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR ];
     // <a name="inst"></a>the instance of the datagrid that will be referenced by all addons.
-    var inst = {};
+    var inst = {}, eventLogger = {}, startupComplete = false, gcIntv;
     // wrap the instance for logging.
     exports.logWrapper("datagrid event", inst, "grey", dispatch);
     /**
@@ -972,8 +973,11 @@ function Datagrid(scope, element, attr, $compile) {
         inst.update = update;
         inst.reset = reset;
         inst.isReady = isReady;
+        inst.isStartupComplete = isStartupComplete;
         inst.forceRenderScope = forceRenderScope;
         inst.dispatch = dispatch;
+        inst.activateScope = activateScope;
+        inst.deactivateScope = deactivateScope;
         inst.render = function() {
             flow.add(render);
         };
@@ -1002,6 +1006,7 @@ function Datagrid(scope, element, attr, $compile) {
         }, inst.dispatch);
         // this needs to be set immediatly so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
+        inst.gc = forceGarbageCollection;
         flow.add(init);
         // initialize core.
         flow.run();
@@ -1026,9 +1031,7 @@ function Datagrid(scope, element, attr, $compile) {
             classes = getClassesFromOldContent() || classes;
             cnt = angular.element('<div class="' + classes + '"></div>');
             if (inst.options.chunks.detachDom) {
-                cnt.css({
-                    position: "relative"
-                });
+                cnt[0].style.position = "relative";
             }
             element.prepend(cnt);
         }
@@ -1118,7 +1121,7 @@ function Datagrid(scope, element, attr, $compile) {
     function addListeners() {
         var unwatchFirstRender = scope.$on(exports.datagrid.events.ON_BEFORE_RENDER_AFTER_DATA_CHANGE, function() {
             unwatchFirstRender();
-            flow.add(dispatch, [ exports.datagrid.events.ON_STARTUP_COMPLETE ]);
+            flow.add(onStartupComplete);
         });
         window.addEventListener("resize", onResize);
         unwatchers.push(scope.$on(exports.datagrid.events.UPDATE, update));
@@ -1126,6 +1129,13 @@ function Datagrid(scope, element, attr, $compile) {
         unwatchers.push(scope.$on("$destroy", destroy));
         flow.add(setupChangeWatcher, [], 0);
         inst.dispatch(exports.datagrid.events.ON_LISTENERS_READY);
+    }
+    function isStartupComplete() {
+        return startupComplete;
+    }
+    function onStartupComplete() {
+        startupComplete = true;
+        dispatch(exports.datagrid.events.ON_STARTUP_COMPLETE);
     }
     /**
      * ###<a name="setupChangeWatcher">setupChangeWatcher</a>###
@@ -1184,9 +1194,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function onResize(event) {
         // we need to wait a moment for the browser to finish the resize, then adjust and fire the event.
-        setTimeout(function() {
-            updateHeights();
-        }, 100);
+        flow.add(updateHeights, 100);
     }
     /**
      * ##<a name="swapItem">swapItem</a>##
@@ -1586,12 +1594,13 @@ function Datagrid(scope, element, attr, $compile) {
      * @returns {{startIndex: number, i: number, inc: number, end: number, visibleScrollStart: number, visibleScrollEnd: number}}
      */
     function getStartingIndex() {
-        if (inst.chunkModel.getChunkList().height - inst.getViewportHeight() < values.scroll) {
+        if (startupComplete && inst.chunkModel.getChunkList().height - inst.getViewportHeight() < values.scroll) {
             // We are trying to start the scroll off at a height that is taller than we have in the list.
             // reset scroll to 0.
+            inst.info("Scroll reset because either there is no data or the scroll is taller than there is scroll area");
             values.scroll = 0;
         }
-        var height = viewHeight, scroll = values.scroll || 0, result = {
+        var height = viewHeight, scroll = startupComplete && values.scroll || 0, result = {
             startIndex: 0,
             i: 0,
             inc: 1,
@@ -1608,16 +1617,16 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function updateHeightValues() {
         //TODO: this is going to be updated to use ChunkArray data to be faster.
-        var height = 0, i = 0;
+        var height = 0, i = 0, contentHeight;
         while (i < inst.rowsLength) {
             rowOffsets[i] = height;
             height += inst.templateModel.getTemplateHeight(inst.data[i]);
             i += 1;
         }
         options.rowHeight = inst.rowsLength ? inst.templateModel.getTemplateHeight("default") : 0;
-        inst.getContent().css({
-            height: getContentHeight()
-        });
+        contentHeight = getContentHeight();
+        inst.getContent()[0].style.height = contentHeight + "px";
+        inst.log("heights: viewport %s content %s", inst.getViewportHeight(), contentHeight);
     }
     /**
      * ###<a name="updateRowWatchers">updateRowWatchers</a>###
@@ -1636,7 +1645,7 @@ function Datagrid(scope, element, attr, $compile) {
         // this needs to always be set after the dispatch of before update watchers in case they need the before activeRange.
         active.length = 0;
         // make sure not to reset until after getStartingIndex.
-        inst.log("	visibleScrollStart %s visibleScrollEnd %s", loop.visibleScrollStart, loop.visibleScrollEnd);
+        inst.log("	scroll %s visibleScrollStart %s visibleScrollEnd %s", values.scroll, loop.visibleScrollStart, loop.visibleScrollEnd);
         while (loop.i < inst.rowsLength) {
             prevS = scope.$$childHead ? scopes[loop.i - 1] : null;
             offset = getRowOffset(loop.i);
@@ -1923,15 +1932,12 @@ function Datagrid(scope, element, attr, $compile) {
         if (inst.chunkModel.getChunkList()) {
             inst.chunkModel.reset(inst.data, content, scopes);
             inst.rowsLength = inst.data.length;
-            updateHeightValues();
-            updateViewportHeight();
-            render();
+            updateHeights();
         } else {
             buildRows(inst.data, true);
         }
         flow.add(inst.info, [ "reset complete" ]);
         flow.add(dispatch, [ exports.datagrid.events.ON_AFTER_RESET ], 0);
-        flow.add(dispatch, [ exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER ]);
     }
     /**
      * ###<a name="forceRenderScope">forceRenderScope</a>###
@@ -1991,7 +1997,8 @@ function Datagrid(scope, element, attr, $compile) {
     function updateHeights(rowIndex) {
         flow.add(updateViewportHeight);
         flow.add(inst.chunkModel.updateAllChunkHeights, [ rowIndex ]);
-        flow.add(updateHeightValues);
+        flow.add(updateHeightValues, 0);
+        flow.add(updateViewportHeight);
         flow.add(render);
         flow.add(inst.dispatch, [ exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER ]);
     }
@@ -2011,9 +2018,23 @@ function Datagrid(scope, element, attr, $compile) {
      * @returns {Object}
      */
     function dispatch(event) {
-        if (!isLogEvent(event) && options.debug && options.debug.all === 1) inst.log("$emit %s", event);
+        if (!isLogEvent(event) && options.debug) eventLogger.log("$emit %s", event);
         // THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
         return scope.$emit.apply(scope, arguments);
+    }
+    function forceGarbageCollection() {
+        // concept is to crate a large object that will cause the browser to garbage collect before creating it.
+        // then since it has no reference it gets removed.
+        clearInterval(gcIntv);
+        gcIntv = setTimeout(function() {
+            if (inst) {
+                inst.info("GC");
+                var a, i, total = 1024 * 1024;
+                for (i = 0; i < total; i += 1) {
+                    a = .5;
+                }
+            }
+        }, 1e3);
     }
     /**
      * ###<a name="destroyScopes">destroyScopes</a>###
@@ -2095,6 +2116,7 @@ function Datagrid(scope, element, attr, $compile) {
         $compile = null;
     }
     exports.logWrapper("datagrid", inst, "green", dispatch);
+    exports.logWrapper("events", eventLogger, "light", dispatch);
     scope.datagrid = inst;
     setupExports();
     return inst;
@@ -2302,7 +2324,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * @param {Array} indexes
      * @returns {*}
      */
-    function getItemByIndex(indexes) {
+    function getItemByIndexes(indexes) {
         var indxs = indexes.slice(0), ca = _list;
         while (indxs.length) {
             ca = ca[indxs.shift()];
@@ -2357,9 +2379,13 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
             ca.updateDomHeight();
         }
         exports.each(children, computeStyles);
-        if (children[0].className.indexOf(inst.options.chunks.chunkClass) !== -1) {
-            // need to calculate css styles before adding this class to make transitions work.
-            children.addClass(inst.options.chunks.chunkReadyClass);
+        if (ca.hasChildChunks()) {
+            if (children[0].className.indexOf(inst.options.chunks.chunkClass) !== -1) {
+                // need to calculate css styles before adding this class to make transitions work.
+                children.addClass(inst.options.chunks.chunkReadyClass);
+            }
+        } else if (!ca.rendered.hasClass(inst.options.chunks.chunkReadyClass)) {
+            ca.rendered.addClass(inst.options.chunks.chunkReadyClass);
         }
     }
     /**
@@ -2470,6 +2496,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     result.getRowIndexes = function(rowIndex) {
         return getRowIndexes(rowIndex, _list);
     };
+    result.getItemByIndexes = getItemByIndexes;
     result.getRow = getRow;
     result.reset = reset;
     result.updateAllChunkHeights = updateAllChunkHeights;
@@ -2850,6 +2877,20 @@ ChunkArray.prototype.children = function() {
     }, []);
 };
 
+ChunkArray.prototype.decompile = function(chunkReadyClass) {
+    if (this.hasChildChunks()) {
+        this.each("decompile");
+    } else {
+        // we are going to remove all dom rows to free up memory.
+        // this can only be done if the chunk has no rows for children instead of chunks.
+        if (this.rendered) {
+            this.rendered.children().remove();
+            this.rendered.removeClass(chunkReadyClass);
+            this.rendered = null;
+        }
+    }
+};
+
 /**
  * #####<a name="destroy">destroy</a>#####
  * Perform proper cleanup.
@@ -2862,6 +2903,7 @@ ChunkArray.prototype.destroy = function() {
     this.templateEnd = "";
     this.templateModel = null;
     this.rendered = null;
+    this.dom = null;
     this.parent = null;
     while (this.length) {
         this.pop();
@@ -3065,7 +3107,7 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
      * @returns {*}
      */
     inst.setData = function(data, grouped) {
-        result.log("setData");
+        result.log("setData %s", data);
         originalData = data;
         if (grouped) {
             normalizedData = inst.normalize(data, grouped);
@@ -3175,7 +3217,23 @@ exports.datagrid.events.ON_TOUCH_DOWN = "datagrid:touchDown";
 exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
 
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
-    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, waitForStopIntv, hasScrollListener = false, lastScroll, lastRenderTime;
+    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, waitForStopIntv, hasScrollListener = false, lastScroll, lastRenderTime, startOffset, offset, speed = 0, scrollingIntv, listenerData = [ {
+        event: "touchstart",
+        method: "onTouchStart",
+        enabled: true
+    }, {
+        event: "touchmove",
+        method: "onTouchMove",
+        enabled: false
+    }, {
+        event: "touchend",
+        method: "onTouchEnd",
+        enabled: true
+    }, {
+        event: "touchcancel",
+        method: "onTouchEnd",
+        enabled: true
+    } ];
     /**
      * Listen for scrollingEvents.
      */
@@ -3205,6 +3263,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         inst.element[0].addEventListener("scroll", onUpdateScrollHandler);
     }
     function onBeforeReset() {
+        if (inst.options.scrollModel && inst.options.scrollModel.manual) {
+            listenerData[1].enabled = true;
+        }
         if (hasScrollListener) {
             result.removeScrollListener();
             hasScrollListener = true;
@@ -3220,9 +3281,12 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     function addTouchEvents() {
         result.log("addTouchEvents");
         var content = inst.getContent();
-        content.bind("touchstart", result.onTouchStart);
-        content.bind("touchend", result.onTouchEnd);
-        content.bind("touchcancel", result.onTouchEnd);
+        exports.each(listenerData, function(item) {
+            if (item.enabled) {
+                result.log("	add %s", item.event);
+                content.bind(item.event, result[item.method]);
+            }
+        });
     }
     result.fireOnScroll = function fireOnScroll() {
         if (inst.values.scroll !== lastScroll) {
@@ -3237,18 +3301,58 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.removeTouchEvents = function removeTouchEvents() {
         if (setup) {
             result.log("removeTouchEvents");
-            inst.getContent().unbind("touchstart", result.onTouchStart);
-            inst.getContent().unbind("touchend", result.onTouchEnd);
-            inst.getContent().unbind("touchcancel", result.onTouchEnd);
+            var content = inst.getContent();
+            exports.each(listenerData, function(item) {
+                result.log("	remove %s", item.event);
+                content.unbind(item.event, result[item.method]);
+            });
         }
     };
+    function getTouches(event) {
+        return event.touches || event.originalEvent.touches;
+    }
     result.onTouchStart = function onTouchStart(event) {
+        clearTimeout(scrollingIntv);
         inst.values.touchDown = true;
+        offset = startOffset = getTouches(event)[0].clientY || 0;
         inst.dispatch(exports.datagrid.events.ON_TOUCH_DOWN, event);
+    };
+    result.onTouchMove = function(event) {
+        var y = getTouches(event)[0].clientY, delta = offset - y;
+        result.setScroll(inst.values.scroll + delta);
+        speed = delta;
+        offset = y;
     };
     result.onTouchEnd = function onTouchEnd(event) {
         inst.values.touchDown = false;
         inst.dispatch(exports.datagrid.events.ON_TOUCH_UP, event);
+        if (listenerData[1].enabled) {
+            if (Math.abs(startOffset - offset) < 5) {
+                result.click(event);
+            } else {
+                result.scrollSlowDown(true);
+            }
+        }
+    };
+    result.scrollSlowDown = function(wait) {
+        clearTimeout(scrollingIntv);
+        speed = Math.abs(speed) > .01 ? speed : 0;
+        if (!wait && speed) {
+            speed *= .9;
+            inst.element[0].scrollTop += speed;
+        }
+        if (speed) {
+            scrollingIntv = setTimeout(result.scrollSlowDown, 20);
+        }
+    };
+    result.click = function(e) {
+        var target = e.target, ev;
+        if (!/(SELECT|INPUT|TEXTAREA)/i.test(target.tagName)) {
+            ev = document.createEvent("MouseEvents");
+            ev.initMouseEvent("click", true, true, e.view, 1, target.screenX, target.screenY, target.clientX, target.clientY, e.ctrlKey, e.altKey, e.shiftKey, e.metaKey, 0, null);
+            ev._constructed = true;
+            target.dispatchEvent(ev);
+        }
     };
     result.getScroll = function getScroll(el) {
         return (el || inst.element[0]).scrollTop;
@@ -3286,11 +3390,16 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         result.fireOnScroll();
     };
     result.capScrollValue = function(value) {
+        var newVal;
         if (inst.getContentHeight() < inst.getViewportHeight()) {
+            inst.log("	CAPPED scroll value from %s to 0", value);
             value = 0;
         } else if (inst.getContentHeight() - value < inst.getViewportHeight()) {
             // don't allow to scroll past the bottom.
-            value = inst.getContentHeight() - inst.getViewportHeight();
+            newVal = inst.getContentHeight() - inst.getViewportHeight();
+            // this will be the bottom scroll.
+            inst.log("	CAPPED scroll value to keep it from scrolling past the bottom. changed %s to %s", value, newVal);
+            value = newVal;
         }
         return value;
     };

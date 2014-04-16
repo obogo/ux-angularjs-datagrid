@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.5.4
+* uxDatagrid v.0.6.0
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -92,7 +92,7 @@ angular.module("ux").service("scrollHistoryModel", [ "$location", "$rootScope", 
  */
 angular.module("ux").factory("scrollHistory", function() {
     return function(inst, scrollHistoryModel) {
-        var result = exports.logWrapper("scrollHistory", {}, "green", inst.dispatch), ready, path = inst.options.scrollHistory && inst.options.scrollHistory.path || "", scrollPos, waitingForAfterDataChange = false, unwatchers = [];
+        var result = exports.logWrapper("scrollHistory", {}, "blue", inst.dispatch), ready, path = inst.options.scrollHistory && inst.options.scrollHistory.path || "", scrollPos, waitingForAfterDataChange = false, unwatchers = [];
         if (inst.options.scrollHistory && inst.options.scrollHistory.ignoreParams) {
             path = scrollHistoryModel.getPath().split("?").shift();
         }
@@ -117,6 +117,20 @@ angular.module("ux").factory("scrollHistory", function() {
             scrollPos = result.getCurrentScroll();
             inst.scrollModel.setScroll(scrollPos);
         };
+        result.setScroll = function(value) {
+            scrollHistoryModel.storeScroll(result.getPath(), value);
+        };
+        /**
+         * ###<a name="isComplete">isComplete</a>###
+         * Tell weather the scrollHistory is still processing or if it is complete.
+         * @returns {boolean}
+         */
+        result.isComplete = function() {
+            if (scrollPos === undefined) {
+                result.setScrollValue();
+            }
+            return scrollPos === 0;
+        };
         /**
          * ###<a name="scroll">scroll</a>###
          * The only time we need to set the actual scrollTo is when the history is invalid. As in it wants to
@@ -124,6 +138,7 @@ angular.module("ux").factory("scrollHistory", function() {
          */
         result.scroll = function() {
             if (inst.getContentHeight() - inst.getViewportHeight() < scrollPos && inst.values.scroll) {
+                result.log("	scrollTo 0 because scroll %s is too tall for the content", scrollPos);
                 inst.scrollModel.setScroll(0);
                 inst.scrollModel.scrollTo(0, true);
             }
@@ -132,8 +147,8 @@ angular.module("ux").factory("scrollHistory", function() {
          * watch only once to have it start at that scrolling position on startup.
          */
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, function() {
-            // need to set the scroll before the data is changed.
             result.log("found scrollHistory so scrollTo %s", result.getCurrentScroll());
+            // need to set the scroll before the data is changed.
             ready = true;
             result.setScrollValue();
             waitingForAfterDataChange = true;
@@ -144,10 +159,17 @@ angular.module("ux").factory("scrollHistory", function() {
          * the scroll top value because the content doesn't have a height yet.
          */
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, function() {
-            waitingForAfterDataChange = false;
-            result.scroll();
-            inst.dispatch(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL);
-            unwatchers.shift()();
+            if (inst.getContentHeight()) {
+                result.log("onRenderAfterDataChange");
+                waitingForAfterDataChange = false;
+                result.scroll();
+                if (!exports.datagrid.isIOS) {
+                    inst.dispatch(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL);
+                }
+                unwatchers.shift()();
+            } else {
+                result.log("onRenderAfterDataChange skipped because there is no contentHeight");
+            }
         }));
         /**
          * add the listener to the main unwatchers array to make sure it gets cleaned up later before the destroy to
@@ -155,6 +177,7 @@ angular.module("ux").factory("scrollHistory", function() {
          */
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, function() {
             if (ready && !waitingForAfterDataChange) {
+                scrollPos = 0;
                 result.storeCurrentScroll();
             }
         }));

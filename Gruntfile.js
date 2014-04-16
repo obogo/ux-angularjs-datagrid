@@ -91,6 +91,12 @@ module.exports = function (grunt) {
                     'build/latest/addons/ux-<%= pkg.filename %>-windowScroll.js': [
                         'src/addons/windowScroll.js'
                     ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-memoryOptimizer.js': [
+                        'src/addons/memoryOptimizer.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-scrollBar.js': [
+                        'src/addons/scrollBar.js'
+                    ],
                     'build/latest/other/ux-doubleScroll.js': [
                         'src/other/doubleScroll.js'
                     ]

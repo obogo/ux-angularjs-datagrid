@@ -46,6 +46,9 @@
         <a href="#storecurrentscroll">storeCurrentScroll</a>
       </div>
       <div class="heading h3">
+        <a href="#iscomplete">isComplete</a>
+      </div>
+      <div class="heading h3">
         <a href="#scroll">scroll</a>
       </div>
     </div>
@@ -66,7 +69,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.5.4
+  <div class="summary"><p>uxDatagrid v.0.6.0
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -350,7 +353,7 @@ instance.</p>
         <td class="code highlight"><div class="highlight"><pre>
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;scrollHistory&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">,</span> <span class="nx">scrollHistoryModel</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;scrollHistory&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">ready</span><span class="p">,</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollHistory</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollHistory</span><span class="p">.</span><span class="nx">path</span> <span class="o">||</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nx">scrollPos</span><span class="p">,</span> <span class="nx">waitingForAfterDataChange</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[];</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;scrollHistory&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">ready</span><span class="p">,</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollHistory</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollHistory</span><span class="p">.</span><span class="nx">path</span> <span class="o">||</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nx">scrollPos</span><span class="p">,</span> <span class="nx">waitingForAfterDataChange</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[];</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollHistory</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollHistory</span><span class="p">.</span><span class="nx">ignoreParams</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">path</span> <span class="o">=</span> <span class="nx">scrollHistoryModel</span><span class="p">.</span><span class="nx">getPath</span><span class="p">().</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">).</span><span class="nx">shift</span><span class="p">();</span>
         <span class="p">}</span>
@@ -404,6 +407,39 @@ instance.</p>
             <span class="nx">scrollPos</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">();</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">setScroll</span><span class="p">(</span><span class="nx">scrollPos</span><span class="p">);</span>
         <span class="p">};</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">setScroll</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">scrollHistoryModel</span><span class="p">.</span><span class="nx">storeScroll</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">getPath</span><span class="p">(),</span> <span class="nx">value</span><span class="p">);</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="iscomplete">
+  <h3>
+    <a href="#iscomplete" name="iscomplete" class="pilcrow">&#182;</a>
+    <a name="isComplete">isComplete</a>
+  </h3>
+</div>
+
+
+<p>Tell weather the scrollHistory is still processing or if it is complete.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">isComplete</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">scrollPos</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">setScrollValue</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">scrollPos</span> <span class="o">===</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">};</span>
 
 </pre></div>
         </td>
@@ -429,6 +465,7 @@ scroll to a value that is taller than the data will support. In that case it wil
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">result</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getContentHeight</span><span class="p">()</span> <span class="o">-</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getViewportHeight</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">scrollPos</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  scrollTo 0 because scroll %s is too tall for the content&quot;</span><span class="p">,</span> <span class="nx">scrollPos</span><span class="p">);</span>
                 <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">setScroll</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
                 <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
             <span class="p">}</span>
@@ -440,7 +477,7 @@ scroll to a value that is taller than the data will support. In that case it wil
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-15" id="section-15">&#182;</a>
+  <a class="pilcrow" href="#section-16" id="section-16">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>watch only once to have it start at that scrolling position on startup.</p>
@@ -451,6 +488,7 @@ scroll to a value that is taller than the data will support. In that case it wil
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_DATA_CHANGE</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;found scrollHistory so scrollTo %s&quot;</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">());</span>
 
 </pre></div>
         </td>
@@ -458,12 +496,11 @@ scroll to a value that is taller than the data will support. In that case it wil
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-16" id="section-16">&#182;</a>
+  <a class="pilcrow" href="#section-17" id="section-17">&#182;</a>
 </div>
 <p>need to set the scroll before the data is changed.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;found scrollHistory so scrollTo %s&quot;</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">());</span>
             <span class="nx">ready</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">setScrollValue</span><span class="p">();</span>
             <span class="nx">waitingForAfterDataChange</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
@@ -476,7 +513,7 @@ scroll to a value that is taller than the data will support. In that case it wil
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-17" id="section-17">&#182;</a>
+  <a class="pilcrow" href="#section-18" id="section-18">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>we then need to scroll to after the render because otherwise the content isn't able to set
@@ -488,10 +525,17 @@ the scroll top value because the content doesn't have a height yet.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_RENDER_AFTER_DATA_CHANGE</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-            <span class="nx">waitingForAfterDataChange</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
-            <span class="nx">result</span><span class="p">.</span><span class="nx">scroll</span><span class="p">();</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">AFTER_SCROLL_HISTORY_INIT_SCROLL</span><span class="p">);</span>
-            <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">shift</span><span class="p">()();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getContentHeight</span><span class="p">())</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;onRenderAfterDataChange&quot;</span><span class="p">);</span>
+                <span class="nx">waitingForAfterDataChange</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">scroll</span><span class="p">();</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">isIOS</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">AFTER_SCROLL_HISTORY_INIT_SCROLL</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">shift</span><span class="p">()();</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;onRenderAfterDataChange skipped because there is no contentHeight&quot;</span><span class="p">);</span>
+            <span class="p">}</span>
         <span class="p">}));</span>
 
 </pre></div>
@@ -500,7 +544,7 @@ the scroll top value because the content doesn't have a height yet.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-18" id="section-18">&#182;</a>
+  <a class="pilcrow" href="#section-19" id="section-19">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>add the listener to the main unwatchers array to make sure it gets cleaned up later before the destroy to
@@ -513,6 +557,7 @@ keep events from firing during the destroy process.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_UPDATE_WATCHERS</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">ready</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">waitingForAfterDataChange</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">scrollPos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
                 <span class="nx">result</span><span class="p">.</span><span class="nx">storeCurrentScroll</span><span class="p">();</span>
             <span class="p">}</span>
         <span class="p">}));</span>

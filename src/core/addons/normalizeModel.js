@@ -34,7 +34,7 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
      * @returns {*}
      */
     inst.setData = function (data, grouped) {
-        result.log('setData');
+        result.log('setData %s', data);
         originalData = data;
         if (grouped) {
             normalizedData = inst.normalize(data, grouped);

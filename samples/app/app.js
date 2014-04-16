@@ -242,6 +242,19 @@ app.config(function ($routeProvider) {
                 });
             }
         })
+        .when('/addons/memoryOptimizer', {
+            templateUrl: "partials/addons/memoryOptimizer.html",
+            controller: function SimpleCtrl($scope) {
+                $scope.name = "Memory Optimizer";
+                $scope.items = createSimpleList();
+                $scope.clear = function () {
+                    $scope.items = [];
+                };
+                $scope.reset = function () {
+                    $scope.items = createSimpleList();
+                };
+            }
+        })
         .otherwise({
             redirectTo: '/'
         });
@@ -260,7 +273,7 @@ app.controller('root', function root($scope) {
 
     $scope.scrollToPercent = function (percent) {
         var datagrid = document.getElementsByClassName('datagrid');
-        angular.element(datagrid).scope().datagrid.scrollModel.scrollTo(angular.element(datagrid[0]).children()[0].offsetHeight * percent);
+        angular.element(datagrid).scope().datagrid.scrollModel.scrollTo(angular.element(datagrid[0]).scope().datagrid.getContentHeight() * percent);
     };
 
     $scope.create = function () {

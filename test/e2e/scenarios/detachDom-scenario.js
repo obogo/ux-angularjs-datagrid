@@ -17,7 +17,7 @@
 
         function scrollToChunk(chunkId, by) {
             by = by || 50;
-            find('.datagrid').until("scroll to chunk", function () {
+            find('.datagrid').until("scroll to chunk " + chunkId, function () {
                 var c = $("div[chunk-id='" + chunkId + "']"), rowId;
                 if (c.length) {
                     rowId = c.attr('range').split(':').shift();
@@ -31,7 +31,7 @@
 
         function scrollTo(value, by, immediately) {
             by = by || 50;
-            find('.datagrid').until('scrolled to', function () {
+            find('.datagrid').until('scrolled to ' + value, function () {
                 var s = ng(this.element[0]).scope();
                 if (immediately) {
                     s.datagrid.element.scrollTop(value);
@@ -61,10 +61,11 @@
         }
 
         function assertChunkTop(label, prevChunkId, chunkId) {
+            wait(250);
             assert(label, function () {
                 var h = $("div[chunk-id='" + prevChunkId + "']").height(),
-                    pt = parseInt($("div[chunk-id='" + prevChunkId + "']").css('top'), 10),
-                    t = parseInt($("div[chunk-id='" + chunkId + "']").css('top'), 10),
+                    pt = parseInt($("div[chunk-id='" + prevChunkId + "']")[0].style.top, 10),
+                    t = parseInt($("div[chunk-id='" + chunkId + "']")[0].style.top, 10),
                     offset = pt + h;
                 if (offset === t) {
                     return true;
@@ -102,7 +103,6 @@
                     var pcId = '0.0.0.0.' + i, id = '0.0.0.0.' + (i + 1);
                     assertChunkTop("chunk " + id + " should be aligned correctly.", pcId, id);
                     scrollToChunk(id);
-//                    scrollTo(parseInt($("div[chunk-id='" + id + "']").css('top'), 10) + $("div[chunk-id='" + id + "']").height(), 0, true);
                 }, 9);
             });
 
@@ -110,7 +110,7 @@
                 ux.runner.repeat(function (i) {
                     var pcId = '0.0.0.' + i, id = '0.0.0.' + (i + 1);
                     assertChunkTop("chunk " + id + " should be aligned correctly.", pcId, id);
-                    scrollTo(parseInt($("div[chunk-id='" + id + "']").css('top'), 10) + $("div[chunk-id='" + id + "']").height(), 0, true);
+                    scrollToChunk(id);
                 }, 9);
             });
 
@@ -118,7 +118,7 @@
                 ux.runner.repeat(function (i) {
                     var pcId = '0.0.' + i, id = '0.0.' + (i + 1);
                     assertChunkTop("chunk " + id + " should be aligned correctly.", pcId, id);
-                    scrollTo(parseInt($("div[chunk-id='" + id + "']").css('top'), 10) + $("div[chunk-id='" + id + "']").height(), 0, true);
+                    scrollToChunk(id);
                 }, 9);
             });
 
@@ -126,7 +126,7 @@
                 ux.runner.repeat(function (i) {
                     var pcId = '0.' + i, id = '0.' + (i + 1);
                     assertChunkTop("chunk " + id + " should be aligned correctly.", pcId, id);
-                    scrollTo(parseInt($("div[chunk-id='" + id + "']").css('top'), 10) + $("div[chunk-id='" + id + "']").height(), 0, true);
+                    scrollToChunk(id);
                 }, 4);
             });
         }
@@ -134,6 +134,7 @@
         scenario("ux-datagrid scrolling check", function (goHome) {
             goHome();
             scene("change to detachDom mode", function () {
+                options.window.ux.datagrid.options.creepRender.enable = false;
                 options.window.ux.datagrid.options.chunks.detachDom = 10;
             });
 
@@ -181,6 +182,7 @@
             clickRowAndAssertAllChunkSizeChange('0.0.0.1.5', 154);
 
             scene("change back to normal mode", function () {
+                options.window.ux.datagrid.options.creepRender.enable = true;
                 options.window.ux.datagrid.options.chunks.detachDom = false;
             });
         });

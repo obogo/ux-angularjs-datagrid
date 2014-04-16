@@ -214,6 +214,7 @@ exports.css = (function CSS() {
         createStyleSheet: createStyleSheet,
         createClass: createClass,
         getCSSValue: getCSSValue,
-        setCSSValue: setCSSValue
+        setCSSValue: setCSSValue,
+        getSelector: getSelector
     };
 }());

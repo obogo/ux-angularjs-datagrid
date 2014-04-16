@@ -187,7 +187,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * @param {Array} indexes
      * @returns {*}
      */
-    function getItemByIndex(indexes) {
+    function getItemByIndexes(indexes) {
         var indxs = indexes.slice(0), ca = _list;
         while (indxs.length) {
             ca = ca[indxs.shift()];
@@ -244,9 +244,13 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
             ca.updateDomHeight();
         }
         exports.each(children, computeStyles);
-        if (children[0].className.indexOf(inst.options.chunks.chunkClass) !== -1) {
-            // need to calculate css styles before adding this class to make transitions work.
-            children.addClass(inst.options.chunks.chunkReadyClass);
+        if (ca.hasChildChunks()) {
+            if (children[0].className.indexOf(inst.options.chunks.chunkClass) !== -1) {
+                // need to calculate css styles before adding this class to make transitions work.
+                children.addClass(inst.options.chunks.chunkReadyClass);
+            }
+        } else if (!ca.rendered.hasClass(inst.options.chunks.chunkReadyClass)) {
+            ca.rendered.addClass(inst.options.chunks.chunkReadyClass);
         }
     }
 
@@ -366,6 +370,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     result.getRowIndexes = function (rowIndex) {
         return getRowIndexes(rowIndex, _list);
     };
+    result.getItemByIndexes = getItemByIndexes;
     result.getRow = getRow;
     result.reset = reset;
     result.updateAllChunkHeights = updateAllChunkHeights;
@@ -719,6 +724,19 @@ ChunkArray.prototype.children = function () {
         children.push(this.rendered);
     }, []);
 };
+ChunkArray.prototype.decompile = function (chunkReadyClass) {
+    if (this.hasChildChunks()) {
+        this.each('decompile');
+    } else {
+        // we are going to remove all dom rows to free up memory.
+        // this can only be done if the chunk has no rows for children instead of chunks.
+        if (this.rendered) {
+            this.rendered.children().remove();
+            this.rendered.removeClass(chunkReadyClass);
+            this.rendered = null;
+        }
+    }
+};
 /**
  * #####<a name="destroy">destroy</a>#####
  * Perform proper cleanup.
@@ -731,6 +749,7 @@ ChunkArray.prototype.destroy = function () {
     this.templateEnd = '';
     this.templateModel = null;
     this.rendered = null;
+    this.dom = null;
     this.parent = null;
     while (this.length) {
         this.pop();

@@ -11,7 +11,17 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         waitForStopIntv,
         hasScrollListener = false,
         lastScroll,
-        lastRenderTime;
+        lastRenderTime,
+        startOffset,
+        offset,
+        speed = 0,
+        scrollingIntv,
+        listenerData = [
+            {event: 'touchstart', method: 'onTouchStart', enabled: true},
+            {event: 'touchmove', method: 'onTouchMove', enabled: false},
+            {event: 'touchend', method: 'onTouchEnd', enabled: true},
+            {event: 'touchcancel', method: 'onTouchEnd', enabled: true}
+        ];
 
     /**
      * Listen for scrollingEvents.
@@ -42,6 +52,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     }
 
     function onBeforeReset() {
+        if (inst.options.scrollModel && inst.options.scrollModel.manual) {
+            listenerData[1].enabled = true;
+        }
         if (hasScrollListener) {
             result.removeScrollListener();
             hasScrollListener = true;
@@ -59,9 +72,12 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     function addTouchEvents() {
         result.log('addTouchEvents');
         var content = inst.getContent();
-        content.bind('touchstart', result.onTouchStart);
-        content.bind('touchend', result.onTouchEnd);
-        content.bind('touchcancel', result.onTouchEnd);
+        exports.each(listenerData, function (item) {
+            if (item.enabled) {
+                result.log("\tadd %s", item.event);
+                content.bind(item.event, result[item.method]);
+            }
+        });
     }
 
     result.fireOnScroll = function fireOnScroll() {
@@ -79,20 +95,71 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.removeTouchEvents = function removeTouchEvents() {
         if (setup) {
             result.log('removeTouchEvents');
-            inst.getContent().unbind('touchstart', result.onTouchStart);
-            inst.getContent().unbind('touchend', result.onTouchEnd);
-            inst.getContent().unbind('touchcancel', result.onTouchEnd);
+            var content = inst.getContent();
+            exports.each(listenerData, function (item) {
+                result.log("\tremove %s", item.event);
+                content.unbind(item.event, result[item.method]);
+            });
         }
     };
 
+    function getTouches(event) {
+        return event.touches || event.originalEvent.touches;
+    }
+
     result.onTouchStart = function onTouchStart(event) {
+        clearTimeout(scrollingIntv);
         inst.values.touchDown = true;
+        offset = startOffset = getTouches(event)[0].clientY || 0;
         inst.dispatch(exports.datagrid.events.ON_TOUCH_DOWN, event);
+    };
+
+    result.onTouchMove = function (event) {
+        var y = getTouches(event)[0].clientY, delta = offset - y;
+        result.setScroll(inst.values.scroll + delta);
+        speed = delta;
+        offset = y;
     };
 
     result.onTouchEnd = function onTouchEnd(event) {
         inst.values.touchDown = false;
         inst.dispatch(exports.datagrid.events.ON_TOUCH_UP, event);
+        if (listenerData[1].enabled) {
+            if (Math.abs(startOffset - offset) < 5) {
+                result.click(event);
+            } else {
+                result.scrollSlowDown(true);
+            }
+        }
+    };
+
+    result.scrollSlowDown = function (wait) {
+        clearTimeout(scrollingIntv);
+        speed = Math.abs(speed) > 0.01 ? speed : 0;
+        if (!wait && speed) {
+            speed *= 0.9;
+            inst.element[0].scrollTop += speed;
+        }
+
+        if (speed) {
+            scrollingIntv = setTimeout(result.scrollSlowDown, 20);
+        }
+    };
+
+    result.click = function (e) {
+        var target = e.target,
+            ev;
+
+        if ( !(/(SELECT|INPUT|TEXTAREA)/i).test(target.tagName) ) {
+            ev = document.createEvent('MouseEvents');
+            ev.initMouseEvent('click', true, true, e.view, 1,
+                target.screenX, target.screenY, target.clientX, target.clientY,
+                e.ctrlKey, e.altKey, e.shiftKey, e.metaKey,
+                0, null);
+
+            ev._constructed = true;
+            target.dispatchEvent(ev);
+        }
     };
 
     result.getScroll = function getScroll(el) {
@@ -135,10 +202,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
 
     result.capScrollValue = function (value) {
+        var newVal;
         if (inst.getContentHeight() < inst.getViewportHeight()) {
+            inst.log("\tCAPPED scroll value from %s to 0", value);
             value = 0;// couldn't make it. just scroll to the bottom.
         } else if (inst.getContentHeight() - value < inst.getViewportHeight()) { // don't allow to scroll past the bottom.
-            value = inst.getContentHeight() - inst.getViewportHeight(); // this will be the bottom scroll.
+            newVal = inst.getContentHeight() - inst.getViewportHeight(); // this will be the bottom scroll.
+            inst.log("\tCAPPED scroll value to keep it from scrolling past the bottom. changed %s to %s", value, newVal);
+            value = newVal;
         }
         return value;
     };

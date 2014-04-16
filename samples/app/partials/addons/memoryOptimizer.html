@@ -1,0 +1,25 @@
+<div class="stats">
+    <div class="page-title">{{name}}</div>
+    <div progress-bar class="progress-bar"></div>
+    <!--<a href="javascript:void(0)" data-ng-click="clear()">Clear</a> |-->
+    <!--<a href="javascript:void(0)" data-ng-click="reset()">Reset</a>-->
+    <span>SCROLL TO:</span>
+    <span data-ng-repeat="p in percents"><a href="" data-ng-click="scrollToPercent(p/100)">{{p}}%</a> </span>
+</div>
+<div class="my-container">
+    <div class="listA">
+        <!--// This is the background loader //-->
+        <div class="spinningSquares">
+            <div data-ng-repeat="num in [1, 2, 3, 4, 5, 6, 7, 8]" class="spinningSquaresG spinningSquares_{{num}}"></div>
+        </div>
+        <!--// this is the datagrid //-->
+        <!--// TODO: need a separate example for detachDom //-->
+        <div data-ux-datagrid="items" class="datagrid" data-addons="gridLogger, memoryOptimizer, scrollBar" options="{debug:{scrollModel:1, memoryOptimizer:1}, chunks:{size:10}, scrollModel:{manual:true}}">
+            <script type="template/html" data-template-name="default" data-template-item="item">
+                <div class="row {{fake}}">
+                    <div class="text">{{item.id}} {{$id}} {{counter}}</div>
+                </div>
+            </script>
+        </div>
+    </div>
+</div>

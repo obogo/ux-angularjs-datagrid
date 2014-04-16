@@ -3,7 +3,7 @@ describe("scrollModel", function () {
     var model, rendered;
 
     beforeEach(function () {
-        console.clear();
+        console.clear && console.clear();
         rendered = false;
         model = ux.datagrid.coreAddons.scrollModel({
             unwatchers: [],

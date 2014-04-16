@@ -31,7 +31,7 @@
             scene("Jump to should take to the right row", function () {
                 find('.content-area .stats a:eq(1)').text().toBe('10%');
                 find('.content-area .stats a:eq(1)').sendMouse();
-                wait(500);
+                wait(2000);
                 assert("is row 5000 at top",function () {
                     return isRowAtTop(5000);
                 }, this);

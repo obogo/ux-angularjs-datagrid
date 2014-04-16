@@ -63,7 +63,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.5.4
+  <div class="summary"><p>uxDatagrid v.0.6.0
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -326,7 +326,7 @@ to modify it to load the template for loading row matching on the _template prop
                     <span class="nx">result</span><span class="p">.</span><span class="nx">calculateBottomOffset</span><span class="p">();</span>
                     <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="nx">scrollOffset</span> <span class="o">!==</span> <span class="o">-</span><span class="mi">1</span> <span class="o">?</span> <span class="nx">scrollOffset</span> <span class="o">:</span> <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
                 <span class="p">}</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&gt;=</span> <span class="nx">bottomOffset</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&amp;&amp;</span> <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&gt;=</span> <span class="nx">bottomOffset</span><span class="p">)</span> <span class="p">{</span>
                     <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_BOTTOM</span><span class="p">);</span>
                 <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
                     <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_TOP</span><span class="p">);</span>

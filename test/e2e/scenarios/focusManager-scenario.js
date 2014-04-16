@@ -37,6 +37,7 @@
             });
 
             scene("focus to the first input.", function () {
+                wait(500);
                 var datagrid = ng($('.datagrid')).scope().datagrid;
                 if (options.window.ux.datagrid.options.chunks.detachDom) {
                     wait(20000);// wait 20 seconds for creeping to render several chunks so we can check the detachment of dom.

@@ -1883,7 +1883,7 @@ proto.capsLock = function() {
 };
 
 proto.lock = function() {
-    var doc = ux.runner.locals.$(document);
+    var doc = ux.runner.locals.$(runner.options.window.document);
     doc.bind("mousedown", this.killEvent);
     doc.bind("keydown", this.killEvent);
     doc.bind("focus", this.killEvent);
@@ -1892,7 +1892,7 @@ proto.lock = function() {
 };
 
 proto.release = function() {
-    var doc = ux.runner.locals.$(document);
+    var doc = ux.runner.locals.$(runner.options.window.document);
     doc.unbind("mousedown", this.killEvent);
     doc.unbind("keydown", this.killEvent);
     doc.unbind("focus", this.killEvent);
@@ -1915,7 +1915,7 @@ proto.dispatchEvent = function(el, type, evt) {
 };
 
 proto.createEvent = function(type, options) {
-    var evt, e;
+    var evt, e, doc = runner.options.window.document;
     e = ux.runner.locals.$.extend({
         bubbles: true,
         cancelable: true,
@@ -1927,13 +1927,13 @@ proto.createEvent = function(type, options) {
         keyCode: 0,
         charCode: 0
     }, options);
-    if (ux.runner.locals.$.isFunction(document.createEvent)) {
+    if (ux.runner.locals.$.isFunction(doc.createEvent)) {
         if (type.indexOf("key") !== -1) {
             try {
-                evt = document.createEvent("KeyEvents");
+                evt = doc.createEvent("KeyEvents");
                 evt.initKeyEvent(type, e.bubbles, e.cancelable, e.view, e.ctrlKey, e.altKey, e.shiftKey, e.metaKey, e.keyCode, e.charCode);
             } catch (err) {
-                evt = document.createEvent("Events");
+                evt = doc.createEvent("Events");
                 evt.initEvent(type, e.bubbles, e.cancelable);
                 ux.runner.locals.$.extend(evt, {
                     view: e.view,
@@ -1946,11 +1946,11 @@ proto.createEvent = function(type, options) {
                 });
             }
         } else {
-            evt = document.createEvent("HTMLEvents");
+            evt = doc.createEvent("HTMLEvents");
             evt.initEvent(type, false, true);
         }
-    } else if (document.createEventObject) {
-        evt = document.createEventObject();
+    } else if (doc.createEventObject) {
+        evt = doc.createEventObject();
         ux.runner.locals.$.extend(evt, e);
     }
     if (ux.runner.locals.$.browser !== undefined && (ux.runner.locals.$.browser.msie || ux.runner.locals.$.browser.opera)) {
@@ -1998,7 +1998,8 @@ runner.elementMethods.push(function(target) {
 
 runner.inPageMethods.push(function() {
     "use strict";
-    var $fn = this.jQuery ? this.jQuery.fn : this.angular.element.prototype, $ = this.jQuery || this.angular.element;
+    var $fn = this.jQuery ? this.jQuery.fn : this.angular.element.prototype, $ = this.jQuery || this.angular.element,
+        doc = runner.options.window.document;
     $fn.getCursorPosition = function() {
         if (this.length === 0) {
             return -1;
@@ -2024,8 +2025,8 @@ runner.inPageMethods.push(function() {
         }
         var input = this[0];
         var pos = input.value.length, r;
-        if (input.createTextRange) {
-            r = ux.runner.locals.window.document.selection.createRange().duplicate();
+        if (input.createTextRange && !doc.getSelection) {
+            r = doc.selection.createRange().duplicate();
             r.moveEnd("character", input.value.length);
             if (r.text === "") {
                 pos = input.value.length;
@@ -2042,8 +2043,8 @@ runner.inPageMethods.push(function() {
         }
         var input = this[0];
         var pos = input.value.length, r;
-        if (input.createTextRange) {
-            r = document.selection.createRange().duplicate();
+        if (input.createTextRange && !doc.getSelection) {
+            r = doc.selection.createRange().duplicate();
             r.moveStart("character", -input.value.length);
             if (r.text === "") {
                 pos = input.value.length;
@@ -2059,7 +2060,7 @@ runner.inPageMethods.push(function() {
             return this;
         }
         var input = this[0];
-        if (input.createTextRange) {
+        if (input.createTextRange && !doc.getSelection) {
             var range = input.createTextRange();
             range.collapse(true);
             range.moveEnd("character", selectionEnd);
@@ -2075,10 +2076,11 @@ runner.inPageMethods.push(function() {
 
 runner.elementMethods.push(function(target) {
     function anchorClick(anchorObj) {
+        var doc = runner.options.window.document;
         if (anchorObj.click) {
             anchorObj.click();
-        } else if (document.createEvent) {
-            var evt = document.createEvent("MouseEvents");
+        } else if (doc.createEvent) {
+            var evt = doc.createEvent("MouseEvents");
             evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
             var allowDefault = anchorObj.dispatchEvent(evt);
         }

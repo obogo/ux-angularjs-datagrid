@@ -92,7 +92,7 @@ angular.module('ux').factory('infiniteScroll', function () {
                     result.calculateBottomOffset();
                     inst.scrollModel.scrollTo(scrollOffset !== -1 ? scrollOffset : values.scroll, true);
                 }
-                if (values.scroll >= bottomOffset) {
+                if (values.scroll && values.scroll >= bottomOffset) {
                     inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_BOTTOM);
                 } else if (values.scroll <= 0) {
                     inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_TOP);

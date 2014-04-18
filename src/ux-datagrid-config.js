@@ -80,6 +80,7 @@ exports.datagrid = {
         ON_SCROLL: 'datagrid:onScroll',
         ON_BEFORE_RESET: 'datagrid:onBeforeReset',
         ON_AFTER_RESET: 'datagrid:onAfterReset',
+        ON_AFTER_HEIGHTS_UPDATED: 'datagrid:onAfterHeightsUpdated',
         ON_AFTER_HEIGHTS_UPDATED_RENDER: 'datagrid:onAfterHeightsUpdatedRender',
         ON_BEFORE_ROW_DEACTIVATE: 'datagrid:onBeforeRowDeactivate', // handy for knowing when to remove jquery listeners.
         ON_AFTER_ROW_ACTIVATE: 'datagrid:onAFterRowActivate', // handy for turning jquery listeners back on.
@@ -152,9 +153,12 @@ exports.datagrid = {
             // transitions on newly created chunks.
             chunkReadyClass: 'datagrid-chunk-ready'
         },
-        // - **<a name="options.chunkSize">chunkSize</a>** this is used to determine how large each chunk should be. Chunks are made recursively
-        // so if you pass 8 items and they are chunked at 2 then you would have 2 chunks each with 2 chunks each with 2 rows.
-        chunkSize: 50,
+        scrollModel: {
+            // - **<a name="options.scrollModel.speed">scrollModel.speed</a>** the factor of speed multiplication when determining how far the scroller should coast in manual mode.
+            speed: 5,
+            // - **<a name="options.scrollModel.manual">scrollModel.manual</a>** if set to true then touch move events will be used to scroll and calculate coasting.
+            manual: false
+        },
         // - **<a name="options.compiledClass">compiledClass</a>** after a row has been compiled the uncompiled class is removed and compiled is added.
         compiledClass: 'compiled',
         // - **<a name="options.uncompiledClass">uncompiledClass</a>** before a dom row is rendered it is compiled. The compiled row will have {{}} still in the code

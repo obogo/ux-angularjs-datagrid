@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.6.0
+* uxDatagrid v.0.6.1
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -96,6 +96,7 @@ exports.datagrid = {
         ON_SCROLL: "datagrid:onScroll",
         ON_BEFORE_RESET: "datagrid:onBeforeReset",
         ON_AFTER_RESET: "datagrid:onAfterReset",
+        ON_AFTER_HEIGHTS_UPDATED: "datagrid:onAfterHeightsUpdated",
         ON_AFTER_HEIGHTS_UPDATED_RENDER: "datagrid:onAfterHeightsUpdatedRender",
         ON_BEFORE_ROW_DEACTIVATE: "datagrid:onBeforeRowDeactivate",
         // handy for knowing when to remove jquery listeners.
@@ -170,9 +171,12 @@ exports.datagrid = {
             // transitions on newly created chunks.
             chunkReadyClass: "datagrid-chunk-ready"
         },
-        // - **<a name="options.chunkSize">chunkSize</a>** this is used to determine how large each chunk should be. Chunks are made recursively
-        // so if you pass 8 items and they are chunked at 2 then you would have 2 chunks each with 2 chunks each with 2 rows.
-        chunkSize: 50,
+        scrollModel: {
+            // - **<a name="options.scrollModel.speed">scrollModel.speed</a>** the factor of speed multiplication when determining how far the scroller should coast in manual mode.
+            speed: 5,
+            // - **<a name="options.scrollModel.manual">scrollModel.manual</a>** if set to true then touch move events will be used to scroll and calculate coasting.
+            manual: false
+        },
         // - **<a name="options.compiledClass">compiledClass</a>** after a row has been compiled the uncompiled class is removed and compiled is added.
         compiledClass: "compiled",
         // - **<a name="options.uncompiledClass">uncompiledClass</a>** before a dom row is rendered it is compiled. The compiled row will have {{}} still in the code
@@ -1194,7 +1198,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function onResize(event) {
         // we need to wait a moment for the browser to finish the resize, then adjust and fire the event.
-        flow.add(updateHeights, 100);
+        flow.add(updateHeights, [], 100);
     }
     /**
      * ##<a name="swapItem">swapItem</a>##
@@ -1410,7 +1414,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Scope} s
      */
     function safeDigest(s) {
-        if (!s.$$phase) {
+        if (!s.$$phase || !s.$root.$$phase) {
             s.$digest();
         }
     }
@@ -1594,13 +1598,13 @@ function Datagrid(scope, element, attr, $compile) {
      * @returns {{startIndex: number, i: number, inc: number, end: number, visibleScrollStart: number, visibleScrollEnd: number}}
      */
     function getStartingIndex() {
-        if (startupComplete && inst.chunkModel.getChunkList().height - inst.getViewportHeight() < values.scroll) {
+        if (inst.chunkModel.getChunkList() && inst.chunkModel.getChunkList().height - inst.getViewportHeight() < values.scroll) {
             // We are trying to start the scroll off at a height that is taller than we have in the list.
             // reset scroll to 0.
             inst.info("Scroll reset because either there is no data or the scroll is taller than there is scroll area");
             values.scroll = 0;
         }
-        var height = viewHeight, scroll = startupComplete && values.scroll || 0, result = {
+        var height = viewHeight, scroll = values.scroll || 0, result = {
             startIndex: 0,
             i: 0,
             inc: 1,
@@ -1971,20 +1975,21 @@ function Datagrid(scope, element, attr, $compile) {
         var index = inst.getNormalizedIndex(item), el = getRowElm(index), s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope(), replaceEl, newScope;
         if (s !== scope) {
             replaceEl = angular.element(inst.templateModel.getTemplateByName(newTemplate).template);
+            replaceEl.addClass(options.uncompiledClass);
             while (classes && classes.length) {
                 replaceEl.addClass(classes.shift());
             }
             el.parent()[0].insertBefore(replaceEl[0], el[0]);
             s.$destroy();
             scopes[index] = null;
-            newScope = scopes[index] = compileRow(index);
-            for (var i in s) {
-                if (s.hasOwnProperty(i) && !newScope.hasOwnProperty(i)) {
-                    newScope[i] = s[i];
-                }
-            }
-            el.remove();
-            newScope.$digested = false;
+            //            newScope = scopes[index] = compileRow(index);
+            //            for(var i in s) {
+            //                if (s.hasOwnProperty(i) && !newScope.hasOwnProperty(i)) {
+            //                    newScope[i] = s[i];
+            //                }
+            //            }
+            //            el.remove();
+            //            newScope.$digested = false;
             updateHeights(index);
         }
     }
@@ -1999,6 +2004,7 @@ function Datagrid(scope, element, attr, $compile) {
         flow.add(inst.chunkModel.updateAllChunkHeights, [ rowIndex ]);
         flow.add(updateHeightValues, 0);
         flow.add(updateViewportHeight);
+        flow.add(inst.dispatch, [ exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED ]);
         flow.add(render);
         flow.add(inst.dispatch, [ exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER ]);
     }
@@ -2029,7 +2035,7 @@ function Datagrid(scope, element, attr, $compile) {
         gcIntv = setTimeout(function() {
             if (inst) {
                 inst.info("GC");
-                var a, i, total = 1024 * 1024;
+                var a, i, total = 1024 * 1024 * .5;
                 for (i = 0; i < total; i += 1) {
                     a = .5;
                 }
@@ -3333,20 +3339,19 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
                 result.click(event);
             } else {
                 startTime = Date.now();
-                distance = speed * 10;
+                distance = speed * inst.options.scrollModel.speed;
                 result.scrollSlowDown(true);
             }
         }
     };
     result.scrollSlowDown = function(wait) {
         clearTimeout(scrollingIntv);
-        var duration = Math.abs(speed) * 10, t = duration - (Date.now() - startTime), prevDistance = distance, change;
+        var duration = Math.abs(speed) * inst.options.scrollModel.speed, t = duration - (Date.now() - startTime), prevDistance = distance, change;
         distance = result.easeOut(t, distance, speed || 0, duration);
         change = distance - prevDistance;
-        if (Math.abs(change) < 1) {
+        if (Math.abs(change) < 5) {
             t = 0;
         }
-        result.log("	duration:%s, time: %s, distance: %s", duration, t, change);
         if (t > 0) {
             if (!wait) {
                 inst.element[0].scrollTop += change;
@@ -3518,6 +3523,12 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             inst.forceRenderScope(index + 1);
         }
     }
+    function onAfterHeightsUpdated() {
+        if (hasScrollListener) {
+            result.log("onAfterHeightsUpdated force scroll to %s", inst.values.scroll);
+            inst.element[0].scrollTop = inst.values.scroll;
+        }
+    }
     /**
      * Scroll to top.
      * @param immediately
@@ -3550,6 +3561,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * Wait till the grid is ready before we setup our listeners.
      */
     unwatchSetup = inst.scope.$on(exports.datagrid.events.ON_READY, setupScrolling);
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED, onAfterHeightsUpdated));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_RESET, onAfterReset));
     result.destroy = destroy;

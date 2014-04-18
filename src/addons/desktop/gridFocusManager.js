@@ -79,7 +79,7 @@ angular.module('ux').factory('gridFocusManager', function () {
          */
         function getFocusableElements(el) {
             var focusable = [].slice.call(el[0].querySelectorAll('input,a,select'));
-            result.log("\tgetFocusableElements %s", focusable.length);
+//            result.log("\tgetFocusableElements %s", focusable.length);
             return ux.filter(focusable, filterVisible);
         }
 
@@ -90,7 +90,7 @@ angular.module('ux').factory('gridFocusManager', function () {
          * @returns {*}
          */
         function filterVisible(el) {
-            result.log("\t\tisVisible %s", ux.visibility.isVisible(el));
+//            result.log("\t\tisVisible %s", ux.visibility.isVisible(el));
             return ux.visibility.isVisible(el, inst.getContent()[0], true);
         }
 

@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.6.0
+* uxDatagrid v.0.6.1
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -163,7 +163,7 @@ angular.module("ux").factory("scrollHistory", function() {
                 result.log("onRenderAfterDataChange");
                 waitingForAfterDataChange = false;
                 result.scroll();
-                if (!exports.datagrid.isIOS) {
+                if (!inst.scrollModel.iScroll) {
                     inst.dispatch(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL);
                 }
                 unwatchers.shift()();

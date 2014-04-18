@@ -132,7 +132,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.6.0
+  <div class="summary"><p>uxDatagrid v.0.6.1
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -1066,7 +1066,22 @@ it gets to the maxParent.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">getFocusableElements</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">focusable</span> <span class="o">=</span> <span class="p">[].</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">querySelectorAll</span><span class="p">(</span><span class="s2">&quot;input,a,select&quot;</span><span class="p">));</span>
-            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  getFocusableElements %s&quot;</span><span class="p">,</span> <span class="nx">focusable</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-27" id="section-27">&#182;</a>
+</div>
+
+<div class="highlight"><pre><code>       <span class="n">result</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">getFocusableElements %s&quot;</span><span class="p">,</span> <span class="n">focusable</span><span class="p">.</span><span class="n">length</span><span class="p">);</span>
+</code></pre></div>
+
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
             <span class="k">return</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">focusable</span><span class="p">,</span> <span class="nx">filterVisible</span><span class="p">);</span>
         <span class="p">}</span>
 
@@ -1099,7 +1114,22 @@ it gets to the maxParent.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">filterVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;    isVisible %s&quot;</span><span class="p">,</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">visibility</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">));</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-29" id="section-29">&#182;</a>
+</div>
+
+<div class="highlight"><pre><code>       <span class="n">result</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t\t</span><span class="s">isVisible %s&quot;</span><span class="p">,</span> <span class="n">ux</span><span class="p">.</span><span class="n">visibility</span><span class="p">.</span><span class="n">isVisible</span><span class="p">(</span><span class="n">el</span><span class="p">));</span>
+</code></pre></div>
+
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
             <span class="k">return</span> <span class="nx">ux</span><span class="p">.</span><span class="nx">visibility</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getContent</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">true</span><span class="p">);</span>
         <span class="p">}</span>
 
@@ -1139,7 +1169,7 @@ it gets to the maxParent.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-29" id="section-29">&#182;</a>
+  <a class="pilcrow" href="#section-31" id="section-31">&#182;</a>
 </div>
 <p>keep moving up until the parent is a chunk.</p>
         </td>
@@ -1761,7 +1791,7 @@ to increment.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-46" id="section-46">&#182;</a>
+  <a class="pilcrow" href="#section-48" id="section-48">&#182;</a>
 </div>
 <p>dir should be 1 or -1</p>
         </td>
@@ -1821,7 +1851,7 @@ to increment.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-48" id="section-48">&#182;</a>
+  <a class="pilcrow" href="#section-50" id="section-50">&#182;</a>
 </div>
 <p>TODO: if no jquery. There may be no select.</p>
         </td>
@@ -1839,7 +1869,7 @@ to increment.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-49" id="section-49">&#182;</a>
+  <a class="pilcrow" href="#section-51" id="section-51">&#182;</a>
 </div>
 <p>we now need to scroll the row into view if it is not.</p>
         </td>
@@ -1914,7 +1944,7 @@ However, possible bug here if a selector similar to this one doesn't exist for a
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-51" id="section-51">&#182;</a>
+  <a class="pilcrow" href="#section-53" id="section-53">&#182;</a>
 </div>
 <p>it has to match a pattern for each row. These are too unique.</p>
         </td>

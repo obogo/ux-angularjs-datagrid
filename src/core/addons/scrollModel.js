@@ -133,7 +133,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
                 result.click(event);
             } else {
                 startTime = Date.now();
-                distance = speed * 10;
+                distance = speed * inst.options.scrollModel.speed;
                 result.scrollSlowDown(true);
             }
         }
@@ -141,10 +141,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
     result.scrollSlowDown = function (wait) {
         clearTimeout(scrollingIntv);
-        var duration = Math.abs(speed) * 10, t = duration - (Date.now() - startTime), prevDistance = distance, change;
+        var duration = Math.abs(speed) * inst.options.scrollModel.speed, t = duration - (Date.now() - startTime), prevDistance = distance, change;
         distance = result.easeOut(t, distance, speed || 0, duration);
         change = distance - prevDistance;
-        if (Math.abs(change) < 1) {
+        if (Math.abs(change) < 5) {
             t = 0;
         }
         if (t > 0) {
@@ -338,6 +338,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         }
     }
 
+    function onAfterHeightsUpdated() {
+        if (hasScrollListener) {
+            result.log('onAfterHeightsUpdated force scroll to %s', inst.values.scroll);
+            inst.element[0].scrollTop = inst.values.scroll;
+        }
+    }
+
     /**
      * Scroll to top.
      * @param immediately
@@ -373,6 +380,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * Wait till the grid is ready before we setup our listeners.
      */
     unwatchSetup = inst.scope.$on(exports.datagrid.events.ON_READY, setupScrolling);
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED, onAfterHeightsUpdated));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_RESET, onAfterReset));
 

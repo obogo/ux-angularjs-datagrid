@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.6.0
+* uxDatagrid v.0.6.1
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -11,7 +11,7 @@ angular.module("ux").factory("memoryOptimizer", function() {
     return function(inst) {
         inst.options.memoryOptimizer = inst.options.memoryOptimizer || {};
         var result = exports.logWrapper("memoryOptimizer", {}, "redOrange", inst.dispatch), defaultOptions = {
-            range: 100
+            range: 200
         }, options = inst.options.memoryOptimizer = exports.extend(defaultOptions, inst.options.memoryOptimizer);
         /**
         * ###<a name="disableCreep">disableCreep</a>###
@@ -19,7 +19,10 @@ angular.module("ux").factory("memoryOptimizer", function() {
         */
         function disableCreep() {
             inst.options.creepRender = inst.options.creepRender || {};
-            inst.options.creepRender.enable = false;
+            //           inst.options.creepRender.enable = false;
+            if (inst.options.creepLimit > options.range * .5) {
+                inst.options.creepLimit = options.range * .5;
+            }
             inst.creepRenderModel.disable();
         }
         /**

@@ -328,7 +328,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function onResize(event) {
         // we need to wait a moment for the browser to finish the resize, then adjust and fire the event.
-        flow.add(updateHeights, 100);
+        flow.add(updateHeights, [], 100);
     }
 
     /**
@@ -566,7 +566,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Scope} s
      */
     function safeDigest(s) {
-        if (!s.$$phase) {
+        if (!s.$$phase || !s.$root.$$phase) {
             s.$digest();
         }
     }
@@ -759,14 +759,14 @@ function Datagrid(scope, element, attr, $compile) {
      * @returns {{startIndex: number, i: number, inc: number, end: number, visibleScrollStart: number, visibleScrollEnd: number}}
      */
     function getStartingIndex() {
-        if (startupComplete && inst.chunkModel.getChunkList().height - inst.getViewportHeight() < values.scroll) {
+        if (inst.chunkModel.getChunkList() && inst.chunkModel.getChunkList().height - inst.getViewportHeight() < values.scroll) {
             // We are trying to start the scroll off at a height that is taller than we have in the list.
             // reset scroll to 0.
             inst.info("Scroll reset because either there is no data or the scroll is taller than there is scroll area");
             values.scroll = 0;
         }
         var height = viewHeight,
-            scroll = startupComplete && values.scroll || 0,
+            scroll = values.scroll || 0,
             result = {
                 startIndex: 0,
                 i: 0,
@@ -1153,20 +1153,21 @@ function Datagrid(scope, element, attr, $compile) {
             s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope(), replaceEl, newScope;
         if (s !== scope) {
             replaceEl = angular.element(inst.templateModel.getTemplateByName(newTemplate).template);
+            replaceEl.addClass(options.uncompiledClass);
             while (classes && classes.length) {
                 replaceEl.addClass(classes.shift());
             }
             el.parent()[0].insertBefore(replaceEl[0], el[0]);
             s.$destroy();
             scopes[index] = null;
-            newScope = scopes[index] = compileRow(index);
-            for(var i in s) {
-                if (s.hasOwnProperty(i) && !newScope.hasOwnProperty(i)) {
-                    newScope[i] = s[i];
-                }
-            }
-            el.remove();
-            newScope.$digested = false;
+//            newScope = scopes[index] = compileRow(index);
+//            for(var i in s) {
+//                if (s.hasOwnProperty(i) && !newScope.hasOwnProperty(i)) {
+//                    newScope[i] = s[i];
+//                }
+//            }
+//            el.remove();
+//            newScope.$digested = false;
             updateHeights(index);
         }
     }
@@ -1182,6 +1183,7 @@ function Datagrid(scope, element, attr, $compile) {
         flow.add(inst.chunkModel.updateAllChunkHeights, [rowIndex]);
         flow.add(updateHeightValues, 0);
         flow.add(updateViewportHeight);
+        flow.add(inst.dispatch, [exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED]);
         flow.add(render);
         flow.add(inst.dispatch, [exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER]);
     }
@@ -1214,7 +1216,7 @@ function Datagrid(scope, element, attr, $compile) {
         gcIntv = setTimeout(function () {
             if (inst) {
                 inst.info("GC");
-                var a, i, total = 1024 * 1024;
+                var a, i, total = (1024 * 1024 * 0.5);
                 for (i = 0; i < total; i += 1) {
                     a = 0.5;
                 }

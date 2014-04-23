@@ -1189,6 +1189,12 @@ function Datagrid(scope, element, attr, $compile) {
         flow.add(inst.chunkModel.updateAllChunkHeights, [rowIndex]);
         flow.add(updateHeightValues, 0);
         flow.add(updateViewportHeight);
+        flow.add(function () {
+            var maxScrollHeight = inst.getContentHeight() - inst.getViewportHeight();
+            if (values.scroll > maxScrollHeight) {
+                values.scroll = maxScrollHeight;
+            }
+        });
         flow.add(inst.dispatch, [exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED]);
         flow.add(render);
         flow.add(inst.dispatch, [exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER]);

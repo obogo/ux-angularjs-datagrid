@@ -99,7 +99,7 @@ angular.module('ux').factory('iScrollAddon', function () {
             }
         }
 
-        function onUpdateScroll(forceValue) {
+        function onUpdateScroll(event, forceValue) {
             var value = forceValue !== undefined ? -forceValue : myScroll.y;
             if (scrolling && value !== lastY) {
                 inst.values.speed = value - lastY;
@@ -133,7 +133,7 @@ angular.module('ux').factory('iScrollAddon', function () {
             if (immediately) {
                 if (inst.values.scroll || value) {
                     scrolling = true;
-                    result.onUpdateScroll(value);
+                    result.onUpdateScroll(null, value);
                     scrolling = false;
                     result.onScrollingStop();
                 }

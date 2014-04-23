@@ -105,7 +105,12 @@ module.exports = function (grunt) {
             build_min: {
                 options: {
                     report: 'gzip',
-                    banner: '<%= banner %>'
+                    mangle: false,
+                    compress: true,
+                    preserveComments: 'none',
+                    beautify: false,
+                    banner: '<%= banner %><%= wrapStart %>',
+                    footer: '<%= wrapEnd %>'
                 },
                 files: {
                     'build/latest/angular-ux-<%= pkg.filename %>.min.js': [

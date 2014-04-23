@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.6.2
+* uxDatagrid v.0.6.3
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -89,7 +89,7 @@ angular.module("ux").factory("iScrollAddon", function() {
                 myScroll.refresh();
             }
         }
-        function onUpdateScroll(forceValue) {
+        function onUpdateScroll(event, forceValue) {
             var value = forceValue !== undefined ? -forceValue : myScroll.y;
             if (scrolling && value !== lastY) {
                 inst.values.speed = value - lastY;
@@ -122,7 +122,7 @@ angular.module("ux").factory("iScrollAddon", function() {
             if (immediately) {
                 if (inst.values.scroll || value) {
                     scrolling = true;
-                    result.onUpdateScroll(value);
+                    result.onUpdateScroll(null, value);
                     scrolling = false;
                     result.onScrollingStop();
                 }

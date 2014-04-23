@@ -1,13 +1,26 @@
 /*
-* uxDatagrid v.0.3.2-alpha
+* uxDatagrid v.0.6.1
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */
 (function(exports, global){
+exports.datagrid.events.COLLAPSE_ROW = "datagrid:collapseRow";
+
+exports.datagrid.events.EXPAND_ROW = "datagrid:expandRow";
+
+exports.datagrid.events.TOGGLE_ROW = "datagrid:toggleRow";
+
+exports.datagrid.events.ROW_TRANSITION_COMPLETE = "datagrid:rowTransitionComplete";
+
+exports.datagrid.options.expandRows = [];
+
+exports.datagrid.options.expandRows.autoClose = true;
+
 angular.module("ux").factory("expandRows", function() {
+    //TODO: on change row template. This needs to collapse the row.
     return function(inst) {
-        var result = {}, lastGetIndex, cache = {}, opened = {}, states = {
+        var intv, result = exports.logWrapper("expandRows", {}, "green", inst.dispatch), lastGetIndex, cache = {}, opened = {}, states = {
             opened: "opened",
             closed: "closed"
         }, superGetTemplateHeight = inst.templateModel.getTemplateHeight, // transition end lookup.
@@ -38,8 +51,8 @@ angular.module("ux").factory("expandRows", function() {
         }
         function setup(item) {
             item.template = item.template || inst.templateModel.defaultName;
-            if (!item.cls && !item.style) {
-                throw new Error("expandRows will not work without an cls property");
+            if (!item.cls && !item.style && !item.swap) {
+                throw new Error("expandRows will not work without an cls|style|swap property");
             }
             cache[item.template] = item;
         }
@@ -60,6 +73,7 @@ angular.module("ux").factory("expandRows", function() {
         function expand(itemOrIndex) {
             var index = getIndex(itemOrIndex);
             if (getState(index) === states.closed) {
+                autoClose([ index ]);
                 setState(index, states.opened);
             }
         }
@@ -69,8 +83,21 @@ angular.module("ux").factory("expandRows", function() {
                 setState(index, states.closed);
             }
         }
+        function autoClose(omitIndexes) {
+            if (inst.options.expandRows.autoClose) {
+                closeAll(omitIndexes);
+            }
+        }
+        function closeAll(omitIndexes) {
+            exports.each(opened, function(cacheItemData, index) {
+                var intIndex = parseInt(index, 10);
+                if (!omitIndexes || omitIndexes.indexOf(intIndex) === -1) {
+                    collapse(intIndex);
+                }
+            });
+        }
         function setState(index, state) {
-            var template = inst.templateModel.getTemplate(inst.data[index]), elm, tpl;
+            var template = inst.templateModel.getTemplate(inst.data[index]), elm, tpl, swapTpl;
             if (cache[template.name]) {
                 elm = inst.getRowElm(index);
                 elm.scope().$state = state;
@@ -84,17 +111,31 @@ angular.module("ux").factory("expandRows", function() {
                     }
                     elm.css(state === states.opened ? tpl.style : tpl.reverse);
                 }
-                if (tpl.cls) {
+                if (tpl.swap && tpl.state !== state) {
+                    swapTpl = cache[tpl.swap];
+                    inst.templateModel.setTemplate(index, tpl.swap, [ swapTpl.cls ]);
+                    elm = inst.getRowElm(index);
+                } else if (tpl.cls) {
                     elm[state === states.opened ? "addClass" : "removeClass"](tpl.cls);
                     elm.addClass("animating");
                 }
                 if (tpl.transition === false) {
-                    onTransitionEnd({
-                        target: elm[0]
-                    });
+                    // we need to wait for the heights to update before updating positions.
+                    var evt = {
+                        target: elm[0],
+                        index: index,
+                        state: state
+                    };
+                    if (inst.options.chunks.detachDom) {
+                        setTimeout(function() {
+                            onTransitionEnd(evt);
+                        }, 0);
+                    } else {
+                        onTransitionEnd(evt);
+                    }
                 }
             } else {
-                throw new Error("unable to toggle template. cls for template %s was not set.", template.name);
+                throw new Error("unable to toggle template. cls for template '" + template.name + "' was not set.");
             }
         }
         function makeReverseStyle(elm, style) {
@@ -111,12 +152,16 @@ angular.module("ux").factory("expandRows", function() {
         }
         function onTransitionEnd(event) {
             var elm = angular.element(event.target), s = elm.scope(), index = s.$index, state = s.$state;
+            if (event.hasOwnProperty("index")) {
+                index = s.$index = event.index;
+                state = s.$state = event.state;
+            }
             elm[0].removeEventListener(TRNEND_EV, onTransitionEnd);
             elm.removeClass("animating");
             if (state === states.opened) {
                 opened[index] = {
                     index: index,
-                    height: parseInt(elm.css("height") || 0, 10)
+                    height: parseInt(elm[0].offsetHeight || 0, 10)
                 };
                 if (isNaN(opened[index].height)) {
                     throw new Error("Invalid Height");
@@ -124,8 +169,19 @@ angular.module("ux").factory("expandRows", function() {
             } else {
                 delete opened[index];
             }
-            s.$digest();
+            inst.safeDigest(s);
             inst.updateHeights(index);
+            // we told the heights to update. Give time for them to change then fire the event.
+            clearTimeout(intv);
+            intv = setTimeout(function() {
+                clearTimeout(intv);
+                // check for last row. On expansion it needs to scroll down.
+                if (state === states.opened && index === inst.data.length - 1) {
+                    inst.scrollModel.scrollToBottom(true);
+                }
+                inst.scrollModel.scrollIntoView(index, true);
+                inst.dispatch(exports.datagrid.events.ROW_TRANSITION_COMPLETE);
+            }, 0);
         }
         function isExpanded(itemOrIndex) {
             var index = getIndex(itemOrIndex);
@@ -134,6 +190,7 @@ angular.module("ux").factory("expandRows", function() {
         function getTemplateHeight(item) {
             var index = getIndex(item);
             if (opened[index]) {
+                result.log("	expandRow %s to height %s", index, opened[index].height);
                 return opened[index].height;
             }
             return superGetTemplateHeight(item);
@@ -153,7 +210,16 @@ angular.module("ux").factory("expandRows", function() {
         result.collapse = collapse;
         result.isExpanded = isExpanded;
         result.destroy = destroy;
-        inst.scope.$on(ux.datagrid.events.ON_READY, setupTemplates);
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_READY, setupTemplates));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.EXPAND_ROW, function(event, itemOrIndex) {
+            result.expand(itemOrIndex);
+        }));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.COLLAPSE_ROW, function(event, itemOrIndex) {
+            result.collapse(itemOrIndex);
+        }));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.TOGGLE_ROW, function(event, itemOrIndex) {
+            result.toggle(itemOrIndex);
+        }));
         inst.expandRows = result;
         return inst;
     };

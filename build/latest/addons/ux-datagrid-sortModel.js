@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.6.1
+* uxDatagrid v.0.6.2
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -8,6 +8,10 @@
 exports.datagrid.events.ON_BEFORE_SORT = "datagrid:onBeforeSort";
 
 exports.datagrid.events.ON_AFTER_SORT = "datagrid:onAfterSort";
+
+exports.datagrid.events.ON_BEFORE_TOGGLE_SORT = "datagrid:onBeforeToggleSort";
+
+exports.datagrid.events.ON_AFTER_TOGGLE_SORT = "datagrid:onAfterToggleSort";
 
 angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", function($location, $rootScope) {
     /**************************************************************************************
@@ -480,6 +484,8 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
                                 pathState: pathState,
                                 ary: result.getCache(key)
                             });
+                        } else {
+                            result.log("	pull sort from cache");
                         }
                         lastSortResult = result.getCache(key);
                         sortStatesModel.clearDirty(pathStateRef);
@@ -590,13 +596,18 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
         /**
          * ###<a name="toggleSort">toggleSort</a>###
          * Sorts always toggle clockwise none -> asc -> desc.
-         * @param name
+         * @param {String} name
          */
         result.toggleSort = function toggleSort(name) {
             result.log("toggleSort %s", name);
+            inst.dispatch(exports.datagrid.events.ON_BEFORE_TOGGLE_SORT, name);
+            if (inst.creepRenderModel) {
+                inst.creepRenderModel.stop();
+            }
             sortStatesModel.toggle(name);
-            result.clear();
+            //            result.clear();
             result.applySorts(original);
+            inst.dispatch(exports.datagrid.events.ON_AFTER_TOGGLE_SORT, name);
         };
         /**
          * ###<a name="clear">clear</a>###

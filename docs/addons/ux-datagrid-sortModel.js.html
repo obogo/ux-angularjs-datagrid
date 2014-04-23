@@ -168,7 +168,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.6.1
+  <div class="summary"><p>uxDatagrid v.0.6.2
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -181,6 +181,10 @@ License: MIT.</p>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_SORT</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onBeforeSort&quot;</span><span class="p">;</span>
 
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_SORT</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onAfterSort&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_TOGGLE_SORT</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onBeforeToggleSort&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_TOGGLE_SORT</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onAfterToggleSort&quot;</span><span class="p">;</span>
 
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">service</span><span class="p">(</span><span class="s2">&quot;sortStatesModel&quot;</span><span class="p">,</span> <span class="p">[</span> <span class="s2">&quot;$location&quot;</span><span class="p">,</span> <span class="s2">&quot;$rootScope&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">$location</span><span class="p">,</span> <span class="nx">$rootScope</span><span class="p">)</span> <span class="p">{</span>
 
@@ -1581,6 +1585,8 @@ It stores the sorted state on the sortStatesModel to keep around until cleared.<
                                 <span class="nx">pathState</span><span class="o">:</span> <span class="nx">pathState</span><span class="p">,</span>
                                 <span class="nx">ary</span><span class="o">:</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span>
                             <span class="p">});</span>
+                        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  pull sort from cache&quot;</span><span class="p">);</span>
                         <span class="p">}</span>
                         <span class="nx">lastSortResult</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
                         <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">clearDirty</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">);</span>
@@ -1924,6 +1930,7 @@ If the states already exist apply those states on the render.</p>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">name
 </span>
+      <span class="dox_type">String</span>
     </div>
   </div>
 </div>
@@ -1931,9 +1938,29 @@ If the states already exist apply those states on the render.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">result</span><span class="p">.</span><span class="nx">toggleSort</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">toggleSort</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;toggleSort %s&quot;</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_TOGGLE_SORT</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">creepRenderModel</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">creepRenderModel</span><span class="p">.</span><span class="nx">stop</span><span class="p">();</span>
+            <span class="p">}</span>
             <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">toggle</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
-            <span class="nx">result</span><span class="p">.</span><span class="nx">clear</span><span class="p">();</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-54" id="section-54">&#182;</a>
+</div>
+
+<div class="highlight"><pre><code>       <span class="n">result</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+</code></pre></div>
+
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
             <span class="nx">result</span><span class="p">.</span><span class="nx">applySorts</span><span class="p">(</span><span class="nx">original</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_TOGGLE_SORT</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
         <span class="p">};</span>
 
 </pre></div>

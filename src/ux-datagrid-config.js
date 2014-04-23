@@ -84,6 +84,7 @@ exports.datagrid = {
         ON_AFTER_HEIGHTS_UPDATED_RENDER: 'datagrid:onAfterHeightsUpdatedRender',
         ON_BEFORE_ROW_DEACTIVATE: 'datagrid:onBeforeRowDeactivate', // handy for knowing when to remove jquery listeners.
         ON_AFTER_ROW_ACTIVATE: 'datagrid:onAFterRowActivate', // handy for turning jquery listeners back on.
+        ON_ROW_COMPILE: 'datagrid:onRowCompile',
         /**
          * #### Driving Events ####
          * - **<a name="events.RESIZE">RESIZE</a>** tells the datagrid to resize. This will update all height calculations.

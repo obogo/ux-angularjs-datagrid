@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.3.2-alpha
+* uxDatagrid v.0.6.1
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -15,8 +15,10 @@ exports.visibility = function() {
      * ###<a name="isVisible">isVisible</a>###
      * Checks if a DOM element is visible. Takes into consideration its parents.
      * @param {DOMElement} el the DOMElement to check if is visible
+     * @param {maxParent} when max parent is reached it will stop.
+     * @param {allowOpacity=} if true then opacity will not return a false if it is 0.
      */
-    function isVisible(el) {
+    function isVisible(el, maxParent, allowOpacity) {
         var p = el.parentNode;
         if (!elementInDocument(el)) {
             return false;
@@ -26,13 +28,16 @@ exports.visibility = function() {
             return true;
         }
         // Return false if our element is invisible
-        if ("0" === getStyle(el, "opacity") || "none" === getStyle(el, "display") || "hidden" === getStyle(el, "visibility")) {
+        if (!allowOpacity && getStyle(el, "opacity") === "0") {
             return false;
         }
-        if (p) {
+        if ("none" === getStyle(el, "display") || "hidden" === getStyle(el, "visibility")) {
+            return false;
+        }
+        if (p && p !== maxParent) {
             //-- If we have a parent, let's continue:
             //-- Let's recursively check upwards:
-            return isVisible(p);
+            return isVisible(p, maxParent, allowOpacity);
         }
         return true;
     }
@@ -74,39 +79,83 @@ exports.visibility = function() {
 /*global exports */
 exports.selector = function() {
     //TODO: Needs unit tests. This needs jquery to run unit tests for selections since it uses filters.
+    var omitAttrs, uniqueAttrs, classFilters, classFiltersFctn, api;
+    function query(selectorStr, el) {
+        el = el || api.config.doc.body;
+        var rx = /:eq\((\d+)\)$/, match = selectorStr.match(rx), result, count;
+        // filter out eq.
+        if (match && match.length) {
+            selectorStr = selectorStr.replace(rx, "");
+            count = match[1];
+        }
+        result = el.querySelectorAll(selectorStr);
+        if (result && count !== undefined) {
+            return result[count];
+        }
+        return result;
+    }
     /**
      * ##getCleanSelector##
      * Generate a clean readable selector. This is accurate, but NOT performant.
+     * The reason this one takes longer is because it takes many queries as it goes to determine when it has
+     * built a query that is unique enough trying to do this as early on as possible to keep it short.
      * @param {DOMElement} el
      * @param {Array} ignoreClasses - an array of strings or regExp
      */
     function getCleanSelector(el, ignoreClass) {
-        var ignore = buildIgnoreFunction(ignoreClass), matches, index, str, selector = getSelectorData(el, document.body, ignore, null, true);
-        while (selector.count > selector.totalCount) {
-            selector = selector.parent;
+        if (validateEl(el)) {
+            var ignore = buildIgnoreFunction(ignoreClass), matches, index, str, maxParent = api.config.doc.body, selector = getSelectorData(el, maxParent, ignore, null, true);
+            while (selector.count > selector.totalCount) {
+                selector = selector.parent;
+            }
+            selector = selector.parent || selector;
+            // once we find the top level. we need to move up one.
+            str = selector.str || selectorToString(selector);
+            if (selector.str) {
+                var child = selector.child;
+                while (child) {
+                    str += " " + child.str;
+                    child = child.child;
+                }
+            }
+            if (selector.count > 1 || selector.child && selector.child.count) {
+                matches = exports.util.array.toArray(query(str, maxParent));
+                index = matches.indexOf(el);
+                str += ":eq(" + index + ")";
+            }
+            str += getVisible();
+            return str;
         }
-        selector = selector.parent || selector;
-        // once we find the top level. we need to move up one.
-        str = selector.relativeSelector;
-        if (selector.count > 1) {
-            matches = exports.util.array.toArray(selector.maxParent.querySelectorAll(selector.relativeSelector));
-            index = matches.indexOf(el);
-            str += ":eq(" + index + ")";
-        }
-        str += ":visible";
-        return str;
+        return "";
     }
     /**
-     * ##<a name="getSelector">getSelector</a>##
+     * ##<a name="quickSelector">quickSelector</a>##
      * build the string selector for the element. This is more performant, but hardly readable.
+     * It is faster because it doesn't check to determine how unique it is. It just keeps building until
+     * it gets to the maxParent.
      * @param {DomElement} element
      * @param {DomElement=} maxParent
      * @param {Function=} ignoreClass
      * @returns {string}
      */
-    function getSelector(element, maxParent, ignoreClass) {
-        var ignore = buildIgnoreFunction(ignoreClass), selector = getSelectorData(element, maxParent, ignore);
-        return selectorToString(selector) + ":visible";
+    function quickSelector(element, maxParent, ignoreClass) {
+        if (validateEl(element)) {
+            var ignore = buildIgnoreFunction(ignoreClass), selector = getSelectorData(element, maxParent, ignore);
+            return selectorToString(selector) + getVisible();
+        }
+        return "";
+    }
+    function validateEl(el) {
+        if (!el) {
+            return "";
+        }
+        if (el && el.length) {
+            throw new Error("selector can only build a selection to a single DOMElement. A list was passed.");
+        }
+        return true;
+    }
+    function getVisible() {
+        return api.config.addVisible ? ":visible" : "";
     }
     function matchesClass(item, matcher) {
         if (typeof matcher === "string" && matcher === item) {
@@ -117,37 +166,40 @@ exports.selector = function() {
         }
         return false;
     }
-    function getSelectorData(element, maxParent, ignoreClass, child, detailed) {
+    function getSelectorData(element, maxParent, ignoreClass, child, smartSelector) {
         var result;
         if (!element) {
             return "";
         }
-        maxParent = maxParent || document;
+        maxParent = maxParent || api.config.doc;
         result = {
             element: element,
             ignoreClass: ignoreClass,
             maxParent: maxParent,
             classes: getClasses(element, ignoreClass),
+            attributes: getAttributes(element, child),
             type: element.nodeName && element.nodeName.toLowerCase() || "",
             child: child
         };
-        if (detailed && element.nodeType >= 1) {
-            result.relativeSelector = getSelectorString(result) + (result.child ? " " + result.child.relativeSelector : "");
-            //selectorToString(result, 0, result.parent);
-            result.count = result.maxParent.querySelectorAll(result.relativeSelector).length;
-            var tmp = result;
-            while (tmp.child) {
-                tmp = tmp.child;
-                tmp.totalCount = result.count;
+        if (!result.attributes.$unique || child) {
+            if (smartSelector) {
+                result.str = selectorToString(result, 0, null, true);
+                result.count = maxParent.querySelectorAll(result.str).length;
+                if (result.count > 1) {
+                    result.parent = getParentSelector(element, maxParent, ignoreClass, result, smartSelector);
+                }
+            } else {
+                // dumb selector. keeps building it. Not checking to see if it is unique.
+                result.parent = getParentSelector(element, maxParent, ignoreClass, result, smartSelector);
             }
         }
-        result.parent = getParentSelector(element, maxParent, ignoreClass, result, detailed);
         return result;
     }
     function filterNumbers(item) {
         return typeof item !== "number";
     }
     function buildIgnoreFunction(ignoreClasses) {
+        ignoreClasses = ignoreClasses || [];
         if (typeof ignoreClasses === "function") {
             return ignoreClasses;
         }
@@ -168,16 +220,73 @@ exports.selector = function() {
     }
     function getClasses(element, ignoreClass) {
         var classes = ux.filter(element.classList, filterNumbers);
+        classes = ux.filter(classes, classFiltersFctn);
         return ux.filter(classes, ignoreClass);
     }
-    function selectorToString(selector, depth, overrideMaxParent) {
+    function getAttributes(element, child) {
+        var i = 0, len = element.attributes ? element.attributes.length : 0, attr, attributes = [], uniqueAttr = getUniqueAttribute(element.attributes);
+        // first see if it has a unique attribute.
+        if (uniqueAttr) {
+            if (uniqueAttr.name === "id" && api.config.allowId) {
+                attributes.push("#" + uniqueAttr.value);
+            } else if (uniqueAttr.name !== "id") {
+                attributes.push(createAttrStr(uniqueAttr));
+            }
+            if (attributes.length) {
+                attributes.$unique = true;
+                return attributes;
+            }
+        }
+        if (api.config.allowAttributes) {
+            while (i < len) {
+                attr = element.attributes[i];
+                if (!omitAttrs[attr.name] && !uniqueAttrs[attr.name]) {
+                    attributes.push(createAttrStr(attr));
+                }
+                i += 1;
+            }
+        }
+        return attributes;
+    }
+    function createAttrStr(attr) {
+        return "[" + camelCase(attr.name) + "='" + escapeQuotes(attr.value) + "']";
+    }
+    function getUniqueAttribute(attributes) {
+        var attr, i = 0, len = attributes ? attributes.length : 0, name;
+        while (i < len) {
+            attr = attributes[i];
+            name = camelCase(attr.name);
+            if (uniqueAttrs[name]) {
+                return attr;
+            }
+            i += 1;
+        }
+        return null;
+    }
+    function camelCase(name) {
+        var ary, i = 1, len;
+        if (name.indexOf("-")) {
+            ary = name.split("-");
+            len = ary.length;
+            while (i < len) {
+                ary[i] = ary[i].charAt(0).toUpperCase() + ary[i].substr(1);
+                i += 1;
+            }
+            name = ary.join("");
+        }
+        return name;
+    }
+    function escapeQuotes(str) {
+        return str.replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+    }
+    function selectorToString(selector, depth, overrideMaxParent, skipCount) {
         var matches, str, parent;
         depth = depth || 0;
-        str = selector ? selectorToString(selector.parent, depth + 1) : "";
+        str = selector && !selector.attributes.$unique ? selectorToString(selector.parent, depth + 1) : "";
         if (selector) {
             str += (str.length ? " " : "") + getSelectorString(selector);
         }
-        if (!depth) {
+        if (!depth && !skipCount) {
             parent = overrideMaxParent || selector.maxParent;
             matches = parent.querySelectorAll && parent.querySelectorAll(str) || [];
             if (matches.length > 1) {
@@ -187,7 +296,10 @@ exports.selector = function() {
         return str;
     }
     function getSelectorString(selector) {
-        return selector.type + (selector.classes.length ? "." + selector.classes.join(".") : "");
+        if (selector.attributes.$unique) {
+            return selector.attributes[0];
+        }
+        return selector.type + selector.attributes.join("") + (selector.classes.length ? "." + selector.classes.join(".") : "");
     }
     function getParentSelector(element, maxParent, ignoreClass, child, detailed) {
         var parent = element.parentNode;
@@ -205,15 +317,111 @@ exports.selector = function() {
         }
         return -1;
     }
-    return {
+    function getList(obj) {
+        var ary = [], i;
+        for (i in obj) {
+            if (obj.hasOwnProperty(i)) {
+                ary.push(obj[i]);
+            }
+        }
+        return ary;
+    }
+    api = {
+        config: {
+            doc: window.document,
+            allowId: true,
+            allowAttributes: true,
+            addVisible: false
+        },
+        // OMIT
+        addOmitAttrs: function(name) {
+            exports.each(arguments, function(name) {
+                omitAttrs[name] = true;
+            });
+            return this;
+        },
+        removeOmitAttrs: function(name) {
+            exports.each(arguments, function(name) {
+                delete omitAttrs[name];
+            });
+            return this;
+        },
+        getOmitAttrs: function() {
+            return getList(omitAttrs);
+        },
+        resetOmitAttrs: function() {
+            omitAttrs = {
+                "class": true,
+                style: true
+            };
+        },
+        // UNIQUE
+        addUniqueAttrs: function(name) {
+            exports.each(arguments, function(name) {
+                uniqueAttrs[name] = true;
+            });
+            return this;
+        },
+        removeUniqueAttrs: function(name) {
+            exports.each(arguments, function(name) {
+                delete uniqueAttrs[name];
+            });
+            return this;
+        },
+        getUniqueAttrs: function() {
+            return getList(uniqueAttrs);
+        },
+        resetUniqueAttrs: function() {
+            uniqueAttrs = {
+                id: true,
+                uid: true
+            };
+        },
+        // CLASS OMIT OMIT FILTERS
+        addClassOmitFilters: function() {
+            exports.each(arguments, function(filter) {
+                classFilters.push(filter);
+            });
+            classFiltersFctn = buildIgnoreFunction(classFilters);
+            return this;
+        },
+        removeClassOmitFilters: function() {
+            exports.each(arguments, function(filter) {
+                var index = classFilters.indexOf(filter);
+                if (index !== -1) {
+                    classFilters.splice(index, 1);
+                }
+            });
+            classFiltersFctn = buildIgnoreFunction(classFilters);
+            return this;
+        },
+        getClassOmitFilters: function() {
+            return classFilters.slice(0);
+        },
+        resetClassOmitFilters: function() {
+            classFilters = [];
+            classFiltersFctn = buildIgnoreFunction(classFilters);
+        },
+        get: getCleanSelector,
         getCleanSelector: getCleanSelector,
-        getSelector: getSelector
+        quickSelector: quickSelector,
+        reset: function() {
+            api.resetOmitAttrs();
+            api.resetUniqueAttrs();
+            api.resetClassOmitFilters();
+        }
     };
+    api.reset();
+    return api;
 }();
 
 exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME = "ux-datagrid:focusToPrevElementOfSame";
 
 exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME = "ux-datagrid:focusToNextElementOfSame";
+
+exports.datagrid.events.ON_SCROLL_TO_TOP_ENTER = "ux-datagrid:onScrollToTopEnter";
+
+exports.datagrid.events.ON_SCROLL_TO_BOTTOM_ENTER = "ux-datagrid:onScrollToBottomEnter";
 
 /**
  * ##<a name="gridFocusManager">gridFocusManager</a>##
@@ -230,7 +438,7 @@ angular.module("ux").factory("gridFocusManager", function() {
         /**
          * We want to add and remove listeners only on the dom that is currently under watch.
          */
-        var result = {}, unwatchers = [], keys = {
+        var result = exports.logWrapper("gridFocusManager", {}, "redOrange", inst.dispatch), unwatchers = [], keys = {
             ENTER: 13,
             UP: 38,
             DOWN: 40
@@ -252,6 +460,7 @@ angular.module("ux").factory("gridFocusManager", function() {
          * Add all of the listeners to the visible rows.
          */
         function addListeners() {
+            result.log("addListeners");
             applyToListeners(addListenersToRow);
         }
         /**
@@ -260,6 +469,7 @@ angular.module("ux").factory("gridFocusManager", function() {
          */
         function removeListeners() {
             // this needs executed before the activeRange changes.
+            result.log("removeListeners");
             applyToListeners(removeListenersToRow);
         }
         /**
@@ -271,6 +481,7 @@ angular.module("ux").factory("gridFocusManager", function() {
             if (!inst.values.activeRange.max || inst.values.activeRange.max < 0) {
                 return;
             }
+            result.log("	applyTo: %s - %s", inst.values.activeRange.min, inst.values.activeRange.max);
             var i = inst.values.activeRange.min, row;
             while (i <= inst.values.activeRange.max) {
                 row = inst.getRowElm(i);
@@ -286,6 +497,7 @@ angular.module("ux").factory("gridFocusManager", function() {
          */
         function getFocusableElements(el) {
             var focusable = [].slice.call(el[0].querySelectorAll("input,a,select"));
+            //            result.log("\tgetFocusableElements %s", focusable.length);
             return ux.filter(focusable, filterVisible);
         }
         /**
@@ -295,7 +507,8 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @returns {*}
          */
         function filterVisible(el) {
-            return ux.visibility.isVisible(el);
+            //            result.log("\t\tisVisible %s", ux.visibility.isVisible(el));
+            return ux.visibility.isVisible(el, inst.getContent()[0], true);
         }
         /**
          * ###<a name="getRowElmFromChildElm">getRowElmFromChildElm</a>###
@@ -386,10 +599,13 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @param {JQLite|DOMElement} rowElm
          */
         function addListenersToRow(rowElm) {
-            var focusable = getFocusableElements(rowElm);
+            var focusable = getFocusableElements(angular.element(rowElm));
             if (focusable.length) {
+                result.log("		addListenersToRow");
                 focusable = angular.element(focusable);
                 focusable.bind("keydown", onKeyDown);
+            } else {
+                result.log("		no focusable elements found in row");
             }
         }
         /**
@@ -398,10 +614,13 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @param {JQLite|DOMElement} rowElm
          */
         function removeListenersToRow(rowElm) {
-            var focusable = getFocusableElements(rowElm);
+            var focusable = getFocusableElements(angular.element(rowElm));
             if (focusable.length) {
+                result.log("		removeListenersToRow");
                 focusable = angular.element(focusable);
                 focusable.unbind("keydown", onKeyDown);
+            } else {
+                result.log("		no focusable elements found in row");
             }
         }
         /**
@@ -410,12 +629,18 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @param {Event} event
          */
         function onKeyDown(event) {
-            var target = angular.element(event.currentTarget);
-            inst.flow.log("FM: onKeyDown");
+            var target = angular.element(event.currentTarget), atTop = false, atBottom = false;
+            result.log("FM: onKeyDown");
             if (event.shiftKey && event.keyCode === keys.ENTER || event.keyCode === keys.UP) {
-                focusToPrevRowElement(target);
+                atTop = !focusToPrevRowElement(target);
+                if (atTop) {
+                    inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_TOP_ENTER);
+                }
             } else if (event.keyCode === keys.ENTER || event.keyCode === keys.DOWN) {
-                focusToNextRowElement(target);
+                atBottom = !focusToNextRowElement(target);
+                if (atBottom) {
+                    inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_BOTTOM_ENTER);
+                }
             }
         }
         /**
@@ -425,7 +650,10 @@ angular.module("ux").factory("gridFocusManager", function() {
          */
         function focusToPrevRowElement(focusedEl) {
             var focusEl = getPrevRowFocusElement(focusedEl, -1);
-            performFocus(focusEl);
+            if (isSame(focusEl, focusedEl)) {
+                return false;
+            }
+            return performFocus(focusEl);
         }
         /**
          * ###<a name="focusToNextRowElement">focusToNextRowElement</a>###
@@ -433,9 +661,21 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @param {JQLite} focusedEl
          */
         function focusToNextRowElement(focusedEl) {
-            inst.flow.log("	FM: focusToNextRowElement");
             var focusEl = getNextRowFocusElement(focusedEl);
-            performFocus(focusEl);
+            if (isSame(focusEl, focusedEl)) {
+                return false;
+            }
+            return performFocus(focusEl);
+        }
+        /**
+         * ###<a name="isSame">isSame</a>###
+         * Compare to JQLite/DOMElements objects to see if they reference the same DOMElement.
+         * @param {JQLite|DOMElement} el
+         * @param {JQLite|DOMElement} el2
+         * @returns {boolean}
+         */
+        function isSame(el, el2) {
+            return (el[0] || el) === (el2[0] || el2);
         }
         /**
          * ###<a name="hasPrevRowFocusElement">hasPrevRowFocusElement</a>###
@@ -472,7 +712,7 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @returns {*}
          */
         function getNextRowFocusElement(focusedEl) {
-            inst.flow.log("	FM: getNextRowFocusElement");
+            result.log("	FM: getNextRowFocusElement");
             return focusToRowElement(focusedEl, 1);
         }
         /**
@@ -485,17 +725,17 @@ angular.module("ux").factory("gridFocusManager", function() {
          */
         function focusToRowElement(focusedEl, dir) {
             // dir should be 1 or -1
-            inst.flow.log("	FM: focusToRowElement");
+            result.log("	focusToRowElement");
             focusedEl = wrap(focusedEl);
             if (!inst.element[0].contains(focusedEl[0])) {
                 return;
             }
-            var resultEl, rowEl = getRowElmFromChildElm(focusedEl), currentIndex = inst.getRowIndexFromElement(focusedEl), nextIndex = currentIndex + dir, selector;
+            var resultEl, currentIndex = inst.getRowIndexFromElement(focusedEl), rowEl = inst.getRowElm(currentIndex), nextIndex = currentIndex + dir, selector;
             if (nextIndex < 0 || nextIndex >= inst.rowsLength) {
                 return focusedEl;
             }
-            selector = ux.selector.getSelector(focusedEl[0], rowEl[0], filterClasses);
-            inst.flow.log("	FM: selector: %s", selector);
+            selector = ux.selector.quickSelector(focusedEl[0], rowEl[0], filterClasses);
+            result.log("	selector: %s", selector);
             resultEl = findNextRowWithSelection(nextIndex, dir, selector);
             return resultEl && resultEl.length ? resultEl : focusedEl;
         }
@@ -505,16 +745,19 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @param {JQLite} focusEl
          */
         function performFocus(focusEl) {
-            inst.flow.log("	FM: performFocus %o", focusEl[0]);
+            result.log("	performFocus %o", focusEl[0]);
+            var success = false;
             if (focusEl[0].select) {
                 // TODO: if no jquery. There may be no select.
                 focusEl[0].select();
             }
             if (focusEl[0]) {
                 focusEl[0].focus();
+                success = true;
             }
             // we now need to scroll the row into view if it is not.
             inst.scrollModel.scrollIntoView(inst.getRowIndexFromElement(focusEl), true);
+            return success;
         }
         /**
          * ###<a name="findNextRowWithSelection">findNextRowWithSelection</a>###
@@ -527,7 +770,7 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @returns {JQLite}
          */
         function findNextRowWithSelection(nextIndex, dir, selector) {
-            inst.flow.log("	FM: findNextRowWithSelection");
+            result.log("	findNextRowWithSelection");
             var nextEl = inst.getRowElm(nextIndex), focusEl = query(nextEl[0], selector);
             var content = inst.getContent();
             while (!focusEl[0] && (dir > 0 && nextIndex < inst.rowsLength - 1 || dir < 0 && nextIndex > 0)) {
@@ -540,6 +783,17 @@ angular.module("ux").factory("gridFocusManager", function() {
             }
             return focusEl;
         }
+        function onResize(event) {
+            var index;
+            if (document.activeElement !== inst.element[0] && inst.element[0].contains(document.activeElement)) {
+                index = inst.getRowIndexFromElement(document.activeElement);
+                inst.scrollModel.scrollIntoView(index);
+            }
+        }
+        // it has to match a pattern for each row. These are too unique.
+        ux.selector.config.allowId = false;
+        ux.selector.config.allowAttributes = false;
+        ux.selector.config.addVisible = true;
         result.hasPrevRowFocusElement = hasPrevRowFocusElement;
         result.hasNextRowFocusElement = hasNextRowFocusElement;
         result.focusToPrevRowElement = focusToPrevRowElement;
@@ -553,13 +807,19 @@ angular.module("ux").factory("gridFocusManager", function() {
             result = null;
         };
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, removeListeners));
-        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, addListeners));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RENDER, removeListeners));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_RENDER, addListeners));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME, function() {
-            focusToPrevRowElement(document.activeElement);
+            if (inst.element[0].contains(document.activeElement)) {
+                focusToPrevRowElement(document.activeElement);
+            }
         }));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME, function() {
-            focusToNextRowElement(document.activeElement);
+            if (inst.element[0].contains(document.activeElement)) {
+                focusToNextRowElement(document.activeElement);
+            }
         }));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER, onResize));
         inst.gridFocusManager = result;
         return inst;
     };

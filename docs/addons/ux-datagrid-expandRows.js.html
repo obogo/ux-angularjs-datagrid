@@ -36,7 +36,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.6.1
+  <div class="summary"><p>uxDatagrid v.0.6.2
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -143,7 +143,7 @@ License: MIT.</p>
         <span class="kd">function</span> <span class="nx">closeAll</span><span class="p">(</span><span class="nx">omitIndexes</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">opened</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">cacheItemData</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
                 <span class="kd">var</span> <span class="nx">intIndex</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
-                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">omitIndexes</span> <span class="o">||</span> <span class="nx">omitIndexes</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">intIndex</span><span class="p">)</span> <span class="o">===</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">omitIndexes</span> <span class="o">||</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">rowsLength</span> <span class="o">&gt;</span> <span class="nx">intIndex</span> <span class="o">&amp;&amp;</span> <span class="nx">omitIndexes</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">intIndex</span><span class="p">)</span> <span class="o">===</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
                     <span class="nx">collapse</span><span class="p">(</span><span class="nx">intIndex</span><span class="p">);</span>
                 <span class="p">}</span>
             <span class="p">});</span>
@@ -214,10 +214,17 @@ License: MIT.</p>
             <span class="nx">params</span><span class="p">.</span><span class="nx">reverse</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">params</span><span class="p">.</span><span class="nx">elm</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">onTransitionEnd</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">elm</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">),</span> <span class="nx">s</span> <span class="o">=</span> <span class="nx">elm</span><span class="p">.</span><span class="nx">scope</span><span class="p">(),</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">$index</span><span class="p">,</span> <span class="nx">state</span> <span class="o">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">$state</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">elm</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">),</span> <span class="nx">s</span> <span class="o">=</span> <span class="nx">elm</span><span class="p">.</span><span class="nx">scope</span><span class="p">(),</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">state</span><span class="p">;</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">))</span> <span class="p">{</span>
-                <span class="nx">index</span> <span class="o">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">$index</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">index</span><span class="p">;</span>
-                <span class="nx">state</span> <span class="o">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">$state</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">state</span><span class="p">;</span>
+                <span class="nx">index</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">index</span><span class="p">;</span>
+                <span class="nx">state</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">state</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">state</span> <span class="o">&amp;&amp;</span> <span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">s</span><span class="p">.</span><span class="nx">$index</span> <span class="o">=</span> <span class="nx">index</span><span class="p">;</span>
+                <span class="nx">s</span><span class="p">.</span><span class="nx">$state</span> <span class="o">=</span> <span class="nx">state</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">index</span> <span class="o">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">$index</span><span class="p">;</span>
+                <span class="nx">state</span> <span class="o">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">$state</span><span class="p">;</span>
             <span class="p">}</span>
             <span class="nx">elm</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="nx">TRNEND_EV</span><span class="p">,</span> <span class="nx">onTransitionEnd</span><span class="p">);</span>
             <span class="nx">elm</span><span class="p">.</span><span class="nx">removeClass</span><span class="p">(</span><span class="s2">&quot;animating&quot;</span><span class="p">);</span>
@@ -232,7 +239,9 @@ License: MIT.</p>
             <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
                 <span class="k">delete</span> <span class="nx">opened</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
             <span class="p">}</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">safeDigest</span><span class="p">(</span><span class="nx">s</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">safeDigest</span><span class="p">(</span><span class="nx">s</span><span class="p">);</span>
+            <span class="p">}</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">updateHeights</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
 
 </pre></div>
@@ -261,7 +270,7 @@ License: MIT.</p>
 <p>check for last row. On expansion it needs to scroll down.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">state</span> <span class="o">===</span> <span class="nx">states</span><span class="p">.</span><span class="nx">opened</span> <span class="o">&amp;&amp;</span> <span class="nx">index</span> <span class="o">===</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">state</span> <span class="o">===</span> <span class="nx">states</span><span class="p">.</span><span class="nx">opened</span> <span class="o">&amp;&amp;</span> <span class="nx">index</span> <span class="o">===</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getViewportHeight</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getContentHeight</span><span class="p">())</span> <span class="p">{</span>
                     <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollToBottom</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
                 <span class="p">}</span>
                 <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollIntoView</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
@@ -316,6 +325,17 @@ License: MIT.</p>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">TOGGLE_ROW</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">itemOrIndex</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">toggle</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">);</span>
         <span class="p">}));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_ROW_COMPILE</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">$s</span><span class="p">,</span> <span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">opened</span><span class="p">[</span><span class="nx">$s</span><span class="p">.</span><span class="nx">$index</span><span class="p">])</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">$s</span><span class="p">.</span><span class="nx">$index</span><span class="p">]),</span> <span class="nx">tpl</span> <span class="o">=</span> <span class="nx">cache</span><span class="p">[</span><span class="nx">template</span><span class="p">.</span><span class="nx">name</span><span class="p">];</span>
+                <span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">classList</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">cls</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_TOGGLE_SORT</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_TOGGLE_SORT</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">columnName</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">closeAll</span><span class="p">();</span>
+            <span class="p">}));</span>
+        <span class="p">}</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">expandRows</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
         <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
     <span class="p">};</span>

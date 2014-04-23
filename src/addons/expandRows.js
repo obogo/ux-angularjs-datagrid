@@ -104,7 +104,7 @@ angular.module('ux').factory('expandRows', function () {
         function closeAll(omitIndexes) {
             exports.each(opened, function (cacheItemData, index) {
                 var intIndex = parseInt(index, 10);
-                if (!omitIndexes || omitIndexes.indexOf(intIndex) === -1) {
+                if (!omitIndexes || (inst.rowsLength > intIndex && omitIndexes.indexOf(intIndex) === -1)) {
                     collapse(intIndex);
                 }
             });
@@ -160,10 +160,17 @@ angular.module('ux').factory('expandRows', function () {
         }
 
         function onTransitionEnd(event) {
-            var elm = angular.element(event.target), s = elm.scope(), index = s.$index, state = s.$state;
+            var elm = angular.element(event.target), s = elm.scope(), index, state;
             if (event.hasOwnProperty('index')) {
-                index = s.$index = event.index;
-                state = s.$state = event.state;
+                index = event.index;
+                state = event.state;
+            }
+            if (state && s) {
+                s.$index = index;
+                s.$state = state;
+            } else if (s) {
+                index = s.$index;
+                state = s.$state;
             }
             elm[0].removeEventListener(TRNEND_EV, onTransitionEnd);
             elm.removeClass('animating');
@@ -178,14 +185,16 @@ angular.module('ux').factory('expandRows', function () {
             } else {
                 delete opened[index];
             }
-            inst.safeDigest(s);
+            if (s) {
+                inst.safeDigest(s);
+            }
             inst.updateHeights(index);
             // we told the heights to update. Give time for them to change then fire the event.
             clearTimeout(intv);
             intv = setTimeout(function () {
                 clearTimeout(intv);
                 // check for last row. On expansion it needs to scroll down.
-                if (state === states.opened && index === inst.data.length - 1) {
+                if (state === states.opened && index === inst.data.length - 1 && inst.getViewportHeight() < inst.getContentHeight()) {
                     inst.scrollModel.scrollToBottom(true);
                 }
                 inst.scrollModel.scrollIntoView(index, true);
@@ -235,6 +244,19 @@ angular.module('ux').factory('expandRows', function () {
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.TOGGLE_ROW, function (event, itemOrIndex) {
             result.toggle(itemOrIndex);
         }));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_ROW_COMPILE, function (event, $s, el) {
+            if (opened[$s.$index]) {
+                var template = inst.templateModel.getTemplate(inst.data[$s.$index]),
+                    tpl = cache[template.name];
+                el[0].classList.add(tpl.cls);
+            }
+        }));
+
+        if (exports.datagrid.events.ON_BEFORE_TOGGLE_SORT) {
+            inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_TOGGLE_SORT, function (event, columnName) {
+                closeAll();
+            }));
+        }
 
         inst.expandRows = result;
 

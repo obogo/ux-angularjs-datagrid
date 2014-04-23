@@ -120,7 +120,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
     result.onTouchMove = function (event) {
         var y = getTouches(event)[0].clientY, delta = offset - y;
-        result.setScroll(inst.values.scroll + delta);
+        result.setScroll(result.capScrollValue(inst.values.scroll + delta));
         speed = delta;
         offset = y;
     };
@@ -141,15 +141,17 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
     result.scrollSlowDown = function (wait) {
         clearTimeout(scrollingIntv);
-        var duration = Math.abs(speed) * inst.options.scrollModel.speed, t = duration - (Date.now() - startTime), prevDistance = distance, change;
+        var value, duration = Math.abs(speed) * inst.options.scrollModel.speed, t = duration - (Date.now() - startTime), prevDistance = distance, change;
         distance = result.easeOut(t, distance, speed || 0, duration);
         change = distance - prevDistance;
         if (Math.abs(change) < 5) {
             t = 0;
         }
         if (t > 0) {
+            value = result.capScrollValue(inst.values.scroll + change);
             if (!wait) {
-                inst.element[0].scrollTop += change;
+                result.log("\tscroll %s of %s", value, inst.element[0].scrollHeight);
+                inst.element[0].scrollTop = value;
             }
             scrollingIntv = setTimeout(result.scrollSlowDown, 20);
         }
@@ -257,6 +259,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.waitForStop = function waitForStop() {
         var forceRender = false;
         clearTimeout(waitForStopIntv);
+        result.log("waitForStop scroll = %s", inst.values.scroll);
         if (inst.options.renderWhileScrolling) {
             if (Date.now() - (inst.options.renderWhileScrolling > 0 || 0) > lastRenderTime) {
                 forceRender = true;
@@ -273,6 +276,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * When it stops render.
      */
     result.onScrollingStop = function onScrollingStop() {
+        result.log("onScrollingStop %s", inst.values.scroll);
         inst.values.speed = 0;
         inst.values.absSpeed = 0;
         inst.render();

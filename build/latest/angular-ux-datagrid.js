@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.6.1
+* uxDatagrid v.0.6.2
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -102,6 +102,7 @@ exports.datagrid = {
         // handy for knowing when to remove jquery listeners.
         ON_AFTER_ROW_ACTIVATE: "datagrid:onAFterRowActivate",
         // handy for turning jquery listeners back on.
+        ON_ROW_COMPILE: "datagrid:onRowCompile",
         /**
          * #### Driving Events ####
          * - **<a name="events.RESIZE">RESIZE</a>** tells the datagrid to resize. This will update all height calculations.
@@ -1205,13 +1206,20 @@ function Datagrid(scope, element, attr, $compile) {
      * swap out an old item with a new item without causing a data change. Quick swap of items.
      * this will only work if the item already exists in the datagrid. You cannot add or remove items
      * this way. Only change them to a different reference. Adding or Removing requires a re-chunking.
+     * @param {Object} oldItem
+     * @param {Object} newItem
+     * @param {Boolean=} keepTemplate
      */
-    function swapItem(oldItem, newItem) {
+    function swapItem(oldItem, newItem, keepTemplate) {
         //TODO: needs unit test.
         var index = getRowIndex(oldItem), oldTpl, newTpl;
         if (inst.data.hasOwnProperty(index)) {
             oldTpl = inst.templateModel.getTemplate(oldItem);
-            newTpl = inst.templateModel.getTemplate(newItem);
+            if (keepTemplate) {
+                newTpl = oldTpl;
+            } else {
+                newTpl = inst.templateModel.getTemplate(newItem);
+            }
             inst.data[index] = newItem;
             if (oldTpl !== newTpl) {
                 inst.templateModel.setTemplate(index, newTpl);
@@ -1368,6 +1376,7 @@ function Datagrid(scope, element, attr, $compile) {
             el = getRowElm(index);
             el.removeClass(options.uncompiledClass);
             $compile(el)(s);
+            inst.dispatch(exports.datagrid.events.ON_ROW_COMPILE, s, el);
             deactivateScope(s);
         }
         return s;
@@ -1507,14 +1516,16 @@ function Datagrid(scope, element, attr, $compile) {
                 s.$$listenerCount = angular.copy(s.$$$listenerCount);
                 subtractEvents(s, s.$$$listenerCount);
             }
+            //RECURSIVE deactivate/activate memory tests show that it doesn't improve anything. So unless there is a good reason leave
+            // this code commented out, because it does affect performance. It adds 30% to destroy time and time to rendering.
             // recursively go through children and deactivate them.
-            if (s.$$childHead) {
-                child = s.$$childHead;
-                while (child) {
-                    deactivateScope(child, depth + 1);
-                    child = child.$$nextSibling;
-                }
-            }
+            //            if (s.$$childHead) {
+            //                child = s.$$childHead;
+            //                while (child) {
+            //                    deactivateScope(child, depth + 1);
+            //                    child = child.$$nextSibling;
+            //                }
+            //            }
             return true;
         }
         return false;
@@ -1541,13 +1552,13 @@ function Datagrid(scope, element, attr, $compile) {
                 s.$$$listenerCount = null;
             }
             // recursively go through children and activate them.
-            if (s.$$childHead) {
-                child = s.$$childHead;
-                while (child) {
-                    activateScope(child, depth + 1);
-                    child = child.$$nextSibling;
-                }
-            }
+            //            if (s.$$childHead) {
+            //                child = s.$$childHead;
+            //                while (child) {
+            //                    activateScope(child, depth + 1);
+            //                    child = child.$$nextSibling;
+            //                }
+            //            }
             if (!depth) {
                 s.$emit(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);
             }
@@ -1604,7 +1615,7 @@ function Datagrid(scope, element, attr, $compile) {
             inst.info("Scroll reset because either there is no data or the scroll is taller than there is scroll area");
             values.scroll = 0;
         }
-        var height = viewHeight, scroll = values.scroll || 0, result = {
+        var height = viewHeight, scroll = values.scroll >= 0 ? values.scroll : 0, result = {
             startIndex: 0,
             i: 0,
             inc: 1,
@@ -1613,6 +1624,9 @@ function Datagrid(scope, element, attr, $compile) {
             visibleScrollEnd: scroll + height - options.cushion
         };
         result.startIndex = result.i = getOffsetIndex(scroll);
+        if (inst.rowsLength && result.startIndex === result.end) {
+            throw new Error(exports.errors.E1002);
+        }
         return result;
     }
     /**
@@ -1681,7 +1695,7 @@ function Datagrid(scope, element, attr, $compile) {
         }
         loop.ended = loop.i - 1;
         if (inst.rowsLength && values.activeRange.min < 0 && values.activeRange.max < 0) {
-            throw new Error(errors.E1002);
+            throw new Error(exports.errors.E1002);
         }
         inst.log("	startIndex %s endIndex %s", loop.startIndex, loop.i);
         deactivateList(lastActive);
@@ -1981,15 +1995,8 @@ function Datagrid(scope, element, attr, $compile) {
             }
             el.parent()[0].insertBefore(replaceEl[0], el[0]);
             s.$destroy();
+            el.remove();
             scopes[index] = null;
-            //            newScope = scopes[index] = compileRow(index);
-            //            for(var i in s) {
-            //                if (s.hasOwnProperty(i) && !newScope.hasOwnProperty(i)) {
-            //                    newScope[i] = s[i];
-            //                }
-            //            }
-            //            el.remove();
-            //            newScope.$digested = false;
             updateHeights(index);
         }
     }
@@ -2032,15 +2039,17 @@ function Datagrid(scope, element, attr, $compile) {
         // concept is to crate a large object that will cause the browser to garbage collect before creating it.
         // then since it has no reference it gets removed.
         clearInterval(gcIntv);
-        gcIntv = setTimeout(function() {
-            if (inst) {
-                inst.info("GC");
-                var a, i, total = 1024 * 1024 * .5;
-                for (i = 0; i < total; i += 1) {
-                    a = .5;
+        if (!inst.shuttingDown) {
+            gcIntv = setTimeout(function() {
+                if (inst) {
+                    inst.info("GC");
+                    var a, i, total = 1024 * 1024 * .5;
+                    for (i = 0; i < total; i += 1) {
+                        a = .5;
+                    }
                 }
-            }
-        }, 1e3);
+            }, 1e3);
+        }
     }
     /**
      * ###<a name="destroyScopes">destroyScopes</a>###
@@ -2073,9 +2082,8 @@ function Datagrid(scope, element, attr, $compile) {
      * needs to put all watcher back before destroying or it will not destroy child scopes, or remove watchers.
      */
     function destroy() {
-        getContent().css({
-            display: "none"
-        });
+        inst.shuttingDown = true;
+        getContent()[0].style.display = "none";
         scope.datagrid = null;
         // we have a circular reference. break it on destroy.
         inst.log("destroying grid");
@@ -3327,7 +3335,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
     result.onTouchMove = function(event) {
         var y = getTouches(event)[0].clientY, delta = offset - y;
-        result.setScroll(inst.values.scroll + delta);
+        result.setScroll(result.capScrollValue(inst.values.scroll + delta));
         speed = delta;
         offset = y;
     };
@@ -3346,15 +3354,17 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
     result.scrollSlowDown = function(wait) {
         clearTimeout(scrollingIntv);
-        var duration = Math.abs(speed) * inst.options.scrollModel.speed, t = duration - (Date.now() - startTime), prevDistance = distance, change;
+        var value, duration = Math.abs(speed) * inst.options.scrollModel.speed, t = duration - (Date.now() - startTime), prevDistance = distance, change;
         distance = result.easeOut(t, distance, speed || 0, duration);
         change = distance - prevDistance;
         if (Math.abs(change) < 5) {
             t = 0;
         }
         if (t > 0) {
+            value = result.capScrollValue(inst.values.scroll + change);
             if (!wait) {
-                inst.element[0].scrollTop += change;
+                result.log("	scroll %s of %s", value, inst.element[0].scrollHeight);
+                inst.element[0].scrollTop = value;
             }
             scrollingIntv = setTimeout(result.scrollSlowDown, 20);
         }
@@ -3447,6 +3457,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.waitForStop = function waitForStop() {
         var forceRender = false;
         clearTimeout(waitForStopIntv);
+        result.log("waitForStop scroll = %s", inst.values.scroll);
         if (inst.options.renderWhileScrolling) {
             if (Date.now() - (inst.options.renderWhileScrolling > 0 || 0) > lastRenderTime) {
                 forceRender = true;
@@ -3462,6 +3473,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * When it stops render.
      */
     result.onScrollingStop = function onScrollingStop() {
+        result.log("onScrollingStop %s", inst.values.scroll);
         inst.values.speed = 0;
         inst.values.absSpeed = 0;
         inst.render();

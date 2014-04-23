@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.3.2-alpha
+* uxDatagrid v.0.6.1
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -13,6 +13,7 @@ angular.module("ux").factory("gridLogger", function() {
         ERROR: 4
     }, methods = [ "log", "info", "warn", "error" ], themes = {
         black: [ "color:#000000", "color:#000000", "color:#000000", "color:#000000" ],
+        light: [ "color:#DDDDDD", "color:#BBBBBB", "color:#999999;font-style:italic;font-weight:bold;", "color:#FF0000;font-weight:bold;" ],
         grey: [ "color:#999999", "color:#666666", "color:#333333;font-style:italic;font-weight:bold;", "color:#FF0000;font-weight:bold;" ],
         red: [ "color:#CD9B9B", "color:#CD5C5C", "color:#CC3232;font-style:italic;font-weight:bold;", "color:#FF0000;font-weight:bold;" ],
         green: [ "color:#9CBA7F", "color:#78AB46", "color:#45B000;font-style:italic;font-weight:bold;", "color:#FF0000;font-weight:bold;" ],

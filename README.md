@@ -50,6 +50,26 @@ The script template has 3 properties.
 - **template-name** if this is not defined it will be changed to 'default'. So this one is not required if you only have one template, but if you have more than one the second will overwrite the first without this property.
 - **template-item** this is what you want the data to be referenced by on the row scope. Such as in angular if you do a repeat with "item in items" you then reference item in your template. This does the same thing with this property.
 
+###Dynamically specify your templates instead of using script templates###
+- [Demo](https://rawgithub.com/webux/ux-angularjs-datagrid/master/samples/app/index.html#/other/templateData)
+
+As of 0.6.4 you can also pass a template data object to be used an an option to script templates. To do this you just need to reference an object and pass to the grid options like so.
+
+    <div data-ux-datagrid="items" class="datagrid" data-options="{templateModel:{templates:templates}}"></div>
+
+Then just define "tempalates" on your scope. Like so:
+
+    $scope.templates = [
+        {
+            template: '<div class="row"><div>{{item.id}}</div></div>',
+            name: 'default',
+            item: 'item',
+            base: null
+        }
+    ];
+
+**Please note that script templates will override these templates if they have the same name.** Such as if you have a template with the name 'default' and a script template with the data-template-name="default" then the script template will overwrite the other template.
+
 ## Addons / Plugins ##
 Addons are like a plugin to the datagrid. It actually becomes a behavior modifier of the datagrid object. Addons are created as factories and applied directly to the datagrid instance. The internals of the datagrid are constructed with addons as well.
 

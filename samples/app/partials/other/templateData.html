@@ -1,0 +1,16 @@
+<div class="stats">
+    <div class="page-title">{{name}}</div>
+    <div>Check out the HTML. No Script Templates. They are in the $scope. View app.js and search for "templateData" to see the controller.</div>
+    <span>SCROLL TO:</span>
+    <span data-ng-repeat="p in percents"><a href="" data-ng-click="scrollToPercent(p/100)">{{p}}%</a> </span>
+</div>
+<div class="my-container">
+    <div class="listA">
+        <!--// This is the background loader //-->
+        <div class="spinningSquares">
+            <div data-ng-repeat="num in [1, 2, 3, 4, 5, 6, 7, 8]" class="spinningSquaresG spinningSquares_{{num}}"></div>
+        </div>
+        <!--// this is the datagrid //-->
+        <div data-ux-datagrid="items" class="datagrid" data-options="{scrollModel:{manual:true}, templateModel:{templates:templates}}"></div>
+    </div>
+</div>

@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.6.3
+* uxDatagrid v.0.6.4
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -631,6 +631,10 @@ angular.module("ux").factory("gridFocusManager", function() {
         function onKeyDown(event) {
             var target = angular.element(event.currentTarget), atTop = false, atBottom = false;
             result.log("FM: onKeyDown");
+            if (event.keyCode === keys.ENTER && event.currentTarget.nodeName.match(/A/)) {
+                // on anchors we allow enter to execute it. So ignore it.
+                return;
+            }
             if (event.shiftKey && event.keyCode === keys.ENTER || event.keyCode === keys.UP) {
                 atTop = !focusToPrevRowElement(target);
                 if (atTop) {

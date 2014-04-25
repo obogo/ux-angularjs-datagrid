@@ -27,11 +27,11 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         function createTemplates() {
             result.log('createTemplates');
             var i, scriptTemplates = inst.element[0].getElementsByTagName('script'), len = scriptTemplates.length;
-            if (!len) {
+            if (!len && !templates.length) {
                 throw new Error(exports.errors.E1102);
             }
             for (i = 0; i < len; i += 1) {
-                createTemplate(scriptTemplates[i]);
+                createTemplateFromScriptTemplate(scriptTemplates[i]);
             }
             // remove the script templates.
             while (scriptTemplates.length) {
@@ -39,12 +39,22 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             }
         }
 
-        function createTemplate(scriptTemplate) {
-            var template = trim(angular.element(scriptTemplate).html()),
-                originalTemplate = template,
-                wrapper = document.createElement('div'),
-                name = getScriptTemplateAttribute(scriptTemplate, 'template-name') || defaultName,
+        function createTemplateFromScriptTemplate(scriptTemplate) {
+            var name = getScriptTemplateAttribute(scriptTemplate, 'template-name') || defaultName,
                 base = getScriptTemplateAttribute(scriptTemplate, 'template-base') || null,
+                itemName = getScriptTemplateAttribute(scriptTemplate, 'template-item');
+            return createTemplate(trim(angular.element(scriptTemplate).html()), name, itemName, base);
+        }
+
+        function createTemplatesFromData(templateData) {
+            exports.each(templateData, function (tpl) {
+                createTemplate(tpl.template, tpl.name, tpl.item, tpl.base);
+            });
+        }
+
+        function createTemplate(template, name, itemName, base) {
+            var originalTemplate = template,
+                wrapper = document.createElement('div'),
                 templateData;
             wrapper.className = 'grid-template-wrapper';
             template = result.prepTemplate(name, template, base);
@@ -58,7 +68,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             template = trim(wrapper.innerHTML);
             templateData = {
                 name: name,
-                item: getScriptTemplateAttribute(scriptTemplate, 'template-item'),
+                item: itemName,
                 template: template,
                 originalTemplate: originalTemplate,
                 height: wrapper.offsetHeight
@@ -204,6 +214,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         result.defaultName = defaultName;
         result.prepTemplate = prepTemplate;
         result.createTemplates = createTemplates;
+        result.createTemplatesFromData = createTemplatesFromData;
         result.getTemplates = getTemplates;
         result.getTemplateName = getTemplateName;
         result.getTemplateByName = getTemplateByName;

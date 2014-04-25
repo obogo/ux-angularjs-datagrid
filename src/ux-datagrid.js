@@ -230,6 +230,9 @@ function Datagrid(scope, element, attr, $compile) {
                 flow.warn("Datagrid: Dom Element does not have a height.");
             }
         }
+        if (options.templateModel && options.templateModel.templates) {
+            flow.add(inst.templateModel.createTemplatesFromData, [options.templateModel.templates], 0);
+        }
         flow.add(inst.templateModel.createTemplates, null, 0); // allow element to be added to dom.
         // if the templates have different heights. Then they are dynamic.
         flow.add(function updateDynamicRowHeights() {

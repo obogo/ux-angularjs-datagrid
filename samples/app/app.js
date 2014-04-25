@@ -116,6 +116,21 @@ app.config(function ($routeProvider) {
                 $scope.items = createSimpleList();
             }
         })
+        .when('/other/templateData', {
+            templateUrl: "partials/other/templateData.html",
+            controller: function ($scope) {
+                $scope.name = "Other >> Template Data";
+                $scope.items = createSimpleList();
+                $scope.templates = [
+                    {
+                        template: '<div class="row"><div>{{item.id}}</div></div>',
+                        name: 'default',
+                        item: 'item',
+                        base: null
+                    }
+                ];
+            }
+        })
         .when('/other/doubleScroll', {
             templateUrl: "partials/other/doubleScroll.html",
             controller: function ($scope) {

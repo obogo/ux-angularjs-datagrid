@@ -52,6 +52,7 @@ The script template has 3 properties.
 
 ###Dynamically specify your templates instead of using script templates###
 - [Demo](https://rawgithub.com/webux/ux-angularjs-datagrid/master/samples/app/index.html#/other/templateData)
+- [Fiddle](http://jsfiddle.net/m2tRh/1/)
 
 As of 0.6.4 you can also pass a template data object to be used an an option to script templates. To do this you just need to reference an object and pass to the grid options like so.
 

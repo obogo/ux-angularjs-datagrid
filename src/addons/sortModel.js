@@ -314,7 +314,11 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
          */
         function cleanSortValue(value) {
             // undefined and null should be compared as an empty string.
-            return value === undefined || value === null ? '' : value;
+            var result = value === undefined || value === null ? '' : value;
+            if (typeof result === "string") {
+                return result.toLowerCase();
+            }
+            return result;
         }
 
         /**

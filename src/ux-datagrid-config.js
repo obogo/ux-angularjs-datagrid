@@ -6,7 +6,7 @@
  *
  * Create the default module of ux if it doesn't already exist.
  */
-var module;
+var module, isIOS = !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g);
 try {
     module = angular.module('ux', ['ng']);
 } catch (e) {
@@ -30,7 +30,7 @@ exports.datagrid = {
      * however with this attribute iOS would crash if you try to change the scroll with javascript, or turn it on and off.
      * So a [virtualScroll](#virtualScroll) was implemented for iOS to make it scroll using translate3d.
      */
-    isIOS: !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g),
+    isIOS: isIOS,
     /**
      * ###<a name="states">states</a>###
      *  - **<a name="states.BUILDING">BUILDING</a>**: is the startup phase of the grid before it is ready to perform the first render. This may include
@@ -158,7 +158,9 @@ exports.datagrid = {
             // - **<a name="options.scrollModel.speed">scrollModel.speed</a>** the factor of speed multiplication when determining how far the scroller should coast in manual mode.
             speed: 5,
             // - **<a name="options.scrollModel.manual">scrollModel.manual</a>** if set to true then touch move events will be used to scroll and calculate coasting.
-            manual: false
+            manual: false,
+            // - **<a name="options.scrollModel.simulateClick">scrollModel.simulateClick</a>** defaulted to true for android, and false for iOS.
+            simulateClick: !isIOS
         },
         // - **<a name="options.compiledClass">compiledClass</a>** after a row has been compiled the uncompiled class is removed and compiled is added.
         compiledClass: 'compiled',

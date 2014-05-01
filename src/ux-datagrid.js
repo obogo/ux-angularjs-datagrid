@@ -577,9 +577,14 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Scope} s
      */
     function safeDigest(s) {
-        if (!s.$$phase || !s.$root.$$phase) {
-            s.$digest();
+        var ds = s;
+        while (ds) {
+            if (ds.$$phase) {
+                return;
+            }
+            ds = ds.$parent;
         }
+        s.$digest();
     }
 
     /**

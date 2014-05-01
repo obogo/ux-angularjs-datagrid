@@ -132,7 +132,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.6.3
+  <div class="summary"><p>uxDatagrid v.0.6.5
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -1494,6 +1494,21 @@ you can filter these out from causing selections to not be made.</p>
         <span class="kd">function</span> <span class="nx">onKeyDown</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">target</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">),</span> <span class="nx">atTop</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">atBottom</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;FM: onKeyDown&quot;</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">ENTER</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/A/</span><span class="p">))</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-40" id="section-40">&#182;</a>
+</div>
+<p>on anchors we allow enter to execute it. So ignore it.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="p">}</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">shiftKey</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">ENTER</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">UP</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">atTop</span> <span class="o">=</span> <span class="o">!</span><span class="nx">focusToPrevRowElement</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nx">atTop</span><span class="p">)</span> <span class="p">{</span>
@@ -1791,7 +1806,7 @@ to increment.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-48" id="section-48">&#182;</a>
+  <a class="pilcrow" href="#section-49" id="section-49">&#182;</a>
 </div>
 <p>dir should be 1 or -1</p>
         </td>
@@ -1851,7 +1866,7 @@ to increment.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-50" id="section-50">&#182;</a>
+  <a class="pilcrow" href="#section-51" id="section-51">&#182;</a>
 </div>
 <p>TODO: if no jquery. There may be no select.</p>
         </td>
@@ -1869,7 +1884,7 @@ to increment.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-51" id="section-51">&#182;</a>
+  <a class="pilcrow" href="#section-52" id="section-52">&#182;</a>
 </div>
 <p>we now need to scroll the row into view if it is not.</p>
         </td>
@@ -1944,7 +1959,7 @@ However, possible bug here if a selector similar to this one doesn't exist for a
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-53" id="section-53">&#182;</a>
+  <a class="pilcrow" href="#section-54" id="section-54">&#182;</a>
 </div>
 <p>it has to match a pattern for each row. These are too unique.</p>
         </td>

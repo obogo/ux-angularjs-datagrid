@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.6.4
+* uxDatagrid v.0.6.5
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.

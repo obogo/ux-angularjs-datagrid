@@ -1,4 +1,7 @@
 exports.datagrid.events.ON_RENDER_PROGRESS = "datagrid:onRenderProgress";
+exports.datagrid.events.STOP_CREEP = "datagrid:stopCreep";
+exports.datagrid.events.ENABLE_CREEP = "datagrid:enableCreep";
+exports.datagrid.events.DISABLE_CREEP = "datagrid:disableCreep";
 exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
 
     var intv = 0,
@@ -164,12 +167,14 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     };
 
     model.disable = function () {
+        stop();
         model.info("creep Disabled");
         while(unwatchers.length) {
             unwatchers.pop()();
         }
     };
 
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.DISABLE_CREEP, model.disable));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
 
     inst.creepRenderModel = model;

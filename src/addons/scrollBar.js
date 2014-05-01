@@ -48,8 +48,8 @@ angular.module('ux').factory('scrollBar', function () {
             calculateDimensions();
             var vendor = {transform: '-webkit-transform'};
             scrollBarElm.style.height = data.height + 'px';
-//           scrollBarElm.style.top = data.top + 'px';
-            scrollBarElm.style[vendor.transform] = 'translate(0px, ' + data.top + 'px) translateZ(0px)';
+           scrollBarElm.style.top = data.top + 'px';
+//            scrollBarElm.style[vendor.transform] = 'translate(0px, ' + data.top + 'px) translateZ(0px)';
         }
 
         function onScrollStart(event, val) {
@@ -72,6 +72,7 @@ angular.module('ux').factory('scrollBar', function () {
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER, updateScrollBar));
 
         result.destroy = function () {
+            scrollBarElm.remove();
             scrollBarElm = null;
             data = null;
             inst = null;

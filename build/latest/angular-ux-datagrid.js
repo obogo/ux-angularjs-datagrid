@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.6.4
+* uxDatagrid v.0.6.5
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -20,7 +20,7 @@ exports.errors = {
  *
  * Create the default module of ux if it doesn't already exist.
  */
-var module;
+var module, isIOS = !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g);
 
 try {
     module = angular.module("ux", [ "ng" ]);
@@ -46,7 +46,7 @@ exports.datagrid = {
      * however with this attribute iOS would crash if you try to change the scroll with javascript, or turn it on and off.
      * So a [virtualScroll](#virtualScroll) was implemented for iOS to make it scroll using translate3d.
      */
-    isIOS: !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g),
+    isIOS: isIOS,
     /**
      * ###<a name="states">states</a>###
      *  - **<a name="states.BUILDING">BUILDING</a>**: is the startup phase of the grid before it is ready to perform the first render. This may include
@@ -176,7 +176,9 @@ exports.datagrid = {
             // - **<a name="options.scrollModel.speed">scrollModel.speed</a>** the factor of speed multiplication when determining how far the scroller should coast in manual mode.
             speed: 5,
             // - **<a name="options.scrollModel.manual">scrollModel.manual</a>** if set to true then touch move events will be used to scroll and calculate coasting.
-            manual: false
+            manual: false,
+            // - **<a name="options.scrollModel.simulateClick">scrollModel.simulateClick</a>** defaulted to true for android, and false for iOS.
+            simulateClick: !isIOS
         },
         // - **<a name="options.compiledClass">compiledClass</a>** after a row has been compiled the uncompiled class is removed and compiled is added.
         compiledClass: "compiled",
@@ -461,7 +463,7 @@ exports.css = function CSS() {
  * Like Lo-Dash.
  * @param {Array\Object} list
  * @param {Function} method
- * @param {..rest} data _additional arguments passes are available in the iteration function_
+ * @param {*=} data _additional arguments passes are available in the iteration function_
  * @returns {*}
  */
 //_example:_
@@ -1426,9 +1428,14 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Scope} s
      */
     function safeDigest(s) {
-        if (!s.$$phase || !s.$root.$$phase) {
-            s.$digest();
+        var ds = s;
+        while (ds) {
+            if (ds.$$phase) {
+                return;
+            }
+            ds = ds.$parent;
         }
+        s.$digest();
     }
     /**
      * ###<a name="applyEventCounts">applyEventCounts</a>###
@@ -2936,6 +2943,12 @@ ChunkArray.prototype.destroy = function() {
 
 exports.datagrid.events.ON_RENDER_PROGRESS = "datagrid:onRenderProgress";
 
+exports.datagrid.events.STOP_CREEP = "datagrid:stopCreep";
+
+exports.datagrid.events.ENABLE_CREEP = "datagrid:enableCreep";
+
+exports.datagrid.events.DISABLE_CREEP = "datagrid:disableCreep";
+
 exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     var intv = 0, creepCount = 0, model = exports.logWrapper("creepModel", {}, "blue", inst.dispatch), upIndex = 0, downIndex = 0, waitHandle, waitingOnReset, time, lastPercent, unwatchers = [];
     function digest(index) {
@@ -3079,11 +3092,13 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         }
     };
     model.disable = function() {
+        stop();
         model.info("creep Disabled");
         while (unwatchers.length) {
             unwatchers.pop()();
         }
     };
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.DISABLE_CREEP, model.disable));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
     inst.creepRenderModel = model;
     // do not add listeners if it is not enabled.
@@ -3241,7 +3256,7 @@ exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
 
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, waitForStopIntv, hasScrollListener = false, lastScroll, lastRenderTime, // start easing
-    startOffset, offset, speed = 0, startTime, distance, scrollingIntv, // end easing
+    startOffsetY, startOffsetX, offsetY, offsetX, startScroll, lastDeltaY, lastDeltaX, speed = 0, startTime, distance, scrollingIntv, // end easing
     listenerData = [ {
         event: "touchstart",
         method: "onTouchStart",
@@ -3264,7 +3279,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     function setupScrolling() {
         unwatchSetup();
-        if (!inst.element.css("overflow")) {
+        if (!inst.element.css("overflow") || inst.element.css("overflow") === "visible") {
             inst.element.css({
                 overflow: "auto"
             });
@@ -3284,6 +3299,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         setup = true;
     }
     function addScrollListener() {
+        result.log("addScrollListener");
         hasScrollListener = true;
         inst.element[0].addEventListener("scroll", onUpdateScrollHandler);
     }
@@ -3293,12 +3309,12 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         }
         if (hasScrollListener) {
             result.removeScrollListener();
-            hasScrollListener = true;
+            hasScrollListener = false;
         }
         result.removeTouchEvents();
     }
     function onAfterReset() {
-        if (hasScrollListener) {
+        if (!hasScrollListener) {
             addScrollListener();
         }
         addTouchEvents();
@@ -3336,29 +3352,48 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     function getTouches(event) {
         return event.touches || event.originalEvent.touches;
     }
+    result.killEvent = function(event) {
+        event.preventDefault();
+        if (event.stopPropagation) event.stopPropagation();
+        if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+    };
     result.onTouchStart = function onTouchStart(event) {
         clearTimeout(scrollingIntv);
         inst.values.touchDown = true;
-        offset = startOffset = getTouches(event)[0].clientY || 0;
+        offsetY = startOffsetY = getTouches(event)[0].clientY || 0;
+        offsetX = startOffsetX = getTouches(event)[0].clientX || 0;
+        startScroll = inst.values.scroll;
+        lastDeltaY = 0;
+        lastDeltaX = 0;
         inst.dispatch(exports.datagrid.events.ON_TOUCH_DOWN, event);
     };
     result.onTouchMove = function(event) {
-        var y = getTouches(event)[0].clientY, delta = offset - y;
-        result.setScroll(result.capScrollValue(inst.values.scroll + delta));
-        speed = delta;
-        offset = y;
+        result.killEvent(event);
+        var y = getTouches(event)[0].clientY, x = getTouches(event)[0].clientX, deltaY = offsetY - y, deltaX = offsetX - x;
+        if (deltaY !== lastDeltaY) {
+            result.setScroll(result.capScrollValue(startScroll + deltaY));
+            speed = deltaY - lastDeltaY;
+            lastDeltaY = deltaY;
+            lastDeltaX = deltaX;
+        }
     };
     result.onTouchEnd = function onTouchEnd(event) {
         inst.values.touchDown = false;
         inst.dispatch(exports.datagrid.events.ON_TOUCH_UP, event);
         if (listenerData[1].enabled) {
-            if (Math.abs(startOffset - offset) < 5) {
+            if (Math.abs(lastDeltaY) < 2 && Math.abs(lastDeltaX) < 2) {
                 result.click(event);
             } else {
                 startTime = Date.now();
                 distance = speed * inst.options.scrollModel.speed;
                 result.scrollSlowDown(true);
             }
+        }
+        var sTop = inst.element[0].scrollTop;
+        if (sTop < 0 || inst.getContentHeight() < inst.getViewportHeight()) {
+            inst.element[0].scrollTop = 0;
+        } else if (sTop > inst.getContentHeight() - inst.getViewportHeight()) {
+            inst.element[0].scrollTop = inst.getContentHeight() - inst.getViewportHeight();
         }
     };
     result.scrollSlowDown = function(wait) {
@@ -3372,7 +3407,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         if (t > 0) {
             value = result.capScrollValue(inst.values.scroll + change);
             if (!wait) {
-                result.log("	scroll %s of %s", value, inst.element[0].scrollHeight);
+                //                result.log("\tscroll %s of %s", value, inst.element[0].scrollHeight);
                 inst.element[0].scrollTop = value;
             }
             scrollingIntv = setTimeout(result.scrollSlowDown, 20);
@@ -3382,12 +3417,15 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         return -c * (t /= d) * (t - 2) + b;
     };
     result.click = function(e) {
-        var target = e.target, ev;
-        if (!/(SELECT|INPUT|TEXTAREA)/i.test(target.tagName)) {
-            ev = document.createEvent("MouseEvents");
-            ev.initMouseEvent("click", true, true, e.view, 1, target.screenX, target.screenY, target.clientX, target.clientY, e.ctrlKey, e.altKey, e.shiftKey, e.metaKey, 0, null);
-            ev._constructed = true;
-            target.dispatchEvent(ev);
+        // simulate click on android. Ignore on IOS.
+        if (!exports.datagrid.isIOS || inst.options.scrollModel.simulateClick) {
+            var target = e.target, ev;
+            if (!/(SELECT|INPUT|TEXTAREA)/i.test(target.tagName)) {
+                ev = document.createEvent("MouseEvents");
+                ev.initMouseEvent("click", true, true, e.view, 1, target.screenX, target.screenY, target.clientX, target.clientY, e.ctrlKey, e.altKey, e.shiftKey, e.metaKey, 0, null);
+                ev._constructed = true;
+                target.dispatchEvent(ev);
+            }
         }
     };
     result.getScroll = function getScroll(el) {
@@ -3401,7 +3439,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
                 unwatch();
                 result.setScroll(value);
             });
-        } else if (inst.element[0].scrollHeight >= value) {
+        } else if (inst.getContentHeight() - inst.getViewportHeight() >= value) {
             inst.element[0].scrollTop = value;
         }
         inst.values.scroll = value;
@@ -3520,7 +3558,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.scrollIntoView = function scrollIntoView(itemOrIndex, immediately) {
         result.log("scrollIntoView");
-        var index = typeof itemOrIndex === "number" ? itemOrIndex : inst.getNormalizedIndex(itemOrIndex), offset = inst.getRowOffset(index), rowHeight, viewHeight, absCushion = Math.abs(inst.options.cushion);
+        var index = typeof itemOrIndex === "number" ? itemOrIndex : inst.getNormalizedIndex(itemOrIndex), offset = inst.getRowOffset(index), rowHeight, viewHeight;
         compileRowSiblings(index);
         if (offset < inst.values.scroll) {
             // it is above the view.

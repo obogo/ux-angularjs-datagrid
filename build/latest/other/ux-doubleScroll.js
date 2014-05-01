@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.6.4
+* uxDatagrid v.0.6.5
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -20,7 +20,14 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
             }), el = element[0], selector = scope.$eval(attr.uxDoubleScroll), target, targetOffset = scope.$eval(attr.targetOffset) || 0, grid, // reference to the datagrid instance
             myScroll, // iScroll for the doubleScroll.
             scrollModel, // the grid scrollModel.
-            enabled, unwatchRender, unwatchOffset, lastOffsetTop = 0, lastOffsetHeight, intv, lastY = 0, momentum = 0, gridScrollIntv;
+            enabled, unwatchRender, unwatchOffset, lastOffsetTop = 0, lastOffsetHeight, intv, lastY = 0, momentum = 0, gridScrollIntv, useIScroll = detectIScroll();
+            function detectIScroll() {
+                var addons = element[0].querySelectorAll(".datagrid")[0].attributes.getNamedItem("data-addons");
+                if (addons && addons.nodeValue.match(/iScrollAddon/)) {
+                    return true;
+                }
+                return false;
+            }
             function setup() {
                 element[0].style.overflowY = "auto";
                 element[0].style.overflowX = "hidden";
@@ -28,7 +35,7 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                 updateTarget();
                 scope.doubleScroll = result;
                 scope.$on(exports.datagrid.events.RESIZE, checkOffsetChange);
-                if (exports.datagrid.isIOS) {
+                if (useIScroll) {
                     setupIScroll();
                 } else {
                     setupNativeScroll();
@@ -65,7 +72,7 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                 scope.$on(exports.datagrid.events.ON_SCROLL_STOP, function() {
                     updateScrollModel();
                     clearInterval(gridScrollIntv);
-                    if (!grid.values.scroll) {
+                    if (grid.values.scroll <= 0) {
                         gridScrollIntv = setInterval(function() {
                             if (element[0].scrollTop > .1) {
                                 element[0].scrollTop *= .1;
@@ -165,7 +172,7 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
             }
             function enable() {
                 result.log("enable doubleScroll disable scroll");
-                if (exports.datagrid.isIOS && !enabled) {
+                if (useIScroll && !enabled) {
                     if (scrollModel && scrollModel.iScroll && (!grid.scrollHistory || !grid.scrollHistory.getCurrentScroll())) {
                         result.log("	scroll grid to 0");
                         scrollModel.iScroll.scrollTo(0, 0);
@@ -183,12 +190,12 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
             }
             function disable() {
                 result.log("disable doubleScroll enable scroll");
-                if (exports.datagrid.isIOS && enabled) {
+                if (useIScroll && enabled) {
                     myScroll.scrollTo(0, myScroll.maxScrollY);
                     myScroll.disable();
                     scrollModel.iScroll.enable();
                     scrollModel.iScroll.scrollBy(0, -1);
-                } else if (!exports.datagrid.isIOS) {
+                } else if (!useIScroll) {
                     element[0].scrollTop = element[0].scrollHeight - element[0].offsetHeight;
                 }
                 enabled = false;
@@ -261,7 +268,7 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                     target.style.height = elHeight - targetOffset + "px";
                     content[0].style.height = contentHeight + "px";
                     s.datagrid.updateHeights();
-                    if (exports.datagrid.isIOS) {
+                    if (useIScroll) {
                         myScroll.refresh();
                         if (s.datagrid.scrollHistory && !s.datagrid.scrollHistory.isComplete()) {
                             myScroll.scrollTo(0, myScroll.maxScrollY);
@@ -291,7 +298,7 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                 clearInterval(gridScrollIntv);
                 result.destroyLogger();
                 result = null;
-                if (exports.datagrid.isIOS) {
+                if (useIScroll) {
                     myScroll.destroy();
                     myScroll = null;
                 } else {

@@ -35,7 +35,7 @@ describe("doubleScroll", function () {
         element[0].scrollTop = 10;
         setTimeout(function () {
             expect(grid.values.scroll).toBe(0);
-            expect(grid.element[0].style.overflowY).toBe("hidden");
+            expect(grid.element[0].style.overflowY).toBe("auto");
             done();
         }, 100);
     });

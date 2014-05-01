@@ -5,7 +5,7 @@
  * Like Lo-Dash.
  * @param {Array\Object} list
  * @param {Function} method
- * @param {..rest} data _additional arguments passes are available in the iteration function_
+ * @param {*=} data _additional arguments passes are available in the iteration function_
  * @returns {*}
  */
 //_example:_

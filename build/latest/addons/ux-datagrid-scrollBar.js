@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.6.4
+* uxDatagrid v.0.6.5
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -33,8 +33,7 @@ angular.module("ux").factory("scrollBar", function() {
                 transform: "-webkit-transform"
             };
             scrollBarElm.style.height = data.height + "px";
-            //           scrollBarElm.style.top = data.top + 'px';
-            scrollBarElm.style[vendor.transform] = "translate(0px, " + data.top + "px) translateZ(0px)";
+            scrollBarElm.style.top = data.top + "px";
         }
         function onScrollStart(event, val) {
             scrollBarElm.classList.add("scrolling");
@@ -52,6 +51,7 @@ angular.module("ux").factory("scrollBar", function() {
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_SCROLL_STOP, onScrollEnd));
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER, updateScrollBar));
         result.destroy = function() {
+            scrollBarElm.remove();
             scrollBarElm = null;
             data = null;
             inst = null;

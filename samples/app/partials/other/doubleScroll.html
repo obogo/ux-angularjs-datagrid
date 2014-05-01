@@ -13,13 +13,8 @@
         </div>
         <div style="background-color:#cecece;width:100%;height:20px;">Offset used to not include this header.</div>
         <div class="listA" style="position: relative;">
-            <!--// This is the background loader //-->
-            <div class="spinningSquares">
-                <div data-ng-repeat="num in [1, 2, 3, 4, 5, 6, 7, 8]"
-                     class="spinningSquaresG spinningSquares_{{num}}"></div>
-            </div>
             <!--// this is the datagrid //-->
-            <div data-ux-datagrid="items" class="datagrid" data-addons="iScrollAddon">
+            <div data-ux-datagrid="items" class="datagrid" data-addons="scrollBar" data-options="{scrollModel:{manual:true}}">
                 <script type="template/html" data-template-name="default" data-template-item="item">
                     <div class="row {{fake}}">
                         <div class="text">{{item.id}} {{$id}} {{counter}} {{outerScrollTop}} {{innerScrollTop}}</div>

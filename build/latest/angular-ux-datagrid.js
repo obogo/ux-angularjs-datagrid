@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.6.5
+* uxDatagrid v.0.6.6
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -1225,7 +1225,7 @@ function Datagrid(scope, element, attr, $compile) {
             } else {
                 newTpl = inst.templateModel.getTemplate(newItem);
             }
-            inst.data[index] = newItem;
+            inst.normalizeModel.replace(newItem, index);
             if (oldTpl !== newTpl) {
                 inst.templateModel.setTemplate(index, newTpl);
             } else {
@@ -1619,7 +1619,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @returns {{startIndex: number, i: number, inc: number, end: number, visibleScrollStart: number, visibleScrollEnd: number}}
      */
     function getStartingIndex() {
-        if (inst.chunkModel.getChunkList() && inst.chunkModel.getChunkList().height - inst.getViewportHeight() < values.scroll) {
+        if (values.dirty && inst.chunkModel.getChunkList() && inst.chunkModel.getChunkList().height - inst.getViewportHeight() < values.scroll) {
             // We are trying to start the scroll off at a height that is taller than we have in the list.
             // reset scroll to 0.
             inst.info("Scroll reset because either there is no data or the scroll is taller than there is scroll area");
@@ -3226,6 +3226,28 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
             }
         }
         return -1;
+    };
+    /**
+     * ###<a name="replace">replace</a>###
+     * Replace at the index, the newItem.
+     * @param item
+     * @param index
+     */
+    result.replace = function(item, index) {
+        // first get the original item index.
+        var indexes = inst.getOriginalIndexOfItem(normalizedData[index]), origItem, list = originalData, lastIndex;
+        while (indexes.length) {
+            lastIndex = indexes.shift();
+            origItem = list[lastIndex];
+            if (!indexes.length) {
+                list[lastIndex] = item;
+                break;
+            }
+            if (inst.grouped) {
+                list = origItem[inst.grouped];
+            }
+        }
+        normalizedData[index] = item;
     };
     /**
      * ###<a name="destroy">destroy</a>###

@@ -120,6 +120,32 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
     };
 
     /**
+     * ###<a name="replace">replace</a>###
+     * Replace at the index, the newItem.
+     * @param item
+     * @param index
+     */
+    result.replace = function (item, index) {
+        // first get the original item index.
+        var indexes = inst.getOriginalIndexOfItem(normalizedData[index]),
+            origItem,
+            list = originalData,
+            lastIndex;
+        while (indexes.length) {
+            lastIndex = indexes.shift();
+            origItem = list[lastIndex];
+            if (!indexes.length) {
+                list[lastIndex] = item;
+                break;
+            }
+            if (inst.grouped) {
+                list = origItem[inst.grouped];
+            }
+        }
+        normalizedData[index] = item;
+    };
+
+    /**
      * ###<a name="destroy">destroy</a>###
      * Make sure all variables are cleaned up.
      */

@@ -4,17 +4,17 @@ angular.module('ux').factory('memoryOptimizer', function () {
        inst.options.memoryOptimizer = inst.options.memoryOptimizer || {};
        var result = exports.logWrapper('memoryOptimizer', {}, 'redOrange', inst.dispatch),
            defaultOptions = {
-               range: 200
+               range: inst.options.creepLimit * 2 || 200
            },
            options = inst.options.memoryOptimizer = exports.extend(defaultOptions, inst.options.memoryOptimizer);
 
        /**
         * ###<a name="disableCreep">disableCreep</a>###
-        * Since this will fight against creep render creepRender will be disabled if this module is included.
+        * Since this will fight against creep render creepRender if the values are not in range values will
+        * be factored to remain in range.
         */
        function disableCreep() {
            inst.options.creepRender = inst.options.creepRender || {};
-//           inst.options.creepRender.enable = false;
            if (inst.options.creepLimit > options.range * 0.5) {
                inst.options.creepLimit = options.range * 0.5;
            }

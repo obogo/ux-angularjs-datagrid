@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.5.2
+* uxDatagrid v.1.0.0
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -13,7 +13,7 @@ exports.datagrid.events.TOGGLE_GROUP = "datagrid:toggleGroup";
 
 angular.module("ux").factory("collapsibleGroups", function() {
     return function(inst) {
-        var result = exports.logWrapper("collapsibleGroups", {}, "orange", inst.dispatch), lastIndex = 0, collapsed = {}, superGetTemplateHeight = inst.templateModel.getTemplateHeight, states = {
+        var result = exports.logWrapper("collapsibleGroups", {}, "orange", inst.dispatch), lastIndex = 0, regroup = [], collapsed = {}, superGetTemplateHeight = inst.templateModel.getTemplateHeight, states = {
             COLLAPSE: "collapse",
             EXPAND: "expand"
         };
@@ -40,9 +40,6 @@ angular.module("ux").factory("collapsibleGroups", function() {
                 } else {
                     changed = expand(rowIndex + i + 1);
                 }
-                //               if (changed) {
-                //                   inst.chunkModel.updateAllChunkHeights(rowIndex);
-                //               }
                 changed = false;
                 i += 1;
             }
@@ -101,6 +98,24 @@ angular.module("ux").factory("collapsibleGroups", function() {
         }));
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.TOGGLE_GROUP, function(event, index) {
             result.toggle(index);
+        }));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, function(event) {
+            // build up list of collapsed groups that we can re-collapse after data is rendered in.
+            var item, i, prev;
+            regroup.length = 0;
+            for (i in collapsed) {
+                if (collapsed.hasOwnProperty(i)) {
+                    item = collapsed[i];
+                    prev = inst.getRowItem(i - 1);
+                    if (prev && prev[inst.grouped]) {
+                        regroup.push(i - 1);
+                    }
+                }
+            }
+            collapsed = {};
+        }));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, function(event) {
+            exports.each(regroup, result.collapse);
         }));
         inst.collapsibleGroups = result;
         return inst;

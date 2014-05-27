@@ -282,8 +282,17 @@
       <div class="heading h2">
         <a href="#computedstyles">computedStyles</a>
       </div>
+      <div class="heading h2">
+        <a href="#checkallcompiled">checkAllCompiled</a>
+      </div>
+      <div class="heading h2">
+        <a href="#iscompiled">isCompiled</a>
+      </div>
       <div class="heading h3">
         <a href="#reset">reset</a>
+      </div>
+      <div class="heading h2">
+        <a href="#disablenonvisiblechunks">disableNonVisibleChunks</a>
       </div>
       <div class="heading h3">
         <a href="#destroy">destroy</a>
@@ -363,7 +372,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.0.6.6
+  <div class="summary"><p>uxDatagrid v.1.0.0
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -374,6 +383,7 @@ License: MIT.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">errors</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">E1000</span><span class="o">:</span> <span class="s2">&quot;Datagrid cannot have a height of 0&quot;</span><span class="p">,</span>
     <span class="nx">E1001</span><span class="o">:</span> <span class="s2">&quot;RENDER STATE INVALID. The only valid render states are those on ux.datagrid.states&quot;</span><span class="p">,</span>
     <span class="nx">E1002</span><span class="o">:</span> <span class="s2">&quot;Unable to render. Invalid activeRange.&quot;</span><span class="p">,</span>
     <span class="nx">E1101</span><span class="o">:</span> <span class="s2">&quot;Script templates that are used for datagrid rows must have a height greater than 0. This may be because the grid is not yet attached to the dom preventing it from calculating heights.&quot;</span><span class="p">,</span>
@@ -1662,6 +1672,14 @@ Like Lo-Dash.</p>
             <span class="p">}</span>
             <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
         <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">list</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">while</span> <span class="p">(</span><span class="nx">list</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nx">result</span> <span class="o">=</span> <span class="nx">method</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="p">[</span> <span class="nx">list</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">list</span> <span class="p">].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">extraArgs</span><span class="p">));</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">result</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
     <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="nx">list</span> <span class="k">instanceof</span> <span class="nb">Array</span><span class="p">))</span> <span class="p">{</span>
         <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="k">in</span> <span class="nx">list</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">list</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span> <span class="p">{</span>
@@ -1986,13 +2004,17 @@ return</span>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-<span class="nx">exports</span><span class="p">.</span><span class="nx">extend</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">destination</span><span class="p">,</span> <span class="nx">source</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">function</span> <span class="nx">extend</span><span class="p">(</span><span class="nx">destination</span><span class="p">,</span> <span class="nx">source</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">array</span><span class="p">.</span><span class="nx">toArray</span><span class="p">(</span><span class="nx">arguments</span><span class="p">),</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">j</span><span class="p">;</span>
     <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">item</span> <span class="o">=</span> <span class="nx">args</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
         <span class="k">for</span> <span class="p">(</span><span class="nx">j</span> <span class="k">in</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">destination</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span> <span class="nx">destination</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">===</span> <span class="s2">&quot;object&quot;</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">destination</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">destination</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">item</span><span class="p">[</span><span class="nx">j</span><span class="p">]);</span>
+                <span class="nx">destination</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">=</span> <span class="nx">extend</span><span class="p">(</span><span class="nx">destination</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">item</span><span class="p">[</span><span class="nx">j</span><span class="p">]);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">item</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="k">instanceof</span> <span class="nb">Array</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">destination</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">=</span> <span class="nx">extend</span><span class="p">([],</span> <span class="nx">item</span><span class="p">[</span><span class="nx">j</span><span class="p">]);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">item</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span> <span class="nx">item</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">===</span> <span class="s2">&quot;object&quot;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">destination</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">=</span> <span class="nx">extend</span><span class="p">({},</span> <span class="nx">item</span><span class="p">[</span><span class="nx">j</span><span class="p">]);</span>
             <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
                 <span class="nx">destination</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">=</span> <span class="nx">item</span><span class="p">[</span><span class="nx">j</span><span class="p">];</span>
             <span class="p">}</span>
@@ -2000,7 +2022,22 @@ return</span>
         <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="nx">destination</span><span class="p">;</span>
-<span class="p">};</span>
+<span class="p">}</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">extend</span> <span class="o">=</span> <span class="nx">extend</span><span class="p">;</span>
+
+<span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">exports</span><span class="p">.</span><span class="nx">uid</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">UID</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">c</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">str</span> <span class="o">=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="mi">36</span><span class="p">).</span><span class="nx">toUpperCase</span><span class="p">();</span>
+        <span class="k">while</span> <span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">length</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">str</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span> <span class="o">+</span> <span class="nx">str</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nx">str</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">})();</span>
 
 
 </pre></div>
@@ -2790,6 +2827,7 @@ attribute.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">setupExports</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">uid</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">uid</span><span class="p">();</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$eval</span><span class="p">(</span><span class="nx">attr</span><span class="p">.</span><span class="nx">gridName</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;datagrid&quot;</span><span class="p">;</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">;</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span> <span class="o">=</span> <span class="nx">element</span><span class="p">;</span>
@@ -4086,6 +4124,22 @@ while this is not recommended by angular it is effective.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">safeDigest</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-142" id="section-142">&#182;</a>
+</div>
+
+<div class="highlight"><pre><code>   <span class="n">s</span><span class="p">.</span><span class="err">$</span><span class="n">evalAsync</span><span class="p">();</span><span class="c1">// this sometimes takes too long so I see {{}} brackets briefly.</span>
+</code></pre></div>
+
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">var</span> <span class="nx">ds</span> <span class="o">=</span> <span class="nx">s</span><span class="p">;</span>
         <span class="k">while</span> <span class="p">(</span><span class="nx">ds</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">ds</span><span class="p">.</span><span class="nx">$$phase</span><span class="p">)</span> <span class="p">{</span>
@@ -4228,7 +4282,7 @@ so that event listeners have them back for broadcast events.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-145" id="section-145">&#182;</a>
+  <a class="pilcrow" href="#section-146" id="section-146">&#182;</a>
 </div>
 <p>console.log("%c%s.$$listenerCount[%s] %s + %s = %s", "color:#009900", s.$id, eventName, s.$$listenerCount[eventName], listenerCounts[eventName], s.$$listenerCount[eventName] + listenerCounts[eventName]);</p>
         </td>
@@ -4363,7 +4417,7 @@ over a scope that is deactivated. It becomes completely hidden from the digest.<
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-149" id="section-149">&#182;</a>
+  <a class="pilcrow" href="#section-150" id="section-150">&#182;</a>
 </div>
 <p>if the scope is not created yet. just skip.</p>
         </td>
@@ -4376,7 +4430,7 @@ over a scope that is deactivated. It becomes completely hidden from the digest.<
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-150" id="section-150">&#182;</a>
+  <a class="pilcrow" href="#section-151" id="section-151">&#182;</a>
 </div>
 <p>do not deactivate one that is already deactivated.</p>
         </td>
@@ -4394,7 +4448,7 @@ over a scope that is deactivated. It becomes completely hidden from the digest.<
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-151" id="section-151">&#182;</a>
+  <a class="pilcrow" href="#section-152" id="section-152">&#182;</a>
 </div>
 <p>only do this on the first depth so we do not recursively reset counts.</p>
         </td>
@@ -4410,7 +4464,7 @@ over a scope that is deactivated. It becomes completely hidden from the digest.<
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-152" id="section-152">&#182;</a>
+  <a class="pilcrow" href="#section-153" id="section-153">&#182;</a>
 </div>
 <p>RECURSIVE deactivate/activate memory tests show that it doesn't improve anything. So unless there is a good reason leave
 this code commented out, because it does affect performance. It adds 30% to destroy time and time to rendering.
@@ -4475,7 +4529,7 @@ to fully make sure the scope is as if it was before it was deactivated.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-154" id="section-154">&#182;</a>
+  <a class="pilcrow" href="#section-155" id="section-155">&#182;</a>
 </div>
 <p>do not activate one that is already active.</p>
         </td>
@@ -4493,7 +4547,7 @@ to fully make sure the scope is as if it was before it was deactivated.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-155" id="section-155">&#182;</a>
+  <a class="pilcrow" href="#section-156" id="section-156">&#182;</a>
 </div>
 <p>recursively go through children and activate them.
            if (s.$$childHead) {
@@ -4582,7 +4636,7 @@ to fully make sure the scope is as if it was before it was deactivated.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-158" id="section-158">&#182;</a>
+  <a class="pilcrow" href="#section-159" id="section-159">&#182;</a>
 </div>
 <p>updateHeightValues must be called before this.</p>
         </td>
@@ -4639,7 +4693,7 @@ of the start area. So we never have to loop the whole thing.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-160" id="section-160">&#182;</a>
+  <a class="pilcrow" href="#section-161" id="section-161">&#182;</a>
 </div>
 <p>We are trying to start the scroll off at a height that is taller than we have in the list.
 reset scroll to 0.</p>
@@ -4692,7 +4746,7 @@ reset scroll to 0.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-162" id="section-162">&#182;</a>
+  <a class="pilcrow" href="#section-163" id="section-163">&#182;</a>
 </div>
 <p>TODO: this is going to be updated to use ChunkArray data to be faster.</p>
         </td>
@@ -4741,7 +4795,7 @@ deactivates any scopes that were active before that are not still active.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-164" id="section-164">&#182;</a>
+  <a class="pilcrow" href="#section-165" id="section-165">&#182;</a>
 </div>
 <p>then scroll is negative. ignore it.</p>
         </td>
@@ -4756,7 +4810,7 @@ deactivates any scopes that were active before that are not still active.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-165" id="section-165">&#182;</a>
+  <a class="pilcrow" href="#section-166" id="section-166">&#182;</a>
 </div>
 <p>we only want to update stuff if we are scrolling slow.</p>
         </td>
@@ -4769,7 +4823,7 @@ deactivates any scopes that were active before that are not still active.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-166" id="section-166">&#182;</a>
+  <a class="pilcrow" href="#section-167" id="section-167">&#182;</a>
 </div>
 <p>this needs to always be set after the dispatch of before update watchers in case they need the before activeRange.</p>
         </td>
@@ -4782,7 +4836,7 @@ deactivates any scopes that were active before that are not still active.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-167" id="section-167">&#182;</a>
+  <a class="pilcrow" href="#section-168" id="section-168">&#182;</a>
 </div>
 <p>make sure not to reset until after getStartingIndex.</p>
         </td>
@@ -4798,7 +4852,7 @@ deactivates any scopes that were active before that are not still active.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-168" id="section-168">&#182;</a>
+  <a class="pilcrow" href="#section-169" id="section-169">&#182;</a>
 </div>
 <p>this is where the chunks and rows get created is when they are requested if they don't exist.</p>
         </td>
@@ -4812,7 +4866,7 @@ deactivates any scopes that were active before that are not still active.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-169" id="section-169">&#182;</a>
+  <a class="pilcrow" href="#section-170" id="section-170">&#182;</a>
 </div>
 <p>only compiles if it is not already compiled. Still returns the scope.</p>
         </td>
@@ -4834,7 +4888,7 @@ deactivates any scopes that were active before that are not still active.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-170" id="section-170">&#182;</a>
+  <a class="pilcrow" href="#section-171" id="section-171">&#182;</a>
 </div>
 <p>make sure to put them into active in the right order.</p>
         </td>
@@ -4852,7 +4906,7 @@ deactivates any scopes that were active before that are not still active.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-171" id="section-171">&#182;</a>
+  <a class="pilcrow" href="#section-172" id="section-172">&#182;</a>
 </div>
 <p>optimize the loop</p>
         </td>
@@ -4877,7 +4931,7 @@ deactivates any scopes that were active before that are not still active.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-172" id="section-172">&#182;</a>
+  <a class="pilcrow" href="#section-173" id="section-173">&#182;</a>
 </div>
 <p>update the $$childHead and $$nextSibling values to keep digest loops at a minimum count.
 this dispatch needs to be after the digest so that it doesn't cause {} to show up in the render.</p>
@@ -5104,7 +5158,7 @@ frame to check the height. If that fails it exits.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-180" id="section-180">&#182;</a>
+  <a class="pilcrow" href="#section-181" id="section-181">&#182;</a>
 </div>
 <p>have it wait a moment for the height to change.</p>
         </td>
@@ -5155,7 +5209,7 @@ digest <a href="#activeRange">activeRange</a> of rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-182" id="section-182">&#182;</a>
+  <a class="pilcrow" href="#section-183" id="section-183">&#182;</a>
 </div>
 <p>Where <a href="#states.BUILDING">states.BUILDING</a> is used</p>
         </td>
@@ -5173,7 +5227,7 @@ digest <a href="#activeRange">activeRange</a> of rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-183" id="section-183">&#182;</a>
+  <a class="pilcrow" href="#section-184" id="section-184">&#182;</a>
 </div>
 <p>this wait allows rows to finish calculating their heights and finish the digest before firing.</p>
         </td>
@@ -5186,7 +5240,7 @@ digest <a href="#activeRange">activeRange</a> of rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-184" id="section-184">&#182;</a>
+  <a class="pilcrow" href="#section-185" id="section-185">&#182;</a>
 </div>
 
 <div class="highlight"><pre><code>           <span class="n">flow</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">destroyOldContent</span><span class="p">);</span>
@@ -5272,7 +5326,7 @@ have changed. Than just update the scopes and run the watchers instead of doing 
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-187" id="section-187">&#182;</a>
+  <a class="pilcrow" href="#section-188" id="section-188">&#182;</a>
 </div>
 <p>TODO: this needs unit tested.</p>
         </td>
@@ -5434,7 +5488,7 @@ have changed. Than just update the scopes and run the watchers instead of doing 
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-192" id="section-192">&#182;</a>
+  <a class="pilcrow" href="#section-193" id="section-193">&#182;</a>
 </div>
 <p>we just want to update the data values and scope values, because no tempaltes changed.</p>
         </td>
@@ -5483,7 +5537,7 @@ have changed. Than just update the scopes and run the watchers instead of doing 
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-194" id="section-194">&#182;</a>
+  <a class="pilcrow" href="#section-195" id="section-195">&#182;</a>
 </div>
 <p>we are going to clear all in the flow before doing a reset.
        state = states.BUILDING;</p>
@@ -5497,7 +5551,7 @@ have changed. Than just update the scopes and run the watchers instead of doing 
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-195" id="section-195">&#182;</a>
+  <a class="pilcrow" href="#section-196" id="section-196">&#182;</a>
 </div>
 <p>now destroy all of the dom.</p>
         </td>
@@ -5512,7 +5566,7 @@ have changed. Than just update the scopes and run the watchers instead of doing 
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-196" id="section-196">&#182;</a>
+  <a class="pilcrow" href="#section-197" id="section-197">&#182;</a>
 </div>
 <p>keep reference to the old content and add a class to it so we can tell it is old. We will remove it after the render.</p>
         </td>
@@ -5526,7 +5580,7 @@ have changed. Than just update the scopes and run the watchers instead of doing 
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-197" id="section-197">&#182;</a>
+  <a class="pilcrow" href="#section-198" id="section-198">&#182;</a>
 </div>
 <p>make sure scopes are destroyed before this level and listeners as well or this will create a memory leak.</p>
         </td>
@@ -5581,7 +5635,7 @@ the <a href="#values.activeRange">activeRange</a></p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-199" id="section-199">&#182;</a>
+  <a class="pilcrow" href="#section-200" id="section-200">&#182;</a>
 </div>
 
 <div class="highlight"><pre><code>   <span class="n">inst</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">forceRenderScope %s&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">);</span>
@@ -5777,7 +5831,7 @@ If a rowIndex is specified, only update ones affected by that row, otherwise upd
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-204" id="section-204">&#182;</a>
+  <a class="pilcrow" href="#section-205" id="section-205">&#182;</a>
 </div>
 <p>THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.</p>
         </td>
@@ -5792,7 +5846,7 @@ If a rowIndex is specified, only update ones affected by that row, otherwise upd
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-205" id="section-205">&#182;</a>
+  <a class="pilcrow" href="#section-206" id="section-206">&#182;</a>
 </div>
 <p>concept is to crate a large object that will cause the browser to garbage collect before creating it.
 then since it has no reference it gets removed.</p>
@@ -5841,7 +5895,7 @@ then since it has no reference it gets removed.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-207" id="section-207">&#182;</a>
+  <a class="pilcrow" href="#section-208" id="section-208">&#182;</a>
 </div>
 <p>because child scopes may not be in order because of rendering techniques. We must loop through
 all scopes and destroy them manually.</p>
@@ -5856,7 +5910,7 @@ all scopes and destroy them manually.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-208" id="section-208">&#182;</a>
+  <a class="pilcrow" href="#section-209" id="section-209">&#182;</a>
 </div>
 <p>listeners should be destroyed with the angular destroy.</p>
         </td>
@@ -5910,7 +5964,7 @@ all scopes and destroy them manually.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-210" id="section-210">&#182;</a>
+  <a class="pilcrow" href="#section-211" id="section-211">&#182;</a>
 </div>
 <p>we have a circular reference. break it on destroy.</p>
         </td>
@@ -5925,7 +5979,7 @@ all scopes and destroy them manually.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-211" id="section-211">&#182;</a>
+  <a class="pilcrow" href="#section-212" id="section-212">&#182;</a>
 </div>
 <p>destroy flow.</p>
         </td>
@@ -5940,7 +5994,7 @@ all scopes and destroy them manually.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-212" id="section-212">&#182;</a>
+  <a class="pilcrow" href="#section-213" id="section-213">&#182;</a>
 </div>
 <p>destroy watchers.</p>
         </td>
@@ -5956,7 +6010,7 @@ all scopes and destroy them manually.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-213" id="section-213">&#182;</a>
+  <a class="pilcrow" href="#section-214" id="section-214">&#182;</a>
 </div>
 <p>now remove every property on exports.</p>
         </td>
@@ -5974,7 +6028,7 @@ all scopes and destroy them manually.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-214" id="section-214">&#182;</a>
+  <a class="pilcrow" href="#section-215" id="section-215">&#182;</a>
 </div>
 <p>activate scopes so they can be destroyed by angular.</p>
         </td>
@@ -5988,7 +6042,7 @@ all scopes and destroy them manually.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-215" id="section-215">&#182;</a>
+  <a class="pilcrow" href="#section-216" id="section-216">&#182;</a>
 </div>
 <p>this seems to be the most memory efficient way to remove elements.</p>
         </td>
@@ -6103,7 +6157,7 @@ all of them, but just those direct siblings and then it's parents siblings and s
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-218" id="section-218">&#182;</a>
+  <a class="pilcrow" href="#section-219" id="section-219">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p><strong>getChunkList</strong>
@@ -6126,7 +6180,7 @@ Return the list that was created.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-219" id="section-219">&#182;</a>
+  <a class="pilcrow" href="#section-220" id="section-220">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Create a ChunkArray from the array of data that is passed.
@@ -6235,7 +6289,7 @@ dimensional array.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-221" id="section-221">&#182;</a>
+  <a class="pilcrow" href="#section-222" id="section-222">&#182;</a>
 </div>
 <p>TODO: unit test needed.
 detach dom must enter here, because it is absolute positioned so it will not push down
@@ -6305,7 +6359,7 @@ the other chunks automatically like relative positioning will.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-223" id="section-223">&#182;</a>
+  <a class="pilcrow" href="#section-224" id="section-224">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Create the chunkList so that it is ready for dom. Set properties needed to create the dom.
@@ -6359,7 +6413,7 @@ The dom gets created when the rows are accessed.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-224" id="section-224">&#182;</a>
+  <a class="pilcrow" href="#section-225" id="section-225">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Generate an array of indexes that point to that row.</p>
@@ -6400,7 +6454,7 @@ The dom gets created when the rows are accessed.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-225" id="section-225">&#182;</a>
+  <a class="pilcrow" href="#section-226" id="section-226">&#182;</a>
 </div>
 <p>we are at the end. So we just need the last index.</p>
         </td>
@@ -6419,7 +6473,7 @@ The dom gets created when the rows are accessed.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-226" id="section-226">&#182;</a>
+  <a class="pilcrow" href="#section-227" id="section-227">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Get the dom row element.</p>
@@ -6517,7 +6571,7 @@ buildDomByIndexes that is called from getRow.</p>
         <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">indxs</span> <span class="o">=</span> <span class="nx">indexes</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nx">ca</span> <span class="o">=</span> <span class="nx">_list</span><span class="p">,</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">_el</span><span class="p">;</span>
         <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">indxs</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">index</span> <span class="o">=</span> <span class="nx">indxs</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
-            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">ca</span><span class="p">.</span><span class="nx">rendered</span> <span class="o">&amp;&amp;</span> <span class="nx">unrendered</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">ca</span><span class="p">.</span><span class="nx">rendered</span> <span class="o">&amp;&amp;</span> <span class="nx">unrendered</span> <span class="o">||</span> <span class="nx">shouldRecompileDecompiledRows</span><span class="p">(</span><span class="nx">ca</span><span class="p">))</span> <span class="p">{</span>
                 <span class="nx">unrendered</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">ca</span><span class="p">);</span>
                 <span class="nx">updateDom</span><span class="p">(</span><span class="nx">ca</span><span class="p">);</span>
             <span class="p">}</span>
@@ -6528,6 +6582,13 @@ buildDomByIndexes that is called from getRow.</p>
             <span class="nx">el</span> <span class="o">=</span> <span class="nx">ca</span><span class="p">.</span><span class="nx">rendered</span> <span class="o">||</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">el</span><span class="p">.</span><span class="nx">children</span><span class="p">()[</span><span class="nx">index</span><span class="p">]);</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="nx">el</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">shouldRecompileDecompiledRows</span><span class="p">(</span><span class="nx">ca</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">recompile</span> <span class="o">=</span> <span class="o">!</span><span class="nx">ca</span><span class="p">.</span><span class="nx">hasChildChunks</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="nx">ca</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">ca</span><span class="p">.</span><span class="nx">rendered</span> <span class="o">&amp;&amp;</span> <span class="nx">ca</span><span class="p">.</span><span class="nx">rendered</span><span class="p">.</span><span class="nx">children</span><span class="p">().</span><span class="nx">length</span> <span class="o">!==</span> <span class="nx">ca</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">recompile</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;recompile chunk %s&quot;</span><span class="p">,</span> <span class="nx">ca</span><span class="p">.</span><span class="nx">getId</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nx">recompile</span><span class="p">;</span>
     <span class="p">}</span>
 
 </pre></div>
@@ -6577,7 +6638,7 @@ dom from html strings.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-230" id="section-230">&#182;</a>
+  <a class="pilcrow" href="#section-231" id="section-231">&#182;</a>
 </div>
 <p>assign the dom element.</p>
         </td>
@@ -6601,7 +6662,7 @@ dom from html strings.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-231" id="section-231">&#182;</a>
+  <a class="pilcrow" href="#section-232" id="section-232">&#182;</a>
 </div>
 <p>need to calculate css styles before adding this class to make transitions work.</p>
         </td>
@@ -6619,7 +6680,7 @@ dom from html strings.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-232" id="section-232">&#182;</a>
+  <a class="pilcrow" href="#section-233" id="section-233">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Get the domElement by indexes, create the dom if it doesn't exist.</p>
@@ -6665,8 +6726,44 @@ dom from html strings.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">computeStyles</span><span class="p">(</span><span class="nx">elm</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nb">window</span><span class="p">.</span><span class="nx">getComputedStyle</span><span class="p">(</span><span class="nx">elm</span><span class="p">).</span><span class="nx">getPropertyValue</span><span class="p">(</span><span class="s2">&quot;top&quot;</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">elm</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">style</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">getComputedStyle</span><span class="p">(</span><span class="nx">elm</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">style</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">style</span><span class="p">.</span><span class="nx">getPropertyValue</span><span class="p">(</span><span class="s2">&quot;top&quot;</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
     <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="checkallcompiled">
+  <h2>
+    <a href="#checkallcompiled" name="checkallcompiled" class="pilcrow">&#182;</a>
+    <a name="checkAllCompiled">checkAllCompiled</a>
+  </h2>
+</div>
+
+
+<p>Each ChunkArray keeps track of weather or not it's dom has been compiled. Since each
+ChunkArray generates the values and updates properties of the dom. The dom chunks are a
+reflection of the ChunkArrays.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">ca</span>
+      <span class="dox_type">ChunkArray</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">checkAllCompiled</span><span class="p">(</span><span class="nx">ca</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">ca</span><span class="p">.</span><span class="nx">compiled</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">ca</span><span class="p">.</span><span class="nx">compiled</span> <span class="o">=</span> <span class="nx">isCompiled</span><span class="p">(</span><span class="nx">ca</span><span class="p">);</span>
@@ -6679,7 +6776,7 @@ dom from html strings.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-234" id="section-234">&#182;</a>
+  <a class="pilcrow" href="#section-236" id="section-236">&#182;</a>
 </div>
 <p>a parent cannot be compiled till it's last child is done. So don't check until
 a chunk child compiles.</p>
@@ -6692,6 +6789,35 @@ a chunk child compiles.</p>
         <span class="p">}</span>
         <span class="k">return</span> <span class="nx">ca</span><span class="p">.</span><span class="nx">compiled</span><span class="p">;</span>
     <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="iscompiled">
+  <h2>
+    <a href="#iscompiled" name="iscompiled" class="pilcrow">&#182;</a>
+    <a name="isCompiled">isCompiled</a>
+  </h2>
+</div>
+
+
+<p>Validate that the chunk is compiled.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">ca</span>
+      <span class="dox_type">ChunkArray</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">isCompiled</span><span class="p">(</span><span class="nx">ca</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">min</span><span class="p">,</span> <span class="nx">max</span><span class="p">;</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">ca</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">instanceof</span> <span class="nx">ChunkArray</span><span class="p">)</span> <span class="p">{</span>
@@ -6767,7 +6893,7 @@ a chunk child compiles.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-236" id="section-236">&#182;</a>
+  <a class="pilcrow" href="#section-239" id="section-239">&#182;</a>
 </div>
 <p>TODO: this needs to make sure it destroys things properly</p>
         </td>
@@ -6780,6 +6906,28 @@ a chunk child compiles.</p>
         <span class="p">}</span>
         <span class="nx">chunkDom</span><span class="p">(</span><span class="nx">newList</span><span class="p">,</span> <span class="nx">_chunkSize</span><span class="p">,</span> <span class="nx">_templateStartCache</span><span class="p">,</span> <span class="nx">_templateEndCache</span><span class="p">,</span> <span class="nx">content</span><span class="p">);</span>
     <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="disablenonvisiblechunks">
+  <h2>
+    <a href="#disablenonvisiblechunks" name="disablenonvisiblechunks" class="pilcrow">&#182;</a>
+    <a name="disableNonVislbieChunks">disableNonVisibleChunks</a>
+  </h2>
+</div>
+
+
+<p>disable all chunks that are outside of the values.activeRange.min/max.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">disableNonVisibleChunks</span><span class="p">()</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">,</span> <span class="nx">o</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">chunks</span><span class="p">;</span>
         <span class="nx">_list</span><span class="p">.</span><span class="nx">enableRange</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">min</span><span class="p">,</span> <span class="nx">r</span><span class="p">.</span><span class="nx">max</span><span class="p">,</span> <span class="nx">o</span><span class="p">.</span><span class="nx">chunkDisabledClass</span><span class="p">);</span>
@@ -6791,7 +6939,7 @@ a chunk child compiles.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-237" id="section-237">&#182;</a>
+  <a class="pilcrow" href="#section-241" id="section-241">&#182;</a>
 </div>
 <p>we need to update which chunks are compiled.</p>
         </td>
@@ -6855,7 +7003,7 @@ a chunk child compiles.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-239" id="section-239">&#182;</a>
+  <a class="pilcrow" href="#section-243" id="section-243">&#182;</a>
 </div>
 <p>apply event dispatching.</p>
         </td>
@@ -7061,7 +7209,7 @@ If deep then return this and all children down.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-243" id="section-243">&#182;</a>
+  <a class="pilcrow" href="#section-247" id="section-247">&#182;</a>
 </div>
 <p>we must the first in the array. so we have to jump up higher. Or we are the first item in the first chunk.</p>
         </td>
@@ -7090,7 +7238,7 @@ If deep then return this and all children down.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-244" id="section-244">&#182;</a>
+  <a class="pilcrow" href="#section-248" id="section-248">&#182;</a>
 </div>
 <p>we must be at the end of the array. So we need to jump up higher. Or we could be at the very end.</p>
         </td>
@@ -7202,7 +7350,7 @@ If deep then return this and all children down.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-247" id="section-247">&#182;</a>
+  <a class="pilcrow" href="#section-251" id="section-251">&#182;</a>
 </div>
 <p>we need to update all siblings if we change.</p>
         </td>
@@ -7290,7 +7438,7 @@ If deep then return this and all children down.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-250" id="section-250">&#182;</a>
+  <a class="pilcrow" href="#section-254" id="section-254">&#182;</a>
 </div>
 <p>keep the last index so if it changes. We change the id.</p>
         </td>
@@ -7370,7 +7518,7 @@ If deep then return this and all children down.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-251" id="section-251">&#182;</a>
+  <a class="pilcrow" href="#section-255" id="section-255">&#182;</a>
 </div>
 <p>jquery detach is just 2nd param pass true to keep data around.</p>
         </td>
@@ -7432,7 +7580,7 @@ If deep then return this and all children down.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-252" id="section-252">&#182;</a>
+  <a class="pilcrow" href="#section-256" id="section-256">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Return an array of the children created from the rendered properties of the children.</p>
@@ -7451,7 +7599,7 @@ If deep then return this and all children down.</p>
 
 <span class="nx">ChunkArray</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">decompile</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">chunkReadyClass</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">hasChildChunks</span><span class="p">())</span> <span class="p">{</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="s2">&quot;decompile&quot;</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="s2">&quot;decompile&quot;</span><span class="p">,</span> <span class="p">[</span> <span class="nx">chunkReadyClass</span> <span class="p">]);</span>
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 
 </pre></div>
@@ -7460,7 +7608,7 @@ If deep then return this and all children down.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-253" id="section-253">&#182;</a>
+  <a class="pilcrow" href="#section-257" id="section-257">&#182;</a>
 </div>
 <p>we are going to remove all dom rows to free up memory.
 this can only be done if the chunk has no rows for children instead of chunks.</p>
@@ -7469,7 +7617,6 @@ this can only be done if the chunk has no rows for children instead of chunks.</
         <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">rendered</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">this</span><span class="p">.</span><span class="nx">rendered</span><span class="p">.</span><span class="nx">children</span><span class="p">().</span><span class="nx">remove</span><span class="p">();</span>
             <span class="k">this</span><span class="p">.</span><span class="nx">rendered</span><span class="p">.</span><span class="nx">removeClass</span><span class="p">(</span><span class="nx">chunkReadyClass</span><span class="p">);</span>
-            <span class="k">this</span><span class="p">.</span><span class="nx">rendered</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">};</span>
@@ -7532,7 +7679,7 @@ this can only be done if the chunk has no rows for children instead of chunks.</
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-255" id="section-255">&#182;</a>
+  <a class="pilcrow" href="#section-259" id="section-259">&#182;</a>
 </div>
 <p>just skip if already digested.</p>
         </td>
@@ -7664,7 +7811,7 @@ this can only be done if the chunk has no rows for children instead of chunks.</
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-256" id="section-256">&#182;</a>
+  <a class="pilcrow" href="#section-260" id="section-260">&#182;</a>
 </div>
 <p>allow external stop of creep render.</p>
         </td>
@@ -7693,6 +7840,7 @@ this can only be done if the chunk has no rows for children instead of chunks.</
     <span class="p">};</span>
     <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">DISABLE_CREEP</span><span class="p">,</span> <span class="nx">model</span><span class="p">.</span><span class="nx">disable</span><span class="p">));</span>
     <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_RESET</span><span class="p">,</span> <span class="nx">onBeforeReset</span><span class="p">));</span>
+    <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">STOP_CREEP</span><span class="p">,</span> <span class="nx">stop</span><span class="p">));</span>
     <span class="nx">inst</span><span class="p">.</span><span class="nx">creepRenderModel</span> <span class="o">=</span> <span class="nx">model</span><span class="p">;</span>
 
 </pre></div>
@@ -7701,7 +7849,7 @@ this can only be done if the chunk has no rows for children instead of chunks.</
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-257" id="section-257">&#182;</a>
+  <a class="pilcrow" href="#section-261" id="section-261">&#182;</a>
 </div>
 <p>do not add listeners if it is not enabled.</p>
         </td>
@@ -7724,7 +7872,7 @@ this can only be done if the chunk has no rows for children instead of chunks.</
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-258" id="section-258">&#182;</a>
+  <a class="pilcrow" href="#section-262" id="section-262">&#182;</a>
 </div>
 <p>TODO: this needs to be put on exp.normalizedModel</p>
         </td>
@@ -8056,7 +8204,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-267" id="section-267">&#182;</a>
+  <a class="pilcrow" href="#section-271" id="section-271">&#182;</a>
 </div>
 <p>first get the original item index.</p>
         </td>
@@ -8147,7 +8295,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-269" id="section-269">&#182;</a>
+  <a class="pilcrow" href="#section-273" id="section-273">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Listen for scrollingEvents.</p>
@@ -8294,7 +8442,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-270" id="section-270">&#182;</a>
+  <a class="pilcrow" href="#section-274" id="section-274">&#182;</a>
 </div>
 
 <div class="highlight"><pre><code>           <span class="n">result</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">scroll %s of %s&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">inst</span><span class="p">.</span><span class="n">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">scrollHeight</span><span class="p">);</span>
@@ -8319,12 +8467,15 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-271" id="section-271">&#182;</a>
+  <a class="pilcrow" href="#section-275" id="section-275">&#182;</a>
 </div>
 <p>simulate click on android. Ignore on IOS.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">isIOS</span> <span class="o">||</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">simulateClick</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">simulateClick</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">killEvent</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+            <span class="p">}</span>
             <span class="kd">var</span> <span class="nx">target</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">,</span> <span class="nx">ev</span><span class="p">;</span>
             <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="sr">/(SELECT|INPUT|TEXTAREA)/i</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">target</span><span class="p">.</span><span class="nx">tagName</span><span class="p">))</span> <span class="p">{</span>
                 <span class="nx">ev</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createEvent</span><span class="p">(</span><span class="s2">&quot;MouseEvents&quot;</span><span class="p">);</span>
@@ -8347,7 +8498,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-272" id="section-272">&#182;</a>
+  <a class="pilcrow" href="#section-276" id="section-276">&#182;</a>
 </div>
 <p>wait until that height is ready then scroll.</p>
         </td>
@@ -8371,7 +8522,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-273" id="section-273">&#182;</a>
+  <a class="pilcrow" href="#section-277" id="section-277">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>When a scrollEvent is fired, recalculate the values.</p>
@@ -8413,7 +8564,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-274" id="section-274">&#182;</a>
+  <a class="pilcrow" href="#section-278" id="section-278">&#182;</a>
 </div>
 <p>don't allow to scroll past the bottom.</p>
         </td>
@@ -8426,7 +8577,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-275" id="section-275">&#182;</a>
+  <a class="pilcrow" href="#section-279" id="section-279">&#182;</a>
 </div>
 <p>this will be the bottom scroll.</p>
         </td>
@@ -8443,7 +8594,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-276" id="section-276">&#182;</a>
+  <a class="pilcrow" href="#section-280" id="section-280">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Scroll to the numeric value.</p>
@@ -8487,7 +8638,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-277" id="section-277">&#182;</a>
+  <a class="pilcrow" href="#section-281" id="section-281">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Wait for the datagrid to slow down enough to render.</p>
@@ -8519,7 +8670,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-278" id="section-278">&#182;</a>
+  <a class="pilcrow" href="#section-282" id="section-282">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>When it stops render.</p>
@@ -8544,7 +8695,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-279" id="section-279">&#182;</a>
+  <a class="pilcrow" href="#section-283" id="section-283">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Scroll to the normalized index.</p>
@@ -8578,7 +8729,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-280" id="section-280">&#182;</a>
+  <a class="pilcrow" href="#section-284" id="section-284">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Scroll to an item by finding it's normalized index.</p>
@@ -8614,7 +8765,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-281" id="section-281">&#182;</a>
+  <a class="pilcrow" href="#section-285" id="section-285">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>If the item is above or below the viewable area, scroll till it is in view.</p>
@@ -8646,7 +8797,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-282" id="section-282">&#182;</a>
+  <a class="pilcrow" href="#section-286" id="section-286">&#182;</a>
 </div>
 <p>it is above the view.</p>
         </td>
@@ -8662,7 +8813,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-283" id="section-283">&#182;</a>
+  <a class="pilcrow" href="#section-287" id="section-287">&#182;</a>
 </div>
 <p>always update the height before calculating. onResize is not reliable</p>
         </td>
@@ -8677,7 +8828,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-284" id="section-284">&#182;</a>
+  <a class="pilcrow" href="#section-288" id="section-288">&#182;</a>
 </div>
 <p>it is below the view.</p>
         </td>
@@ -8706,7 +8857,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-285" id="section-285">&#182;</a>
+  <a class="pilcrow" href="#section-289" id="section-289">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Scroll to top.</p>
@@ -8734,7 +8885,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-286" id="section-286">&#182;</a>
+  <a class="pilcrow" href="#section-290" id="section-290">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Scroll to bottom.</p>
@@ -8774,7 +8925,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-287" id="section-287">&#182;</a>
+  <a class="pilcrow" href="#section-291" id="section-291">&#182;</a>
 </div>
 <div class="dox">
   <div class="summary"><p>Wait till the grid is ready before we setup our listeners.</p>
@@ -8797,7 +8948,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-288" id="section-288">&#182;</a>
+  <a class="pilcrow" href="#section-292" id="section-292">&#182;</a>
 </div>
 <p>all models should try not to pollute the main model to keep it clean.</p>
         </td>
@@ -8846,7 +8997,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-290" id="section-290">&#182;</a>
+  <a class="pilcrow" href="#section-294" id="section-294">&#182;</a>
 </div>
 <p>remove newline / carriage return</p>
         </td>
@@ -8859,7 +9010,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-291" id="section-291">&#182;</a>
+  <a class="pilcrow" href="#section-295" id="section-295">&#182;</a>
 </div>
 <p>remove whitespace (space and tabs) before tags</p>
         </td>
@@ -8872,7 +9023,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-292" id="section-292">&#182;</a>
+  <a class="pilcrow" href="#section-296" id="section-296">&#182;</a>
 </div>
 <p>remove whitespace between tags</p>
         </td>
@@ -8885,7 +9036,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-293" id="section-293">&#182;</a>
+  <a class="pilcrow" href="#section-297" id="section-297">&#182;</a>
 </div>
 <p>remove whitespace after tags</p>
         </td>
@@ -8894,7 +9045,13 @@ will all be able to represented by template rows.</p>
         <span class="k">return</span> <span class="nx">str</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">templates</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">totalHeight</span><span class="p">,</span> <span class="nx">defaultName</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;templateModel&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">templates</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">totalHeight</span><span class="p">,</span> <span class="nx">defaultName</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;templateModel&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">forcedTemplates</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">templatesKey</span><span class="p">;</span>
+        <span class="kd">function</span> <span class="nx">getTemplatesKey</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">templatesKey</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">templatesKey</span> <span class="o">=</span> <span class="s2">&quot;$$template_&quot;</span> <span class="o">+</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">uid</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">templatesKey</span><span class="p">;</span>
+        <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">createTemplates</span><span class="p">()</span> <span class="p">{</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;createTemplates&quot;</span><span class="p">);</span>
             <span class="kd">var</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">scriptTemplates</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="s2">&quot;script&quot;</span><span class="p">),</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">scriptTemplates</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
@@ -8911,7 +9068,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-294" id="section-294">&#182;</a>
+  <a class="pilcrow" href="#section-298" id="section-298">&#182;</a>
 </div>
 <p>remove the script templates.</p>
         </td>
@@ -8950,7 +9107,13 @@ will all be able to represented by template rows.</p>
             <span class="p">};</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;template: %s %o&quot;</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">templateData</span><span class="p">);</span>
             <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">templateData</span><span class="p">.</span><span class="nx">height</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">errors</span><span class="p">.</span><span class="nx">E1101</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s2">&quot;display&quot;</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">result</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;Datagrid was intialized with a display:&#39;none&#39; value. Templates are unable to calculate heights. Grid will not render correctly.&quot;</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">offsetHeight</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">errors</span><span class="p">.</span><span class="nx">E1000</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">errors</span><span class="p">.</span><span class="nx">E1101</span><span class="p">);</span>
+                <span class="p">}</span>
             <span class="p">}</span>
             <span class="nx">templates</span><span class="p">[</span><span class="nx">templateData</span><span class="p">.</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">templateData</span><span class="p">;</span>
             <span class="nx">templates</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">templateData</span><span class="p">);</span>
@@ -8963,7 +9126,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-295" id="section-295">&#182;</a>
+  <a class="pilcrow" href="#section-299" id="section-299">&#182;</a>
 </div>
 <p>reset cached value.</p>
         </td>
@@ -9017,7 +9180,8 @@ will all be able to represented by template rows.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">result</span><span class="p">.</span><span class="nx">getTemplate</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">getTemplate</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getTemplateByName</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">_template</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">tpl</span> <span class="o">=</span> <span class="nx">data</span><span class="p">[</span><span class="nx">getTemplatesKey</span><span class="p">()]</span> <span class="o">||</span> <span class="nx">data</span><span class="p">.</span><span class="nx">_template</span><span class="p">;</span>
+            <span class="k">return</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getTemplateByName</span><span class="p">(</span><span class="nx">tpl</span><span class="p">);</span>
         <span class="p">};</span>
 
 </pre></div>
@@ -9026,7 +9190,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-297" id="section-297">&#182;</a>
+  <a class="pilcrow" href="#section-301" id="section-301">&#182;</a>
 </div>
 <p>TODO: need to make this method so it can be overwritten to look up templates a different way.</p>
         </td>
@@ -9081,7 +9245,11 @@ will all be able to represented by template rows.</p>
             <span class="k">return</span> <span class="nx">height</span><span class="p">;</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">setTemplateName</span><span class="p">(</span><span class="nx">item</span><span class="p">,</span> <span class="nx">templateName</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">item</span><span class="p">.</span><span class="nx">_template</span> <span class="o">=</span> <span class="nx">templateName</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">key</span> <span class="o">=</span> <span class="nx">getTemplatesKey</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">item</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">forcedTemplates</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="o">===</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">forcedTemplates</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="nx">item</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">templateName</span><span class="p">;</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">setTemplate</span><span class="p">(</span><span class="nx">itemOrIndex</span><span class="p">,</span> <span class="nx">newTemplateName</span><span class="p">,</span> <span class="nx">classes</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setTemplate %s %s&quot;</span><span class="p">,</span> <span class="nx">itemOrIndex</span><span class="p">,</span> <span class="nx">newTemplateName</span><span class="p">);</span>
@@ -9098,7 +9266,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-298" id="section-298">&#182;</a>
+  <a class="pilcrow" href="#section-302" id="section-302">&#182;</a>
 </div>
 <p>TODO: needs unit tested.</p>
         </td>
@@ -9120,11 +9288,17 @@ will all be able to represented by template rows.</p>
                 <span class="nx">inst</span><span class="p">.</span><span class="nx">updateHeights</span><span class="p">();</span>
             <span class="p">}</span>
         <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">clearTemplate</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">delete</span> <span class="nx">item</span><span class="p">[</span><span class="nx">getTemplatesKey</span><span class="p">()];</span>
+        <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">destroy</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">forcedTemplates</span><span class="p">,</span> <span class="nx">clearTemplate</span><span class="p">);</span>
+            <span class="nx">forcedTemplates</span><span class="p">.</span><span class="nx">length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">destroyLogger</span><span class="p">();</span>
             <span class="nx">result</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
             <span class="nx">templates</span><span class="p">.</span><span class="nx">length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
             <span class="nx">templates</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">forcedTemplates</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
         <span class="p">}</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">defaultName</span> <span class="o">=</span> <span class="nx">defaultName</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">prepTemplate</span> <span class="o">=</span> <span class="nx">prepTemplate</span><span class="p">;</span>
@@ -9141,6 +9315,7 @@ will all be able to represented by template rows.</p>
         <span class="nx">result</span><span class="p">.</span><span class="nx">setTemplate</span> <span class="o">=</span> <span class="nx">setTemplate</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">setTemplateName</span> <span class="o">=</span> <span class="nx">setTemplateName</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">updateTemplateHeights</span> <span class="o">=</span> <span class="nx">updateTemplateHeights</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getTemplatesKey</span> <span class="o">=</span> <span class="nx">getTemplatesKey</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">destroy</span> <span class="o">=</span> <span class="nx">destroy</span><span class="p">;</span>
         <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
     <span class="p">}();</span>

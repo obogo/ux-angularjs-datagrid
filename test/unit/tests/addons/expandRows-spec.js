@@ -38,7 +38,7 @@ describe("expandRows", function () {
 
     it("should re-adjust the chunk style heights to the new calculated height", function() {
         grid.expandRows.expand(0);
-        expect(grid.getRowElm(0).parent().css("height")).toBe("110px");
+        expect(grid.getRowElm(0).parent().css("height")).toBe("510px");
     });
 
     it("should remove a css class that will change the height back", function() {
@@ -50,7 +50,7 @@ describe("expandRows", function () {
     it("should restore the height of the chunk when collapsed", function() {
         grid.expandRows.expand(5);
         grid.expandRows.collapse(5);
-        expect(grid.getRowElm(5).parent().css("height")).toBe("100px");
+        expect(grid.getRowElm(5).parent().css("height")).toBe("500px");
     });
 
     it("toggle should expand a row that is collapsed", function() {

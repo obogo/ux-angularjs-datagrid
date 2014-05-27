@@ -28,8 +28,8 @@ angular.module('ux').factory('scrollBar', function () {
 //               '-webkit-transition: 0ms cubic-bezier(0.1, 0.57, 0.1, 1); ' +
 //               'transition: 0ms cubic-bezier(0.1, 0.57, 0.1, 1); ' +
                 'display: block; height: 476px; ' +
-                '-webkit-transform: translate(0px, 0px) ' +
-                'translateZ(0px); ' +
+//                '-webkit-transform: translate(0px, 0px) ' +
+//                'translateZ(0px); ' +
                 'background-position: initial initial; ' +
                 'background-repeat: initial initial;');
             exports.css.createClass('datagrid-scrollbar', '.scrolling', 'opacity:1;');
@@ -46,10 +46,8 @@ angular.module('ux').factory('scrollBar', function () {
 
         function updateScrollBar() {
             calculateDimensions();
-            var vendor = {transform: '-webkit-transform'};
             scrollBarElm.style.height = data.height + 'px';
-           scrollBarElm.style.top = data.top + 'px';
-//            scrollBarElm.style[vendor.transform] = 'translate(0px, ' + data.top + 'px) translateZ(0px)';
+            scrollBarElm.style.top = data.top + 'px';
         }
 
         function onScrollStart(event, val) {

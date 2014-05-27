@@ -132,3 +132,135 @@ inside of the app directory. Then starting the server.
     node server.js
 
 Then you can just pull it up in your browser on "http://localhost:4000/".
+
+##About Addons##
+
+###Addon: disableHoverWhileScrolling (desktop/ux-datagrid-disableHoverWhileScrolling.js) ###
+This addon is used to do obviously what it says. This increases performance while scrolling because hover events if there are a lot on the page can affect performance.
+
+###Addon: focusManager (desktop/ux-datagrid-focusManager.js) ###
+While this is listed under desktop, it actually has several uses for touch browsers as well. It has built in functionality to move next and prevous through rows selecting similar items.
+
+So for example lets say you have an input in a row. Focus manager on focus would build a selector for that input. Then when you have a button that tells it go to to the next item. It will look up that next item based on the selector from the previous row. If the selector doesn't match it will skip that row. Making it jump over rows that might be headers and such. You can see an example of this in the example app under focus manager.
+If you are looking for more of a full focusManager for your whole app you should check out [angular-ux-focusmanager](https://github.com/webux/angular-ux-focusmanager).
+
+To tell the focus manager to go to the next item you would need to get the datagrid instance from the scope. Let's add an example below of a controller with a datagrid.
+
+    <div ng-controller="myController" class="listA">
+        <a href="" ng-click="prev()">Prev</a>
+        <a href="" ng-click="next()">Next</a>
+        <!--// this is the datagrid //-->
+        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="gridFocusManager">
+            <script type="template/html" data-template-name="group" data-template-item="item">
+                <div class="group {{fake}}">
+                    <div class="col col1">{{item.id}}</div>
+                </div>
+            </script>
+            <script type="template/html" data-template-name="default" data-template-item="item">
+                <div class="row">
+                    <div class="col col1">{{item.id}}</div>
+                    <div class="col col1" data-ng-repeat="col in item.cols"><input type="text" data-ng-model="col.value"></div>
+                    <div class="col"></div>
+                </div>
+            </script>
+        </div>
+    </div>
+
+Using the above html, and having a controller like the one below we could access the grid like this.
+
+    function myController($scope) {
+        // neither of these functions will work unless there is an active focus element within the grid already.
+        $scope.previous = function () {
+            // the reason we do this is that the datagrid has it's own scope. So the myController scope needs to get it's child scope to access the datagrid.
+            var grid = $scope.$$childHead.datagrid;
+            grid.gridFocusManager.focusToPrevRowElement(document.activeElement);
+        };
+        $scope.next = function () {
+            // the reason we do this is that the datagrid has it's own scope. So the myController scope needs to get it's child scope to access the datagrid.
+            var grid = $scope.$$childHead.datagrid;
+            grid.gridFocusManager.focusToNextRowElement(document.activeElement);
+        };
+    }
+
+###Addon: Collapsible Groups (ux-datagrid-collapsibleGroups.js)###
+Collapsible groups it meant to work with grouped data. Given an array like the following.
+
+    [{id:'a', list:[{id:'a.1'}, {'a.2'}]}, {id:'b', list:[{id:'b.1'}, {id:'b.2'}]}]
+
+Each Group has sub groups of list. In the template we pass the data-grouped="'list'" so that the datagrid knows which child property to normalize.
+The datagrid will convert the structure into a single array like the one below.
+
+    [{id:'a}, {id:'a.1'}, {'a.2'}, {id:'b'}, {id:'b.1'}, {id:'b.2'}]
+
+Then we have group "a" and group "b" that are now indexed and no longer actual groups. The collapseGroups addon will take this new structure and when a group is clicked it will hide all children from that group and update the heights accordingly.
+This will essentially hide all children of that group leaving the group header.
+
+###Addon: Expanded Rows (ux-datagrid-expandRows.js)###
+This one works in a similar way to collapsible groups. It changes the heights of rows to simulate an effect. In this case it makes the rows taller. Collapsible Groups actually changes their heights to 0 and makes them not display.
+Expand rows work with different templates. So you need to setup some options. Given the following grid, see the options.
+
+    <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="iScrollAddon expandRows"
+        data-options="{chunks:{size:10}, expandRows:[{template:'group', cls:'groupExpand'},{template:'default', cls:'expandDefault'},{template:'sub', cls:'expandSub'}]}">
+        <script type="template/html" data-template-name="group" data-template-item="item">
+            <div class="group {{fake}}" data-ng-click="datagrid.expandRows.toggle($index)">
+                <div class="col col1">{{item.id}}</div>
+                <div class="col col2">{{$id}}</div>
+                <div class="col col4">{{counter}}</div>
+                <div class="col col3">height 20px</div>
+                <div class="col col5"></div>
+            </div>
+        </script>
+        <script type="template/html" data-template-name="default" data-template-item="item">
+            <div class="row {{fake}}" data-ng-click="datagrid.expandRows.toggle($index)">
+                <div class="col col1">{{item.id}}</div>
+                <div class="col col2">{{$id}}</div>
+                <div class="col col4">{{counter}}</div>
+                <div class="col col3">height 40px</div>
+                <div class="col col5"><input type="text"></div>
+            </div>
+        </script>
+        <script type="template/html" data-template-name="sub" data-template-item="item">
+            <div class="sub {{fake}}" data-ng-click="datagrid.expandRows.toggle($index)">
+                <div class="col col1">{{item.id}}</div>
+                <div class="col col2">{{$id}}</div>
+                <div class="col col4">{{counter}}</div>
+                <div class="col col3">height 30px</div>
+                <div class="col col5"><input type="text"></div>
+            </div>
+        </script>
+    </div>
+
+Notice that expandRows option gives a template, and cls property. The template property is the name of the template to affect, and the cls is the css class that gets assigned to that row when it is expanded.
+Then with the css transitions can be done or just popped open as well. Transitions may suffer from chunks that do not transition as well so in my examples I have just had them snap open. All I needed to do is add a new height to that css class so that when it is added the row expands. The datagrid does the rest.
+
+###Addon: Grid Logger (ux-datagrid-gridLogger.js)###
+The grid logger is a way to display errors or other log data from the grid. It is set to listen to grid events and log those values. The datagrid doesn't log directly, it throws events for logs.
+Notice the options. Grid logger can capture events for all addons, or it can capture them for only items specified.
+
+    <div data-ux-datagrid="items" class="datagrid" data-addons="gridLogger" data-options="{debug:{all:1, Flow:0}}">
+        <script type="template/html" data-template-name="default" data-template-item="item">
+            <div class="row {{fake}}">
+                <div class="text">{{item.id}} {{$id}} {{counter}}</div>
+            </div>
+        </script>
+    </div>
+
+With debug:{all: 1} your going to get a lot of log data.
+With debug:{scrollModel:1} you just get events from the scroll model. So when building your addon this can be handy to debug your addon.
+You can also turn logs off. debug:{all:1, Flow:0} turns off the flow control logs, but loggs everything else. debug:{all:1, Flow:0, scrollModel: 0} turns off Flow and scrollModel, but logs the rest.
+
+###Addon: Infinite Scroll (ux-datagrid-infiniteScroll.js)###
+Infinite Scroll needs a couple of hooks to work. First your data to start, and then a method that will update the data when it reaches the bottom. This method can be asynchronous because the datagrid watches for it's data to change. So once the data changes in the array, it will update.
+The limit property can be helpful as well. With this it will tell the addon that it should not show the loading row once the limit has reached this value.
+
+    <div data-ux-datagrid="items" class="datagrid" data-options="{infiniteScroll: {limit:200}}" data-addons="iScrollAddon, infiniteScroll, gridLogger">
+        <script type="template/html" data-template-name="default" data-template-item="item">
+            <div class="row">
+                <div class="text">{{item.id}} {{$id}} {{counter}}</div>
+            </div>
+        </script>
+        <script type="template/html" data-template-name="loadingRow" data-template-item="item">
+            <div class="row loadingRow"></div>
+        </script>
+    </div>
+

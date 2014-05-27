@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.6.6
+* uxDatagrid v.1.0.0
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -442,7 +442,7 @@ angular.module("ux").factory("gridFocusManager", function() {
             ENTER: 13,
             UP: 38,
             DOWN: 40
-        };
+        }, throttleIntv = 0;
         /**
          * ###<a name="wrap">wrap</a>###
          * if an element is not a JQLite element then make it one.
@@ -496,9 +496,13 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @returns {Array}
          */
         function getFocusableElements(el) {
-            var focusable = [].slice.call(el[0].querySelectorAll("input,a,select"));
-            //            result.log("\tgetFocusableElements %s", focusable.length);
-            return ux.filter(focusable, filterVisible);
+            if (el && el[0]) {
+                // detachDom and memoryOptimizer can cause this to be null at times.
+                var focusable = [].slice.call(el[0].querySelectorAll("input,a,select"));
+                //            result.log("\tgetFocusableElements %s", focusable.length);
+                return ux.filter(focusable, filterVisible);
+            }
+            return [];
         }
         /**
          * ###<a name="filterVisible">filterVisible</a>###
@@ -751,6 +755,8 @@ angular.module("ux").factory("gridFocusManager", function() {
         function performFocus(focusEl) {
             result.log("	performFocus %o", focusEl[0]);
             var success = false;
+            // we now need to scroll the row into view if it is not.
+            inst.scrollModel.scrollIntoView(inst.getRowIndexFromElement(focusEl), true);
             if (focusEl[0].select) {
                 // TODO: if no jquery. There may be no select.
                 focusEl[0].select();
@@ -759,8 +765,6 @@ angular.module("ux").factory("gridFocusManager", function() {
                 focusEl[0].focus();
                 success = true;
             }
-            // we now need to scroll the row into view if it is not.
-            inst.scrollModel.scrollIntoView(inst.getRowIndexFromElement(focusEl), true);
             return success;
         }
         /**
@@ -794,6 +798,20 @@ angular.module("ux").factory("gridFocusManager", function() {
                 inst.scrollModel.scrollIntoView(index);
             }
         }
+        function throttleNextPrev(method) {
+            if (inst.options.gridFocusManager && inst.options.gridFocusManager.throttleNextPrev) {
+                if (throttleIntv) {
+                    return;
+                } else {
+                    throttleIntv = setTimeout(function() {
+                        clearTimeout();
+                        throttleIntv = 0;
+                    }, inst.options.gridFocusManager.throttleNextPrev);
+                }
+            }
+            inst.creepRenderModel.stop();
+            inst.flow.add(method, [ document.activeElement ], 0);
+        }
         // it has to match a pattern for each row. These are too unique.
         ux.selector.config.allowId = false;
         ux.selector.config.allowAttributes = false;
@@ -815,12 +833,12 @@ angular.module("ux").factory("gridFocusManager", function() {
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_RENDER, addListeners));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME, function() {
             if (inst.element[0].contains(document.activeElement)) {
-                focusToPrevRowElement(document.activeElement);
+                throttleNextPrev(focusToPrevRowElement);
             }
         }));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME, function() {
             if (inst.element[0].contains(document.activeElement)) {
-                focusToNextRowElement(document.activeElement);
+                throttleNextPrev(focusToNextRowElement);
             }
         }));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER, onResize));

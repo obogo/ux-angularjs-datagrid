@@ -58,7 +58,8 @@ describe("gridFocusManager", function () {
             input = q(element, 'input')[0],
             rows = q(element, '.mock-row');
         input.focus();
-        fireKey(input, 13);
+//        fireKey(input, 13);
+        grid.gridFocusManager.focusToNextRowElement(document.activeElement);
         expect(document.activeElement).toBe(q(rows[1], 'input')[0]);
     });
 
@@ -67,7 +68,8 @@ describe("gridFocusManager", function () {
             input = q(element, 'input')[1],
             rows = q(element, '.mock-row');
         input.focus();
-        fireKey(input, 13);
+//        fireKey(input, 13);
+        grid.gridFocusManager.focusToNextRowElement(document.activeElement);
         expect(document.activeElement).toBe(q(rows[1], 'input')[1]);
     });
 
@@ -76,7 +78,8 @@ describe("gridFocusManager", function () {
             input = q(element, 'input')[4],
             rows = q(element, '.mock-row');
         input.focus();
-        fireKey(input, 13, true);
+//        fireKey(input, 13, true);
+        grid.gridFocusManager.focusToPrevRowElement(document.activeElement);
         expect(document.activeElement).toBe(q(rows[0], 'input')[1]);
     });
 
@@ -85,7 +88,8 @@ describe("gridFocusManager", function () {
             input = q(element, 'input')[0],
             rows = q(element, '.mock-row');
         input.focus();
-        fireKey(input, 13);
+//        fireKey(input, 13);
+        grid.gridFocusManager.focusToNextRowElement(document.activeElement);
         expect(document.activeElement).toBe(q(rows[1], 'input')[0]);
     });
 
@@ -94,7 +98,8 @@ describe("gridFocusManager", function () {
             input = q(element, 'input')[4],
             rows = q(element, '.mock-row');
         input.focus();
-        fireKey(input, 13);
+//        fireKey(input, 13);
+        grid.gridFocusManager.focusToNextRowElement(document.activeElement);
         expect(document.activeElement).toBe(q(rows[3], 'input')[1]);
     });
 
@@ -105,7 +110,8 @@ describe("gridFocusManager", function () {
         forceRenderAll();
         input = q(element, 'input')[295]; // 3 inputs per row and remember row 3 doesn't have any inputs.
         input.focus();
-        fireKey(input, 13);
+//        fireKey(input, 13);
+        grid.gridFocusManager.focusToNextRowElement(document.activeElement);
         expect(document.activeElement).toBe(input);
     });
 
@@ -115,7 +121,8 @@ describe("gridFocusManager", function () {
             input = q(element, 'input')[1],
             rows = q(element, '.mock-row');
         input.focus();
-        fireKey(input, 13, true);
+//        fireKey(input, 13, true);
+        grid.gridFocusManager.focusToPrevRowElement(document.activeElement);
         expect(document.activeElement).toBe(q(rows[0], 'input')[1]);
     });
 });

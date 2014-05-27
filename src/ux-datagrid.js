@@ -87,6 +87,7 @@ function Datagrid(scope, element, attr, $compile) {
      * Build out the public api variables for the datagrid.
      */
     function setupExports() {
+        inst.uid = exports.uid();
         inst.name = scope.$eval(attr.gridName) || 'datagrid';
         inst.scope = scope;
         inst.element = element;
@@ -577,6 +578,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Scope} s
      */
     function safeDigest(s) {
+//        s.$evalAsync();// this sometimes takes too long so I see {{}} brackets briefly.
         var ds = s;
         while (ds) {
             if (ds.$$phase) {

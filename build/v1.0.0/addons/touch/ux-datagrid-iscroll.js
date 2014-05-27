@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.5.2
+* uxDatagrid v.1.0.0
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -34,11 +34,12 @@ angular.module("ux").factory("iScrollAddon", function() {
                 interactiveScrollbars: true,
                 deceleration: .005,
                 click: true,
-                startY: -(inst.values.scroll || 0)
+                startY: -(inst.scrollHistory && inst.scrollHistory.getCurrentScroll() || inst.values.scroll || 0)
             };
             if (!myScroll) {
                 inst.element[0].style.overflowY = "hidden";
                 //TODO: these options need to be passed in.
+                result.log("IScroll Init at startY %s", options.startY);
                 myScroll = new IScroll(inst.element[0], options);
                 myScroll.on("beforeScrollStart", beforeScrollStart);
                 myScroll.on("scrollStart", beforeScrollStart);
@@ -79,14 +80,16 @@ angular.module("ux").factory("iScrollAddon", function() {
             clearInterval(unwatchRefreshRender);
         }
         function onRefreshRender() {
+            var h;
             if (!inst.element) {
                 clearRefreshRender();
-            } else if (inst.element[0].offsetHeight) {
+            } else if (h = inst.element[0].offsetHeight) {
                 clearRefreshRender();
+                result.log("	refresh iscroll height:%s/%s", h, inst.getContentHeight());
                 myScroll.refresh();
             }
         }
-        function onUpdateScroll(forceValue) {
+        function onUpdateScroll(event, forceValue) {
             var value = forceValue !== undefined ? -forceValue : myScroll.y;
             if (scrolling && value !== lastY) {
                 inst.values.speed = value - lastY;
@@ -101,23 +104,28 @@ angular.module("ux").factory("iScrollAddon", function() {
             return myScroll && myScroll.y || 0;
         };
         result.setScroll = function(value) {
+            result.log("setScroll %s", value);
             inst.values.scroll = value;
         };
         result.waitForStop = originalScrollModel.waitForStop;
         result.scrollTo = function(value, immediately) {
+            result.log("scrollTo %s", value);
             if (inst.element[0].scrollTop) {
                 inst.element[0].scrollTop = 0;
             }
             if (!myScroll) {
                 refresh();
             }
+            value = originalScrollModel.capScrollValue(value);
             myScroll.scrollTo(0, -value, immediately ? 0 : 200);
             clearTimeout(scrollToIntv);
             if (immediately) {
-                scrolling = true;
-                result.onUpdateScroll(value);
-                scrolling = false;
-                result.onScrollingStop();
+                if (inst.values.scroll || value) {
+                    scrolling = true;
+                    result.onUpdateScroll(null, value);
+                    scrolling = false;
+                    result.onScrollingStop();
+                }
             } else {
                 scrollToIntv = setTimeout(function() {
                     result.onScrollingStop();
@@ -134,9 +142,11 @@ angular.module("ux").factory("iScrollAddon", function() {
         result.onScrollingStop = originalScrollModel.onScrollingStop;
         result.onUpdateScroll = onUpdateScroll;
         result.fireOnScroll = originalScrollModel.fireOnScroll;
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.RESIZE, function() {
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER, function() {
             inst.element[0].scrollTop = 0;
-            myScroll.refresh();
+            if (myScroll) {
+                onRefreshRender();
+            }
         }));
         result.destroy = function destroy() {
             unwatchSetup();

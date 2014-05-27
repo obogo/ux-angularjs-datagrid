@@ -42,21 +42,22 @@
                 if (options.window.ux.datagrid.options.chunks.detachDom) {
                     wait(20000);// wait 20 seconds for creeping to render several chunks so we can check the detachment of dom.
                 }
-                focusToRowAndColumn(1, 0).sendKeys('0 enter');
-                assert("first input in the 2nd row should have focus.", function () {
-                    return $(getSelector(2, 0))[0] === options.window.document.activeElement;
-                });
+                focusToRowAndColumn(1, 0).sendKeys('1 enter').val().toBe('1');
 
                 repeat(function () {
-                    find(getActiveElement).sendKeys('0 enter');
-                    assert("activeElement is in row ", function () {
-                        var i = datagrid.getRowIndexFromElement(getActiveElement()),
-                            result = i === index + 1 || i === index + 2;
-                        this.label += index;
-                        index = i;
-                        return result;
-                    })
-                }, 200);
+                    find(getActiveElement).sendKeys('1 enter').val().toBe('1');
+                    wait(10);
+                }, 40);
+
+                find('.datagrid').scrollTop(0);
+                wait(500);
+
+                focusToRowAndColumn(1, 1).sendKeys('2 enter').val().toBe('2');
+
+                repeat(function () {
+                    find(getActiveElement).sendKeys('2 enter').val().toBe('2');
+                    wait(10);
+                }, 40);
             });
         }
 

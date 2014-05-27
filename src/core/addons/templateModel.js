@@ -22,7 +22,15 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
 
     inst.templateModel = function () {
 
-        var templates = [], totalHeight, defaultName = 'default', result = exports.logWrapper('templateModel', {}, 'teal', inst.dispatch);
+        var templates = [], totalHeight, defaultName = 'default', result = exports.logWrapper('templateModel', {}, 'teal', inst.dispatch),
+            forcedTemplates = [], templatesKey;
+
+        function getTemplatesKey() {
+            if (!templatesKey) {
+                templatesKey = '$$template_' + inst.uid;
+            }
+            return templatesKey;
+        }
 
         function createTemplates() {
             result.log('createTemplates');
@@ -75,7 +83,13 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             };
             result.log('template: %s %o', name, templateData);
             if (!templateData.height) {
-                throw new Error(exports.errors.E1101);
+                if (inst.element.css('display') === 'none') {
+                    result.warn("Datagrid was intialized with a display:'none' value. Templates are unable to calculate heights. Grid will not render correctly.");
+                } else if (!inst.element[0].offsetHeight) {
+                    throw new Error(exports.errors.E1000);
+                } else {
+                    throw new Error(exports.errors.E1101);
+                }
             }
             templates[templateData.name] = templateData;
             templates.push(templateData);
@@ -110,7 +124,8 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
          * @param data
          */
         result.getTemplate = function getTemplate(data) {
-            return result.getTemplateByName(data._template);
+            var tpl = data[getTemplatesKey()] || data._template;
+            return result.getTemplateByName(tpl);
         };
 
         //TODO: need to make this method so it can be overwritten to look up templates a different way.
@@ -172,7 +187,11 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         }
 
         function setTemplateName(item, templateName) {
-            item._template = templateName;
+            var key = getTemplatesKey();
+            if (!item.hasOwnProperty(key) && forcedTemplates.indexOf(item) === -1) {
+                forcedTemplates.push(item);
+            }
+            item[key] = templateName;
         }
 
         function setTemplate(itemOrIndex, newTemplateName, classes) {
@@ -204,11 +223,18 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             }
         }
 
+        function clearTemplate(item) {
+            delete item[getTemplatesKey()];
+        }
+
         function destroy() {
+            exports.each(forcedTemplates, clearTemplate);
+            forcedTemplates.length = 0;
             result.destroyLogger();
             result = null;
             templates.length = 0;
             templates = null;
+            forcedTemplates = null;
         }
 
         result.defaultName = defaultName;
@@ -226,6 +252,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         result.setTemplate = setTemplate;
         result.setTemplateName = setTemplateName;
         result.updateTemplateHeights = updateTemplateHeights;
+        result.getTemplatesKey = getTemplatesKey;
         result.destroy = destroy;
 
         return result;

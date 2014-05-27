@@ -207,7 +207,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         var i = 0, index, indxs = indexes.slice(0), ca = _list, el = _el;
         while (i < indxs.length) {
             index = indxs.shift();
-            if (!ca.rendered && unrendered) {
+            if ((!ca.rendered && unrendered) || shouldRecompileDecompiledRows(ca)) {
                 unrendered(el, ca);
                 updateDom(ca);
             }
@@ -219,6 +219,14 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
             el = ca.rendered || angular.element(el.children()[index]);
         }
         return el;
+    }
+
+    function shouldRecompileDecompiledRows(ca) {
+        var recompile = !ca.hasChildChunks() && ca.length && ca.rendered && ca.rendered.children().length !== ca.length;
+        if (recompile) {
+            result.info("recompile chunk %s", ca.getId());
+        }
+        return recompile;
     }
 
     /**
@@ -268,9 +276,22 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * calculate the computed styles of each element
      */
     function computeStyles(elm) {
-        window.getComputedStyle(elm).getPropertyValue('top');
+        if (elm) {
+            var style = window.getComputedStyle(elm);
+            if (style) {
+                return style.getPropertyValue('top');
+            }
+        }
     }
 
+    /**
+     * ##<a name="checkAllCompiled">checkAllCompiled</a>##
+     * Each ChunkArray keeps track of weather or not it's dom has been compiled. Since each
+     * ChunkArray generates the values and updates properties of the dom. The dom chunks are a
+     * reflection of the ChunkArrays.
+     * @param {ChunkArray} ca
+     * @returns {Boolean}
+     */
     function checkAllCompiled(ca) {
         if (!ca.compiled) {
             ca.compiled = isCompiled(ca);
@@ -286,6 +307,12 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         return ca.compiled;
     }
 
+    /**
+     * ##<a name="isCompiled">isCompiled</a>##
+     * Validate that the chunk is compiled.
+     * @param {ChunkArray} ca
+     * @returns {boolean}
+     */
     function isCompiled(ca) {
         var min, max;
         if (ca[0] instanceof ChunkArray) {
@@ -335,6 +362,10 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         chunkDom(newList, _chunkSize, _templateStartCache, _templateEndCache, content);
     }
 
+    /**
+     * ##<a name="disableNonVislbieChunks">disableNonVisibleChunks</a>##
+     * disable all chunks that are outside of the values.activeRange.min/max.
+     */
     function disableNonVisibleChunks() {
         var r = inst.values.activeRange, o = inst.options.chunks;
         _list.enableRange(r.min, r.max, o.chunkDisabledClass);
@@ -726,14 +757,14 @@ ChunkArray.prototype.children = function () {
 };
 ChunkArray.prototype.decompile = function (chunkReadyClass) {
     if (this.hasChildChunks()) {
-        this.each('decompile');
+        this.each('decompile', [chunkReadyClass]);
     } else {
         // we are going to remove all dom rows to free up memory.
         // this can only be done if the chunk has no rows for children instead of chunks.
         if (this.rendered) {
             this.rendered.children().remove();
             this.rendered.removeClass(chunkReadyClass);
-            this.rendered = null;
+//            this.rendered = null;
         }
     }
 };

@@ -1,11 +1,12 @@
 /*
-* uxDatagrid v.0.6.6
+* uxDatagrid v.1.0.0
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */
 (function(exports, global){
 exports.errors = {
+    E1000: "Datagrid cannot have a height of 0",
     E1001: "RENDER STATE INVALID. The only valid render states are those on ux.datagrid.states",
     E1002: "Unable to render. Invalid activeRange.",
     E1101: "Script templates that are used for datagrid rows must have a height greater than 0. This may be because the grid is not yet attached to the dom preventing it from calculating heights.",
@@ -487,6 +488,14 @@ function each(list, method, data) {
             }
             i += 1;
         }
+    } else if (list.hasOwnProperty("0")) {
+        while (list.hasOwnProperty(i)) {
+            result = method.apply(null, [ list[i], i, list ].concat(extraArgs));
+            if (result !== undefined) {
+                return result;
+            }
+            i += 1;
+        }
     } else if (!(list instanceof Array)) {
         for (i in list) {
             if (list.hasOwnProperty(i)) {
@@ -625,13 +634,17 @@ function dispatcher(target, scope, map) {
  * @param {Object=} source
  * return {Object|destination}
  */
-exports.extend = function(destination, source) {
+function extend(destination, source) {
     var args = exports.util.array.toArray(arguments), i = 1, len = args.length, item, j;
     while (i < len) {
         item = args[i];
         for (j in item) {
             if (destination[j] && typeof destination[j] === "object") {
-                destination[j] = exports.extend(destination[j], item[j]);
+                destination[j] = extend(destination[j], item[j]);
+            } else if (item[j] instanceof Array) {
+                destination[j] = extend([], item[j]);
+            } else if (item[j] && typeof item[j] === "object") {
+                destination[j] = extend({}, item[j]);
             } else {
                 destination[j] = item[j];
             }
@@ -639,7 +652,22 @@ exports.extend = function(destination, source) {
         i += 1;
     }
     return destination;
-};
+}
+
+exports.extend = extend;
+
+(function() {
+    "use strict";
+    var c = 0;
+    exports.uid = function UID() {
+        c += 1;
+        var str = c.toString(36).toUpperCase();
+        while (str.length < 6) {
+            str = "0" + str;
+        }
+        return str;
+    };
+})();
 
 /**
  * **toArray** Convert arguments or objects to an array.
@@ -967,6 +995,7 @@ function Datagrid(scope, element, attr, $compile) {
      * Build out the public api variables for the datagrid.
      */
     function setupExports() {
+        inst.uid = exports.uid();
         inst.name = scope.$eval(attr.gridName) || "datagrid";
         inst.scope = scope;
         inst.element = element;
@@ -1428,6 +1457,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Scope} s
      */
     function safeDigest(s) {
+        //        s.$evalAsync();// this sometimes takes too long so I see {{}} brackets briefly.
         var ds = s;
         while (ds) {
             if (ds.$$phase) {
@@ -2373,7 +2403,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         var i = 0, index, indxs = indexes.slice(0), ca = _list, el = _el;
         while (i < indxs.length) {
             index = indxs.shift();
-            if (!ca.rendered && unrendered) {
+            if (!ca.rendered && unrendered || shouldRecompileDecompiledRows(ca)) {
                 unrendered(el, ca);
                 updateDom(ca);
             }
@@ -2384,6 +2414,13 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
             el = ca.rendered || angular.element(el.children()[index]);
         }
         return el;
+    }
+    function shouldRecompileDecompiledRows(ca) {
+        var recompile = !ca.hasChildChunks() && ca.length && ca.rendered && ca.rendered.children().length !== ca.length;
+        if (recompile) {
+            result.info("recompile chunk %s", ca.getId());
+        }
+        return recompile;
     }
     /**
      * ###<a name="unrendered">unrendered</a>###
@@ -2431,8 +2468,21 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * calculate the computed styles of each element
      */
     function computeStyles(elm) {
-        window.getComputedStyle(elm).getPropertyValue("top");
+        if (elm) {
+            var style = window.getComputedStyle(elm);
+            if (style) {
+                return style.getPropertyValue("top");
+            }
+        }
     }
+    /**
+     * ##<a name="checkAllCompiled">checkAllCompiled</a>##
+     * Each ChunkArray keeps track of weather or not it's dom has been compiled. Since each
+     * ChunkArray generates the values and updates properties of the dom. The dom chunks are a
+     * reflection of the ChunkArrays.
+     * @param {ChunkArray} ca
+     * @returns {Boolean}
+     */
     function checkAllCompiled(ca) {
         if (!ca.compiled) {
             ca.compiled = isCompiled(ca);
@@ -2447,6 +2497,12 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         }
         return ca.compiled;
     }
+    /**
+     * ##<a name="isCompiled">isCompiled</a>##
+     * Validate that the chunk is compiled.
+     * @param {ChunkArray} ca
+     * @returns {boolean}
+     */
     function isCompiled(ca) {
         var min, max;
         if (ca[0] instanceof ChunkArray) {
@@ -2493,6 +2549,10 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         }
         chunkDom(newList, _chunkSize, _templateStartCache, _templateEndCache, content);
     }
+    /**
+     * ##<a name="disableNonVislbieChunks">disableNonVisibleChunks</a>##
+     * disable all chunks that are outside of the values.activeRange.min/max.
+     */
     function disableNonVisibleChunks() {
         var r = inst.values.activeRange, o = inst.options.chunks;
         _list.enableRange(r.min, r.max, o.chunkDisabledClass);
@@ -2909,14 +2969,13 @@ ChunkArray.prototype.children = function() {
 
 ChunkArray.prototype.decompile = function(chunkReadyClass) {
     if (this.hasChildChunks()) {
-        this.each("decompile");
+        this.each("decompile", [ chunkReadyClass ]);
     } else {
         // we are going to remove all dom rows to free up memory.
         // this can only be done if the chunk has no rows for children instead of chunks.
         if (this.rendered) {
             this.rendered.children().remove();
             this.rendered.removeClass(chunkReadyClass);
-            this.rendered = null;
         }
     }
 };
@@ -3100,6 +3159,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     };
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.DISABLE_CREEP, model.disable));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.STOP_CREEP, stop));
     inst.creepRenderModel = model;
     // do not add listeners if it is not enabled.
     if (inst.options.creepRender && inst.options.creepRender.enable) {
@@ -3441,6 +3501,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.click = function(e) {
         // simulate click on android. Ignore on IOS.
         if (!exports.datagrid.isIOS || inst.options.scrollModel.simulateClick) {
+            if (inst.options.scrollModel.simulateClick) {
+                result.killEvent(e);
+            }
             var target = e.target, ev;
             if (!/(SELECT|INPUT|TEXTAREA)/i.test(target.tagName)) {
                 ev = document.createEvent("MouseEvents");
@@ -3674,7 +3737,13 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         return str;
     }
     inst.templateModel = function() {
-        var templates = [], totalHeight, defaultName = "default", result = exports.logWrapper("templateModel", {}, "teal", inst.dispatch);
+        var templates = [], totalHeight, defaultName = "default", result = exports.logWrapper("templateModel", {}, "teal", inst.dispatch), forcedTemplates = [], templatesKey;
+        function getTemplatesKey() {
+            if (!templatesKey) {
+                templatesKey = "$$template_" + inst.uid;
+            }
+            return templatesKey;
+        }
         function createTemplates() {
             result.log("createTemplates");
             var i, scriptTemplates = inst.element[0].getElementsByTagName("script"), len = scriptTemplates.length;
@@ -3719,7 +3788,13 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             };
             result.log("template: %s %o", name, templateData);
             if (!templateData.height) {
-                throw new Error(exports.errors.E1101);
+                if (inst.element.css("display") === "none") {
+                    result.warn("Datagrid was intialized with a display:'none' value. Templates are unable to calculate heights. Grid will not render correctly.");
+                } else if (!inst.element[0].offsetHeight) {
+                    throw new Error(exports.errors.E1000);
+                } else {
+                    throw new Error(exports.errors.E1101);
+                }
             }
             templates[templateData.name] = templateData;
             templates.push(templateData);
@@ -3751,7 +3826,8 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
          * @param data
          */
         result.getTemplate = function getTemplate(data) {
-            return result.getTemplateByName(data._template);
+            var tpl = data[getTemplatesKey()] || data._template;
+            return result.getTemplateByName(tpl);
         };
         //TODO: need to make this method so it can be overwritten to look up templates a different way.
         function getTemplateName(el) {
@@ -3804,7 +3880,11 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             return height;
         }
         function setTemplateName(item, templateName) {
-            item._template = templateName;
+            var key = getTemplatesKey();
+            if (!item.hasOwnProperty(key) && forcedTemplates.indexOf(item) === -1) {
+                forcedTemplates.push(item);
+            }
+            item[key] = templateName;
         }
         function setTemplate(itemOrIndex, newTemplateName, classes) {
             result.log("setTemplate %s %s", itemOrIndex, newTemplateName);
@@ -3832,11 +3912,17 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
                 inst.updateHeights();
             }
         }
+        function clearTemplate(item) {
+            delete item[getTemplatesKey()];
+        }
         function destroy() {
+            exports.each(forcedTemplates, clearTemplate);
+            forcedTemplates.length = 0;
             result.destroyLogger();
             result = null;
             templates.length = 0;
             templates = null;
+            forcedTemplates = null;
         }
         result.defaultName = defaultName;
         result.prepTemplate = prepTemplate;
@@ -3853,6 +3939,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         result.setTemplate = setTemplate;
         result.setTemplateName = setTemplateName;
         result.updateTemplateHeights = updateTemplateHeights;
+        result.getTemplatesKey = getTemplatesKey;
         result.destroy = destroy;
         return result;
     }();

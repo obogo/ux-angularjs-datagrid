@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.0.5.2
+* uxDatagrid v.1.0.0
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -12,7 +12,7 @@ exports.datagrid.events.DOUBLE_SCROLL_SCROLL_TO_BOTTOM = "datagrid:doubleScrollS
 /**
  * Allow a header to scroll out before scrolling the content. Nested scrollers.
  */
-angular.module("ux").directive("uxDoubleScroll", function() {
+angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) {
     return {
         link: function(scope, element, attr) {
             var result = exports.logWrapper("doubleScroll", {}, "red", function() {
@@ -20,7 +20,14 @@ angular.module("ux").directive("uxDoubleScroll", function() {
             }), el = element[0], selector = scope.$eval(attr.uxDoubleScroll), target, targetOffset = scope.$eval(attr.targetOffset) || 0, grid, // reference to the datagrid instance
             myScroll, // iScroll for the doubleScroll.
             scrollModel, // the grid scrollModel.
-            enabled, unwatchRender, unwatchOffset, lastOffsetTop = 0, lastOffsetHeight, intv, lastY = 0, momentum = 0, gridScrollIntv;
+            enabled, unwatchRender, unwatchOffset, lastOffsetTop = 0, lastOffsetHeight, intv, lastY = 0, momentum = 0, gridScrollIntv, useIScroll = detectIScroll();
+            function detectIScroll() {
+                var addons = element[0].querySelectorAll(".datagrid")[0].attributes.getNamedItem("data-addons");
+                if (addons && addons.nodeValue.match(/iScrollAddon/)) {
+                    return true;
+                }
+                return false;
+            }
             function setup() {
                 element[0].style.overflowY = "auto";
                 element[0].style.overflowX = "hidden";
@@ -28,16 +35,21 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                 updateTarget();
                 scope.doubleScroll = result;
                 scope.$on(exports.datagrid.events.RESIZE, checkOffsetChange);
-                if (exports.datagrid.isIOS) {
+                if (useIScroll) {
                     setupIScroll();
                 } else {
                     setupNativeScroll();
                 }
-                unwatchOffset = scope.$watch(function() {
-                    // wait until a render is all done. Then check the heights.
-                    clearTimeout(intv);
-                    intv = setTimeout(checkOffsetChange, 100);
-                });
+                unwatchOffset = scope.$watch(onWatchOffset);
+            }
+            function onWatchOffset() {
+                // wait until a render is all done. Then check the heights.
+                clearTimeout(intv);
+                intv = setTimeout(function() {
+                    if (checkOffsetChange()) {
+                        onWatchOffset();
+                    }
+                }, 100);
             }
             function setupNativeScroll() {
                 element[0].addEventListener("scroll", onScroll, true);
@@ -51,12 +63,16 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                         updateTarget();
                         checkOffsetChange();
                         onScroll(null);
+                        enable();
+                        if (grid.scrollHistory && grid.scrollHistory.getCurrentScroll()) {
+                            disable();
+                        }
                     });
                 }
                 scope.$on(exports.datagrid.events.ON_SCROLL_STOP, function() {
                     updateScrollModel();
                     clearInterval(gridScrollIntv);
-                    if (!grid.values.scroll) {
+                    if (grid.values.scroll <= 0) {
                         gridScrollIntv = setInterval(function() {
                             if (element[0].scrollTop > .1) {
                                 element[0].scrollTop *= .1;
@@ -106,6 +122,12 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                         enable();
                     }
                 });
+                scope.$on(exports.datagrid.events.AFTER_SCROLL_HISTORY_INIT_SCROLL, function() {
+                    if (scrollModel.scrollHistory && scrollModel.scrollHistory.getCurrentScroll()) {
+                        myScroll.enable();
+                        myScroll.scrollTo(0, myScroll.maxScrollY);
+                    }
+                });
                 unwatchRender = scope.$on(exports.datagrid.events.ON_LISTENERS_READY, function() {
                     // it needs to start off with the target disabled.
                     unwatchRender();
@@ -117,6 +139,9 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                         unwatchRender();
                         checkOffsetChange();
                         enable();
+                        if (grid.scrollHistory && grid.scrollHistory.getCurrentScroll()) {
+                            disable();
+                        }
                     });
                 });
                 function updateLastScroll(myIScroll, otherIScroll) {
@@ -124,30 +149,39 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                     momentum = 0;
                     clearInterval(gridScrollIntv);
                     gridScrollIntv = setInterval(function() {
-                        var style = window.getComputedStyle(element[0].children[0]), y = parseInt(style.webkitTransform.match(/(\-?\d+)\)$/)[1], 10);
-                        if (y !== lastY) {
-                            momentum = y - lastY;
-                            lastY = y;
-                            if (y === otherIScroll.maxScrollY) {
-                                clearInterval(gridScrollIntv);
-                                gridScrollIntv = setTimeout(function() {
-                                    clearTimeout(gridScrollIntv);
-                                    disable();
-                                    myIScroll.scrollBy(0, momentum * 5, 500);
-                                }, 0);
+                        var style = window.getComputedStyle(element[0].children[0]), y;
+                        if (!style) {
+                            clearInterval(gridScrollIntv);
+                        } else {
+                            y = parseInt(style.webkitTransform.match(/(\-?\d+)\)$/)[1], 10);
+                            if (y !== lastY) {
+                                momentum = y - lastY;
+                                lastY = y;
+                                if (y === otherIScroll.maxScrollY) {
+                                    clearInterval(gridScrollIntv);
+                                    gridScrollIntv = setTimeout(function() {
+                                        clearTimeout(gridScrollIntv);
+                                        disable();
+                                        myIScroll.scrollBy(0, momentum * 5, 500);
+                                    }, 0);
+                                }
                             }
                         }
                     }, 10);
                 }
             }
             function enable() {
-                if (exports.datagrid.isIOS && !enabled) {
-                    if (scrollModel && scrollModel.iScroll) {
+                result.log("enable doubleScroll disable scroll");
+                if (useIScroll && !enabled) {
+                    if (scrollModel && scrollModel.iScroll && (!grid.scrollHistory || !grid.scrollHistory.getCurrentScroll())) {
+                        result.log("	scroll grid to 0");
                         scrollModel.iScroll.scrollTo(0, 0);
                         scrollModel.iScroll.disable();
                     }
                     myScroll.enable();
-                    myScroll.scrollTo(0, 0, 500);
+                    if (grid.getContentHeight() > grid.getViewportHeight()) {
+                        myScroll.scrollTo(0, 0);
+                    }
                 } else if (!enabled) {
                     element[0].scrollTop = 0;
                     target.scrollTop = 0;
@@ -155,12 +189,13 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                 enabled = true;
             }
             function disable() {
-                if (exports.datagrid.isIOS && enabled) {
+                result.log("disable doubleScroll enable scroll");
+                if (useIScroll && enabled) {
                     myScroll.scrollTo(0, myScroll.maxScrollY);
                     myScroll.disable();
                     scrollModel.iScroll.enable();
                     scrollModel.iScroll.scrollBy(0, -1);
-                } else if (!exports.datagrid.isIOS) {
+                } else if (!useIScroll) {
                     element[0].scrollTop = element[0].scrollHeight - element[0].offsetHeight;
                 }
                 enabled = false;
@@ -205,16 +240,22 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                     if (onSizeChange(offsetTop)) {
                         lastOffsetTop = offsetTop;
                         lastOffsetHeight = offsetHeight;
+                        return true;
                     }
                 }
+                return false;
             }
             function calculateOffsetTop() {
-                var content = element.children(), children = content.children(), i = 0, len = children.length, offsetTop = 0;
+                var cpStyle, paddingTop, paddingBottom, content = element.children(), children = content.children(), i = 0, len = children.length, offsetTop = 0;
                 while (i < len) {
                     if (children[i] === target || children[i].contains(target)) {
                         break;
                     }
-                    offsetTop += children[i].offsetHeight;
+                    //TODO: need to add padding and margin as well.
+                    cpStyle = $window.getComputedStyle(children[i]);
+                    paddingTop = parseInt(cpStyle.paddingTop, 10);
+                    paddingBottom = parseInt(cpStyle.paddingBottom, 10);
+                    offsetTop += children[i].offsetHeight + paddingTop + paddingBottom;
                     i += 1;
                 }
                 return offsetTop;
@@ -227,8 +268,11 @@ angular.module("ux").directive("uxDoubleScroll", function() {
                     target.style.height = elHeight - targetOffset + "px";
                     content[0].style.height = contentHeight + "px";
                     s.datagrid.updateHeights();
-                    if (exports.datagrid.isIOS) {
+                    if (useIScroll) {
                         myScroll.refresh();
+                        if (s.datagrid.scrollHistory && !s.datagrid.scrollHistory.isComplete()) {
+                            myScroll.scrollTo(0, myScroll.maxScrollY);
+                        }
                     }
                     return true;
                 }
@@ -251,9 +295,10 @@ angular.module("ux").directive("uxDoubleScroll", function() {
             scope.$on("$destroy", function() {
                 unwatchOffset();
                 clearTimeout(intv);
+                clearInterval(gridScrollIntv);
                 result.destroyLogger();
                 result = null;
-                if (exports.datagrid.isIOS) {
+                if (useIScroll) {
                     myScroll.destroy();
                     myScroll = null;
                 } else {
@@ -263,5 +308,5 @@ angular.module("ux").directive("uxDoubleScroll", function() {
             setup();
         }
     };
-});
+} ]);
 }(this.ux = this.ux || {}, function() {return this;}()));

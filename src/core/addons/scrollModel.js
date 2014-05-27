@@ -192,6 +192,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.click = function (e) {
         // simulate click on android. Ignore on IOS.
         if (!exports.datagrid.isIOS || inst.options.scrollModel.simulateClick) {
+            if (inst.options.scrollModel.simulateClick) {
+                result.killEvent(e);
+            }
             var target = e.target,
                 ev;
 

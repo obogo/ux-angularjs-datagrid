@@ -2,6 +2,7 @@ exports.datagrid.events.COLLAPSE_ROW = "datagrid:collapseRow";
 exports.datagrid.events.EXPAND_ROW = "datagrid:expandRow";
 exports.datagrid.events.TOGGLE_ROW = "datagrid:toggleRow";
 exports.datagrid.events.ROW_TRANSITION_COMPLETE = "datagrid:rowTransitionComplete";
+exports.datagrid.events.COLLAPSE_ALL_EXPANDED_ROWS = "datagrid:collapseAllExpandedRows";
 exports.datagrid.options.expandRows = [];
 exports.datagrid.options.expandRows.autoClose = true;
 angular.module('ux').factory('expandRows', function () {
@@ -101,11 +102,15 @@ angular.module('ux').factory('expandRows', function () {
             }
         }
 
-        function closeAll(omitIndexes) {
+        function closeAll(omitIndexes, silent) {
             exports.each(opened, function (cacheItemData, index) {
                 var intIndex = parseInt(index, 10);
                 if (!omitIndexes || (inst.rowsLength > intIndex && omitIndexes.indexOf(intIndex) === -1)) {
-                    collapse(intIndex);
+                    if (silent) {
+                        delete opened[index];
+                    } else {
+                        collapse(intIndex);
+                    }
                 }
             });
         }
@@ -114,6 +119,10 @@ angular.module('ux').factory('expandRows', function () {
             var template = inst.templateModel.getTemplate(inst.data[index]), elm, tpl, swapTpl;
             if (cache[template.name]) {
                 elm = inst.getRowElm(index);
+                if (!elm.scope()) { // we must be closing a row out of view. possibly destroyed.
+                    delete opened[index];
+                    return;
+                }
                 elm.scope().$state = state;
                 tpl = cache[template.name];
                 if (tpl.transition !== false) {
@@ -251,9 +260,12 @@ angular.module('ux').factory('expandRows', function () {
                 el[0].classList.add(tpl.cls);
             }
         }));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.COLLAPSE_ALL_EXPANDED_ROWS, function (event, silent) {
+            closeAll(null, silent);
+        }));
 
         if (exports.datagrid.events.ON_BEFORE_TOGGLE_SORT) {
-            inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_TOGGLE_SORT, function (event, columnName) {
+            inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_TOGGLE_SORT, function (event) {
                 closeAll();
             }));
         }

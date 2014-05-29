@@ -13,6 +13,7 @@ angular.module('ux').factory('expandRows', function () {
             lastGetIndex,
             cache = {},
             opened = {},
+            opening = false,
             states = {
                 opened: "opened", closed: "closed"
             },
@@ -84,6 +85,11 @@ angular.module('ux').factory('expandRows', function () {
         function expand(itemOrIndex) {
             var index = getIndex(itemOrIndex);
             if (getState(index) === states.closed) {
+                // prevent multi-finger expand rows.
+                if (inst.options.expandRows.autoClose && opening) {
+                    return;
+                }
+                opening = true;
                 autoClose([index]);
                 setState(index, states.opened);
             }
@@ -152,6 +158,8 @@ angular.module('ux').factory('expandRows', function () {
                     } else {
                         onTransitionEnd(evt);
                     }
+                } else {
+                    opening = false;
                 }
             } else {
                 throw new Error("unable to toggle template. cls for template '" + template.name + "' was not set.");
@@ -208,6 +216,7 @@ angular.module('ux').factory('expandRows', function () {
                 }
                 inst.scrollModel.scrollIntoView(index, true);
                 inst.dispatch(exports.datagrid.events.ROW_TRANSITION_COMPLETE);
+                opening = false;
             }, 0);
         }
 

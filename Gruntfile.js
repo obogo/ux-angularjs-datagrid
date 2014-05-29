@@ -125,14 +125,14 @@ module.exports = function (grunt) {
                 }
             }
         },
-        copy: {
-            main: {
-                files: [
-                    // include files withing path
-                    {expand: true, cwd: 'build/latest/', src: ['**'], dest: 'build/v<%= pkg.version %>/'}
-                ]
-            }
-        },
+//        copy: {
+//            main: {
+//                files: [
+//                    // include files withing path
+//                    {expand: true, cwd: 'build/latest/', src: ['**'], dest: 'build/v<%= pkg.version %>/'}
+//                ]
+//            }
+//        },
         //https://github.com/gruntjs/grunt-contrib-watch
         watch: {
             scripts: {
@@ -166,6 +166,6 @@ module.exports = function (grunt) {
 
     // Default task(s).
 //    grunt.registerTask('default', ['jshint', 'uglify', 'compress']);
-    grunt.registerTask('default', ['jshint', 'uglify', 'copy']);
+    grunt.registerTask('default', ['jshint', 'uglify']);
 
 };

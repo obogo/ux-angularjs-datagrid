@@ -1,3 +1,6 @@
+[Releases](https://github.com/webux/ux-angularjs-datagrid/releases)
+Release 1.0.0 [Source Code (zip)](https://github.com/webux/ux-angularjs-datagrid/archive/v1.0.0.zip) [Source Code (tar.gz)](https://github.com/webux/ux-angularjs-datagrid/archive/v1.0.0.tar.gz)
+
 ## ux-datagrid : An Angular DataGrid ##
 ----------
 **Highly performant list and datagrid for AngularJS** designed for mobile devices which just makes it all the better on a desktop.

@@ -1,4 +1,5 @@
 [Releases](https://github.com/webux/ux-angularjs-datagrid/releases)
+Release 1.0.1 [Source Code (zip)](https://github.com/webux/ux-angularjs-datagrid/archive/v1.0.1.zip) [Source Code (tar.gz)](https://github.com/webux/ux-angularjs-datagrid/archive/v1.0.1.tar.gz)
 Release 1.0.0 [Source Code (zip)](https://github.com/webux/ux-angularjs-datagrid/archive/v1.0.0.zip) [Source Code (tar.gz)](https://github.com/webux/ux-angularjs-datagrid/archive/v1.0.0.tar.gz)
 
 ## ux-datagrid : An Angular DataGrid ##

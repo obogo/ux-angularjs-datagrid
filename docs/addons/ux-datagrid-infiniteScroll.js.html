@@ -31,12 +31,6 @@
         <a href="#addextrarow">addExtraRow</a>
       </div>
       <div class="heading h3">
-        <a href="#calculatebottomoffset">calculateBottomOffset</a>
-      </div>
-      <div class="heading h3">
-        <a href="#onupdatescroll">onUpdateScroll</a>
-      </div>
-      <div class="heading h3">
         <a href="#enable">enable</a>
       </div>
       <div class="heading h3">
@@ -102,15 +96,11 @@ License: MIT.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-<span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_TOP</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onScrollToTop&quot;</span><span class="p">;</span>
-
-<span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_BOTTOM</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onScrollToBottom&quot;</span><span class="p">;</span>
-
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;infiniteScroll&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">return</span> <span class="kd">function</span> <span class="nx">infiniteScroll</span><span class="p">(</span><span class="nx">inst</span><span class="p">,</span> <span class="nx">$filter</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">bottomOffset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">scrollOffset</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">loadingRow</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">scrollOffset</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">loadingRow</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nx">_template</span><span class="o">:</span> <span class="s2">&quot;loadingRow&quot;</span>
-        <span class="p">},</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">lastScroll</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+        <span class="p">},</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[];</span>
 
 </pre></div>
         </td>
@@ -256,82 +246,12 @@ to modify it to load the template for loading row matching on the _template prop
         <span class="nx">result</span><span class="p">.</span><span class="nx">addExtraRow</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">scrollOffset</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">;</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">data</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">loadingRow</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;loadingInfiniteRowData&quot;</span><span class="p">);</span>
                 <span class="nx">data</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">loadingRow</span><span class="p">);</span>
             <span class="p">}</span>
         <span class="p">};</span>
-
-</pre></div>
-        </td>
-      </tr>
-      <tr>
-        <td class="docs"><div class="dox">
-  <div class="summary">
-<div class="pilwrap" id="calculatebottomoffset">
-  <h3>
-    <a href="#calculatebottomoffset" name="calculatebottomoffset" class="pilcrow">&#182;</a>
-    <a name="calculateBottomOffset">calculateBottomOffset</a>
-  </h3>
-</div>
-
-
-<p>calculate the scroll value for when the grid is scrolled to the bottom.</p>
-  </div>
-  <div class="body">
-  </div>
-</div>
-        </td>
-        <td class="code highlight"><div class="highlight"><pre>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">calculateBottomOffset</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">calculateBottomOffset</span><span class="p">()</span> <span class="p">{</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">rowsLength</span><span class="p">)</span> <span class="p">{</span>
-                <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">rowsLength</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
-                <span class="nx">bottomOffset</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowOffset</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="o">-</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getViewportHeight</span><span class="p">()</span> <span class="o">+</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowHeight</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
-            <span class="p">}</span>
-        <span class="p">};</span>
-
-</pre></div>
-        </td>
-      </tr>
-      <tr>
-        <td class="docs"><div class="dox">
-  <div class="summary">
-<div class="pilwrap" id="onupdatescroll">
-  <h3>
-    <a href="#onupdatescroll" name="onupdatescroll" class="pilcrow">&#182;</a>
-    <a name="onUpdateScroll">onUpdateScroll</a>
-  </h3>
-</div>
-
-
-<p>When the scroll value updates. Determine if we are at the top or the bottom and dispatch if so.</p>
-  </div>
-  <div class="body">
-  </div>
-  <div class="details">
-    <div class="dox_tag_title">Params</div>
-    <div class="dox_tag_detail">
-      <span class="dox_tag_name">event</span>
-    </div>
-    <div class="dox_tag_detail">
-      <span class="dox_tag_name">scroll
-</span>
-    </div>
-  </div>
-</div>
-        </td>
-        <td class="code highlight"><div class="highlight"><pre>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">onUpdateScroll</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">onUpdateScroll</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">values</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">!==</span> <span class="nx">lastScroll</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">lastScroll</span> <span class="o">=</span> <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">;</span>
-                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">bottomOffset</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="nx">result</span><span class="p">.</span><span class="nx">calculateBottomOffset</span><span class="p">();</span>
-                    <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="nx">scrollOffset</span> <span class="o">!==</span> <span class="o">-</span><span class="mi">1</span> <span class="o">?</span> <span class="nx">scrollOffset</span> <span class="o">:</span> <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-                <span class="p">}</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&amp;&amp;</span> <span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&gt;=</span> <span class="nx">bottomOffset</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_BOTTOM</span><span class="p">);</span>
-                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_TOP</span><span class="p">);</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">afterRowsAdded</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">removeClass</span><span class="p">(</span><span class="s2">&quot;loadingInfiniteRowData&quot;</span><span class="p">);</span>
         <span class="p">};</span>
 
 </pre></div>
@@ -357,8 +277,7 @@ to modify it to load the template for loading row matching on the _template prop
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">result</span><span class="p">.</span><span class="nx">enable</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
             <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_DATA_CHANGE</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">onBeforeDataChange</span><span class="p">));</span>
-            <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_RENDER_AFTER_DATA_CHANGE</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">calculateBottomOffset</span><span class="p">));</span>
-            <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_STOP</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">onUpdateScroll</span><span class="p">));</span>
+            <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_RENDER_AFTER_DATA_CHANGE</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">afterRowsAdded</span><span class="p">));</span>
         <span class="p">};</span>
 
 </pre></div>

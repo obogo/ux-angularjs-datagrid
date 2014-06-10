@@ -1,0 +1,7 @@
+.loadingInfiniteRowData .datagrid-chunk {
+    opacity: 1;
+}
+
+.loadingInfiniteRowData .uncompiled > * {
+    opacity: 1;
+}

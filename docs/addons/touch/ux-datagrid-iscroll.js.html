@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ux-datagrid-iscroll.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../doc-style.css" />
+  <script src="../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../", thisFile = "Users/wes/PhpstormProjects/wes/webux/ux-datagrid//addons/touch/ux-datagrid-iscroll.js", defaultSidebar = true;
+  </script>
+  <script src="../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+      <div class="heading h2">
+        <a href="#iscrolladdon">iScrollAddon</a>
+      </div>
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>ux-datagrid-iscroll.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>uxDatagrid v.1.0.0
+(c) 2014, WebUX
+<a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
+License: MIT.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="iscrolladdon">
+  <h2>
+    <a href="#iscrolladdon" name="iscrolladdon" class="pilcrow">&#182;</a>
+    <a name="iScrollAddon">iScrollAddon</a>
+  </h2>
+</div>
+
+
+<p>This requires <a href="https://github.com/cubiq/iscroll">iscroll.js</a> to work.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;iScrollAddon&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>This is only needed for IOS devices. Android devices work fine without it.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">isIOS</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">IScroll</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;IScroll (https://github.com/cubiq/iscroll) is required to use the iScrollAddon.&quot;</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;iScrollAddon&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;purple&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">scrolling</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">intv</span><span class="p">,</span> <span class="nx">myScroll</span><span class="p">,</span> <span class="nx">originalScrollModel</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">,</span> <span class="nx">unwatchRefreshRender</span><span class="p">,</span> <span class="nx">scrollToIntv</span><span class="p">,</span> <span class="nx">unwatchSetup</span><span class="p">,</span> <span class="nx">lastY</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">unwatchSetup</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_READY</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">removeScrollListener</span><span class="p">();</span>
+            <span class="nx">unwatchSetup</span><span class="p">();</span>
+        <span class="p">});</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_HEIGHTS_UPDATED_RENDER</span><span class="p">,</span> <span class="nx">refresh</span><span class="p">));</span>
+        <span class="kd">function</span> <span class="nx">refresh</span><span class="p">()</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="nx">mouseWheel</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nx">scrollbars</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nx">bounce</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nx">bindToWrapper</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nx">tap</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nx">interactiveScrollbars</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nx">deceleration</span><span class="o">:</span> <span class="p">.</span><span class="mi">005</span><span class="p">,</span>
+                <span class="nx">click</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nx">startY</span><span class="o">:</span> <span class="o">-</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scrollHistory</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollHistory</span><span class="p">.</span><span class="nx">getCurrentScroll</span><span class="p">()</span> <span class="o">||</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">||</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="p">};</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">myScroll</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">style</span><span class="p">.</span><span class="nx">overflowY</span> <span class="o">=</span> <span class="s2">&quot;hidden&quot;</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>TODO: these options need to be passed in.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;IScroll Init at startY %s&quot;</span><span class="p">,</span> <span class="nx">options</span><span class="p">.</span><span class="nx">startY</span><span class="p">);</span>
+                <span class="nx">myScroll</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">IScroll</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">options</span><span class="p">);</span>
+                <span class="nx">myScroll</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;beforeScrollStart&quot;</span><span class="p">,</span> <span class="nx">beforeScrollStart</span><span class="p">);</span>
+                <span class="nx">myScroll</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;scrollStart&quot;</span><span class="p">,</span> <span class="nx">beforeScrollStart</span><span class="p">);</span>
+                <span class="nx">myScroll</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;scrollEnd&quot;</span><span class="p">,</span> <span class="nx">onScrollEnd</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="nx">myScroll</span><span class="p">.</span><span class="nx">_initEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+            <span class="nx">myScroll</span><span class="p">.</span><span class="nx">scroller</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getContent</span><span class="p">()[</span><span class="mi">0</span><span class="p">];</span>
+            <span class="nx">myScroll</span><span class="p">.</span><span class="nx">scrollerStyle</span> <span class="o">=</span> <span class="nx">myScroll</span><span class="p">.</span><span class="nx">scroller</span><span class="p">.</span><span class="nx">style</span><span class="p">;</span>
+            <span class="nx">myScroll</span><span class="p">.</span><span class="nx">_initEvents</span><span class="p">();</span>
+            <span class="nx">myScroll</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">options</span><span class="p">.</span><span class="nx">startY</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>update the transform.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">iScroll</span> <span class="o">=</span> <span class="nx">myScroll</span><span class="p">;</span>
+            <span class="nx">refeshRender</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">refeshRender</span><span class="p">()</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+</div>
+<p>iScroll always needs to wait till the next frame for offsetHeight to update before refresh.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">clearRefreshRender</span><span class="p">();</span>
+            <span class="nx">unwatchRefreshRender</span> <span class="o">=</span> <span class="nx">setInterval</span><span class="p">(</span><span class="nx">onRefreshRender</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">stop</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">intv</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">beforeScrollStart</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">stop</span><span class="p">();</span>
+            <span class="nx">scrolling</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_START</span><span class="p">,</span> <span class="o">-</span><span class="nx">myScroll</span><span class="p">.</span><span class="nx">y</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">onScrollEnd</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">stop</span><span class="p">();</span>
+            <span class="nx">intv</span> <span class="o">=</span> <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">scrollEnd</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">updateDelay</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">scrollEnd</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">=</span> <span class="o">-</span><span class="nx">myScroll</span><span class="p">.</span><span class="nx">y</span><span class="p">;</span>
+            <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">onScrollingStop</span><span class="p">();</span>
+            <span class="nx">scrolling</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">clearRefreshRender</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">clearInterval</span><span class="p">(</span><span class="nx">unwatchRefreshRender</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">onRefreshRender</span><span class="p">()</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">h</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">clearRefreshRender</span><span class="p">();</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">h</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">offsetHeight</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">clearRefreshRender</span><span class="p">();</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  refresh iscroll height:%s/%s&quot;</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getContentHeight</span><span class="p">());</span>
+                <span class="nx">myScroll</span><span class="p">.</span><span class="nx">refresh</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">onUpdateScroll</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">forceValue</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">forceValue</span> <span class="o">!==</span> <span class="kc">undefined</span> <span class="o">?</span> <span class="o">-</span><span class="nx">forceValue</span> <span class="o">:</span> <span class="nx">myScroll</span><span class="p">.</span><span class="nx">y</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">scrolling</span> <span class="o">&amp;&amp;</span> <span class="nx">value</span> <span class="o">!==</span> <span class="nx">lastY</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">speed</span> <span class="o">=</span> <span class="nx">value</span> <span class="o">-</span> <span class="nx">lastY</span><span class="p">;</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">absSpeed</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">speed</span><span class="p">);</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">setScroll</span><span class="p">(</span><span class="o">-</span><span class="nx">value</span><span class="p">);</span>
+                <span class="nx">lastY</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scrollPercent</span> <span class="o">=</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">/</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getContentHeight</span><span class="p">()</span> <span class="o">*</span> <span class="mi">100</span><span class="p">).</span><span class="nx">toFixed</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">fireOnScroll</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getScroll</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">myScroll</span> <span class="o">&amp;&amp;</span> <span class="nx">myScroll</span><span class="p">.</span><span class="nx">y</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">setScroll</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setScroll %s&quot;</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">waitForStop</span> <span class="o">=</span> <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">waitForStop</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">scrollTo</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">immediately</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;scrollTo %s&quot;</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">scrollTop</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">scrollTop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">myScroll</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">refresh</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="nx">value</span> <span class="o">=</span> <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">capScrollValue</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+            <span class="nx">myScroll</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="nx">value</span><span class="p">,</span> <span class="nx">immediately</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="mi">200</span><span class="p">);</span>
+            <span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">scrollToIntv</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">immediately</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">||</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">scrolling</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                    <span class="nx">result</span><span class="p">.</span><span class="nx">onUpdateScroll</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+                    <span class="nx">scrolling</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+                    <span class="nx">result</span><span class="p">.</span><span class="nx">onScrollingStop</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">scrollToIntv</span> <span class="o">=</span> <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="nx">result</span><span class="p">.</span><span class="nx">onScrollingStop</span><span class="p">();</span>
+                <span class="p">},</span> <span class="mi">200</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">scrollToIndex</span> <span class="o">=</span> <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">scrollToIndex</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">scrollToItem</span> <span class="o">=</span> <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">scrollToItem</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">scrollIntoView</span> <span class="o">=</span> <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">scrollIntoView</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">scrollToBottom</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">immediately</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getContentHeight</span><span class="p">()</span> <span class="o">-</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getViewportHeight</span><span class="p">();</span>
+            <span class="nx">myScroll</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="nx">value</span><span class="p">,</span> <span class="nx">immediately</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="mi">200</span><span class="p">);</span>
+        <span class="p">};</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">onScrollingStop</span> <span class="o">=</span> <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">onScrollingStop</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">onUpdateScroll</span> <span class="o">=</span> <span class="nx">onUpdateScroll</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">fireOnScroll</span> <span class="o">=</span> <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">fireOnScroll</span><span class="p">;</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_HEIGHTS_UPDATED_RENDER</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">scrollTop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">myScroll</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">onRefreshRender</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}));</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">destroy</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">destroy</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">unwatchSetup</span><span class="p">();</span>
+            <span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">scrollToIntv</span><span class="p">);</span>
+            <span class="nx">stop</span><span class="p">();</span>
+            <span class="nx">originalScrollModel</span><span class="p">.</span><span class="nx">destroy</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">myScroll</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">myScroll</span><span class="p">.</span><span class="nx">destroy</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+<span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

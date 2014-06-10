@@ -97,6 +97,9 @@ module.exports = function (grunt) {
                     'build/latest/addons/ux-<%= pkg.filename %>-scrollBar.js': [
                         'src/addons/scrollBar.js'
                     ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-scrollBounce.js': [
+                        'src/addons/scrollBounce.js'
+                    ],
                     'build/latest/other/ux-doubleScroll.js': [
                         'src/other/doubleScroll.js'
                     ]

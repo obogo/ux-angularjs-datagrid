@@ -187,6 +187,13 @@ app.config(function ($routeProvider) {
                 $scope.items = createSimpleList();
             }
         })
+        .when('/addons/scrollBounce', {
+            templateUrl: "partials/addons/scrollBounce.html",
+            controller: function ($scope) {
+                $scope.name = "Addons >> Scroll Bounce";
+                $scope.items = createSimpleList(200);
+            }
+        })
         .when('/addons/scrollHistory', {
             templateUrl: "partials/addons/scrollHistory.html",
             controller: function ($scope) {

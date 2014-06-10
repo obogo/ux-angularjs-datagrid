@@ -10,15 +10,11 @@
  * Datagrid infinite scroll adds more data when the list scrolls to the bottom.
  * @type {string}
  */
-ux.datagrid.events.ON_SCROLL_TO_TOP = "datagrid:onScrollToTop";
-
-ux.datagrid.events.ON_SCROLL_TO_BOTTOM = "datagrid:onScrollToBottom";
-
 angular.module("ux").factory("infiniteScroll", function() {
     return function infiniteScroll(inst, $filter) {
-        var result = {}, bottomOffset = 0, scrollOffset = -1, loadingRow = {
+        var result = {}, scrollOffset = -1, loadingRow = {
             _template: "loadingRow"
-        }, unwatchers = [], lastScroll = -1;
+        }, unwatchers = [];
         /**
          * Set the default values for the infiniteScroll options.
          * enable: true, limit: 0
@@ -70,38 +66,12 @@ angular.module("ux").factory("infiniteScroll", function() {
         result.addExtraRow = function(data) {
             scrollOffset = inst.values.scroll;
             if (data.length && data[data.length - 1] !== loadingRow) {
+                inst.element.addClass("loadingInfiniteRowData");
                 data.push(loadingRow);
             }
         };
-        /**
-         * ###<a name="calculateBottomOffset">calculateBottomOffset</a>###
-         * calculate the scroll value for when the grid is scrolled to the bottom.
-         */
-        result.calculateBottomOffset = function calculateBottomOffset() {
-            if (inst.rowsLength) {
-                var i = inst.rowsLength - 1;
-                bottomOffset = inst.getRowOffset(i) - inst.getViewportHeight() + inst.getRowHeight(i);
-            }
-        };
-        /**
-         * ###<a name="onUpdateScroll">onUpdateScroll</a>###
-         * When the scroll value updates. Determine if we are at the top or the bottom and dispatch if so.
-         * @param event
-         * @param scroll
-         */
-        result.onUpdateScroll = function onUpdateScroll(event, values) {
-            if (values.scroll !== lastScroll) {
-                lastScroll = values.scroll;
-                if (!bottomOffset) {
-                    result.calculateBottomOffset();
-                    inst.scrollModel.scrollTo(scrollOffset !== -1 ? scrollOffset : values.scroll, true);
-                }
-                if (values.scroll && values.scroll >= bottomOffset) {
-                    inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_BOTTOM);
-                } else if (values.scroll <= 0) {
-                    inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_TOP);
-                }
-            }
+        result.afterRowsAdded = function(event) {
+            inst.element.removeClass("loadingInfiniteRowData");
         };
         /**
          * ###<a name="enable">enable</a>###
@@ -109,8 +79,7 @@ angular.module("ux").factory("infiniteScroll", function() {
          */
         result.enable = function() {
             unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_BEFORE_DATA_CHANGE, result.onBeforeDataChange));
-            unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
-            unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_SCROLL_STOP, result.onUpdateScroll));
+            unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.afterRowsAdded));
         };
         /**
          * ###<a name="disable">disable</a>###

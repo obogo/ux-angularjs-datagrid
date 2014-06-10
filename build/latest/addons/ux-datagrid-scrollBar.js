@@ -51,8 +51,7 @@ angular.module("ux").factory("scrollBar", function() {
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_SCROLL_START, onScrollStart));
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_SCROLL, onScrollMove));
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_SCROLL_STOP, onScrollEnd));
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER, updateScrollBar));
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_STARTUP_COMPLETE, updateScrollBar));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_RENDER, updateScrollBar));
         result.destroy = function() {
             scrollBarElm.remove();
             scrollBarElm = null;

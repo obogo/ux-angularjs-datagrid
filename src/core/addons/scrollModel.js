@@ -3,6 +3,7 @@ exports.datagrid.events.ON_SCROLL_START = "datagrid:scrollStart";
 exports.datagrid.events.ON_SCROLL_STOP = "datagrid:scrollStop";
 exports.datagrid.events.ON_TOUCH_DOWN = "datagrid:touchDown";
 exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
+exports.datagrid.events.ON_TOUCH_MOVE = "datagrid:touchMove";
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
     var result = exports.logWrapper('scrollModel', {}, 'orange', inst.dispatch),
@@ -11,6 +12,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         waitForStopIntv,
         hasScrollListener = false,
         lastScroll,
+        bottomOffset = 0,
         lastRenderTime,
         // start easing
         startOffsetY,
@@ -128,6 +130,11 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         inst.values.touchDown = true;
         offsetY = startOffsetY = getTouches(event)[0].clientY || 0;
         offsetX = startOffsetX = getTouches(event)[0].clientX || 0;
+        if (inst.values.scroll < 0) {
+            inst.values.scroll = 0;
+        } else if (inst.values.scroll > bottomOffset) {
+            inst.values.scroll = bottomOffset;
+        }
         startScroll = inst.values.scroll;
         lastDeltaY = 0;
         lastDeltaX = 0;
@@ -145,6 +152,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             lastDeltaY = deltaY;
             lastDeltaX = deltaX;
         }
+        inst.dispatch(exports.datagrid.events.ON_TOUCH_MOVE, speed, deltaY, lastDeltaY);
     };
 
     result.onTouchEnd = function onTouchEnd(event) {
@@ -311,11 +319,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.onScrollingStop = function onScrollingStop() {
         result.log("onScrollingStop %s", inst.values.scroll);
+        result.checkForEnds();
         inst.values.speed = 0;
         inst.values.absSpeed = 0;
         inst.render();
         result.fireOnScroll();
         inst.dispatch(exports.datagrid.events.ON_SCROLL_STOP, inst.values);
+        result.calculateBottomOffset();
     };
 
     /**
@@ -402,6 +412,31 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         inst.scrollModel.scrollTo(value >= 0 ? value : 0, immediately);
     };
 
+    /**
+     * ###<a name="calculateBottomOffset">calculateBottomOffset</a>###
+     * calculate the scroll value for when the grid is scrolled to the bottom.
+     */
+    result.calculateBottomOffset = function () {
+        if (inst.rowsLength) {
+            var i = inst.rowsLength - 1;
+            result.bottomOffset = bottomOffset = (inst.getRowOffset(i) - inst.getViewportHeight()) + inst.getRowHeight(i);
+        }
+    };
+
+    /**
+     * ###<a name="onUpdateScroll">onUpdateScroll</a>###
+     * When the scroll value updates. Determine if we are at the top or the bottom and dispatch if so.
+     */
+    result.checkForEnds = function () {
+        if (inst.values.scroll && inst.values.scroll >= bottomOffset) {
+            console.log("scrollToBottom %s > %s", inst.values.scroll, bottomOffset);
+            inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_BOTTOM, inst.values.speed);
+        } else if (inst.values.scroll <= 0) {
+            console.log("scrollToTop");
+            inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_TOP, inst.values.speed);
+        }
+    };
+
     function destroy() {
         clearTimeout(waitForStopIntv);
         result.destroyLogger();
@@ -421,6 +456,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED, onAfterHeightsUpdated));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_RESET, onAfterReset));
+    inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
 
     result.destroy = destroy;
 

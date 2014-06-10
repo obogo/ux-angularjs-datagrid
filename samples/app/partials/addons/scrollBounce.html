@@ -1,0 +1,16 @@
+<div class="stats">
+    <div class="page-title">{{name}}</div>
+    <div>Show the stats for the datagrid in the list it is using.</div>
+</div>
+<div class="my-container">
+    <div class="listA">
+        <!--// this is the datagrid //-->
+        <div data-ux-datagrid="items" class="datagrid" data-addons="scrollBounce">
+            <script type="template/html" data-template-name="default" data-template-item="item">
+                <div class="row {{fake}}">
+                    <div class="text">{{item.id}} {{$id}} {{counter}}</div>
+                </div>
+            </script>
+        </div>
+    </div>
+</div>

@@ -85,6 +85,8 @@ exports.datagrid = {
         ON_BEFORE_ROW_DEACTIVATE: 'datagrid:onBeforeRowDeactivate', // handy for knowing when to remove jquery listeners.
         ON_AFTER_ROW_ACTIVATE: 'datagrid:onAFterRowActivate', // handy for turning jquery listeners back on.
         ON_ROW_COMPILE: 'datagrid:onRowCompile',
+        ON_SCROLL_TO_TOP: "datagrid:onScrollToTop",
+        ON_SCROLL_TO_BOTTOM: 'datagrid:onScrollToBottom',
         /**
          * #### Driving Events ####
          * - **<a name="events.RESIZE">RESIZE</a>** tells the datagrid to resize. This will update all height calculations.
@@ -158,7 +160,7 @@ exports.datagrid = {
             // - **<a name="options.scrollModel.speed">scrollModel.speed</a>** the factor of speed multiplication when determining how far the scroller should coast in manual mode.
             speed: 5,
             // - **<a name="options.scrollModel.manual">scrollModel.manual</a>** if set to true then touch move events will be used to scroll and calculate coasting.
-            manual: false,
+            manual: true,
             // - **<a name="options.scrollModel.simulateClick">scrollModel.simulateClick</a>** defaulted to true for android, and false for iOS.
             simulateClick: !isIOS
         },

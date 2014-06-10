@@ -112,6 +112,9 @@ exports.css = (function CSS() {
             }
 
             styleSheet.addRule(selector, style);
+            if (styleSheet.rules[styleSheet.rules.length - 1].cssText === selector + ' { }') {
+                throw new Error("CSS failed to write");
+            }
         } else if (styleSheet.insertRule) {
             for (i = 0; i < styleSheet.cssRules.length; i++) {
                 if (styleSheet.cssRules[i].selectorText && styleSheet.cssRules[i].selectorText.toLowerCase() === selector.toLowerCase()) {

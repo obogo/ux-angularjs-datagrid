@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ux-datagrid-memoryOptimizer.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../doc-style.css" />
+  <script src="../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../", thisFile = "Users/wes/PhpstormProjects/wes/webux/ux-datagrid//addons/ux-datagrid-memoryOptimizer.js", defaultSidebar = true;
+  </script>
+  <script src="../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+      <div class="heading h3">
+        <a href="#disablecreep">disableCreep</a>
+      </div>
+      <div class="heading h3">
+        <a href="#optimizerows">optimizeRows</a>
+      </div>
+      <div class="heading h3">
+        <a href="#decompilechunk">decompileChunk</a>
+      </div>
+      <div class="heading h3">
+        <a href="#inrange">inRange</a>
+      </div>
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>ux-datagrid-memoryOptimizer.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>uxDatagrid v.1.0.0
+(c) 2014, WebUX
+<a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
+License: MIT.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_MEMORY_OPTIMIZED</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onMemoryOptimized&quot;</span><span class="p">;</span>
+
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;memoryOptimizer&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">memoryOptimizer</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">memoryOptimizer</span> <span class="o">||</span> <span class="p">{};</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;memoryOptimizer&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;redOrange&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">defaultOptions</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nx">range</span><span class="o">:</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">creepLimit</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">||</span> <span class="mi">200</span>
+        <span class="p">},</span> <span class="nx">options</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">memoryOptimizer</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">defaultOptions</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">memoryOptimizer</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="disablecreep">
+  <h3>
+    <a href="#disablecreep" name="disablecreep" class="pilcrow">&#182;</a>
+    <a name="disableCreep">disableCreep</a>
+  </h3>
+</div>
+
+
+<p>Since this will fight against creep render creepRender if the values are not in range values will
+be factored to remain in range.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">disableCreep</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">creepRender</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">creepRender</span> <span class="o">||</span> <span class="p">{};</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">creepLimit</span> <span class="o">&gt;</span> <span class="nx">options</span><span class="p">.</span><span class="nx">range</span> <span class="o">*</span> <span class="p">.</span><span class="mi">5</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">creepLimit</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">range</span> <span class="o">*</span> <span class="p">.</span><span class="mi">5</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">creepRenderModel</span><span class="p">.</span><span class="nx">disable</span><span class="p">();</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="optimizerows">
+  <h3>
+    <a href="#optimizerows" name="optimizerows" class="pilcrow">&#182;</a>
+    <a name="optimizeRows">optimizeRows</a>
+  </h3>
+</div>
+
+
+<p>We are going to remove rows that are outside of our threshold range. This will access all chunks that are not
+in the active range and remove their dom and destroy their scopes.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">optimizeRows</span><span class="p">()</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>first we need to destroy each scope that is not active.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">iLen</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scopes</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="nx">indexes</span><span class="p">,</span> <span class="nx">chunk</span><span class="p">,</span> <span class="nx">chunks</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">chunksLength</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">iLen</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scopes</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">inRange</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nx">indexes</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">chunkModel</span><span class="p">.</span><span class="nx">getRowIndexes</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+                    <span class="nx">indexes</span><span class="p">.</span><span class="nx">pop</span><span class="p">();</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>drop off the row. we only want it's parent chunk.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="nx">chunk</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">chunkModel</span><span class="p">.</span><span class="nx">getItemByIndexes</span><span class="p">(</span><span class="nx">indexes</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">chunks</span><span class="p">[</span><span class="nx">chunk</span><span class="p">.</span><span class="nx">getId</span><span class="p">()])</span> <span class="p">{</span>
+                        <span class="nx">chunks</span><span class="p">[</span><span class="nx">chunk</span><span class="p">.</span><span class="nx">getId</span><span class="p">()]</span> <span class="o">=</span> <span class="nx">chunk</span><span class="p">;</span>
+                        <span class="nx">chunksLength</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+                <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">chunksLength</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">chunks</span><span class="p">,</span> <span class="nx">decompileChunk</span><span class="p">);</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">gc</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="decompilechunk">
+  <h3>
+    <a href="#decompilechunk" name="decompilechunk" class="pilcrow">&#182;</a>
+    <a name="decompileChunk">decompileChunk</a>
+  </h3>
+</div>
+
+
+<p>Decompile the chunk and destroy scopes and dom.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">chunk
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">decompileChunk</span><span class="p">(</span><span class="nx">chunk</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  decompile %s %s-%s&quot;</span><span class="p">,</span> <span class="nx">chunk</span><span class="p">.</span><span class="nx">getId</span><span class="p">(),</span> <span class="nx">chunk</span><span class="p">.</span><span class="nx">min</span><span class="p">,</span> <span class="nx">chunk</span><span class="p">.</span><span class="nx">max</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="nx">chunk</span><span class="p">.</span><span class="nx">min</span><span class="p">,</span> <span class="nx">iLen</span> <span class="o">=</span> <span class="nx">chunk</span><span class="p">.</span><span class="nx">max</span><span class="p">;</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">iLen</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scopes</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">s</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scopes</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">activateScope</span><span class="p">(</span><span class="nx">s</span><span class="p">);</span>
+                    <span class="nx">s</span><span class="p">.</span><span class="nx">$destroy</span><span class="p">();</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">scopes</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">chunk</span><span class="p">.</span><span class="nx">decompile</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">chunks</span><span class="p">.</span><span class="nx">chunkReadyClass</span><span class="p">);</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="inrange">
+  <h3>
+    <a href="#inrange" name="inrange" class="pilcrow">&#182;</a>
+    <a name="inRange">inRange</a>
+  </h3>
+</div>
+
+
+<p>Check to see if the index is within the activeRange plus options range.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">index</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">inRange</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">min</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span> <span class="o">-</span> <span class="nx">options</span><span class="p">.</span><span class="nx">range</span><span class="p">,</span> <span class="nx">max</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">+</span> <span class="nx">options</span><span class="p">.</span><span class="nx">range</span><span class="p">;</span>
+            <span class="nx">min</span> <span class="o">=</span> <span class="nx">min</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="nx">min</span><span class="p">;</span>
+            <span class="k">return</span> <span class="nx">index</span> <span class="o">&gt;=</span> <span class="nx">min</span> <span class="o">&amp;&amp;</span> <span class="nx">index</span> <span class="o">&lt;</span> <span class="nx">max</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_UPDATE_WATCHERS</span><span class="p">,</span> <span class="nx">optimizeRows</span><span class="p">));</span>
+        <span class="nx">disableCreep</span><span class="p">();</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">memoryOptimizer</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+<span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

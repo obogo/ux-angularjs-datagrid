@@ -137,7 +137,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     /**
-     * ###<a name="createContent">createConent</a>###
+     * ###<a name="createContent">createContent</a>###
      * The [content](#content) dom element is the only direct child created by the datagrid.
      * It is used so append all of the `chunks` so that the it can be scrolled.
      * If the dom element is provided with the class [content](#content) then that dom element will be used

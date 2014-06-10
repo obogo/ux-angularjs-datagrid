@@ -104,6 +104,8 @@ exports.datagrid = {
         ON_AFTER_ROW_ACTIVATE: "datagrid:onAFterRowActivate",
         // handy for turning jquery listeners back on.
         ON_ROW_COMPILE: "datagrid:onRowCompile",
+        ON_SCROLL_TO_TOP: "datagrid:onScrollToTop",
+        ON_SCROLL_TO_BOTTOM: "datagrid:onScrollToBottom",
         /**
          * #### Driving Events ####
          * - **<a name="events.RESIZE">RESIZE</a>** tells the datagrid to resize. This will update all height calculations.
@@ -177,7 +179,7 @@ exports.datagrid = {
             // - **<a name="options.scrollModel.speed">scrollModel.speed</a>** the factor of speed multiplication when determining how far the scroller should coast in manual mode.
             speed: 5,
             // - **<a name="options.scrollModel.manual">scrollModel.manual</a>** if set to true then touch move events will be used to scroll and calculate coasting.
-            manual: false,
+            manual: true,
             // - **<a name="options.scrollModel.simulateClick">scrollModel.simulateClick</a>** defaulted to true for android, and false for iOS.
             simulateClick: !isIOS
         },
@@ -362,6 +364,9 @@ exports.css = function CSS() {
                 }
             }
             styleSheet.addRule(selector, style);
+            if (styleSheet.rules[styleSheet.rules.length - 1].cssText === selector + " { }") {
+                throw new Error("CSS failed to write");
+            }
         } else if (styleSheet.insertRule) {
             for (i = 0; i < styleSheet.cssRules.length; i++) {
                 if (styleSheet.cssRules[i].selectorText && styleSheet.cssRules[i].selectorText.toLowerCase() === selector.toLowerCase()) {
@@ -549,7 +554,8 @@ function filter(list, method, data) {
 exports.filter = filter;
 
 /**
- *
+ * ##dispatcher##
+ * Behavior modifier for event dispatching.
  * @param {Object} target - the object to apply the methods to.
  * @param {Object} scope - the object that the methods will be applied from
  * @param {object} map - custom names of what methods to map from scope. such as _$emit_ and _$broadcast_.
@@ -557,7 +563,8 @@ exports.filter = filter;
 function dispatcher(target, scope, map) {
     var listeners = {};
     /**
-     * **off** removeEventListener from this object instance. given the event listened for and the callback reference.
+     * ###off###
+     * removeEventListener from this object instance. given the event listened for and the callback reference.
      * @param event
      * @param callback
      */
@@ -576,7 +583,8 @@ function dispatcher(target, scope, map) {
         }
     }
     /**
-     * **on** addEventListener to this object instance.
+     * ###on###
+     * addEventListener to this object instance.
      * @param {String} event
      * @param {Function} callback
      * @returns {Function} - removeListener or unwatch function.
@@ -589,7 +597,31 @@ function dispatcher(target, scope, map) {
         };
     }
     /**
-     * **fire** fire the callback with arguments.
+     * ###onOnce###
+     * addEventListener that gets remove with the first call.
+     * @param event
+     * @param callback
+     * @returns {Function} - removeListener or unwatch function.
+     */
+    function onOnce(event, callback) {
+        function fn() {
+            off(event, fn);
+            callback.apply(scope || target, arguments);
+        }
+        return on(event, fn);
+    }
+    /**
+     * ###getListeners###
+     * get the listeners from the dispatcher.
+     * @param {String} event
+     * @returns {*}
+     */
+    function getListeners(event) {
+        return listeners[event];
+    }
+    /**
+     * ###fire###
+     * fire the callback with arguments.
      * @param {Function} callback
      * @param {Array} args
      * @returns {*}
@@ -598,7 +630,8 @@ function dispatcher(target, scope, map) {
         return callback && callback.apply(target, args);
     }
     /**
-     * **dispatch** fire the event and any arguments that are passed.
+     * ###dispatch###
+     * fire the event and any arguments that are passed.
      * @param {String} event
      */
     function dispatch(event) {
@@ -610,22 +643,21 @@ function dispatcher(target, scope, map) {
             }
         }
     }
-    /**
-     * **Dispatcher API**
-     * - on: add event listener
-     * - off: remove event listener
-     * - dispatch: fire event.
-     */
     if (scope && map) {
         target.on = scope[map.on] && scope[map.on].bind(scope);
         target.off = scope[map.off] && scope[map.off].bind(scope);
+        target.onOnce = scope[map.onOnce] && scope[map.onOnce].bind(scope);
         target.dispatch = scope[map.dispatch].bind(scope);
     } else {
         target.on = on;
         target.off = off;
+        target.onOnce = onOnce;
         target.dispatch = dispatch;
     }
+    target.getListeners = getListeners;
 }
+
+exports.dispatcher = dispatcher;
 
 /**
  * ###<a name="extend">extend</a>###
@@ -1048,7 +1080,7 @@ function Datagrid(scope, element, attr, $compile) {
         flow.run();
     }
     /**
-     * ###<a name="createContent">createConent</a>###
+     * ###<a name="createContent">createContent</a>###
      * The [content](#content) dom element is the only direct child created by the datagrid.
      * It is used so append all of the `chunks` so that the it can be scrolled.
      * If the dom element is provided with the class [content](#content) then that dom element will be used
@@ -3336,8 +3368,10 @@ exports.datagrid.events.ON_TOUCH_DOWN = "datagrid:touchDown";
 
 exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
 
+exports.datagrid.events.ON_TOUCH_MOVE = "datagrid:touchMove";
+
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
-    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, waitForStopIntv, hasScrollListener = false, lastScroll, lastRenderTime, // start easing
+    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, waitForStopIntv, hasScrollListener = false, lastScroll, bottomOffset = 0, lastRenderTime, // start easing
     startOffsetY, startOffsetX, offsetY, offsetX, startScroll, lastDeltaY, lastDeltaX, speed = 0, startTime, distance, scrollingIntv, // end easing
     listenerData = [ {
         event: "touchstart",
@@ -3444,6 +3478,11 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         inst.values.touchDown = true;
         offsetY = startOffsetY = getTouches(event)[0].clientY || 0;
         offsetX = startOffsetX = getTouches(event)[0].clientX || 0;
+        if (inst.values.scroll < 0) {
+            inst.values.scroll = 0;
+        } else if (inst.values.scroll > bottomOffset) {
+            inst.values.scroll = bottomOffset;
+        }
         startScroll = inst.values.scroll;
         lastDeltaY = 0;
         lastDeltaX = 0;
@@ -3458,6 +3497,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             lastDeltaY = deltaY;
             lastDeltaX = deltaX;
         }
+        inst.dispatch(exports.datagrid.events.ON_TOUCH_MOVE, speed, deltaY, lastDeltaY);
     };
     result.onTouchEnd = function onTouchEnd(event) {
         inst.values.touchDown = false;
@@ -3606,11 +3646,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.onScrollingStop = function onScrollingStop() {
         result.log("onScrollingStop %s", inst.values.scroll);
+        result.checkForEnds();
         inst.values.speed = 0;
         inst.values.absSpeed = 0;
         inst.render();
         result.fireOnScroll();
         inst.dispatch(exports.datagrid.events.ON_SCROLL_STOP, inst.values);
+        result.calculateBottomOffset();
     };
     /**
      * Scroll to the normalized index.
@@ -3690,6 +3732,29 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         var value = inst.getContentHeight() - inst.getViewportHeight();
         inst.scrollModel.scrollTo(value >= 0 ? value : 0, immediately);
     };
+    /**
+     * ###<a name="calculateBottomOffset">calculateBottomOffset</a>###
+     * calculate the scroll value for when the grid is scrolled to the bottom.
+     */
+    result.calculateBottomOffset = function() {
+        if (inst.rowsLength) {
+            var i = inst.rowsLength - 1;
+            result.bottomOffset = bottomOffset = inst.getRowOffset(i) - inst.getViewportHeight() + inst.getRowHeight(i);
+        }
+    };
+    /**
+     * ###<a name="onUpdateScroll">onUpdateScroll</a>###
+     * When the scroll value updates. Determine if we are at the top or the bottom and dispatch if so.
+     */
+    result.checkForEnds = function() {
+        if (inst.values.scroll && inst.values.scroll >= bottomOffset) {
+            console.log("scrollToBottom %s > %s", inst.values.scroll, bottomOffset);
+            inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_BOTTOM, inst.values.speed);
+        } else if (inst.values.scroll <= 0) {
+            console.log("scrollToTop");
+            inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_TOP, inst.values.speed);
+        }
+    };
     function destroy() {
         clearTimeout(waitForStopIntv);
         result.destroyLogger();
@@ -3708,6 +3773,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED, onAfterHeightsUpdated));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_RESET, onAfterReset));
+    inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
     result.destroy = destroy;
     inst.scrollModel = result;
     // all models should try not to pollute the main model to keep it clean.

@@ -253,12 +253,12 @@ app.config(function ($routeProvider) {
             templateUrl: "partials/addons/infiniteScroll.html",
             controller: function ($scope, $timeout) {
                 $scope.name = "Addons >> InfiniteScroll";
-                $scope.items = createSimpleList(20);
+                $scope.items = createSimpleList(30);
                 $scope.$on(ux.datagrid.events.ON_SCROLL_TO_BOTTOM, function () {
                     if ($scope.items.length < grid().options.infiniteScroll.limit) {
                         // we are doing a timeout here to simulate time that an ajax call may need to get the paginated data.
                         $timeout(function () {
-                            $scope.items = $scope.items.concat(createSimpleList(20, $scope.items.length));
+                            $scope.items = $scope.items.concat(createSimpleList(30, $scope.items.length));
                         }, 1000, true);
                     }
                 });

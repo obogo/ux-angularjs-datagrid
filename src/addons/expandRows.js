@@ -279,6 +279,10 @@ angular.module('ux').factory('expandRows', function () {
             }));
         }
 
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, function (event) {
+            closeAll(null, true);
+        }));
+
         inst.expandRows = result;
 
         return inst;

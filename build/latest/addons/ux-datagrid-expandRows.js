@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.1.0.0
+* uxDatagrid v.1.0.2
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -262,6 +262,9 @@ angular.module("ux").factory("expandRows", function() {
                 closeAll();
             }));
         }
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, function(event) {
+            closeAll(null, true);
+        }));
         inst.expandRows = result;
         return inst;
     };

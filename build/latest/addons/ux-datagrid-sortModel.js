@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.1.0.0
+* uxDatagrid v.1.0.2
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -467,7 +467,7 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
                 result.log("apply sortOptions");
                 sortStatesModel.setPathState(sortOptions);
             }
-            if (original !== ary || sortStatesModel.hasDirtySortState(pathStateRef)) {
+            if (original && (original !== ary || sortStatesModel.hasDirtySortState(pathStateRef))) {
                 original = ary;
                 result.setCache("", original);
                 // the original is always without any sort options.
@@ -500,6 +500,8 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
                     result.$processing = false;
                     inst.dispatch(exports.datagrid.events.ON_AFTER_SORT, key, pathState, currentPathState);
                 }
+            } else if (!original) {
+                lastSortResult = original;
             }
             return lastSortResult;
         };

@@ -493,7 +493,7 @@ function each(list, method, data) {
             }
             i += 1;
         }
-    } else if (list.hasOwnProperty("0")) {
+    } else if (list && list.hasOwnProperty("0")) {
         while (list.hasOwnProperty(i)) {
             result = method.apply(null, [ list[i], i, list ].concat(extraArgs));
             if (result !== undefined) {

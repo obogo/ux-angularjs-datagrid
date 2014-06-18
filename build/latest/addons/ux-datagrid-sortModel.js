@@ -13,6 +13,10 @@ exports.datagrid.events.ON_BEFORE_TOGGLE_SORT = "datagrid:onBeforeToggleSort";
 
 exports.datagrid.events.ON_AFTER_TOGGLE_SORT = "datagrid:onAfterToggleSort";
 
+exports.datagrid.events.CLEAR_SORTS = "datagrid:clearSorts";
+
+exports.datagrid.events.CLEAR_ALL_SORTS = "datagrid:clearAllSorts";
+
 angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", function($location, $rootScope) {
     /**************************************************************************************
      * ##<a name="sortStatesModel">sortStatesModel</a>##
@@ -634,6 +638,8 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
             inst.sortModel = null;
             inst = null;
         };
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.CLEAR_SORTS, exports.datagrid.sortStatesModel.clear));
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.CLEAR_ALL_SORTS, exports.datagrid.sortStatesModel.clearAll));
         inst.sortModel = result;
         addSortsFromOptions();
         return inst;

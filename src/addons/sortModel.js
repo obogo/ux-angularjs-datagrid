@@ -494,8 +494,12 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
                 result.log("apply sortOptions");
                 sortStatesModel.setPathState(sortOptions);
             }
-            if (original && (original !== ary || sortStatesModel.hasDirtySortState(pathStateRef))) {
+            if (original !== ary || sortStatesModel.hasDirtySortState(pathStateRef)) {
                 original = ary;
+                if (!original) {
+                    lastSortResult = original;
+                    return lastSortResult;
+                }
                 result.setCache('', original);// the original is always without any sort options.
                 if (!result.$processing) {
                     result.$processing = true;
@@ -525,8 +529,6 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
                     result.$processing = false;
                     inst.dispatch(exports.datagrid.events.ON_AFTER_SORT, key, pathState, currentPathState);
                 }
-            } else if (!original) {
-                lastSortResult = original;
             }
             return lastSortResult;
         };

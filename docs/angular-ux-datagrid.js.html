@@ -399,7 +399,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.1.0.0
+  <div class="summary"><p>uxDatagrid v.1.0.2
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -1704,7 +1704,7 @@ Like Lo-Dash.</p>
             <span class="p">}</span>
             <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
         <span class="p">}</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">list</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">))</span> <span class="p">{</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">list</span> <span class="o">&amp;&amp;</span> <span class="nx">list</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">))</span> <span class="p">{</span>
         <span class="k">while</span> <span class="p">(</span><span class="nx">list</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span> <span class="p">{</span>
             <span class="nx">result</span> <span class="o">=</span> <span class="nx">method</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="p">[</span> <span class="nx">list</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">list</span> <span class="p">].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">extraArgs</span><span class="p">));</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">result</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
@@ -9081,10 +9081,8 @@ will all be able to represented by template rows.</p>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="nx">result</span><span class="p">.</span><span class="nx">checkForEnds</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&gt;=</span> <span class="nx">bottomOffset</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;scrollToBottom %s &gt; %s&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span><span class="p">,</span> <span class="nx">bottomOffset</span><span class="p">);</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_BOTTOM</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">speed</span><span class="p">);</span>
         <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">scroll</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;scrollToTop&quot;</span><span class="p">);</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_TOP</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">speed</span><span class="p">);</span>
         <span class="p">}</span>
     <span class="p">};</span>

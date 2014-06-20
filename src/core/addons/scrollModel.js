@@ -429,10 +429,8 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.checkForEnds = function () {
         if (inst.values.scroll && inst.values.scroll >= bottomOffset) {
-            console.log("scrollToBottom %s > %s", inst.values.scroll, bottomOffset);
             inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_BOTTOM, inst.values.speed);
         } else if (inst.values.scroll <= 0) {
-            console.log("scrollToTop");
             inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_TOP, inst.values.speed);
         }
     };

@@ -168,7 +168,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.1.0.0
+  <div class="summary"><p>uxDatagrid v.1.0.2
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -185,6 +185,10 @@ License: MIT.</p>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_TOGGLE_SORT</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onBeforeToggleSort&quot;</span><span class="p">;</span>
 
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_TOGGLE_SORT</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onAfterToggleSort&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">CLEAR_SORTS</span> <span class="o">=</span> <span class="s2">&quot;datagrid:clearSorts&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">CLEAR_ALL_SORTS</span> <span class="o">=</span> <span class="s2">&quot;datagrid:clearAllSorts&quot;</span><span class="p">;</span>
 
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">service</span><span class="p">(</span><span class="s2">&quot;sortStatesModel&quot;</span><span class="p">,</span> <span class="p">[</span> <span class="s2">&quot;$location&quot;</span><span class="p">,</span> <span class="s2">&quot;$rootScope&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">$location</span><span class="p">,</span> <span class="nx">$rootScope</span><span class="p">)</span> <span class="p">{</span>
 
@@ -1526,6 +1530,10 @@ It stores the sorted state on the sortStatesModel to keep around until cleared.<
             <span class="p">}</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">original</span> <span class="o">!==</span> <span class="nx">ary</span> <span class="o">||</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">hasDirtySortState</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">))</span> <span class="p">{</span>
                 <span class="nx">original</span> <span class="o">=</span> <span class="nx">ary</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">original</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">lastSortResult</span> <span class="o">=</span> <span class="nx">original</span><span class="p">;</span>
+                    <span class="k">return</span> <span class="nx">lastSortResult</span><span class="p">;</span>
+                <span class="p">}</span>
                 <span class="nx">result</span><span class="p">.</span><span class="nx">setCache</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nx">original</span><span class="p">);</span>
 
 </pre></div>
@@ -2020,6 +2028,8 @@ If the states already exist apply those states on the render.</p>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">sortModel</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
             <span class="nx">inst</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
         <span class="p">};</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">CLEAR_SORTS</span><span class="p">,</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">clear</span><span class="p">));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">CLEAR_ALL_SORTS</span><span class="p">,</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">clearAll</span><span class="p">));</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">sortModel</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
         <span class="nx">addSortsFromOptions</span><span class="p">();</span>
         <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>

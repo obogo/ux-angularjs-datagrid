@@ -14,6 +14,7 @@ describe("sortModel", function () {
             var exp =
                 sortModel({
                     scope: scope,
+                    unwatchers: [],
                     options: {
                         sorts: {id:'none', name: 'asc'}
                     },

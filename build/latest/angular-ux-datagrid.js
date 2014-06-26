@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.1.0.2
+* uxDatagrid v.1.0.3
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -41,6 +41,11 @@ try {
  * These options are then available to other addons to configure them.
  */
 exports.datagrid = {
+    /**
+     * ###<a name="version">version</a>###
+     * Current datagrid version.
+     */
+    version: "1.0.3",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -493,8 +498,8 @@ function each(list, method, data) {
             }
             i += 1;
         }
-    } else if (list && list.hasOwnProperty("0")) {
-        while (list.hasOwnProperty(i)) {
+    } else if (list && Object.prototype.hasOwnProperty.apply(list, [ "0" ])) {
+        while (Object.prototype.hasOwnProperty.apply(list, [ i ])) {
             result = method.apply(null, [ list[i], i, list ].concat(extraArgs));
             if (result !== undefined) {
                 return result;
@@ -503,7 +508,7 @@ function each(list, method, data) {
         }
     } else if (!(list instanceof Array)) {
         for (i in list) {
-            if (list.hasOwnProperty(i)) {
+            if (Object.prototype.hasOwnProperty.apply(list, [ i ])) {
                 result = method.apply(null, [ list[i], i, list ].concat(extraArgs));
                 if (result !== undefined) {
                     return result;
@@ -540,7 +545,7 @@ function filter(list, method, data) {
         }
     } else {
         for (i in list) {
-            if (list.hasOwnProperty(i)) {
+            if (Object.prototype.hasOwnProperty.apply(list, [ i ])) {
                 response = method.apply(null, [ list[i], i, list ].concat(extraArgs));
                 if (response) {
                     result.push(list[i]);
@@ -715,7 +720,7 @@ function toArray(obj) {
         }
     } else {
         for (i in obj) {
-            if (obj.hasOwnProperty(i)) {
+            if (Object.prototype.hasOwnProperty.apply(obj, [ i ])) {
                 result.push(obj[i]);
             }
         }
@@ -922,8 +927,8 @@ function Flow(inst, dispatch) {
         inst = null;
     }
     inst = exports.logWrapper("Flow", inst || {}, "grey", dispatch);
-    inst.async = inst.hasOwnProperty("async") ? inst.async : true;
-    inst.debug = inst.hasOwnProperty("debug") ? inst.debug : 0;
+    inst.async = Object.prototype.hasOwnProperty.apply(inst, [ "async" ]) ? inst.async : true;
+    inst.debug = Object.prototype.hasOwnProperty.apply(inst, [ "debug" ]) ? inst.debug : 0;
     inst.insert = insert;
     inst.add = add;
     inst.unique = unique;
@@ -1069,8 +1074,8 @@ function Datagrid(scope, element, attr, $compile) {
         inst.calculateViewportHeight = calculateViewportHeight;
         inst.options = options = exports.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
         inst.flow = flow = new Flow({
-            async: options.hasOwnProperty("async") ? !!options.async : true,
-            debug: options.hasOwnProperty("debug") ? options.debug : 0
+            async: Object.prototype.hasOwnProperty.apply(options, [ "async" ]) ? !!options.async : true,
+            debug: Object.prototype.hasOwnProperty.apply(options, [ "debug" ]) ? options.debug : 0
         }, inst.dispatch);
         // this needs to be set immediatly so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
@@ -1279,7 +1284,7 @@ function Datagrid(scope, element, attr, $compile) {
     function swapItem(oldItem, newItem, keepTemplate) {
         //TODO: needs unit test.
         var index = getRowIndex(oldItem), oldTpl, newTpl;
-        if (inst.data.hasOwnProperty(index)) {
+        if (Object.prototype.hasOwnProperty.apply(inst.data, [ index ])) {
             oldTpl = inst.templateModel.getTemplate(oldItem);
             if (keepTemplate) {
                 newTpl = oldTpl;
@@ -1510,7 +1515,7 @@ function Datagrid(scope, element, attr, $compile) {
     function applyEventCounts(s, listenerCounts, fn) {
         while (s) {
             for (var eventName in listenerCounts) {
-                if (listenerCounts.hasOwnProperty(eventName)) {
+                if (Object.prototype.hasOwnProperty.apply(listenerCounts, [ eventName ])) {
                     fn(s, listenerCounts, eventName);
                 }
             }
@@ -3906,7 +3911,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         function dynamicHeights() {
             var i, h;
             for (i in templates) {
-                if (templates.hasOwnProperty(i)) {
+                if (Object.prototype.hasOwnProperty.apply(templates, [ i ])) {
                     h = h || templates[i].height;
                     if (h !== templates[i].height) {
                         return true;
@@ -3945,7 +3950,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         }
         function setTemplateName(item, templateName) {
             var key = getTemplatesKey();
-            if (!item.hasOwnProperty(key) && forcedTemplates.indexOf(item) === -1) {
+            if (!Object.prototype.hasOwnProperty.apply(item, [ key ]) && forcedTemplates.indexOf(item) === -1) {
                 forcedTemplates.push(item);
             }
             item[key] = templateName;

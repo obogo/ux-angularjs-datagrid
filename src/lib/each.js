@@ -29,8 +29,8 @@ function each(list, method, data) {
             }
             i += 1;
         }
-    } else if(list && list.hasOwnProperty('0')) {
-        while (list.hasOwnProperty(i)) {
+    } else if(list && Object.prototype.hasOwnProperty.apply(list, ['0'])) {
+        while (Object.prototype.hasOwnProperty.apply(list, [i])) {
             result = method.apply(null, [list[i], i, list].concat(extraArgs));
             if (result !== undefined) {
                 return result;
@@ -39,7 +39,7 @@ function each(list, method, data) {
         }
     } else if(!(list instanceof Array)) {
         for (i in list) {
-            if (list.hasOwnProperty(i)) {
+            if (Object.prototype.hasOwnProperty.apply(list, [i])) {
                 result = method.apply(null, [list[i], i, list].concat(extraArgs));
                 if (result !== undefined) {
                     return result;

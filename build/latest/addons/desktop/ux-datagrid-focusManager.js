@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.1.0.2
+* uxDatagrid v.1.0.3
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -320,7 +320,7 @@ exports.selector = function() {
     function getList(obj) {
         var ary = [], i;
         for (i in obj) {
-            if (obj.hasOwnProperty(i)) {
+            if (Object.prototype.hasOwnProperty.apply(obj, [ i ])) {
                 ary.push(obj[i]);
             }
         }

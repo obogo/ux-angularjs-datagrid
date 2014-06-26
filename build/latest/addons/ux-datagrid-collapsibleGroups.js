@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.1.0.2
+* uxDatagrid v.1.0.3
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -104,7 +104,7 @@ angular.module("ux").factory("collapsibleGroups", function() {
             var item, i, prev;
             regroup.length = 0;
             for (i in collapsed) {
-                if (collapsed.hasOwnProperty(i)) {
+                if (Object.prototype.hasOwnProperty.apply(collapsed, [ i ])) {
                     item = collapsed[i];
                     prev = inst.getRowItem(i - 1);
                     if (prev && prev[inst.grouped]) {

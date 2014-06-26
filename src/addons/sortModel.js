@@ -161,7 +161,7 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
             result.log("setPathState %s to %s", currentPathState, pathState);
             setIgnoreParamsInPath(true);
             for (columnName in pathState) {
-                if (pathState.hasOwnProperty(columnName) && pathState[columnName] !== currentPathState[columnName] && !isPrivate(columnName)) {
+                if (Object.prototype.hasOwnProperty.apply(pathState, [columnName]) && pathState[columnName] !== currentPathState[columnName] && !isPrivate(columnName)) {
                     setState(columnName, pathState[columnName], currentPathState);
                 }
             }
@@ -391,7 +391,7 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
             pathState = pathState || getPathState(getPath());
             pathState.$order.length = 0;
             for (i in pathState) {
-                if (pathState.hasOwnProperty(i) && !isPrivate(i) && pathState[i] !== sortOptions.NONE) {
+                if (Object.prototype.hasOwnProperty.apply(pathState, [i]) && !isPrivate(i) && pathState[i] !== sortOptions.NONE) {
                     pathState[i] = sortOptions.NONE;
                 }
             }

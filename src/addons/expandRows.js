@@ -178,7 +178,7 @@ angular.module('ux').factory('expandRows', function () {
 
         function onTransitionEnd(event) {
             var elm = angular.element(event.target), s = elm.scope(), index, state;
-            if (event.hasOwnProperty('index')) {
+            if (Object.prototype.hasOwnProperty.apply(event, ['index'])) {
                 index = event.index;
                 state = event.state;
             }

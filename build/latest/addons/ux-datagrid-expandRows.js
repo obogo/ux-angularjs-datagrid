@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.1.0.2
+* uxDatagrid v.1.0.3
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -170,7 +170,7 @@ angular.module("ux").factory("expandRows", function() {
         }
         function onTransitionEnd(event) {
             var elm = angular.element(event.target), s = elm.scope(), index, state;
-            if (event.hasOwnProperty("index")) {
+            if (Object.prototype.hasOwnProperty.apply(event, [ "index" ])) {
                 index = event.index;
                 state = event.state;
             }

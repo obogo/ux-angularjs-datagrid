@@ -22,7 +22,7 @@ function filter(list, method, data) {
         }
     } else {
         for (i in list) {
-            if (list.hasOwnProperty(i)) {
+            if (Object.prototype.hasOwnProperty.apply(list, [i])) {
                 response = method.apply(null, [list[i], i, list].concat(extraArgs));
                 if (response) {
                     result.push(list[i]);

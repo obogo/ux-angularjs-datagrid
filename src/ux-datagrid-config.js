@@ -25,6 +25,11 @@ try {
  */
 exports.datagrid = {
     /**
+     * ###<a name="version">version</a>###
+     * Current datagrid version.
+     */
+    version: '@@version',
+    /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
      * however with this attribute iOS would crash if you try to change the scroll with javascript, or turn it on and off.

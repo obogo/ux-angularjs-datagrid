@@ -144,7 +144,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         function dynamicHeights() {
             var i, h;
             for (i in templates) {
-                if (templates.hasOwnProperty(i)) {
+                if (Object.prototype.hasOwnProperty.apply(templates, [i])) {
                     h = h || templates[i].height;
                     if (h !== templates[i].height) {
                         return true;
@@ -188,7 +188,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
 
         function setTemplateName(item, templateName) {
             var key = getTemplatesKey();
-            if (!item.hasOwnProperty(key) && forcedTemplates.indexOf(item) === -1) {
+            if (!Object.prototype.hasOwnProperty.apply(item, [key]) && forcedTemplates.indexOf(item) === -1) {
                 forcedTemplates.push(item);
             }
             item[key] = templateName;

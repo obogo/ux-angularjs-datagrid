@@ -110,7 +110,7 @@ angular.module('ux').factory('collapsibleGroups', function () {
            var item, i, prev;
            regroup.length = 0;
            for (i in collapsed) {
-               if (collapsed.hasOwnProperty(i)) {
+               if (Object.prototype.hasOwnProperty.apply(collapsed, [i])) {
                    item = collapsed[i];
                    prev = inst.getRowItem(i - 1);
                    if (prev && prev[inst.grouped]) {

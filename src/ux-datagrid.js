@@ -128,7 +128,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.updateViewportHeight = updateViewportHeight;
         inst.calculateViewportHeight = calculateViewportHeight;
         inst.options = options = exports.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
-        inst.flow = flow = new Flow({async: options.hasOwnProperty('async') ? !!options.async : true, debug: options.hasOwnProperty('debug') ? options.debug : 0}, inst.dispatch);
+        inst.flow = flow = new Flow({async: Object.prototype.hasOwnProperty.apply(options, ['async']) ? !!options.async : true, debug: Object.prototype.hasOwnProperty.apply(options, ['debug']) ? options.debug : 0}, inst.dispatch);
         // this needs to be set immediatly so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
         inst.gc = forceGarbageCollection;
@@ -347,7 +347,7 @@ function Datagrid(scope, element, attr, $compile) {
     function swapItem(oldItem, newItem, keepTemplate) {
         //TODO: needs unit test.
         var index = getRowIndex(oldItem), oldTpl, newTpl;
-        if (inst.data.hasOwnProperty(index)) {
+        if (Object.prototype.hasOwnProperty.apply(inst.data, [index])) {
             oldTpl = inst.templateModel.getTemplate(oldItem);
             if (keepTemplate) {
                 newTpl = oldTpl;
@@ -600,7 +600,7 @@ function Datagrid(scope, element, attr, $compile) {
     function applyEventCounts(s, listenerCounts, fn) {
         while (s) {
             for (var eventName in listenerCounts) {
-                if (listenerCounts.hasOwnProperty(eventName)) {
+                if (Object.prototype.hasOwnProperty.apply(listenerCounts, [eventName])) {
                     fn(s, listenerCounts, eventName);
                 }
             }

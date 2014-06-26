@@ -128,6 +128,26 @@ module.exports = function (grunt) {
                 }
             }
         },
+        replace: {
+            build: {
+                options: {
+                    patterns: [
+                        {
+                            match: 'version',
+                            replacement: '<%= pkg.version %>'
+                        }
+                    ]
+                },
+                files: [
+                    {
+                        expand: true,
+                        flatten: true,
+                        src: ['build/latest/*.js'],
+                        dest: 'build/latest/'
+                    }
+                ]
+            }
+        },
 //        copy: {
 //            main: {
 //                files: [
@@ -166,9 +186,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-replace');
 
     // Default task(s).
 //    grunt.registerTask('default', ['jshint', 'uglify', 'compress']);
-    grunt.registerTask('default', ['jshint', 'uglify']);
+    grunt.registerTask('default', ['jshint', 'uglify', 'replace']);
 
 };

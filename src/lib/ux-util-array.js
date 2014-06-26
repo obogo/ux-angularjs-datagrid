@@ -12,7 +12,7 @@ function toArray(obj) {
         }
     } else {
         for(i in obj) {
-            if (obj.hasOwnProperty(i)) {
+            if (Object.prototype.hasOwnProperty.apply(obj, [i])) {
                 result.push(obj[i]);
             }
         }

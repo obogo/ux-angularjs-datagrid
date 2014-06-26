@@ -268,7 +268,7 @@ exports.selector = (function () {
     function getList(obj) {
         var ary = [], i;
         for (i in obj) {
-            if (obj.hasOwnProperty(i)) {
+            if (Object.prototype.hasOwnProperty.apply(obj, [i])) {
                 ary.push(obj[i]);
             }
         }

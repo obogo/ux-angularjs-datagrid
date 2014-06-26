@@ -272,4 +272,4 @@ The limit property can be helpful as well. With this it will tell the addon that
     </div>
 
 ##IE8 Compatibility##
-IE8 may work with ux-datagrid by adding some polyfills for emulating missing ES5 features in IE8. First it's required to add [ES5 Shim](https://github.com/es-shims/es5-shim) and also an additional file [Polyfill IE8](/IE/Polyfill_IE8.js), located in this repository from this repository. 
+IE8 may work with ux-datagrid by adding some polyfills for emulating missing ES5 features in IE8. First it's required to add [ES5 Shim](https://github.com/es-shims/es5-shim) and also an additional file [Polyfill IE8](/IE/Polyfill_IE8.js), located in this repository. 

@@ -189,6 +189,8 @@ Using the above html, and having a controller like the one below we could access
         };
     }
 
+Here is a JSFiddle example of how to make your grid work like tables with columns. [ux-angularjs-datagrid tables](http://jsfiddle.net/wesjones/8r4xP/)
+
 ###Addon: Collapsible Groups (ux-datagrid-collapsibleGroups.js)###
 Collapsible groups it meant to work with grouped data. Given an array like the following.
 

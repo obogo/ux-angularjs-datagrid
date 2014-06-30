@@ -736,7 +736,7 @@ ChunkArray.prototype.updateDomHeight = function (recursiveDirection) {
     }
 };
 ChunkArray.prototype.createDomTemplates = function() {
-    if (!this.templateReady) {
+    if (!this.templateReady && this.templateStart) {
         var str = this.templateStart.substr(0, this.templateStart.length - 1) + ' style="';
         if (this.mode === ChunkArray.DETACHED) {
             this.calculateTop();

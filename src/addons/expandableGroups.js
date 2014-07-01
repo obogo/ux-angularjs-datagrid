@@ -141,6 +141,18 @@ angular.module('ux').factory('expandableGroups', function () {
            }
        };
 
+       /**
+        * ###<a name="isExpanded">isExpanded</a>###
+        * Special Thanks to https://github.com/Krisa
+        * Public method to allow other elements to tell if it is expanded. Such as for CSS.
+        * @param rowIndex
+        * @returns {boolean}
+        */
+       result.isExpanded = function (rowIndex) {
+           var groupIndex = convertIndex(rowIndex);
+           return !!expanded[groupIndex];
+       };
+
        // Add listeners.
 
        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.EXPAND_GROUP, function (event, index) {

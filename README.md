@@ -205,6 +205,11 @@ The datagrid will convert the structure into a single array like the one below.
 Then we have group "a" and group "b" that are now indexed and no longer actual groups. The collapseGroups addon will take this new structure and when a group is clicked it will hide all children from that group and update the heights accordingly.
 This will essentially hide all children of that group leaving the group header.
 
+###Addon: Expandable Groups (ux-datagrid-expandableGroups.js)###
+While this is easy to confuse with collapsible groups this addon performs very differently. it is optimized to remove rows instead of just hiding them like with collapsibleGroups. This has pros and cons to it.
+
+While it will be able to do an expandAll and collapse all which the collapsibleGroups cannot do. It cannot change without reloading the data which means that you can see a flicker of the list. (This is if you are using the built in styles, if you take the transitions off then the flicker is unnoticable).
+
 ###Addon: Expanded Rows (ux-datagrid-expandRows.js)###
 This one works in a similar way to collapsible groups. It changes the heights of rows to simulate an effect. In this case it makes the rows taller. Collapsible Groups actually changes their heights to 0 and makes them not display.
 Expand rows work with different templates. So you need to setup some options. Given the following grid, see the options.

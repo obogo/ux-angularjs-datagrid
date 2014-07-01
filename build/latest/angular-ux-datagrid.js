@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.1.0.4
+* uxDatagrid v.1.1.0
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -45,7 +45,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.0.4",
+    version: "1.1.0",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -2983,7 +2983,7 @@ ChunkArray.prototype.updateDomHeight = function(recursiveDirection) {
 };
 
 ChunkArray.prototype.createDomTemplates = function() {
-    if (!this.templateReady) {
+    if (!this.templateReady && this.templateStart) {
         var str = this.templateStart.substr(0, this.templateStart.length - 1) + ' style="';
         if (this.mode === ChunkArray.DETACHED) {
             this.calculateTop();

@@ -166,6 +166,19 @@ app.config(function ($routeProvider) {
                 $scope.items = createGroupedList();
             }
         })
+        .when('/addons/expandableGroups', {
+            templateUrl: "partials/addons/expandableGroups.html",
+            controller: function ($scope) {
+                $scope.name = "Addons >> Expandable Groups";
+                $scope.items = createGroupedList();
+                $scope.expandAll = function () {
+                    $scope.$broadcast(ux.datagrid.events.EXPAND_ALL_GROUPS);
+                };
+                $scope.collapseAll = function () {
+                    $scope.$broadcast(ux.datagrid.events.COLLAPSE_ALL_GROUPS);
+                };
+            }
+        })
         .when('/addons/expandRows', {
             templateUrl: "partials/addons/expandRows.html",
             controller: function ($scope) {

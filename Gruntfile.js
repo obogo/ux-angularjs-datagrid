@@ -67,6 +67,9 @@ module.exports = function (grunt) {
                     'build/latest/addons/ux-<%= pkg.filename %>-collapsibleGroups.js': [
                         'src/addons/collapsibleGroups.js'
                     ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-expandableGroups.js': [
+                        'src/addons/expandableGroups.js'
+                    ],
                     'build/latest/addons/ux-<%= pkg.filename %>-expandRows.js': [
                         'src/addons/expandRows.js'
                     ],

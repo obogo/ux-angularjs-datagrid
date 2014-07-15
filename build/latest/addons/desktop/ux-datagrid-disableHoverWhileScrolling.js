@@ -12,7 +12,7 @@
  * http://www.thecssninja.com/javascript/pointer-events-60fps
  */
 angular.module("ux").factory("disableHoverWhileScrolling", function() {
-    return function(inst) {
+    return [ "inst", function(inst) {
         var name = "disable-hover-while-scrolling", timer;
         function init() {
             inst.flow.log("init");
@@ -40,6 +40,6 @@ angular.module("ux").factory("disableHoverWhileScrolling", function() {
         inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_SCROLL_STOP, scrollStop));
         init();
         return inst;
-    };
+    } ];
 });
 }(this.ux = this.ux || {}, function() {return this;}()));

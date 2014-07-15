@@ -12,7 +12,7 @@ exports.datagrid.events.EXPAND_GROUP = "datagrid:expandGroup";
 exports.datagrid.events.TOGGLE_GROUP = "datagrid:toggleGroup";
 
 angular.module("ux").factory("collapsibleGroups", function() {
-    return function(inst) {
+    return [ "inst", function(inst) {
         var result = exports.logWrapper("collapsibleGroups", {}, "orange", inst.dispatch), lastIndex = 0, regroup = [], collapsed = {}, superGetTemplateHeight = inst.templateModel.getTemplateHeight, states = {
             COLLAPSE: "collapse",
             EXPAND: "expand"
@@ -119,6 +119,6 @@ angular.module("ux").factory("collapsibleGroups", function() {
         }));
         inst.collapsibleGroups = result;
         return inst;
-    };
+    } ];
 });
 }(this.ux = this.ux || {}, function() {return this;}()));

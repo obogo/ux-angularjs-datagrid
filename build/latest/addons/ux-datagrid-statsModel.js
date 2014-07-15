@@ -12,7 +12,7 @@
 exports.datagrid.events.STATS_UPDATE = "datagrid:statsUpdate";
 
 angular.module("ux").factory("statsModel", function() {
-    return function(inst) {
+    return [ "inst", function(inst) {
         var initStartTime = 0, rendersTotal = 0, renders = [], unwatchers = [];
         var api = {
             initialRenderTime: 0,
@@ -52,6 +52,6 @@ angular.module("ux").factory("statsModel", function() {
         inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_BEFORE_UPDATE_WATCHERS, renderStart));
         inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_AFTER_UPDATE_WATCHERS, renderStop));
         inst.stats = api;
-    };
+    } ];
 });
 }(this.ux = this.ux || {}, function() {return this;}()));

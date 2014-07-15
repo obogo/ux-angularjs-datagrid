@@ -6,7 +6,7 @@
 */
 (function(exports, global){
 angular.module("ux").factory("scrollBar", function() {
-    return function(inst) {
+    return [ "inst", function(inst) {
         var result = exports.logWrapper("scrollBar", {}, "red", inst.dispatch), scrollBarElm = document.createElement("div"), data = {}, parent = inst.element[0].parentNode, nextSibling = inst.element[0].nextSibling;
         scrollBarElm.style.display = "none";
         scrollBarElm.className = "datagrid-scrollbar";
@@ -60,6 +60,6 @@ angular.module("ux").factory("scrollBar", function() {
             result = null;
         };
         inst.scrollBar = result;
-    };
+    } ];
 });
 }(this.ux = this.ux || {}, function() {return this;}()));

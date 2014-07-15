@@ -1,5 +1,5 @@
 angular.module('ux').factory('scrollBar', function () {
-    return function (inst) {
+    return ['inst', function (inst) {
 
         var result = exports.logWrapper('scrollBar', {}, 'red', inst.dispatch),
             scrollBarElm = document.createElement('div'),
@@ -81,5 +81,5 @@ angular.module('ux').factory('scrollBar', function () {
         };
 
         inst.scrollBar = result;
-    };
+    }];
 });

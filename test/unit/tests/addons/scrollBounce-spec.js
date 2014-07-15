@@ -20,7 +20,7 @@ describe("scrollBounce", function () {
         };
         ux.dispatcher(inst.scope);
         inst.scope.$on = inst.scope.on;
-        injector.get('scrollBounce')(inst);
+        injector.get('scrollBounce')[1](inst);
     });
 
     it("should listen to the top event", function() {

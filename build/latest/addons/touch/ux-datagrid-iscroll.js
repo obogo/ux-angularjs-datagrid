@@ -10,7 +10,7 @@
  * This requires [iscroll.js](https://github.com/cubiq/iscroll) to work.
  */
 angular.module("ux").factory("iScrollAddon", function() {
-    return function(inst) {
+    return [ "inst", function(inst) {
         // This is only needed for IOS devices. Android devices work fine without it.
         if (!exports.datagrid.isIOS) {
             return;
@@ -159,6 +159,6 @@ angular.module("ux").factory("iScrollAddon", function() {
         };
         inst.scrollModel = result;
         return result;
-    };
+    } ];
 });
 }(this.ux = this.ux || {}, function() {return this;}()));

@@ -434,7 +434,7 @@ exports.datagrid.events.ON_SCROLL_TO_BOTTOM_ENTER = "ux-datagrid:onScrollToBotto
  *
  */
 angular.module("ux").factory("gridFocusManager", function() {
-    return function(inst) {
+    return [ "inst", function(inst) {
         /**
          * We want to add and remove listeners only on the dom that is currently under watch.
          */
@@ -844,6 +844,6 @@ angular.module("ux").factory("gridFocusManager", function() {
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER, onResize));
         inst.gridFocusManager = result;
         return inst;
-    };
+    } ];
 });
 }(this.ux = this.ux || {}, function() {return this;}()));

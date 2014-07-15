@@ -7,7 +7,7 @@ exports.datagrid.options.expandRows = [];
 exports.datagrid.options.expandRows.autoClose = true;
 angular.module('ux').factory('expandRows', function () {
     //TODO: on change row template. This needs to collapse the row.
-    return function (inst) {
+    return ['inst', function (inst) {
         var intv,
             result = exports.logWrapper('expandRows', {}, 'green', inst.dispatch),
             lastGetIndex,
@@ -286,5 +286,5 @@ angular.module('ux').factory('expandRows', function () {
         inst.expandRows = result;
 
         return inst;
-    };
+    }];
 });

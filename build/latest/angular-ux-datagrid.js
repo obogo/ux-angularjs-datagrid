@@ -45,7 +45,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.1.0",
+    version: "@@version",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -235,14 +235,14 @@ module.factory("gridAddons", [ "$injector", function($injector) {
         var i = 0, len = addons.length, result, addon;
         while (i < len) {
             result = $injector.get(addons[i]);
-            if (typeof result === "function") {
-                // It is expected that each addon be a function. inst is the instance that is injected.
+            if (typeof result === "function" || result instanceof Array) {
+                // It is expected that each addon be a function or injector array syntax. inst is the instance that is injected.
                 addon = $injector.invoke(result, instance, {
                     inst: instance
                 });
             } else {
                 // they must have returned a null? what was the point. Throw an error.
-                throw new Error("Addons expect a function to pass the grid instance to.");
+                throw new Error("Addons expect a function ($injector array supported) to pass the grid instance to.");
             }
             i += 1;
         }

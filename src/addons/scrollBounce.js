@@ -3,7 +3,7 @@
  * Add a bounce based on the speed of the scroll in the grid to the top and bottom of the grid.
  */
 angular.module('ux').factory('scrollBounce', function () {
-    return function (inst) {
+    return ['inst', function (inst) {
 
         var result = exports.logWrapper('scrollBounce', {}, 'red', inst.dispatch),
             intv,
@@ -96,5 +96,5 @@ angular.module('ux').factory('scrollBounce', function () {
         };
 
         inst.scrollBounce = result;
-    };
+    }];
 });

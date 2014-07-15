@@ -13,7 +13,7 @@ exports.datagrid.events.ON_SCROLL_TO_BOTTOM_ENTER = "ux-datagrid:onScrollToBotto
  *
  */
 angular.module('ux').factory('gridFocusManager', function () {
-    return function (inst) {
+    return ['inst', function (inst) {
 
         /**
          * We want to add and remove listeners only on the dom that is currently under watch.
@@ -454,5 +454,5 @@ angular.module('ux').factory('gridFocusManager', function () {
         inst.gridFocusManager = result;
 
         return inst;
-    };
+    }];
 });

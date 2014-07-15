@@ -10,7 +10,7 @@ exports.datagrid.events.TOGGLE_GROUP = "datagrid:toggleGroup";
  * By default all of these are collapsed. Hence the name expandableGroups.
  */
 angular.module('ux').factory('expandableGroups', function () {
-   return function (inst) {
+   return ['inst', function (inst) {
        var result = exports.logWrapper('expandableGroups', {}, 'orange', inst.dispatch),
            expanded = {},
            resultData = [],
@@ -181,5 +181,5 @@ angular.module('ux').factory('expandableGroups', function () {
        inst.expandableGroups = result;
 
        return inst;
-   };
+   }];
 });

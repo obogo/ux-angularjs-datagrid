@@ -8,7 +8,7 @@
 exports.datagrid.events.ON_MEMORY_OPTIMIZED = "datagrid:onMemoryOptimized";
 
 angular.module("ux").factory("memoryOptimizer", function() {
-    return function(inst) {
+    return [ "inst", function(inst) {
         inst.options.memoryOptimizer = inst.options.memoryOptimizer || {};
         var result = exports.logWrapper("memoryOptimizer", {}, "redOrange", inst.dispatch), defaultOptions = {
             range: inst.options.creepLimit * 2 || 200
@@ -85,6 +85,6 @@ angular.module("ux").factory("memoryOptimizer", function() {
         disableCreep();
         inst.memoryOptimizer = result;
         return inst;
-    };
+    } ];
 });
 }(this.ux = this.ux || {}, function() {return this;}()));

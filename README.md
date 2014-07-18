@@ -8,7 +8,7 @@
 ## ux-datagrid : An Angular DataGrid ##
 ----------
 
-[![Build Status](https://travis-ci.org/webux/ux-schema.svg?branch=master)](https://travis-ci.org/webux/ux-angularjs-datagrid)
+[![Build Status](https://travis-ci.org/webux/ux-angularjs-datagrid.svg?branch=master)](https://travis-ci.org/webux/ux-angularjs-datagrid)
 
 **Highly performant list and datagrid for AngularJS** designed for mobile devices which just makes it all the better on a desktop.
 

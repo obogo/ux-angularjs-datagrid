@@ -182,7 +182,7 @@ module.exports = function (grunt) {
         },
         jasmine: {
             tests: {
-                src: ['lib/angular.js', 'lib/angular-mocks.js', 'build/latest/angular-ux-datagrid.js', 'build/latest/addons/**/*.js', 'build/latest/other/**/*.js'],
+                src: ['vendor/angular.js', 'vendor/angular-mocks.js', 'build/latest/angular-ux-datagrid.js', 'build/latest/addons/**/*.js', 'build/latest/other/**/*.js'],
                 options: {
                     specs: 'test/unit/tests/**/*.js'
                 }

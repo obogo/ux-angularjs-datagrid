@@ -35,7 +35,8 @@
         "connect-livereload": "~0.2.0",
         "time-grunt": "~0.1.1",
         "grunt-contrib-copy": "latest",
-        "grunt-replace": "latest"
+        "grunt-replace": "latest",
+        "grunt-contrib-jasmine": "latest"
     },
     "engines": {
         "node": ">=0.8.0"

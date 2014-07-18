@@ -179,6 +179,14 @@ module.exports = function (grunt) {
                 src: ['build/<%= pkg.filename %>.js'],
                 dest: ''
             }
+        },
+        jasmine: {
+            tests: {
+                src: ['lib/angular.js', 'lib/angular-mocks.js', 'build/latest/angular-ux-datagrid.js', 'build/latest/addons/**/*.js', 'build/latest/other/**/*.js'],
+                options: {
+                    specs: 'test/unit/tests/**/*.js'
+                }
+            }
         }
     });
 
@@ -190,9 +198,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-replace');
+    grunt.loadNpmTasks('grunt-contrib-jasmine');
 
     // Default task(s).
 //    grunt.registerTask('default', ['jshint', 'uglify', 'compress']);
     grunt.registerTask('default', ['jshint', 'uglify', 'replace']);
+    grunt.registerTask('test', ['jasmine']);
 
 };

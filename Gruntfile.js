@@ -203,6 +203,6 @@ module.exports = function (grunt) {
     // Default task(s).
 //    grunt.registerTask('default', ['jshint', 'uglify', 'compress']);
     grunt.registerTask('default', ['jshint', 'uglify', 'replace']);
-    grunt.registerTask('test', ['jasmine']);
+    grunt.registerTask('integrate', ['jasmine']);
 
 };

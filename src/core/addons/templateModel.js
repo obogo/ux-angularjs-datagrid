@@ -111,7 +111,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
 
         function getScriptTemplateAttribute(scriptTemplate, attrStr) {
             var node = scriptTemplate.attributes['data-' + attrStr] || scriptTemplate.attributes[attrStr];
-            return node && node.nodeValue || '';
+            return node && node.value || '';
         }
 
         function getTemplates() {

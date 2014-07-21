@@ -282,5 +282,8 @@ The limit property can be helpful as well. With this it will tell the addon that
         </script>
     </div>
 
+###ng-show###
+The datagrid has an incompatibility with ng-show because it needs a height when initialized to calculate how many rows to show. Please do not use an ng-show, use an ng-if which will create the datagrid when it is shown, where an ng-show will create it but not allow it to get a height because of the display:none of the parent. See issue [#28](https://github.com/webux/ux-angularjs-datagrid/issues/28).
+
 ##IE8 Compatibility##
 IE8 may work with ux-datagrid by adding some polyfills for emulating missing ES5 features in IE8. First it's required to add [ES5 Shim](https://github.com/es-shims/es5-shim) and also an additional file [Polyfill IE8](/build/latest/IE/Polyfill_IE8.js), located in this repository from this repository.

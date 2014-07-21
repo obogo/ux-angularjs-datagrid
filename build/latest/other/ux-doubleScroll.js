@@ -23,7 +23,7 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
             enabled, unwatchRender, unwatchOffset, lastOffsetTop = 0, lastOffsetHeight, intv, lastY = 0, momentum = 0, gridScrollIntv, useIScroll = detectIScroll();
             function detectIScroll() {
                 var addons = element[0].querySelectorAll(".datagrid")[0].attributes.getNamedItem("data-addons");
-                if (addons && addons.nodeValue.match(/iScrollAddon/)) {
+                if (addons && addons.value.match(/iScrollAddon/)) {
                     return true;
                 }
                 return false;

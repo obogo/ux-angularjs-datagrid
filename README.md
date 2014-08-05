@@ -209,6 +209,8 @@ While this is easy to confuse with collapsible groups this addon performs very d
 
 While it will be able to do an expandAll and collapse all which the collapsibleGroups cannot do. It cannot change without reloading the data which means that you can see a flicker of the list. (This is if you are using the built in styles, if you take the transitions off then the flicker is unnoticable).
 
+If you need to async load data into expandable groups then this example may work better for you. It shows how to do it without an addon. [jsFiddle Example](http://jsfiddle.net/wesjones/3Wg79/)
+
 ###Addon: Expanded Rows (ux-datagrid-expandRows.js)###
 This one works in a similar way to collapsible groups. It changes the heights of rows to simulate an effect. In this case it makes the rows taller. Collapsible Groups actually changes their heights to 0 and makes them not display.
 Expand rows work with different templates. So you need to setup some options. Given the following grid, see the options.

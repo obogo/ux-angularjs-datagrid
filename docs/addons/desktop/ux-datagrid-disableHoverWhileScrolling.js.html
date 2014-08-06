@@ -67,7 +67,7 @@ them from reducing your fps.
         </td>
         <td class="code highlight"><div class="highlight"><pre>
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;disableHoverWhileScrolling&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="s2">&quot;inst&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="s2">&quot;disable-hover-while-scrolling&quot;</span><span class="p">,</span> <span class="nx">timer</span><span class="p">;</span>
         <span class="kd">function</span> <span class="nx">init</span><span class="p">()</span> <span class="p">{</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;init&quot;</span><span class="p">);</span>
@@ -95,7 +95,7 @@ them from reducing your fps.
         <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">ux</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_STOP</span><span class="p">,</span> <span class="nx">scrollStop</span><span class="p">));</span>
         <span class="nx">init</span><span class="p">();</span>
         <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
-    <span class="p">};</span>
+    <span class="p">}</span> <span class="p">];</span>
 <span class="p">});</span>
 <span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
 </pre></div>

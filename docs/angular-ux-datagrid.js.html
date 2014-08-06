@@ -1156,7 +1156,7 @@ in from angular's injector.</p>
         <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">addons</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">addon</span><span class="p">;</span>
         <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">result</span> <span class="o">=</span> <span class="nx">$injector</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">addons</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
-            <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">result</span> <span class="o">===</span> <span class="s2">&quot;function&quot;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">result</span> <span class="o">===</span> <span class="s2">&quot;function&quot;</span> <span class="o">||</span> <span class="nx">result</span> <span class="k">instanceof</span> <span class="nb">Array</span><span class="p">)</span> <span class="p">{</span>
 
 </pre></div>
         </td>
@@ -1166,7 +1166,7 @@ in from angular's injector.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-37" id="section-37">&#182;</a>
 </div>
-<p>It is expected that each addon be a function. inst is the instance that is injected.</p>
+<p>It is expected that each addon be a function or injector array syntax. inst is the instance that is injected.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
                 <span class="nx">addon</span> <span class="o">=</span> <span class="nx">$injector</span><span class="p">.</span><span class="nx">invoke</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span> <span class="nx">instance</span><span class="p">,</span> <span class="p">{</span>
@@ -1185,7 +1185,7 @@ in from angular's injector.</p>
 <p>they must have returned a null? what was the point. Throw an error.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-                <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;Addons expect a function to pass the grid instance to.&quot;</span><span class="p">);</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;Addons expect a function ($injector array supported) to pass the grid instance to.&quot;</span><span class="p">);</span>
             <span class="p">}</span>
             <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
         <span class="p">}</span>
@@ -9351,7 +9351,7 @@ will all be able to represented by template rows.</p>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">getScriptTemplateAttribute</span><span class="p">(</span><span class="nx">scriptTemplate</span><span class="p">,</span> <span class="nx">attrStr</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">scriptTemplate</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="s2">&quot;data-&quot;</span> <span class="o">+</span> <span class="nx">attrStr</span><span class="p">]</span> <span class="o">||</span> <span class="nx">scriptTemplate</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attrStr</span><span class="p">];</span>
-            <span class="k">return</span> <span class="nx">node</span> <span class="o">&amp;&amp;</span> <span class="nx">node</span><span class="p">.</span><span class="nx">nodeValue</span> <span class="o">||</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+            <span class="k">return</span> <span class="nx">node</span> <span class="o">&amp;&amp;</span> <span class="nx">node</span><span class="p">.</span><span class="nx">value</span> <span class="o">||</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">getTemplates</span><span class="p">()</span> <span class="p">{</span>
             <span class="k">return</span> <span class="nx">templates</span><span class="p">;</span>

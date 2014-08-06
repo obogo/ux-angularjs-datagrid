@@ -42,6 +42,9 @@ angular.module("ux").factory("expandableGroups", function() {
                 }
                 i += 1;
             }
+            if (normalized.length && !resultData.length && window.console && window.console.warn) {
+                console.warn("ExpandableGroups does not work with async loaded groups. It cannot keep the indexes in sync. Try this example http://jsfiddle.net/wesjones/3Wg79/");
+            }
         }
         /**
         * ###<a name="isGroup">isGroup</a>###

@@ -73,7 +73,7 @@ License: MIT.</p>
 <p>TODO: on change row template. This needs to collapse the row.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="s2">&quot;inst&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">intv</span><span class="p">,</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;expandRows&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">lastGetIndex</span><span class="p">,</span> <span class="nx">cache</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">opened</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">opening</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">states</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nx">opened</span><span class="o">:</span> <span class="s2">&quot;opened&quot;</span><span class="p">,</span>
             <span class="nx">closed</span><span class="o">:</span> <span class="s2">&quot;closed&quot;</span>
@@ -385,7 +385,7 @@ License: MIT.</p>
         <span class="p">}));</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">expandRows</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
         <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
-    <span class="p">};</span>
+    <span class="p">}</span> <span class="p">];</span>
 <span class="p">});</span>
 <span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
 </pre></div>

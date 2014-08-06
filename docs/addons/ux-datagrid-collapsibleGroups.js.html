@@ -53,7 +53,7 @@ License: MIT.</p>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">TOGGLE_GROUP</span> <span class="o">=</span> <span class="s2">&quot;datagrid:toggleGroup&quot;</span><span class="p">;</span>
 
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;collapsibleGroups&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="s2">&quot;inst&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;collapsibleGroups&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;orange&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">lastIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">regroup</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">collapsed</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">superGetTemplateHeight</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplateHeight</span><span class="p">,</span> <span class="nx">states</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nx">COLLAPSE</span><span class="o">:</span> <span class="s2">&quot;collapse&quot;</span><span class="p">,</span>
             <span class="nx">EXPAND</span><span class="o">:</span> <span class="s2">&quot;expand&quot;</span>
@@ -171,7 +171,7 @@ License: MIT.</p>
         <span class="p">}));</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">collapsibleGroups</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
         <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
-    <span class="p">};</span>
+    <span class="p">}</span> <span class="p">];</span>
 <span class="p">});</span>
 <span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
 </pre></div>

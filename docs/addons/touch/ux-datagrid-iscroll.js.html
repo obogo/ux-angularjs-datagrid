@@ -72,7 +72,7 @@ License: MIT.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;iScrollAddon&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="s2">&quot;inst&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
 
 </pre></div>
         </td>
@@ -265,7 +265,7 @@ License: MIT.</p>
         <span class="p">};</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
         <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
-    <span class="p">};</span>
+    <span class="p">}</span> <span class="p">];</span>
 <span class="p">});</span>
 <span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
 </pre></div>

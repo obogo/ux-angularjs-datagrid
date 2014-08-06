@@ -225,7 +225,7 @@ It persists based on the path.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">sortStatesModel</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;columnSortStatesModel&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;columnSortStatesModel&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
             <span class="nx">$rootScope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">$rootScope</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
         <span class="p">}),</span> <span class="nx">sortOptions</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nx">ASC</span><span class="o">:</span> <span class="s2">&quot;asc&quot;</span><span class="p">,</span>
@@ -339,7 +339,7 @@ The default of weather multiple states are allowed or not.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">getCurrentPathWithoutParams</span><span class="p">()</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="nx">getCurrentPath</span><span class="p">().</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">).</span><span class="nx">shift</span><span class="p">();</span>
+            <span class="k">return</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getCurrentPath</span><span class="p">().</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">).</span><span class="nx">shift</span><span class="p">();</span>
         <span class="p">}</span>
 
 </pre></div>
@@ -372,13 +372,13 @@ The default of weather multiple states are allowed or not.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">getPath</span><span class="p">()</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">path</span><span class="p">;</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">getIgnoreParamsInPath</span><span class="p">())</span> <span class="p">{</span>
-                <span class="nx">path</span> <span class="o">=</span> <span class="nx">getCurrentPathWithoutParams</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">api</span><span class="p">.</span><span class="nx">getIgnoreParamsInPath</span><span class="p">())</span> <span class="p">{</span>
+                <span class="nx">path</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getCurrentPathWithoutParams</span><span class="p">();</span>
             <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                <span class="nx">path</span> <span class="o">=</span> <span class="nx">getCurrentPath</span><span class="p">();</span>
+                <span class="nx">path</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getCurrentPath</span><span class="p">();</span>
             <span class="p">}</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">path</span> <span class="o">!==</span> <span class="nx">lastPath</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;getPath changed from %s to %s&quot;</span><span class="p">,</span> <span class="nx">lastPath</span><span class="p">,</span> <span class="nx">path</span><span class="p">);</span>
+                <span class="nx">api</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;getPath changed from %s to %s&quot;</span><span class="p">,</span> <span class="nx">lastPath</span><span class="p">,</span> <span class="nx">path</span><span class="p">);</span>
                 <span class="nx">lastPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">;</span>
             <span class="p">}</span>
             <span class="k">return</span> <span class="nx">path</span><span class="p">;</span>
@@ -416,7 +416,7 @@ fall back on the defaultAllowMultipleStates</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">getAllowMultipleStates</span><span class="p">()</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">multipleStates</span><span class="p">[</span><span class="nx">getPath</span><span class="p">()];</span>
+            <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">multipleStates</span><span class="p">[</span><span class="nx">api</span><span class="p">.</span><span class="nx">getPath</span><span class="p">()];</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">result</span> <span class="o">===</span> <span class="kc">true</span> <span class="o">||</span> <span class="nx">result</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
                 <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
             <span class="p">}</span>
@@ -457,9 +457,9 @@ fall back on the defaultAllowMultipleStates</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">setAllowMultipleStates</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">path</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">path</span> <span class="o">=</span> <span class="nx">path</span> <span class="o">||</span> <span class="nx">getPath</span><span class="p">();</span>
+            <span class="nx">path</span> <span class="o">=</span> <span class="nx">path</span> <span class="o">||</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getPath</span><span class="p">();</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setAllowMultipleStates %s&quot;</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+                <span class="nx">api</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setAllowMultipleStates %s&quot;</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
                 <span class="nx">multipleStates</span><span class="p">[</span><span class="nx">path</span><span class="p">]</span> <span class="o">=</span> <span class="nx">value</span> <span class="o">===</span> <span class="kc">true</span><span class="p">;</span>
             <span class="p">}</span>
             <span class="k">return</span> <span class="o">!!</span><span class="nx">multipleStates</span><span class="p">[</span><span class="nx">path</span><span class="p">];</span>
@@ -496,7 +496,7 @@ fall back on the defaultAllowMultipleStates</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">getIgnoreParamsInPath</span><span class="p">()</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="nx">ignoreParamsInPath</span><span class="p">[</span><span class="nx">getCurrentPathWithoutParams</span><span class="p">()]</span> <span class="o">===</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="k">return</span> <span class="nx">ignoreParamsInPath</span><span class="p">[</span><span class="nx">api</span><span class="p">.</span><span class="nx">getCurrentPathWithoutParams</span><span class="p">()]</span> <span class="o">===</span> <span class="kc">true</span><span class="p">;</span>
         <span class="p">}</span>
 
 </pre></div>
@@ -529,8 +529,8 @@ fall back on the defaultAllowMultipleStates</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">setIgnoreParamsInPath</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setIgnoreParamsInPath %s&quot;</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
-            <span class="nx">ignoreParamsInPath</span><span class="p">[</span><span class="nx">getCurrentPathWithoutParams</span><span class="p">()]</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+            <span class="nx">api</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setIgnoreParamsInPath %s&quot;</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+            <span class="nx">ignoreParamsInPath</span><span class="p">[</span><span class="nx">api</span><span class="p">.</span><span class="nx">getCurrentPathWithoutParams</span><span class="p">()]</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
         <span class="p">}</span>
 
 </pre></div>
@@ -562,7 +562,7 @@ fall back on the defaultAllowMultipleStates</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">hasPathState</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">path</span> <span class="o">=</span> <span class="nx">path</span> <span class="o">||</span> <span class="nx">getPath</span><span class="p">();</span>
+            <span class="nx">path</span> <span class="o">=</span> <span class="nx">path</span> <span class="o">||</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getPath</span><span class="p">();</span>
             <span class="k">return</span> <span class="o">!!</span><span class="nx">states</span><span class="p">[</span><span class="nx">path</span><span class="p">];</span>
         <span class="p">}</span>
 
@@ -598,7 +598,7 @@ fall back on the defaultAllowMultipleStates</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">path</span> <span class="o">=</span> <span class="nx">path</span> <span class="o">||</span> <span class="nx">getPath</span><span class="p">();</span>
+            <span class="nx">path</span> <span class="o">=</span> <span class="nx">path</span> <span class="o">||</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getPath</span><span class="p">();</span>
             <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">states</span><span class="p">[</span><span class="nx">path</span><span class="p">])</span> <span class="p">{</span>
                 <span class="nx">states</span><span class="p">[</span><span class="nx">path</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="nx">$dirty</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
@@ -640,12 +640,12 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">setPathState</span><span class="p">(</span><span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">columnName</span><span class="p">,</span> <span class="nx">currentPathState</span> <span class="o">=</span> <span class="nx">getPathState</span><span class="p">();</span>
-            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setPathState %s to %s&quot;</span><span class="p">,</span> <span class="nx">currentPathState</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
-            <span class="nx">setIgnoreParamsInPath</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">columnName</span><span class="p">,</span> <span class="nx">currentPathState</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">();</span>
+            <span class="nx">api</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setPathState %s to %s&quot;</span><span class="p">,</span> <span class="nx">currentPathState</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
+            <span class="nx">api</span><span class="p">.</span><span class="nx">setIgnoreParamsInPath</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
             <span class="k">for</span> <span class="p">(</span><span class="nx">columnName</span> <span class="k">in</span> <span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">pathState</span><span class="p">,</span> <span class="p">[</span> <span class="nx">columnName</span> <span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">currentPathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">columnName</span><span class="p">))</span> <span class="p">{</span>
-                    <span class="nx">setState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">],</span> <span class="nx">currentPathState</span><span class="p">);</span>
+                    <span class="nx">api</span><span class="p">.</span><span class="nx">setState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">],</span> <span class="nx">currentPathState</span><span class="p">);</span>
                 <span class="p">}</span>
             <span class="p">}</span>
         <span class="p">}</span>
@@ -686,7 +686,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">getState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">)</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="kd">var</span> <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">(</span><span class="nx">api</span><span class="p">.</span><span class="nx">getPath</span><span class="p">());</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">=</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">;</span>
             <span class="p">}</span>
@@ -732,18 +732,18 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">setState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">state</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">prevState</span><span class="p">;</span>
-            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
-            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">columnName</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">(</span><span class="nx">api</span><span class="p">.</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">api</span><span class="p">.</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">columnName</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">prevState</span> <span class="o">=</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">];</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">getAllowMultipleStates</span><span class="p">(</span><span class="nx">pathState</span><span class="p">.</span><span class="nx">$path</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">api</span><span class="p">.</span><span class="nx">getAllowMultipleStates</span><span class="p">(</span><span class="nx">pathState</span><span class="p">.</span><span class="nx">$path</span><span class="p">))</span> <span class="p">{</span>
                     <span class="nx">index</span> <span class="o">=</span> <span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">columnName</span><span class="p">);</span>
                     <span class="k">if</span> <span class="p">(</span><span class="nx">index</span> <span class="o">!==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
                         <span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
                     <span class="p">}</span>
                 <span class="p">}</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nx">state</span> <span class="o">!==</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">getAllowMultipleStates</span><span class="p">())</span> <span class="p">{</span>
-                        <span class="nx">clear</span><span class="p">(</span><span class="nx">pathState</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">api</span><span class="p">.</span><span class="nx">getAllowMultipleStates</span><span class="p">())</span> <span class="p">{</span>
+                        <span class="nx">api</span><span class="p">.</span><span class="nx">clear</span><span class="p">(</span><span class="nx">pathState</span><span class="p">);</span>
                     <span class="p">}</span>
                     <span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">columnName</span><span class="p">);</span>
                 <span class="p">}</span>
@@ -751,7 +751,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
                 <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">prevState</span> <span class="o">&amp;&amp;</span> <span class="nx">state</span> <span class="o">===</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">)</span> <span class="p">{</span>
                     <span class="k">return</span><span class="p">;</span>
                 <span class="p">}</span>
-                <span class="nx">dirtyState</span><span class="p">(</span><span class="nx">pathState</span><span class="p">);</span>
+                <span class="nx">api</span><span class="p">.</span><span class="nx">dirtyState</span><span class="p">(</span><span class="nx">pathState</span><span class="p">);</span>
             <span class="p">}</span>
         <span class="p">}</span>
 
@@ -784,12 +784,12 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">createKeyFromStates</span><span class="p">(</span><span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">(</span><span class="nx">api</span><span class="p">.</span><span class="nx">getPath</span><span class="p">());</span>
             <span class="kd">var</span> <span class="nx">combo</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="nx">text</span><span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
                 <span class="nx">pathState</span><span class="o">:</span> <span class="nx">pathState</span>
             <span class="p">};</span>
-            <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">,</span> <span class="nx">createKeyFromState</span><span class="p">,</span> <span class="nx">combo</span><span class="p">);</span>
+            <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">,</span> <span class="nx">api</span><span class="p">.</span><span class="nx">createKeyFromState</span><span class="p">,</span> <span class="nx">combo</span><span class="p">);</span>
             <span class="k">return</span> <span class="nx">combo</span><span class="p">.</span><span class="nx">text</span><span class="p">;</span>
         <span class="p">}</span>
 
@@ -831,7 +831,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">createKeyFromState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">combo</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">columnName</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">api</span><span class="p">.</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">columnName</span><span class="p">))</span> <span class="p">{</span>
                 <span class="nx">combo</span><span class="p">.</span><span class="nx">text</span> <span class="o">+=</span> <span class="p">(</span><span class="nx">combo</span><span class="p">.</span><span class="nx">text</span><span class="p">.</span><span class="nx">length</span> <span class="o">?</span> <span class="s2">&quot;|&quot;</span> <span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="nx">columnName</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">combo</span><span class="p">.</span><span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">];</span>
             <span class="p">}</span>
         <span class="p">}</span>
@@ -866,10 +866,10 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">toggle</span><span class="p">(</span><span class="nx">columnName</span><span class="p">)</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">state</span> <span class="o">=</span> <span class="nx">getState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">),</span> <span class="nx">nextState</span> <span class="o">=</span> <span class="nx">getNextState</span><span class="p">(</span><span class="nx">state</span><span class="p">);</span>
-            <span class="nx">result</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;toggle %s from %s to %s&quot;</span><span class="p">,</span> <span class="nx">columnName</span><span class="p">,</span> <span class="nx">state</span><span class="p">,</span> <span class="nx">nextState</span><span class="p">);</span>
-            <span class="nx">setState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">nextState</span><span class="p">);</span>
-            <span class="nx">dirtyState</span><span class="p">();</span>
+            <span class="kd">var</span> <span class="nx">state</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">),</span> <span class="nx">nextState</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getNextState</span><span class="p">(</span><span class="nx">state</span><span class="p">);</span>
+            <span class="nx">api</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;toggle %s from %s to %s&quot;</span><span class="p">,</span> <span class="nx">columnName</span><span class="p">,</span> <span class="nx">state</span><span class="p">,</span> <span class="nx">nextState</span><span class="p">);</span>
+            <span class="nx">api</span><span class="p">.</span><span class="nx">setState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">nextState</span><span class="p">);</span>
+            <span class="nx">api</span><span class="p">.</span><span class="nx">dirtyState</span><span class="p">();</span>
         <span class="p">}</span>
 
 </pre></div>
@@ -902,8 +902,8 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">dirtyState</span><span class="p">(</span><span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
-            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;dirtyState %s&quot;</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
+            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">(</span><span class="nx">api</span><span class="p">.</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="nx">api</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;dirtyState %s&quot;</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
             <span class="nx">pathState</span><span class="p">.</span><span class="nx">$dirty</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
         <span class="p">}</span>
 
@@ -937,8 +937,8 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">clearDirty</span><span class="p">(</span><span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
-            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;clearDirty %s&quot;</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
+            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">(</span><span class="nx">api</span><span class="p">.</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="nx">api</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;clearDirty %s&quot;</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
             <span class="nx">pathState</span><span class="p">.</span><span class="nx">$dirty</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
         <span class="p">}</span>
 
@@ -1024,7 +1024,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">hasDirtySortState</span><span class="p">(</span><span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">(</span><span class="nx">api</span><span class="p">.</span><span class="nx">getPath</span><span class="p">());</span>
             <span class="k">return</span> <span class="nx">pathState</span><span class="p">.</span><span class="nx">$dirty</span><span class="p">;</span>
         <span class="p">}</span>
 
@@ -1135,8 +1135,8 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">sortValueCompare</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">a</span> <span class="o">=</span> <span class="nx">cleanSortValue</span><span class="p">(</span><span class="nx">a</span><span class="p">);</span>
-            <span class="nx">b</span> <span class="o">=</span> <span class="nx">cleanSortValue</span><span class="p">(</span><span class="nx">b</span><span class="p">);</span>
+            <span class="nx">a</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">cleanSortValue</span><span class="p">(</span><span class="nx">a</span><span class="p">);</span>
+            <span class="nx">b</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">cleanSortValue</span><span class="p">(</span><span class="nx">b</span><span class="p">);</span>
             <span class="k">return</span> <span class="nx">a</span> <span class="o">&gt;</span> <span class="nx">b</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="nx">a</span> <span class="o">&lt;</span> <span class="nx">b</span> <span class="o">?</span> <span class="o">-</span><span class="mi">1</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
         <span class="p">}</span>
 
@@ -1205,7 +1205,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         <span class="kd">function</span> <span class="nx">createAscSort</span><span class="p">(</span><span class="nx">property</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="kd">function</span> <span class="nx">asc</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
                 <span class="kd">var</span> <span class="nx">av</span> <span class="o">=</span> <span class="nx">a</span><span class="p">[</span><span class="nx">property</span><span class="p">],</span> <span class="nx">bv</span> <span class="o">=</span> <span class="nx">b</span><span class="p">[</span><span class="nx">property</span><span class="p">];</span>
-                <span class="k">return</span> <span class="nx">sortValueCompare</span><span class="p">(</span><span class="nx">av</span><span class="p">,</span> <span class="nx">bv</span><span class="p">);</span>
+                <span class="k">return</span> <span class="nx">api</span><span class="p">.</span><span class="nx">sortValueCompare</span><span class="p">(</span><span class="nx">av</span><span class="p">,</span> <span class="nx">bv</span><span class="p">);</span>
             <span class="p">};</span>
         <span class="p">}</span>
 
@@ -1240,7 +1240,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         <span class="kd">function</span> <span class="nx">createDescSort</span><span class="p">(</span><span class="nx">property</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="kd">function</span> <span class="nx">desc</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
                 <span class="kd">var</span> <span class="nx">av</span> <span class="o">=</span> <span class="nx">a</span><span class="p">[</span><span class="nx">property</span><span class="p">],</span> <span class="nx">bv</span> <span class="o">=</span> <span class="nx">b</span><span class="p">[</span><span class="nx">property</span><span class="p">];</span>
-                <span class="k">return</span> <span class="o">-</span><span class="nx">sortValueCompare</span><span class="p">(</span><span class="nx">av</span><span class="p">,</span> <span class="nx">bv</span><span class="p">);</span>
+                <span class="k">return</span> <span class="o">-</span><span class="nx">api</span><span class="p">.</span><span class="nx">sortValueCompare</span><span class="p">(</span><span class="nx">av</span><span class="p">,</span> <span class="nx">bv</span><span class="p">);</span>
             <span class="p">};</span>
         <span class="p">}</span>
 
@@ -1275,10 +1275,10 @@ Any columnNames not passed are set to none if not allow multiples.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">clear</span><span class="p">(</span><span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">i</span><span class="p">;</span>
-            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">(</span><span class="nx">api</span><span class="p">.</span><span class="nx">getPath</span><span class="p">());</span>
             <span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">.</span><span class="nx">length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
             <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="k">in</span> <span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">pathState</span><span class="p">,</span> <span class="p">[</span> <span class="nx">i</span> <span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">pathState</span><span class="p">,</span> <span class="p">[</span> <span class="nx">i</span> <span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">api</span><span class="p">.</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">)</span> <span class="p">{</span>
                     <span class="nx">pathState</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">;</span>
                 <span class="p">}</span>
             <span class="p">}</span>
@@ -1309,30 +1309,36 @@ Any columnNames not passed are set to none if not allow multiples.</p>
             <span class="nx">states</span> <span class="o">=</span> <span class="p">{};</span>
             <span class="nx">multipleStates</span> <span class="o">=</span> <span class="p">{};</span>
         <span class="p">}</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">getPath</span> <span class="o">=</span> <span class="nx">getPath</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">getAllowMultipleStates</span> <span class="o">=</span> <span class="nx">getAllowMultipleStates</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">setAllowMultipleStates</span> <span class="o">=</span> <span class="nx">setAllowMultipleStates</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">getIgnoreParamsInPath</span> <span class="o">=</span> <span class="nx">getIgnoreParamsInPath</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">setIgnoreParamsInPath</span> <span class="o">=</span> <span class="nx">setIgnoreParamsInPath</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">hasPathState</span> <span class="o">=</span> <span class="nx">hasPathState</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">getPathState</span> <span class="o">=</span> <span class="nx">getPathState</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">setPathState</span> <span class="o">=</span> <span class="nx">setPathState</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">getState</span> <span class="o">=</span> <span class="nx">getState</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">setState</span> <span class="o">=</span> <span class="nx">setState</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">toggle</span> <span class="o">=</span> <span class="nx">toggle</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">dirtyState</span> <span class="o">=</span> <span class="nx">dirtyState</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">clearDirty</span> <span class="o">=</span> <span class="nx">clearDirty</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">sortNone</span> <span class="o">=</span> <span class="nx">sortNone</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">createAscSort</span> <span class="o">=</span> <span class="nx">createAscSort</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">createDescSort</span> <span class="o">=</span> <span class="nx">createDescSort</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">hasDirtySortState</span> <span class="o">=</span> <span class="nx">hasDirtySortState</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">createKeyFromStates</span> <span class="o">=</span> <span class="nx">createKeyFromStates</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">isPrivate</span> <span class="o">=</span> <span class="nx">isPrivate</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">getLocale</span> <span class="o">=</span> <span class="nx">getLocale</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">clear</span> <span class="o">=</span> <span class="nx">clear</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">clearAll</span> <span class="o">=</span> <span class="nx">clearAll</span><span class="p">;</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">sortOptions</span> <span class="o">=</span> <span class="nx">sortOptions</span><span class="p">;</span>
-        <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">getPath</span> <span class="o">=</span> <span class="nx">getPath</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">getCurrentPath</span> <span class="o">=</span> <span class="nx">getCurrentPath</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">getCurrentPathWithoutParams</span> <span class="o">=</span> <span class="nx">getCurrentPathWithoutParams</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">sortValueCompare</span> <span class="o">=</span> <span class="nx">sortValueCompare</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">cleanSortValue</span> <span class="o">=</span> <span class="nx">cleanSortValue</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">getNextState</span> <span class="o">=</span> <span class="nx">getNextState</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">createKeyFromState</span> <span class="o">=</span> <span class="nx">createKeyFromState</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">getAllowMultipleStates</span> <span class="o">=</span> <span class="nx">getAllowMultipleStates</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">setAllowMultipleStates</span> <span class="o">=</span> <span class="nx">setAllowMultipleStates</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">getIgnoreParamsInPath</span> <span class="o">=</span> <span class="nx">getIgnoreParamsInPath</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">setIgnoreParamsInPath</span> <span class="o">=</span> <span class="nx">setIgnoreParamsInPath</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">hasPathState</span> <span class="o">=</span> <span class="nx">hasPathState</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">getPathState</span> <span class="o">=</span> <span class="nx">getPathState</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">setPathState</span> <span class="o">=</span> <span class="nx">setPathState</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">getState</span> <span class="o">=</span> <span class="nx">getState</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">setState</span> <span class="o">=</span> <span class="nx">setState</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">toggle</span> <span class="o">=</span> <span class="nx">toggle</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">dirtyState</span> <span class="o">=</span> <span class="nx">dirtyState</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">clearDirty</span> <span class="o">=</span> <span class="nx">clearDirty</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">sortNone</span> <span class="o">=</span> <span class="nx">sortNone</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">createAscSort</span> <span class="o">=</span> <span class="nx">createAscSort</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">createDescSort</span> <span class="o">=</span> <span class="nx">createDescSort</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">hasDirtySortState</span> <span class="o">=</span> <span class="nx">hasDirtySortState</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">createKeyFromStates</span> <span class="o">=</span> <span class="nx">createKeyFromStates</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">isPrivate</span> <span class="o">=</span> <span class="nx">isPrivate</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">getLocale</span> <span class="o">=</span> <span class="nx">getLocale</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">clear</span> <span class="o">=</span> <span class="nx">clear</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">clearAll</span> <span class="o">=</span> <span class="nx">clearAll</span><span class="p">;</span>
+        <span class="nx">api</span><span class="p">.</span><span class="nx">sortOptions</span> <span class="o">=</span> <span class="nx">sortOptions</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">api</span><span class="p">;</span>
     <span class="p">}();</span>
     <span class="k">return</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">sortStatesModel</span><span class="p">;</span>
 <span class="p">}</span> <span class="p">]);</span>

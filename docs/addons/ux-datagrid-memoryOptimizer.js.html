@@ -61,7 +61,7 @@ License: MIT.</p>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_MEMORY_OPTIMIZED</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onMemoryOptimized&quot;</span><span class="p">;</span>
 
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;memoryOptimizer&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="s2">&quot;inst&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">memoryOptimizer</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">memoryOptimizer</span> <span class="o">||</span> <span class="p">{};</span>
         <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;memoryOptimizer&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;redOrange&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">defaultOptions</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nx">range</span><span class="o">:</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">creepLimit</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">||</span> <span class="mi">200</span>
@@ -242,7 +242,7 @@ in the active range and remove their dom and destroy their scopes.</p>
         <span class="nx">disableCreep</span><span class="p">();</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">memoryOptimizer</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
         <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
-    <span class="p">};</span>
+    <span class="p">}</span> <span class="p">];</span>
 <span class="p">});</span>
 <span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
 </pre></div>

@@ -26,7 +26,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
      * @type {Object}
      **************************************************************************************/
     exports.datagrid.sortStatesModel = function() {
-        var result = exports.logWrapper("columnSortStatesModel", {}, "blue", function() {
+        var api = exports.logWrapper("columnSortStatesModel", {}, "blue", function() {
             $rootScope.$emit.apply($rootScope, arguments);
         }), sortOptions = {
             ASC: "asc",
@@ -59,7 +59,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @returns {*}
          */
         function getCurrentPathWithoutParams() {
-            return getCurrentPath().split("?").shift();
+            return api.getCurrentPath().split("?").shift();
         }
         /**
          * ###<a name="getPath">getPath</a>###
@@ -67,13 +67,13 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          */
         function getPath() {
             var path;
-            if (getIgnoreParamsInPath()) {
-                path = getCurrentPathWithoutParams();
+            if (api.getIgnoreParamsInPath()) {
+                path = api.getCurrentPathWithoutParams();
             } else {
-                path = getCurrentPath();
+                path = api.getCurrentPath();
             }
             if (path !== lastPath) {
-                result.log("getPath changed from %s to %s", lastPath, path);
+                api.log("getPath changed from %s to %s", lastPath, path);
                 lastPath = path;
             }
             return path;
@@ -85,7 +85,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @return {Boolean}
          */
         function getAllowMultipleStates() {
-            var result = multipleStates[getPath()];
+            var result = multipleStates[api.getPath()];
             if (result === true || result === false) {
                 return result;
             }
@@ -98,9 +98,9 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @param {String=} path
          */
         function setAllowMultipleStates(value, path) {
-            path = path || getPath();
+            path = path || api.getPath();
             if (value !== undefined) {
-                result.log("setAllowMultipleStates %s", value);
+                api.log("setAllowMultipleStates %s", value);
                 multipleStates[path] = value === true;
             }
             return !!multipleStates[path];
@@ -111,7 +111,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @return {Boolean}
          */
         function getIgnoreParamsInPath() {
-            return ignoreParamsInPath[getCurrentPathWithoutParams()] === true;
+            return ignoreParamsInPath[api.getCurrentPathWithoutParams()] === true;
         }
         /**
          * ###<a name="setIgnoreParamsInPath">setIgnoreParamsInPath</a>###
@@ -119,8 +119,8 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @param {Boolean} value
          */
         function setIgnoreParamsInPath(value) {
-            result.log("setIgnoreParamsInPath %s", value);
-            ignoreParamsInPath[getCurrentPathWithoutParams()] = value;
+            api.log("setIgnoreParamsInPath %s", value);
+            ignoreParamsInPath[api.getCurrentPathWithoutParams()] = value;
         }
         /**
          * ###<a name="hasPathState">hasPathState</a>###
@@ -129,7 +129,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @returns {boolean}
          */
         function hasPathState(path) {
-            path = path || getPath();
+            path = path || api.getPath();
             return !!states[path];
         }
         /**
@@ -139,7 +139,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @private
          */
         function getPathState(path) {
-            path = path || getPath();
+            path = path || api.getPath();
             if (!states[path]) {
                 states[path] = {
                     $dirty: false,
@@ -156,12 +156,12 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @param {Object} pathState
          */
         function setPathState(pathState) {
-            var columnName, currentPathState = getPathState();
-            result.log("setPathState %s to %s", currentPathState, pathState);
-            setIgnoreParamsInPath(true);
+            var columnName, currentPathState = api.getPathState();
+            api.log("setPathState %s to %s", currentPathState, pathState);
+            api.setIgnoreParamsInPath(true);
             for (columnName in pathState) {
                 if (Object.prototype.hasOwnProperty.apply(pathState, [ columnName ]) && pathState[columnName] !== currentPathState[columnName] && !isPrivate(columnName)) {
-                    setState(columnName, pathState[columnName], currentPathState);
+                    api.setState(columnName, pathState[columnName], currentPathState);
                 }
             }
         }
@@ -173,7 +173,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @return {String}
          */
         function getState(columnName) {
-            var pathState = getPathState(getPath());
+            var pathState = api.getPathState(api.getPath());
             if (pathState[columnName] === undefined) {
                 pathState[columnName] = sortOptions.NONE;
             }
@@ -188,18 +188,18 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          */
         function setState(columnName, state, pathState) {
             var index, prevState;
-            pathState = pathState || getPathState(getPath());
-            if (!isPrivate(columnName) && pathState[columnName] !== state) {
+            pathState = pathState || api.getPathState(api.getPath());
+            if (!api.isPrivate(columnName) && pathState[columnName] !== state) {
                 prevState = pathState[columnName];
-                if (getAllowMultipleStates(pathState.$path)) {
+                if (api.getAllowMultipleStates(pathState.$path)) {
                     index = pathState.$order.indexOf(columnName);
                     if (index !== -1) {
                         pathState.$order.splice(index, 1);
                     }
                 }
                 if (state !== sortOptions.NONE) {
-                    if (!getAllowMultipleStates()) {
-                        clear(pathState);
+                    if (!api.getAllowMultipleStates()) {
+                        api.clear(pathState);
                     }
                     pathState.$order.push(columnName);
                 }
@@ -207,7 +207,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
                 if (!prevState && state === sortOptions.NONE) {
                     return;
                 }
-                dirtyState(pathState);
+                api.dirtyState(pathState);
             }
         }
         /**
@@ -217,12 +217,12 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @returns {string}
          */
         function createKeyFromStates(pathState) {
-            pathState = pathState || getPathState(getPath());
+            pathState = pathState || api.getPathState(api.getPath());
             var combo = {
                 text: "",
                 pathState: pathState
             };
-            exports.each(pathState.$order, createKeyFromState, combo);
+            exports.each(pathState.$order, api.createKeyFromState, combo);
             return combo.text;
         }
         /**
@@ -234,7 +234,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @param combo
          */
         function createKeyFromState(columnName, index, list, combo) {
-            if (!isPrivate(columnName)) {
+            if (!api.isPrivate(columnName)) {
                 combo.text += (combo.text.length ? "|" : "") + columnName + ":" + combo.pathState[columnName];
             }
         }
@@ -244,10 +244,10 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @param {String} columnName
          */
         function toggle(columnName) {
-            var state = getState(columnName), nextState = getNextState(state);
-            result.info("toggle %s from %s to %s", columnName, state, nextState);
-            setState(columnName, nextState);
-            dirtyState();
+            var state = api.getState(columnName), nextState = api.getNextState(state);
+            api.info("toggle %s from %s to %s", columnName, state, nextState);
+            api.setState(columnName, nextState);
+            api.dirtyState();
         }
         /**
          * ###<a name="dirtyState">dirtyState</a>###
@@ -255,8 +255,8 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @param {Object=} pathState
          */
         function dirtyState(pathState) {
-            pathState = pathState || getPathState(getPath());
-            result.log("dirtyState %s", pathState);
+            pathState = pathState || api.getPathState(api.getPath());
+            api.log("dirtyState %s", pathState);
             pathState.$dirty = true;
         }
         /**
@@ -265,8 +265,8 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @param {Object=} pathState
          */
         function clearDirty(pathState) {
-            pathState = pathState || getPathState(getPath());
-            result.log("clearDirty %s", pathState);
+            pathState = pathState || api.getPathState(api.getPath());
+            api.log("clearDirty %s", pathState);
             pathState.$dirty = false;
         }
         /**
@@ -299,7 +299,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @returns {boolean|*|pathState.$dirty}
          */
         function hasDirtySortState(pathState) {
-            pathState = pathState || getPathState(getPath());
+            pathState = pathState || api.getPathState(api.getPath());
             return pathState.$dirty;
         }
         /**
@@ -332,8 +332,8 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          * @returns {number}
          */
         function sortValueCompare(a, b) {
-            a = cleanSortValue(a);
-            b = cleanSortValue(b);
+            a = api.cleanSortValue(a);
+            b = api.cleanSortValue(b);
             return a > b ? 1 : a < b ? -1 : 0;
         }
         /**
@@ -354,7 +354,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
         function createAscSort(property) {
             return function asc(a, b) {
                 var av = a[property], bv = b[property];
-                return sortValueCompare(av, bv);
+                return api.sortValueCompare(av, bv);
             };
         }
         /**
@@ -366,7 +366,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
         function createDescSort(property) {
             return function desc(a, b) {
                 var av = a[property], bv = b[property];
-                return -sortValueCompare(av, bv);
+                return -api.sortValueCompare(av, bv);
             };
         }
         /**
@@ -376,10 +376,10 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
          */
         function clear(pathState) {
             var i;
-            pathState = pathState || getPathState(getPath());
+            pathState = pathState || api.getPathState(api.getPath());
             pathState.$order.length = 0;
             for (i in pathState) {
-                if (Object.prototype.hasOwnProperty.apply(pathState, [ i ]) && !isPrivate(i) && pathState[i] !== sortOptions.NONE) {
+                if (Object.prototype.hasOwnProperty.apply(pathState, [ i ]) && !api.isPrivate(i) && pathState[i] !== sortOptions.NONE) {
                     pathState[i] = sortOptions.NONE;
                 }
             }
@@ -392,30 +392,36 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
             states = {};
             multipleStates = {};
         }
-        result.getPath = getPath;
-        result.getAllowMultipleStates = getAllowMultipleStates;
-        result.setAllowMultipleStates = setAllowMultipleStates;
-        result.getIgnoreParamsInPath = getIgnoreParamsInPath;
-        result.setIgnoreParamsInPath = setIgnoreParamsInPath;
-        result.hasPathState = hasPathState;
-        result.getPathState = getPathState;
-        result.setPathState = setPathState;
-        result.getState = getState;
-        result.setState = setState;
-        result.toggle = toggle;
-        result.dirtyState = dirtyState;
-        result.clearDirty = clearDirty;
-        result.sortNone = sortNone;
-        result.createAscSort = createAscSort;
-        result.createDescSort = createDescSort;
-        result.hasDirtySortState = hasDirtySortState;
-        result.createKeyFromStates = createKeyFromStates;
-        result.isPrivate = isPrivate;
-        result.getLocale = getLocale;
-        result.clear = clear;
-        result.clearAll = clearAll;
-        result.sortOptions = sortOptions;
-        return result;
+        api.getPath = getPath;
+        api.getCurrentPath = getCurrentPath;
+        api.getCurrentPathWithoutParams = getCurrentPathWithoutParams;
+        api.sortValueCompare = sortValueCompare;
+        api.cleanSortValue = cleanSortValue;
+        api.getNextState = getNextState;
+        api.createKeyFromState = createKeyFromState;
+        api.getAllowMultipleStates = getAllowMultipleStates;
+        api.setAllowMultipleStates = setAllowMultipleStates;
+        api.getIgnoreParamsInPath = getIgnoreParamsInPath;
+        api.setIgnoreParamsInPath = setIgnoreParamsInPath;
+        api.hasPathState = hasPathState;
+        api.getPathState = getPathState;
+        api.setPathState = setPathState;
+        api.getState = getState;
+        api.setState = setState;
+        api.toggle = toggle;
+        api.dirtyState = dirtyState;
+        api.clearDirty = clearDirty;
+        api.sortNone = sortNone;
+        api.createAscSort = createAscSort;
+        api.createDescSort = createDescSort;
+        api.hasDirtySortState = hasDirtySortState;
+        api.createKeyFromStates = createKeyFromStates;
+        api.isPrivate = isPrivate;
+        api.getLocale = getLocale;
+        api.clear = clear;
+        api.clearAll = clearAll;
+        api.sortOptions = sortOptions;
+        return api;
     }();
     return exports.datagrid.sortStatesModel;
 } ]);

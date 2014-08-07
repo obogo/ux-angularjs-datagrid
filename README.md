@@ -280,6 +280,49 @@ The limit property can be helpful as well. With this it will tell the addon that
         </script>
     </div>
 
+###Addon: Sort Model (ux-datagrid-sortModel.js)###
+Allows you to sort the datagrid by it's columns. This has options to sort grouped data as well. When sorting grouped data you may want to sort the groups or the items inside of the groups. By default it sorts the items inside of the groups. To sort the groups you need to set the option sortModel:{groupSort:true}.
+Here is an example where it has grouped data and you want to sort the groups instead. YOu can see it setting the options. You then just toggleSort on the sortModel.
+
+    <div class="header">
+        <div class="row">
+            <div class="col sortCol1" data-ng-click="datagrid.sortModel.toggleSort('id')"><div class="{{datagrid.sortModel.getSortStateOf('id')}}">ID</div></div>
+            <div class="col sortCol2" data-ng-click="datagrid.sortModel.toggleSort('name')"><div class="{{datagrid.sortModel.getSortStateOf('name')}}">Name</div></div>
+            <div class="col sortCol3" data-ng-click="datagrid.sortModel.toggleSort('description')"><div class="{{datagrid.sortModel.getSortStateOf('description')}}">Description</div></div>
+            <div class="col sortCol4" data-ng-click="datagrid.sortModel.toggleSort('type')"><div class="{{datagrid.sortModel.getSortStateOf('type')}}">Type</div></div>
+            <div class="col sortCol5" data-ng-click="datagrid.sortModel.toggleSort('weight')"><div class="{{datagrid.sortModel.getSortStateOf('weight')}}">oz</div></div>
+        </div>
+    </div>
+    <div class="my-container">
+        <div class="listA">
+            <!--// this is the datagrid. Add to the sorts the columns that you want sorted. If not added they will not be sortable. To pass methods for your own sorts, pass an object with asc, and desc properties that are sort functions. //-->
+            <div data-ux-datagrid="datagrid.sortModel.applySorts(items)" class="datagrid" data-grouped="'children'" data-addons="sortModel" data-options="{sortModel:{groupSort:true, sorts: {id:'none', name:'asc', description:'none', type:'none', weight:'none'}}}">
+                <script type="template/html" data-template-name="group" data-template-item="item">
+                    <div class="group {{fake}}">
+                        <div class="col col1">{{item.id}}</div>
+                    </div>
+                </script>
+                <script type="template/html" data-template-name="default" data-template-item="item">
+                    <div class="row {{fake}}">
+                        <div class="col sortCol1">{{item.id}}</div>
+                        <div class="col sortCol2">{{item.name}}</div>
+                        <div class="col sortCol3">{{item.description}}</div>
+                        <div class="col sortCol4">{{item.type}}</div>
+                        <div class="col sortCol5">{{item.weight}}</div>
+                    </div>
+                </script>
+            </div>
+        </div>
+    </div>
+
+###Get a reference to the datagrid from your scope###
+Often times you want to communicate directly with the datagrid in a directive or a controller.
+To get a reference to the datagrid instance you just need to listen for it's startup event. (v1.1.1)
+
+        $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+            $scope.datagrid = inst;
+        });
+
 ###ng-show###
 The datagrid has an incompatibility with ng-show because it needs a height when initialized to calculate how many rows to show. Please do not use an ng-show, use an ng-if which will create the datagrid when it is shown, where an ng-show will create it but not allow it to get a height because of the display:none of the parent. See issue [#28](https://github.com/webux/ux-angularjs-datagrid/issues/28).
 

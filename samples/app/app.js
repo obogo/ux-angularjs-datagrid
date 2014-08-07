@@ -100,6 +100,9 @@ app.config(function ($routeProvider) {
                 $scope.reset = function () {
                     $scope.items = createSimpleList();
                 };
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/grouped', {
@@ -114,6 +117,9 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Other >> Columns";
                 $scope.items = createSimpleList();
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/other/templateData', {
@@ -129,6 +135,9 @@ app.config(function ($routeProvider) {
                         base: null
                     }
                 ];
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/other/doubleScroll', {
@@ -136,6 +145,9 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Other >> Double Scroll";
                 $scope.items = createSimpleList();
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/disableHoverWhileScrolling', {
@@ -143,6 +155,9 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Addons >> Desktop >> Disable Hover While Scrolling";
                 $scope.items = createSimpleList();
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/gridFocusManager', {
@@ -150,6 +165,9 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Addons >> Desktop >> Grid Focus Manager";
                 $scope.items = createGroupedSpreadsheetData();
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/iScrollAddon', {
@@ -157,6 +175,9 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Addons >> Touch >> IScroll";
                 $scope.items = createSimpleList(100);
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/collapsibleGroups', {
@@ -164,6 +185,9 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Addons >> Collapsible Groups";
                 $scope.items = createGroupedList();
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/expandableGroups', {
@@ -177,6 +201,9 @@ app.config(function ($routeProvider) {
                 $scope.collapseAll = function () {
                     $scope.$broadcast(ux.datagrid.events.COLLAPSE_ALL_GROUPS);
                 };
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/expandRows', {
@@ -184,6 +211,9 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Addons >> Expand Rows";
                 $scope.items = createGroupedList();
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/findInList', {
@@ -191,6 +221,9 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Addons >> Find In List";
                 $scope.items = createSimpleFieldList(1000, 0, {name: 1, description: ['redish yellow grey','greenish orange','bluish blurbl'], type:['red','green','blue'], weight: [0.1, 0.2, 0.3, 0.4, 0.5]});
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/logging', {
@@ -198,6 +231,9 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Addons >> Grid Logger";
                 $scope.items = createSimpleList();
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/scrollBounce', {
@@ -205,6 +241,9 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Addons >> Scroll Bounce";
                 $scope.items = createSimpleList(200);
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/scrollHistory', {
@@ -212,6 +251,9 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Addons >> Scroll History Model";
                 $scope.items = createSimpleList();
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/sortModel', {
@@ -219,6 +261,9 @@ app.config(function ($routeProvider) {
             controller: function ($scope) {
                 $scope.name = "Addons >> Sort Model";
                 $scope.items = createSimpleFieldList(100, 0, {name: 1, description: 10, type:['red','green','blue'], weight: [0.1, 0.2, 0.3, 0.4, 0.5]});
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/sortModelGrouped', {
@@ -259,6 +304,9 @@ app.config(function ($routeProvider) {
                         }, 1000);
                     }
                 });
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/statsModel', {
@@ -269,6 +317,9 @@ app.config(function ($routeProvider) {
                 $scope.$on(ux.datagrid.events.STATS_UPDATE, function (event, result) {
                     $scope.stats = result;
                     $scope.$digest();
+                });
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
                 });
             }
         })
@@ -285,6 +336,9 @@ app.config(function ($routeProvider) {
                         }, 1000, true);
                     }
                 });
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .when('/addons/memoryOptimizer', {
@@ -298,6 +352,9 @@ app.config(function ($routeProvider) {
                 $scope.reset = function () {
                     $scope.items = createSimpleList();
                 };
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
             }
         })
         .otherwise({

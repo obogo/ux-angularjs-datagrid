@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.1.1.0
+* uxDatagrid v.1.1.1
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -435,7 +435,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
 angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStatesModel) {
     return function sortModel(inst) {
         // cache is the stored sort values. It needs to be cleared if the data changes.
-        var result = exports.logWrapper("sortModel", {}, "blue", inst.dispatch), sorts = {}, original, cache = {}, lastSortResult;
+        var result = exports.logWrapper("sortModel", {}, "blue", inst.dispatch), sorts = {}, original, cache = {}, options = inst.options.sortModel || {}, lastSortResult;
         /**
          * ###<a name="addSortColumn">addSortColumn</a>###
          * add a column so that it's sort state can be toggled and used.
@@ -542,7 +542,7 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
          */
         function applyListSort(columnName, index, list, data) {
             var i, len;
-            if (data.grouped && data.ary.length && data.ary[0].hasOwnProperty(data.grouped)) {
+            if (!options.groupSort && data.grouped && data.ary.length && data.ary[0].hasOwnProperty(data.grouped)) {
                 len = data.ary.length;
                 for (i = 0; i < len; i += 1) {
                     data.ary[i] = angular.extend({}, data.ary[i]);
@@ -591,15 +591,16 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
          */
         function addSortsFromOptions() {
             var i, methods, alreadyHasState = sortStatesModel.hasPathState(), pathState = sortStatesModel.getPathState();
-            if (inst.options.sorts) {
-                for (i in inst.options.sorts) {
-                    if (typeof inst.options.sorts[i] === "object") {
-                        sortStatesModel.setState(i, inst.options.sorts[i].value, pathState);
+            options.sorts = options.sorts || inst.options.sorts;
+            if (options.sorts) {
+                for (i in options.sorts) {
+                    if (typeof options.sorts[i] === "object") {
+                        sortStatesModel.setState(i, options.sorts[i].value, pathState);
                         // value is the default sort state.
-                        methods = inst.options.sorts[i];
+                        methods = options.sorts[i];
                     } else {
                         if (!alreadyHasState) {
-                            sortStatesModel.setState(i, inst.options.sorts[i], pathState);
+                            sortStatesModel.setState(i, options.sorts[i], pathState);
                         }
                         methods = {
                             asc: sortStatesModel.createAscSort(i),

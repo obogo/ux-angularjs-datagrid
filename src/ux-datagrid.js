@@ -267,7 +267,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     function onStartupComplete() {
         startupComplete = true;
-        dispatch(exports.datagrid.events.ON_STARTUP_COMPLETE);
+        dispatch(exports.datagrid.events.ON_STARTUP_COMPLETE, inst);
     }
 
     /**
@@ -1062,22 +1062,42 @@ function Datagrid(scope, element, attr, $compile) {
      * ###<a name="mapData">mapData</a>###
      * map the new data to the old data object and update the scopes.
      */
-    function mapData(newVal) {
+    function mapData(newVal, oldVal) {
         inst.log("\tmapData()");
+        var oldTemplates = [];// get temp cache for templates
+        exports.each(inst.getData(), cacheOldTemplates, oldTemplates);
         inst.data = inst.setData(newVal, inst.grouped) || [];
-        exports.each(inst.getData(), updateScope);
+        exports.each(inst.getData(), updateScope, oldTemplates);
+        oldTemplates = null; // clear temp cache for templates.
+    }
+
+    /**
+     * ###<a name="cacheOldTemplates>cacheOldTemplates</a>###
+     * temporally cache old templates for mapping so we can tell if a template changed
+     * when a scope changed.
+     * @param item
+     * @param index
+     * @param list
+     * @param cache
+     */
+    function cacheOldTemplates(item, index, list, cache) {
+        cache[index] = inst.templateModel.getTemplate(item);
     }
 
     /**
      * ###<a name="updateScope">updateScope</a>###
      * update the scope at that index with the new item.
      */
-    function updateScope(item, index) {
+    function updateScope(item, index, list, oldTemplates) {
         var tpl;
         if (scopes[index]) {
             tpl = inst.templateModel.getTemplate(item);
             scopes[index][tpl.item] = item;
+            if (tpl !== oldTemplates[index]) {
+                onRowTemplateChange({}, item, oldTemplates[index].name, tpl.name, []);
+            }
         }
+        flow.add(updateHeightValues);
     }
 
     /**
@@ -1101,7 +1121,7 @@ function Datagrid(scope, element, attr, $compile) {
         } else {
             // we just want to update the data values and scope values, because no tempaltes changed.
             values.dirty = true;
-            mapData(newVal);
+            mapData(newVal, oldVal);
             render();
         }
     }

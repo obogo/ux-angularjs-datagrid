@@ -221,6 +221,16 @@ app.config(function ($routeProvider) {
                 $scope.items = createSimpleFieldList(100, 0, {name: 1, description: 10, type:['red','green','blue'], weight: [0.1, 0.2, 0.3, 0.4, 0.5]});
             }
         })
+        .when('/addons/sortModelGrouped', {
+            templateUrl: "partials/addons/sortModelGrouped.html",
+            controller: function ($scope) {
+                $scope.name = "Addons >> Sort Model Grouped";
+                $scope.items = createGroupedList(100);
+                $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+                    $scope.datagrid = inst;
+                });
+            }
+        })
         .when('/addons/sortModelServer', {
             templateUrl: "partials/addons/sortModelServer.html",
             controller: function ($scope) {

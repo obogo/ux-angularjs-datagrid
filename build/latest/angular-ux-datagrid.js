@@ -1989,10 +1989,9 @@ function Datagrid(scope, element, attr, $compile) {
             tpl = inst.templateModel.getTemplate(item);
             scopes[index][tpl.item] = item;
             if (tpl !== oldTemplates[index]) {
-                onRowTemplateChange({}, item, oldTemplates[index].name, tpl.name, []);
+                onRowTemplateChange({}, item, oldTemplates[index].name, tpl.name, [], true);
             }
         }
-        flow.add(updateHeightValues);
     }
     /**
      * ###<a name="onDataChanged">onDataChanged</a>###
@@ -2017,6 +2016,7 @@ function Datagrid(scope, element, attr, $compile) {
             values.dirty = true;
             mapData(newVal, oldVal);
             render();
+            flow.add(updateHeightValues);
         }
     }
     function changeData(newVal, oldVal) {
@@ -2082,7 +2082,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Object} newTemplate
      * @param {Array} classes
      */
-    function onRowTemplateChange(evt, item, oldTemplate, newTemplate, classes) {
+    function onRowTemplateChange(evt, item, oldTemplate, newTemplate, classes, skipUpdateHeights) {
         var index = inst.getNormalizedIndex(item), el = getRowElm(index), s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope(), replaceEl, newScope;
         if (s !== scope) {
             replaceEl = angular.element(inst.templateModel.getTemplateByName(newTemplate).template);
@@ -2094,7 +2094,9 @@ function Datagrid(scope, element, attr, $compile) {
             s.$destroy();
             el.remove();
             scopes[index] = null;
-            updateHeights(index);
+            if (!skipUpdateHeights) {
+                updateHeights(index);
+            }
         }
     }
     /**

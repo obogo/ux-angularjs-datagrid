@@ -12,12 +12,12 @@
     <link type="text/css" rel="stylesheet" href="main.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.min.js"></script>
     <!--<script src="../../lib/angular.js"></script>-->
-    <script src="../../lib/iscroll.js"></script>
+    <script src="../../build/latest/addons/angular-ux-scrollBar.js"></script>
+    <script src="../../build/latest/addons/angular-ux-scrollBounce.js"></script>
     <script src="../../build/latest/angular-ux-datagrid.js"></script>
 
     <!--// optional addons //-->
     <script src="../../build/latest/addons/ux-datagrid-statsModel.js"></script>
-    <script src="../../build/latest/addons/touch/ux-datagrid-iscroll.js"></script>
     <script>
 
         var records = 50000;
@@ -112,7 +112,7 @@
     <!--// this is the controller for the datagrid //-->
     <div data-ng-controller="complexArray" class="listA">
         <!--// this is the datagrid //-->
-        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="statsModel, iScrollAddon">
+        <div ux-datagrid="items" class="datagrid" data-grouped="'children'" data-addons="statsModel,scrollBar,scrollBounce">
             <script type="template/html" data-template-name="group" data-template-item="item">
                 <div class="group {{fake}}">
                     <div class="text">{{item.id}} {{$id}} {{counter}} height: 20px</div>

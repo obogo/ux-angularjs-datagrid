@@ -5641,10 +5641,9 @@ when a scope changed.</p>
             <span class="nx">tpl</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
             <span class="nx">scopes</span><span class="p">[</span><span class="nx">index</span><span class="p">][</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">item</span><span class="p">]</span> <span class="o">=</span> <span class="nx">item</span><span class="p">;</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">tpl</span> <span class="o">!==</span> <span class="nx">oldTemplates</span><span class="p">[</span><span class="nx">index</span><span class="p">])</span> <span class="p">{</span>
-                <span class="nx">onRowTemplateChange</span><span class="p">({},</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">oldTemplates</span><span class="p">[</span><span class="nx">index</span><span class="p">].</span><span class="nx">name</span><span class="p">,</span> <span class="nx">tpl</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="p">[]);</span>
+                <span class="nx">onRowTemplateChange</span><span class="p">({},</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">oldTemplates</span><span class="p">[</span><span class="nx">index</span><span class="p">].</span><span class="nx">name</span><span class="p">,</span> <span class="nx">tpl</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="p">[],</span> <span class="kc">true</span><span class="p">);</span>
             <span class="p">}</span>
         <span class="p">}</span>
-        <span class="nx">flow</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">updateHeightValues</span><span class="p">);</span>
     <span class="p">}</span>
 
 </pre></div>
@@ -5698,6 +5697,7 @@ when a scope changed.</p>
             <span class="nx">values</span><span class="p">.</span><span class="nx">dirty</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
             <span class="nx">mapData</span><span class="p">(</span><span class="nx">newVal</span><span class="p">,</span> <span class="nx">oldVal</span><span class="p">);</span>
             <span class="nx">render</span><span class="p">();</span>
+            <span class="nx">flow</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">updateHeightValues</span><span class="p">);</span>
         <span class="p">}</span>
     <span class="p">}</span>
     <span class="kd">function</span> <span class="nx">changeData</span><span class="p">(</span><span class="nx">newVal</span><span class="p">,</span> <span class="nx">oldVal</span><span class="p">)</span> <span class="p">{</span>
@@ -5902,7 +5902,7 @@ the <a href="#values.activeRange">activeRange</a></p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="kd">function</span> <span class="nx">onRowTemplateChange</span><span class="p">(</span><span class="nx">evt</span><span class="p">,</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">oldTemplate</span><span class="p">,</span> <span class="nx">newTemplate</span><span class="p">,</span> <span class="nx">classes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">function</span> <span class="nx">onRowTemplateChange</span><span class="p">(</span><span class="nx">evt</span><span class="p">,</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">oldTemplate</span><span class="p">,</span> <span class="nx">newTemplate</span><span class="p">,</span> <span class="nx">classes</span><span class="p">,</span> <span class="nx">skipUpdateHeights</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getNormalizedIndex</span><span class="p">(</span><span class="nx">item</span><span class="p">),</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">getRowElm</span><span class="p">(</span><span class="nx">index</span><span class="p">),</span> <span class="nx">s</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">hasClass</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">uncompiledClass</span><span class="p">)</span> <span class="o">?</span> <span class="nx">compileRow</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="o">:</span> <span class="nx">el</span><span class="p">.</span><span class="nx">scope</span><span class="p">(),</span> <span class="nx">replaceEl</span><span class="p">,</span> <span class="nx">newScope</span><span class="p">;</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">s</span> <span class="o">!==</span> <span class="nx">scope</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">replaceEl</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplateByName</span><span class="p">(</span><span class="nx">newTemplate</span><span class="p">).</span><span class="nx">template</span><span class="p">);</span>
@@ -5914,7 +5914,9 @@ the <a href="#values.activeRange">activeRange</a></p>
             <span class="nx">s</span><span class="p">.</span><span class="nx">$destroy</span><span class="p">();</span>
             <span class="nx">el</span><span class="p">.</span><span class="nx">remove</span><span class="p">();</span>
             <span class="nx">scopes</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-            <span class="nx">updateHeights</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">skipUpdateHeights</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">updateHeights</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+            <span class="p">}</span>
         <span class="p">}</span>
     <span class="p">}</span>
 

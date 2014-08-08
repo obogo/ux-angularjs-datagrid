@@ -270,7 +270,7 @@ app.config(function ($routeProvider) {
             templateUrl: "partials/addons/sortModelGrouped.html",
             controller: function ($scope) {
                 $scope.name = "Addons >> Sort Model Grouped";
-                $scope.items = createGroupedList(100);
+                $scope.items = createGroupedSpreadsheetData(200);
                 $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
                     $scope.datagrid = inst;
                 });

@@ -12,6 +12,7 @@ exports.datagrid.events.TOGGLE_GROUP = "datagrid:toggleGroup";
 angular.module('ux').factory('expandableGroups', function () {
    return ['inst', function (inst) {
        var result = exports.logWrapper('expandableGroups', {}, 'orange', inst.dispatch),
+           options = inst.expandableGroups || {},
            expanded = {},
            resultData = [],
            instSetData = inst.setData,
@@ -52,7 +53,10 @@ angular.module('ux').factory('expandableGroups', function () {
         * @returns {*|.attributes.length|options.length|types.length|File.toJSON.length|length}
         */
        function isGroup(item) {
-           return item[inst.grouped] && item[inst.grouped].length;
+           if (options.hideEmptyGroups) {
+               return item[inst.grouped] && item[inst.grouped].length;
+           }
+           return item[inst.grouped];
        }
 
        /**

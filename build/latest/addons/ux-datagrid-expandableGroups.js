@@ -23,7 +23,7 @@ exports.datagrid.events.TOGGLE_GROUP = "datagrid:toggleGroup";
  */
 angular.module("ux").factory("expandableGroups", function() {
     return [ "inst", function(inst) {
-        var result = exports.logWrapper("expandableGroups", {}, "orange", inst.dispatch), expanded = {}, resultData = [], instSetData = inst.setData, getNormalized = inst.getData;
+        var result = exports.logWrapper("expandableGroups", {}, "orange", inst.dispatch), options = inst.expandableGroups || {}, expanded = {}, resultData = [], instSetData = inst.setData, getNormalized = inst.getData;
         /**
         * ###<a name="generateData">generateData</a>###
         * Generate an array of only the items that should be shown. A normalized array.
@@ -54,7 +54,10 @@ angular.module("ux").factory("expandableGroups", function() {
         * @returns {*|.attributes.length|options.length|types.length|File.toJSON.length|length}
         */
         function isGroup(item) {
-            return item[inst.grouped] && item[inst.grouped].length;
+            if (options.hideEmptyGroups) {
+                return item[inst.grouped] && item[inst.grouped].length;
+            }
+            return item[inst.grouped];
         }
         /**
         * ###<a name="setData">setData</a>###

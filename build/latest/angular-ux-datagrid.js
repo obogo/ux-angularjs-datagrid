@@ -1964,8 +1964,11 @@ function Datagrid(scope, element, attr, $compile) {
         // get temp cache for templates
         exports.each(inst.getData(), cacheOldTemplates, oldTemplates);
         inst.data = inst.setData(newVal, inst.grouped) || [];
+        inst.chunkModel.updateList(inst.data);
         exports.each(inst.getData(), updateScope, oldTemplates);
         oldTemplates = null;
+        // clear temp cache for templates.
+        dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal);
     }
     /**
      * ###<a name="cacheOldTemplates>cacheOldTemplates</a>###
@@ -1984,11 +1987,15 @@ function Datagrid(scope, element, attr, $compile) {
      * update the scope at that index with the new item.
      */
     function updateScope(item, index, list, oldTemplates) {
-        var tpl;
+        var tpl, oldTemplate;
         if (scopes[index]) {
+            console.log("update scope %s", index);
+            oldTemplate = oldTemplates[index];
+            delete scopes[index][oldTemplate.item];
             tpl = inst.templateModel.getTemplate(item);
             scopes[index][tpl.item] = item;
             if (tpl !== oldTemplates[index]) {
+                console.log("	replace %s %s %s", index, oldTemplate.height, tpl.height);
                 onRowTemplateChange({}, item, oldTemplates[index].name, tpl.name, [], true);
             }
         }
@@ -2015,8 +2022,7 @@ function Datagrid(scope, element, attr, $compile) {
             // we just want to update the data values and scope values, because no tempaltes changed.
             values.dirty = true;
             mapData(newVal, oldVal);
-            render();
-            flow.add(updateHeightValues);
+            flow.add(updateHeights, [], 0);
         }
     }
     function changeData(newVal, oldVal) {
@@ -2081,9 +2087,10 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Object} oldTemplate
      * @param {Object} newTemplate
      * @param {Array} classes
+     * @param {Boolean=} skipUpdateHeights - useful to turn off when doing multiple row template changes.
      */
     function onRowTemplateChange(evt, item, oldTemplate, newTemplate, classes, skipUpdateHeights) {
-        var index = inst.getNormalizedIndex(item), el = getRowElm(index), s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope(), replaceEl, newScope;
+        var index = inst.getNormalizedIndex(item), el = getRowElm(index), s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope(), replaceEl;
         if (s !== scope) {
             replaceEl = angular.element(inst.templateModel.getTemplateByName(newTemplate).template);
             replaceEl.addClass(options.uncompiledClass);
@@ -2095,6 +2102,7 @@ function Datagrid(scope, element, attr, $compile) {
             el.remove();
             scopes[index] = null;
             if (!skipUpdateHeights) {
+                inst.chunkModel.updateRow(index, item);
                 updateHeights(index);
             }
         }
@@ -2348,7 +2356,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
             // the other chunks automatically like relative positioning will.
             if (_list) {
                 _list.forceHeightReCalc(inst.templateModel, _rows);
-                _list.updateHeight(inst.templateModel, _rows, 1);
+                _list.updateHeight(inst.templateModel, _rows, 1, true);
                 if (_list.detachDom) {
                     _list.updateDomHeight(1);
                 }
@@ -2397,6 +2405,36 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         updateDom(_list);
         _list.updateDomHeight(1);
         return el;
+    }
+    /**
+     * For quick updates that do not require rechunking.
+     * @param list
+     * @returns {*}
+     */
+    function updateList(list) {
+        if (_list.length !== list.length) {
+            return chunkDom(list, _chunkSize, _templateStartCache, _templateEndCache, _el);
+        } else {
+            var i = 0, len = list.length;
+            while (i < len) {
+                updateRow(i, list[i]);
+                i += 1;
+            }
+        }
+        return el;
+    }
+    /**
+     * Update the item using the normalized index to map to the chunkArray.
+     * @param {Number} rowIndex
+     * @param {Object} rowData
+     */
+    function updateRow(rowIndex, rowData) {
+        var indexes = getRowIndexes(rowIndex, _list), lastIndex = indexes.pop(), ca = getItemByIndexes(indexes);
+        if (ca && ca[lastIndex]) {
+            ca[lastIndex] = rowData;
+            ca.dirtyHeight = true;
+        }
+        _rows[rowIndex] = rowData;
     }
     /**
      * Generate an array of indexes that point to that row.
@@ -2648,6 +2686,8 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     result.getItemByIndexes = getItemByIndexes;
     result.getRow = getRow;
     result.reset = reset;
+    result.updateRow = updateRow;
+    result.updateList = updateList;
     result.updateAllChunkHeights = updateAllChunkHeights;
     result.destroy = destroy;
     inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, disableNonVisibleChunks);
@@ -2748,7 +2788,7 @@ ChunkArray.prototype.getChildrenStr = function(deep) {
  * @param _rows
  */
 ChunkArray.prototype.updateHeight = function(templateModel, _rows, recurse, updateDomHeight) {
-    var i = 0, len, height = 0;
+    var i = 0, len, height = 0, lastChild;
     if (this[0] instanceof ChunkArray) {
         len = this.length;
         while (i < len) {
@@ -2764,7 +2804,7 @@ ChunkArray.prototype.updateHeight = function(templateModel, _rows, recurse, upda
     if (this.height !== height) {
         this.dirtyHeight = true;
         this.height = height;
-    }
+    } else if (this.rendered) {}
     if (recurse == -1 && this.dirtyHeight && this.parent) {
         this.parent.updateHeight(templateModel, _rows, recurse, updateDomHeight);
     }
@@ -3572,11 +3612,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
                 result.killEvent(e);
             }
             var target = e.target, ev;
-            if (!/(SELECT|INPUT|TEXTAREA)/i.test(target.tagName)) {
+            if (target && !/(SELECT|INPUT|TEXTAREA)/i.test(target.tagName)) {
                 ev = document.createEvent("MouseEvents");
                 ev.initMouseEvent("click", true, true, e.view, 1, target.screenX, target.screenY, target.clientX, target.clientY, e.ctrlKey, e.altKey, e.shiftKey, e.metaKey, 0, null);
                 ev._constructed = true;
-                target.dispatchEvent(ev);
+                try {
+                    inst.creepRenderModel.stop();
+                    target.dispatchEvent(ev);
+                } catch (err) {}
             }
         }
     };

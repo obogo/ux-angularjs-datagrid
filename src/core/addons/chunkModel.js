@@ -87,7 +87,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
             // the other chunks automatically like relative positioning will.
             if (_list) {
                 _list.forceHeightReCalc(inst.templateModel, _rows);
-                _list.updateHeight(inst.templateModel, _rows, 1);
+                _list.updateHeight(inst.templateModel, _rows, 1, true);
                 if (_list.detachDom) {
                     _list.updateDomHeight(1);
                 }
@@ -138,6 +138,40 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         updateDom(_list);
         _list.updateDomHeight(1);
         return el;
+    }
+
+    /**
+     * For quick updates that do not require rechunking.
+     * @param list
+     * @returns {*}
+     */
+    function updateList(list) {
+        if (_list.length !== list.length) {
+            return chunkDom(list, _chunkSize, _templateStartCache, _templateEndCache, _el);
+        } else {
+            var i = 0, len = list.length;
+            while (i < len) {
+                updateRow(i, list[i]);
+                i += 1;
+            }
+        }
+        return el;
+    }
+
+    /**
+     * Update the item using the normalized index to map to the chunkArray.
+     * @param {Number} rowIndex
+     * @param {Object} rowData
+     */
+    function updateRow(rowIndex, rowData) {
+        var indexes = getRowIndexes(rowIndex, _list),
+            lastIndex = indexes.pop(),
+            ca = getItemByIndexes(indexes);
+        if (ca && ca[lastIndex]) {
+            ca[lastIndex] = rowData;
+            ca.dirtyHeight = true;
+        }
+        _rows[rowIndex] = rowData;
     }
 
     /**
@@ -404,6 +438,8 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     result.getItemByIndexes = getItemByIndexes;
     result.getRow = getRow;
     result.reset = reset;
+    result.updateRow = updateRow;
+    result.updateList = updateList;
     result.updateAllChunkHeights = updateAllChunkHeights;
     result.destroy = destroy;
 
@@ -496,7 +532,7 @@ ChunkArray.prototype.getChildrenStr = function (deep) {
  * @param _rows
  */
 ChunkArray.prototype.updateHeight = function (templateModel, _rows, recurse, updateDomHeight) {
-    var i = 0, len, height = 0;
+    var i = 0, len, height = 0, lastChild;
     if (this[0] instanceof ChunkArray) {
         len = this.length;
         while (i < len) {
@@ -512,6 +548,12 @@ ChunkArray.prototype.updateHeight = function (templateModel, _rows, recurse, upd
     if (this.height !== height) {
         this.dirtyHeight = true;
         this.height = height;
+    } else if (this.rendered) {
+        // comment in when debugging heights.
+//        lastChild = this.rendered[0].children[this.rendered[0].children.length - 1];
+//        if (lastChild.offsetTop + lastChild.offsetHeight !== this.rendered[0].offsetHeight) {
+//            console.warn("Invalid Heights.");
+//        }
     }
     if (recurse == -1 && this.dirtyHeight && this.parent) {
         this.parent.updateHeight(templateModel, _rows, recurse, updateDomHeight);

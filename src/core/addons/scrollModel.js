@@ -206,7 +206,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             var target = e.target,
                 ev;
 
-            if (!(/(SELECT|INPUT|TEXTAREA)/i).test(target.tagName)) {
+            if (target && !(/(SELECT|INPUT|TEXTAREA)/i).test(target.tagName)) {
                 ev = document.createEvent('MouseEvents');
                 ev.initMouseEvent('click', true, true, e.view, 1,
                     target.screenX, target.screenY, target.clientX, target.clientY,
@@ -214,7 +214,12 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
                     0, null);
 
                 ev._constructed = true;
-                target.dispatchEvent(ev);
+                try {
+                    inst.creepRenderModel.stop();
+                    target.dispatchEvent(ev);
+                } catch(err) {
+                    // event could have been nulled. ignore.
+                }
             }
         }
     };

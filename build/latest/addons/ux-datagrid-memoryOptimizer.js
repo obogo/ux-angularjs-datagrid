@@ -63,6 +63,8 @@ angular.module("ux").factory("memoryOptimizer", function() {
                 if (inst.scopes[i]) {
                     var s = inst.scopes[i];
                     inst.activateScope(s);
+                    inst.$$prevSibling = null;
+                    inst.$$nextSibling = null;
                     s.$destroy();
                     inst.scopes[i] = undefined;
                 }

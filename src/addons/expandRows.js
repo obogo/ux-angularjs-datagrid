@@ -124,8 +124,8 @@ angular.module('ux').factory('expandRows', function () {
         function setState(index, state) {
             var template = inst.templateModel.getTemplate(inst.data[index]), elm, tpl, swapTpl;
             if (cache[template.name]) {
-                elm = inst.getRowElm(index);
-                if (!elm.scope()) { // we must be closing a row out of view. possibly destroyed.
+                elm = inst.getExistingRow(index);
+                if (!elm || !elm.scope()) { // we must be closing a row out of view. possibly destroyed.
                     delete opened[index];
                     return;
                 }

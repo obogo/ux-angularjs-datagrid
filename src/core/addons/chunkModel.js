@@ -216,6 +216,16 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     }
 
     /**
+     * Get the dom row element.
+     * @param rowIndex {Number}
+     * @returns {*}
+     */
+    function getExistingRow(rowIndex) {
+        var indexes = getRowIndexes(rowIndex, _list);
+        return getDomRowByIndexes(indexes);
+    }
+
+    /**
      * ###<a name="getItemByIndexes">getItemByIndexes</a>###
      * Get the chunk or item given the indexes.
      * @param {Array} indexes
@@ -241,7 +251,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         var i = 0, index, indxs = indexes.slice(0), ca = _list, el = _el;
         while (i < indxs.length) {
             index = indxs.shift();
-            if ((!ca.rendered && unrendered) || shouldRecompileDecompiledRows(ca)) {
+            if (unrendered && (!ca.rendered || shouldRecompileDecompiledRows(ca))) {
                 unrendered(el, ca);
                 updateDom(ca);
             }
@@ -437,6 +447,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     };
     result.getItemByIndexes = getItemByIndexes;
     result.getRow = getRow;
+    result.getExistingRow = getExistingRow;
     result.reset = reset;
     result.updateRow = updateRow;
     result.updateList = updateList;

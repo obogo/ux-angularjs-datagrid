@@ -156,6 +156,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
 
     result.onTouchEnd = function onTouchEnd(event) {
+        if (!inst.values.touchDown) {
+            return;// don't allow it to double fire if touchcancel and touchend both fire.
+        }
         inst.values.touchDown = false;
         inst.dispatch(exports.datagrid.events.ON_TOUCH_UP, event);
         if (listenerData[1].enabled) {
@@ -206,7 +209,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             var target = e.target,
                 ev;
 
-            if (target && !(/(SELECT|INPUT|TEXTAREA)/i).test(target.tagName)) {
+            if (!inst.isDigesting(inst.$scope) && target && !(/(SELECT|INPUT|TEXTAREA)/i).test(target.tagName)) {
                 ev = document.createEvent('MouseEvents');
                 ev.initMouseEvent('click', true, true, e.view, 1,
                     target.screenX, target.screenY, target.clientX, target.clientY,

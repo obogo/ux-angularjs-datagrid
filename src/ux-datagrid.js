@@ -117,12 +117,14 @@ function Datagrid(scope, element, attr, $compile) {
         inst.getScope = getScope;
         inst.getRowItem = getRowItem;
         inst.getRowElm = getRowElm;
+        inst.getExistingRow = getExistingRow;
         inst.getRowIndex = inst.getIndexOf = getRowIndex;
         inst.getRowOffset = getRowOffset;
         inst.getRowHeight = getRowHeight;
         inst.getViewportHeight = getViewportHeight;
         inst.getContentHeight = getContentHeight;
         inst.getContent = getContent;
+        inst.isDigesting = isDigesting;
         inst.safeDigest = safeDigest;
         inst.getRowIndexFromElement = getRowIndexFromElement;
         inst.updateViewportHeight = updateViewportHeight;
@@ -396,6 +398,16 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     /**
+     * ###<a name="getExistingRow">getExistingRow</a>###
+     * Return the dom element at that row index. This will not build it if it doesn't exist.
+     * @param {Number} index
+     * @returns {element|*}
+     */
+    function getExistingRow(index) {
+        return angular.element(inst.chunkModel.getExistingRow(index));
+    }
+
+    /**
      * ###<a name="isCompiled">isCompiled</a>###
      * Return if the row is compiled or not.
      * @param {Number} index
@@ -571,6 +583,17 @@ function Datagrid(scope, element, attr, $compile) {
         scope.$emit(exports.datagrid.events.ON_READY);
     }
 
+    function isDigesting(s) {
+        var ds = s;
+        while (ds) {
+            if (ds.$$phase) {
+                return true;
+            }
+            ds = ds.$parent;
+        }
+        return false;
+    }
+
     /**
      * ###<a name="safeDigest">safeDigest</a>###
      * SafeDigest by checking the render phase of the scope before rendering.
@@ -579,14 +602,9 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function safeDigest(s) {
 //        s.$evalAsync();// this sometimes takes too long so I see {{}} brackets briefly.
-        var ds = s;
-        while (ds) {
-            if (ds.$$phase) {
-                return;
-            }
-            ds = ds.$parent;
+        if (!isDigesting(s)) {
+            s.$digest();
         }
-        s.$digest();
     }
 
     /**

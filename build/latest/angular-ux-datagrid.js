@@ -1062,12 +1062,14 @@ function Datagrid(scope, element, attr, $compile) {
         inst.getScope = getScope;
         inst.getRowItem = getRowItem;
         inst.getRowElm = getRowElm;
+        inst.getExistingRow = getExistingRow;
         inst.getRowIndex = inst.getIndexOf = getRowIndex;
         inst.getRowOffset = getRowOffset;
         inst.getRowHeight = getRowHeight;
         inst.getViewportHeight = getViewportHeight;
         inst.getContentHeight = getContentHeight;
         inst.getContent = getContent;
+        inst.isDigesting = isDigesting;
         inst.safeDigest = safeDigest;
         inst.getRowIndexFromElement = getRowIndexFromElement;
         inst.updateViewportHeight = updateViewportHeight;
@@ -1329,6 +1331,15 @@ function Datagrid(scope, element, attr, $compile) {
         return angular.element(inst.chunkModel.getRow(index));
     }
     /**
+     * ###<a name="getExistingRow">getExistingRow</a>###
+     * Return the dom element at that row index. This will not build it if it doesn't exist.
+     * @param {Number} index
+     * @returns {element|*}
+     */
+    function getExistingRow(index) {
+        return angular.element(inst.chunkModel.getExistingRow(index));
+    }
+    /**
      * ###<a name="isCompiled">isCompiled</a>###
      * Return if the row is compiled or not.
      * @param {Number} index
@@ -1487,6 +1498,16 @@ function Datagrid(scope, element, attr, $compile) {
     function fireReadyEvent() {
         scope.$emit(exports.datagrid.events.ON_READY);
     }
+    function isDigesting(s) {
+        var ds = s;
+        while (ds) {
+            if (ds.$$phase) {
+                return true;
+            }
+            ds = ds.$parent;
+        }
+        return false;
+    }
     /**
      * ###<a name="safeDigest">safeDigest</a>###
      * SafeDigest by checking the render phase of the scope before rendering.
@@ -1495,14 +1516,9 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function safeDigest(s) {
         //        s.$evalAsync();// this sometimes takes too long so I see {{}} brackets briefly.
-        var ds = s;
-        while (ds) {
-            if (ds.$$phase) {
-                return;
-            }
-            ds = ds.$parent;
+        if (!isDigesting(s)) {
+            s.$digest();
         }
-        s.$digest();
     }
     /**
      * ###<a name="applyEventCounts">applyEventCounts</a>###
@@ -2476,6 +2492,15 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         return el;
     }
     /**
+     * Get the dom row element.
+     * @param rowIndex {Number}
+     * @returns {*}
+     */
+    function getExistingRow(rowIndex) {
+        var indexes = getRowIndexes(rowIndex, _list);
+        return getDomRowByIndexes(indexes);
+    }
+    /**
      * ###<a name="getItemByIndexes">getItemByIndexes</a>###
      * Get the chunk or item given the indexes.
      * @param {Array} indexes
@@ -2500,7 +2525,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         var i = 0, index, indxs = indexes.slice(0), ca = _list, el = _el;
         while (i < indxs.length) {
             index = indxs.shift();
-            if (!ca.rendered && unrendered || shouldRecompileDecompiledRows(ca)) {
+            if (unrendered && (!ca.rendered || shouldRecompileDecompiledRows(ca))) {
                 unrendered(el, ca);
                 updateDom(ca);
             }
@@ -2685,6 +2710,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     };
     result.getItemByIndexes = getItemByIndexes;
     result.getRow = getRow;
+    result.getExistingRow = getExistingRow;
     result.reset = reset;
     result.updateRow = updateRow;
     result.updateList = updateList;
@@ -3567,6 +3593,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         inst.dispatch(exports.datagrid.events.ON_TOUCH_MOVE, speed, deltaY, lastDeltaY);
     };
     result.onTouchEnd = function onTouchEnd(event) {
+        if (!inst.values.touchDown) {
+            return;
+        }
         inst.values.touchDown = false;
         inst.dispatch(exports.datagrid.events.ON_TOUCH_UP, event);
         if (listenerData[1].enabled) {
@@ -3612,7 +3641,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
                 result.killEvent(e);
             }
             var target = e.target, ev;
-            if (target && !/(SELECT|INPUT|TEXTAREA)/i.test(target.tagName)) {
+            if (!inst.isDigesting(inst.$scope) && target && !/(SELECT|INPUT|TEXTAREA)/i.test(target.tagName)) {
                 ev = document.createEvent("MouseEvents");
                 ev.initMouseEvent("click", true, true, e.view, 1, target.screenX, target.screenY, target.clientX, target.clientY, e.ctrlKey, e.altKey, e.shiftKey, e.metaKey, 0, null);
                 ev._constructed = true;

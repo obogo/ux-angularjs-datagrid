@@ -117,6 +117,21 @@ exports.datagrid = {
         WARN: 'datagrid:warn',
         ERROR: 'datagrid:error'
     },
+    getGrid: function (scope) {
+        var result;
+        while (scope) {
+            if (scope.datagrid) {
+                return scope.datagrid;
+            } else if (scope.$$childHead) {
+                result = exports.datagrid.getGrid(scope.$$childHead);
+                if (result) {
+                    return result;
+                }
+            }
+            scope = scope.$$nextSibling;
+        }
+        return null;
+    },
     /**
      * ###<a name="options">options</a>###
      */

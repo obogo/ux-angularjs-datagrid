@@ -491,9 +491,10 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
          * Apply the sorts to the array. Pull from cache if it exists.
          * @param {Array} ary
          * @param {Object} sortOptions
+         * @param {Boolean=} clear
          * @returns {*}
          */
-        result.applySorts = function applySorts(ary, sortOptions) {
+        result.applySorts = function applySorts(ary, sortOptions, clear) {
             var pathStateRef = sortStatesModel.getPathState(),
                 currentPathState = angular.copy(pathStateRef);
             if (sortOptions) {
@@ -505,6 +506,9 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
                 if (!original) {
                     lastSortResult = original;
                     return lastSortResult;
+                }
+                if (clear) {
+                    result.clear();
                 }
                 result.setCache('', original);// the original is always without any sort options.
                 if (!result.$processing) {
@@ -528,6 +532,9 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
                         }
                         lastSortResult = result.getCache(key);
                         sortStatesModel.clearDirty(pathStateRef);
+                        if (options.enableCache === false) {
+                            result.clear();
+                        }
                     } else {
     //TODO: need to unit test this to make sure it works with async sort.
                         lastSortResult = original;

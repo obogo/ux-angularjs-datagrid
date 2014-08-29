@@ -144,15 +144,23 @@ describe("chunkModel", function () {
             element.remove();
         });
 
-        it("should swap the template for the row", function() {
+        it("should swap the template for the row", function(done) {
             var height = grid.getContentHeight();
             grid.templateModel.setTemplate(0, 'alternate');
-            expect(grid.getContentHeight()).toBe(height + 5);
+            function onDone() {
+                expect(grid.getContentHeight()).toBe(height + 5);
+                done();
+            }
+            setTimeout(onDone);
         });
 
-        it("should update all of the chunks above it to the correct style heights.", function() {
+        it("should update all of the chunks above it to the correct style heights.", function(done) {
             grid.templateModel.setTemplate(0, 'alternate');
-            expect(grid.getContent().css("height")).toBe("1005px");
+            function onDone() {
+                expect(grid.getContent().css("height")).toBe("1005px");
+                done();
+            }
+            setTimeout(onDone);
         });
     });
 

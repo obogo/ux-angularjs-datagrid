@@ -242,6 +242,8 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                         lastOffsetHeight = offsetHeight;
                         return true;
                     }
+                } else if (enabled && target && target.children[0] && target.children[0].offsetHeight + targetOffset < offsetHeight) {
+                    disable();
                 }
                 return false;
             }

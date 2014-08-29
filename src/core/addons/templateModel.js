@@ -199,7 +199,9 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             var item = typeof itemOrIndex === "number" ? inst.data[itemOrIndex] : itemOrIndex;
             var oldTemplate = result.getTemplate(item).name;
             result.setTemplateName(item, newTemplateName);
-            inst.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName, classes);
+            setTimeout(function () {
+                inst.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName, classes);
+            });
         }
 
         function updateTemplateHeights() {
@@ -227,9 +229,13 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             delete item[getTemplatesKey()];
         }
 
-        function destroy() {
+        function clearForcedTemplates() {
             exports.each(forcedTemplates, clearTemplate);
             forcedTemplates.length = 0;
+        }
+
+        function destroy() {
+            clearForcedTemplates();
             result.destroyLogger();
             result = null;
             templates.length = 0;

@@ -521,10 +521,14 @@ function Datagrid(scope, element, attr, $compile) {
      * ###<a name="compileRow">compileRow</a>###
      * Compile a row at that index. This creates the scope for that row when compiled. It does not perform a digest.
      * @param {Number} index
+     * @param {Object=} el
      * @returns {*}
      */
-    function compileRow(index) {
-        var s = scopes[index], prev, tpl, el;
+    function compileRow(index, el) {
+        var s = scopes[index], prev, tpl;
+        if (s && !s.$parent) {
+            throw new Error("Scope without a parent");
+        }
         if (!s) {
             s = scope.$new();
             prev = getScope(index - 1);
@@ -537,11 +541,11 @@ function Datagrid(scope, element, attr, $compile) {
             s[tpl.item] = inst.data[index]; // set the data to the scope.
             s.$index = index;
             scopes[index] = s;
-            el = getRowElm(index);
+            el = el || getRowElm(index);
             el.removeClass(options.uncompiledClass);
             $compile(el)(s);
             inst.dispatch(exports.datagrid.events.ON_ROW_COMPILE, s, el);
-            deactivateScope(s);
+            deactivateScope(s, index);
         }
         return s;
     }
@@ -681,35 +685,22 @@ function Datagrid(scope, element, attr, $compile) {
      * $$childHead and $$nextSibling variables are also updated for angular so that it will not even iterate
      * over a scope that is deactivated. It becomes completely hidden from the digest.
      * @param {Scope} s
-     * @param {Number=} depth
+     * @param {number} index
      * @returns {boolean}
      */
-    function deactivateScope(s, depth) {
-        var child;
-        depth = depth || 0;
+    function deactivateScope(s, index) {
         // if the scope is not created yet. just skip.
         if (s && !isActive(s)) { // do not deactivate one that is already deactivated.
-            if (!depth) {
-                s.$emit(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);
-            }
+            s.$emit(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);
             s.$$$watchers = s.$$watchers;
             s.$$watchers = [];
-            if (!depth) {
-                // only do this on the first depth so we do not recursively reset counts.
-                s.$$$listenerCount = s.$$listenerCount;
-                s.$$listenerCount = angular.copy(s.$$$listenerCount);
-                subtractEvents(s, s.$$$listenerCount);
+            s.$$$listenerCount = s.$$listenerCount;
+            s.$$listenerCount = angular.copy(s.$$$listenerCount);
+            subtractEvents(s, s.$$$listenerCount);
+            if (index >= 0) {
+                s.$$nextSibling = null;
+                s.$$prevSibling = null;
             }
-//RECURSIVE deactivate/activate memory tests show that it doesn't improve anything. So unless there is a good reason leave
-// this code commented out, because it does affect performance. It adds 30% to destroy time and time to rendering.
-            // recursively go through children and deactivate them.
-//            if (s.$$childHead) {
-//                child = s.$$childHead;
-//                while (child) {
-//                    deactivateScope(child, depth + 1);
-//                    child = child.$$nextSibling;
-//                }
-//            }
             return true;
         }
         return false;
@@ -722,30 +713,21 @@ function Datagrid(scope, element, attr, $compile) {
      * though child scopes as well to activate them. It also updates the linking $$childHead and $$nextSiblings
      * to fully make sure the scope is as if it was before it was deactivated.
      * @param {Scope} s
-     * @param {Number=} depth
+     * @param {number} index
      * @returns {boolean}
      */
-    function activateScope(s, depth) {
-        var child;
-        depth = depth || 0;
+    function activateScope(s, index) {
         if (s && s.$$$watchers) { // do not activate one that is already active.
             s.$$watchers = s.$$$watchers;
-            s.$$$watchers = null;
-            if (!depth) {
-                addEvents(s, s.$$$listenerCount);
-                s.$$$listenerCount = null;
+            delete s.$$$watchers;
+            addEvents(s, s.$$$listenerCount);
+            delete s.$$$listenerCount;
+            if (index >= 0) {
+                s.$$nextSibling = scopes[index + 1];
+                s.$$prevSibling = scopes[index - 1];
+                s.$parent = scope;
             }
-            // recursively go through children and activate them.
-//            if (s.$$childHead) {
-//                child = s.$$childHead;
-//                while (child) {
-//                    activateScope(child, depth + 1);
-//                    child = child.$$nextSibling;
-//                }
-//            }
-            if (!depth) {
-                s.$emit(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);
-            }
+            s.$emit(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);
             return true;
         }
         return !!(s && !s.$$$watchers); // if it is active or not.
@@ -863,7 +845,7 @@ function Datagrid(scope, element, attr, $compile) {
                     loop.started = loop.i;
                 }
                 updateMinMax(loop.i);
-                if (activateScope(s)) {
+                if (activateScope(s, loop.i)) {
                     inst.getRowElm(loop.i).attr('status', 'active');
                     lastActiveIndex = lastActive.indexOf(loop.i);
                     if (lastActiveIndex !== -1) {
@@ -903,7 +885,7 @@ function Datagrid(scope, element, attr, $compile) {
         while (lastActive.length) {
             lastActiveIndex = lastActive.pop();
             deactivated.push(lastActiveIndex);
-            deactivateScope(scopes[lastActiveIndex]);
+            deactivateScope(scopes[lastActiveIndex], lastActiveIndex);
             inst.getRowElm(lastActiveIndex).attr('status', 'inactive');
         }
         inst.log("\tdeactivated %s", deactivated.join(', '));
@@ -1141,12 +1123,24 @@ function Datagrid(scope, element, attr, $compile) {
             }
             values.dirty = true;
             flow.add(changeData, [newVal, oldVal]);
-        } else {
-            // we just want to update the data values and scope values, because no tempaltes changed.
+        } else if (isDataReallyChanged(newVal)) {
+            // we just want to update the data values and scope values, because no templates changed.
             values.dirty = true;
             mapData(newVal, oldVal);
             flow.add(updateHeights, [], 0);
         }
+    }
+
+    function isDataReallyChanged(newVal) {
+        // loop through the data and make sure it hasn't already been updated by swap.
+        var i = 0, norm = inst.normalize(newVal, inst.grouped), len = newVal.length;
+        while (i < len) {
+            if (inst.data[i] !== norm[i]) {
+                return true;
+            }
+            i += 1;
+        }
+        return false;
     }
 
     function changeData(newVal, oldVal) {
@@ -1209,14 +1203,14 @@ function Datagrid(scope, element, attr, $compile) {
      * ###<a name="onRowTemplateChange">onRowTemplateChange</a>###
      * when changing the template for an individual row.
      * @param {Event} evt
-     * @param {*) item
+     * @param {*} item
      * @param {Object} oldTemplate
      * @param {Object} newTemplate
      * @param {Array} classes
      * @param {Boolean=} skipUpdateHeights - useful to turn off when doing multiple row template changes.
      */
     function onRowTemplateChange(evt, item, oldTemplate, newTemplate, classes, skipUpdateHeights) {
-        var index = inst.getNormalizedIndex(item), el = getRowElm(index),
+        var index = inst.getNormalizedIndex(item), el = getExistingRow(index),
             s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope(), replaceEl;
         if (s !== scope) {
             replaceEl = angular.element(inst.templateModel.getTemplateByName(newTemplate).template);
@@ -1224,9 +1218,10 @@ function Datagrid(scope, element, attr, $compile) {
             while (classes && classes.length) {
                 replaceEl.addClass(classes.shift());
             }
-            el.parent()[0].insertBefore(replaceEl[0], el[0]);
-            s.$destroy();
+            el.parent()[0].replaceChild(replaceEl[0], el[0]);
+            activateScope(s);
             el.remove();
+            s.$destroy();
             scopes[index] = null;
             if (!skipUpdateHeights) {
                 inst.chunkModel.updateRow(index, item);
@@ -1244,7 +1239,7 @@ function Datagrid(scope, element, attr, $compile) {
     function updateHeights(rowIndex) {
         flow.add(updateViewportHeight);
         flow.add(inst.chunkModel.updateAllChunkHeights, [rowIndex]);
-        flow.add(updateHeightValues, 0);
+        flow.add(updateHeightValues);
         flow.add(updateViewportHeight);
         flow.add(function () {
             var maxScrollHeight = inst.getContentHeight() - inst.getViewportHeight();

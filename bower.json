@@ -1,29 +1,37 @@
 {
     "name": "ux-datagrid",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "homepage": "https://github.com/webux/ux-angularjs-datagrid",
     "authors": [
         "wesjones <cybus10@gmail.com>"
     ],
-    "description": "high performance for large lists in angularjs",
+    "description": "A high performance datagrid for angularjs",
     "main": "build/latest/**/*.js",
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "test",
+        "src",
+        "docs",
+        "misc",
+        "samples",
+        "vendor",
+        ".gitignore",
+        ".travis.yml",
+        "bower.json",
+        "GruntFile.js",
+        "index.html",
+        "LICENSE",
+        "package.json",
+        "README.md",
+        "server.js"
+    ],
     "keywords": [
         "angular",
         "datagrid",
         "grid",
         "ux-datagrid"
     ],
-    "license": "MIT",
-    "ignore": [
-        "**/.*",
-        "node_modules",
-        "bower_components",
-        "test",
-        "tests",
-        "src",
-        "docs",
-        "misc",
-        "samples",
-        "vendor"
-    ]
+    "license": "MIT"
 }

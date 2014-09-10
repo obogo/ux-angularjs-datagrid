@@ -20,7 +20,7 @@
         ".gitignore",
         ".travis.yml",
         "bower.json",
-        "GruntFile.js",
+        "Gruntfile.js",
         "index.html",
         "LICENSE",
         "package.json",

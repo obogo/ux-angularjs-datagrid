@@ -72,6 +72,11 @@ angular.module('ux').directive('uxDoubleScroll', ['$window', function ($window) 
                         if (grid.scrollHistory && grid.scrollHistory.getCurrentScroll()) {
                             disable();
                         }
+                        scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, function () {
+                            if (enabled && grid.getContentHeight() && grid.getContentHeight() < grid.getViewportHeight()) {
+                                grid.scrollModel.removeTouchEvents();
+                            }
+                        });
                     });
                 }
                 scope.$on(exports.datagrid.events.ON_SCROLL_STOP, function () {
@@ -257,8 +262,8 @@ angular.module('ux').directive('uxDoubleScroll', ['$window', function ($window) 
                         lastOffsetHeight = offsetHeight;
                         return true;
                     }
-                } else if (enabled && target && target.children[0] && target.children[0].offsetHeight + targetOffset < offsetHeight) {
-                    disable();
+                } else if (!enabled && target && target.children[0] && target.children[0].offsetHeight + targetOffset < offsetHeight) {
+                    enable();
                 }
                 return false;
             }

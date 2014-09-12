@@ -1,10 +1,10 @@
-####[Releases](https://github.com/webux/ux-angularjs-datagrid/releases)
-- Release 1.1.0 [Source Code (zip)](https://github.com/webux/ux-angularjs-datagrid/archive/v1.1.0.zip) | [Source Code (tar.gz)](https://github.com/webux/ux-angularjs-datagrid/archive/v1.1.0.tar.gz)
+####[Releases](https://github.com/obogo/ux-angularjs-datagrid/releases)
+- Release 1.1.0 [Source Code (zip)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.1.0.zip) | [Source Code (tar.gz)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.1.0.tar.gz)
 
 ## ux-datagrid : An Angular DataGrid ##
 ----------
 
-[![Build Status](https://travis-ci.org/webux/ux-angularjs-datagrid.svg?branch=master)](https://travis-ci.org/webux/ux-angularjs-datagrid)
+[![Build Status](https://travis-ci.org/obogo/ux-angularjs-datagrid.svg?branch=master)](https://travis-ci.org/obogo/ux-angularjs-datagrid)
 
 **Highly performant list and datagrid for AngularJS** designed for mobile devices which just makes it all the better on a desktop.
 
@@ -12,17 +12,17 @@ Most lists work with recycled or just in time created rows for long lists in ang
 
 Of course since this is angular there is then the issue with a **digest being too expensive. This is not a problem** because all rows are disabled from the digest when out of view and enabled when in view. So they don't loose their scopes or have to create new ones constantly, but only once. Then **they are just enabled or disabled as they come into view**.
 
-- [Demos](https://rawgithub.com/webux/ux-angularjs-datagrid/master/samples/index.html)
-- [Unit Tests](https://rawgithub.com/webux/ux-angularjs-datagrid/master/test/index.html)
-- [Docs - in Progress](https://rawgithub.com/webux/ux-angularjs-datagrid/master/docs/angular-ux-datagrid.js.html)
+- [Demos](https://rawgithub.com/obogo/ux-angularjs-datagrid/master/samples/index.html)
+- [Unit Tests](https://rawgithub.com/obogo/ux-angularjs-datagrid/master/test/index.html)
+- [Docs - in Progress](https://rawgithub.com/obogo/ux-angularjs-datagrid/master/docs/angular-ux-datagrid.js.html)
 
 ### More Examples ###
 - [Simple Fiddle Example](http://jsfiddle.net/wesjones/uftsG/)
 - [Infinite Scroll Example](http://jsfiddle.net/wesjones/sqas5wjp/)
-- [Quick Start](https://github.com/webux/ux-angularjs-datagrid/wiki/#wiki-quick-start)
-- [Getting Started](https://github.com/webux/ux-angularjs-datagrid/wiki/#wiki-getting-started)
-- [Multiple Row Templates](https://github.com/webux/ux-angularjs-datagrid/wiki/#wiki-multiple-row-templates)
-- [Grouped Data](https://github.com/webux/ux-angularjs-datagrid/wiki/#wiki-grouped-data)
+- [Quick Start](https://github.com/obogo/ux-angularjs-datagrid/wiki/#wiki-quick-start)
+- [Getting Started](https://github.com/obogo/ux-angularjs-datagrid/wiki/#wiki-getting-started)
+- [Multiple Row Templates](https://github.com/obogo/ux-angularjs-datagrid/wiki/#wiki-multiple-row-templates)
+- [Grouped Data](https://github.com/obogo/ux-angularjs-datagrid/wiki/#wiki-grouped-data)
 
 ## What makes this list/datagrid different? ##
 Chunking is the concept of **grouping the dom elements in hierarchies** so that the browser does not calculate the position of every element when one changes, but only those in that container, it's parents in it's container, and so on up the chain. The smaller the groups the less the browser has to redraw, size, and position elements because it can just move the parent of necessary. **This works regardless of rows all having the same heights or dynamic heights as long as there is a template for each different height.**
@@ -40,7 +40,7 @@ First we will create the directive and assign it an array so it has something to
 	
 These items are read from the scope that the datagrid exists in. It will then take that data and convert it into a normalized array so it can display every item. This does nothing for single dimentional arrays, but for arrays that are multi-dimentional it creates a single array of those based on the grouped property.
 
-Grouped property is for reading a hiearchy. If you have an object with the property children that is an array, then "children" would be your grouped property for the datagrid to read it. See this example for use of grouped data. [Grouped Data Example](https://rawgithub.com/webux/ux-datagrid/master/samples/lotsOfRows/index.html)
+Grouped property is for reading a hiearchy. If you have an object with the property children that is an array, then "children" would be your grouped property for the datagrid to read it. See this example for use of grouped data. [Grouped Data Example](https://rawgithub.com/obogo/ux-datagrid/master/samples/lotsOfRows/index.html)
 
 In most cases your datagrid will look similar to this one below.
 
@@ -59,7 +59,7 @@ The script template has 3 properties.
 - **template-item** this is what you want the data to be referenced by on the row scope. Such as in angular if you do a repeat with "item in items" you then reference item in your template. This does the same thing with this property.
 
 ###Dynamically specify your templates instead of using script templates###
-- [Demo](https://rawgithub.com/webux/ux-angularjs-datagrid/master/samples/app/index.html#/other/templateData)
+- [Demo](https://rawgithub.com/obogo/ux-angularjs-datagrid/master/samples/app/index.html#/other/templateData)
 - [Fiddle](http://jsfiddle.net/m2tRh/1/)
 
 As of 0.6.4 you can also pass a template data object to be used an an option to script templates. To do this you just need to reference an object and pass to the grid options like so.
@@ -150,7 +150,7 @@ This addon is used to do obviously what it says. This increases performance whil
 While this is listed under desktop, it actually has several uses for touch browsers as well. It has built in functionality to move next and prevous through rows selecting similar items.
 
 So for example lets say you have an input in a row. Focus manager on focus would build a selector for that input. Then when you have a button that tells it go to to the next item. It will look up that next item based on the selector from the previous row. If the selector doesn't match it will skip that row. Making it jump over rows that might be headers and such. You can see an example of this in the example app under focus manager.
-If you are looking for more of a full focusManager for your whole app you should check out [angular-ux-focusmanager](https://github.com/webux/angular-ux-focusmanager).
+If you are looking for more of a full focusManager for your whole app you should check out [angular-ux-focusmanager](https://github.com/obogo/angular-ux-focusmanager).
 
 To tell the focus manager to go to the next item you would need to get the datagrid instance from the scope. Let's add an example below of a controller with a datagrid.
 
@@ -325,7 +325,7 @@ To get a reference to the datagrid instance you just need to listen for it's sta
         });
 
 ###ng-show###
-The datagrid has an incompatibility with ng-show because it needs a height when initialized to calculate how many rows to show. Please do not use an ng-show, use an ng-if which will create the datagrid when it is shown, where an ng-show will create it but not allow it to get a height because of the display:none of the parent. See issue [#28](https://github.com/webux/ux-angularjs-datagrid/issues/28).
+The datagrid has an incompatibility with ng-show because it needs a height when initialized to calculate how many rows to show. Please do not use an ng-show, use an ng-if which will create the datagrid when it is shown, where an ng-show will create it but not allow it to get a height because of the display:none of the parent. See issue [#28](https://github.com/obogo/ux-angularjs-datagrid/issues/28).
 
 ##IE8 Compatibility##
 IE8 may work with ux-datagrid by adding some polyfills for emulating missing ES5 features in IE8. First it's required to add [ES5 Shim](https://github.com/es-shims/es5-shim) and also an additional file [Polyfill IE8](/build/latest/IE/Polyfill_IE8.js), located in this repository from this repository.

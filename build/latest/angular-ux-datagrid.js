@@ -1,5 +1,5 @@
 /*
-* uxDatagrid v.1.1.1
+* uxDatagrid v.1.1.2
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -45,7 +45,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.1.1",
+    version: "1.1.2",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -2778,7 +2778,7 @@ ChunkArray.prototype.rangeOverlap = function(min, max, cushion) {
     cushion = cushion > 0 ? cushion : 0;
     min -= cushion;
     max += cushion;
-    while (min < max) {
+    while (min <= max && this.length) {
         if (this.inRange(min)) {
             overlap = true;
             break;

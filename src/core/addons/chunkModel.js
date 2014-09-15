@@ -501,7 +501,7 @@ ChunkArray.prototype.rangeOverlap = function (min, max, cushion) {
     cushion = cushion > 0 ? cushion : 0;
     min -= cushion;
     max += cushion;
-    while (min < max) {
+    while (min <= max) {// if min < max then a grid with only 1 items shows that row disabled.
         if (this.inRange(min)) {
             overlap = true;
             break;

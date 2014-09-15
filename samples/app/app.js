@@ -313,7 +313,7 @@ app.config(function ($routeProvider) {
             templateUrl: "partials/addons/statsModel.html",
             controller: function ($scope) {
                 $scope.name = "Addons >> Touch >> Stats Model";
-                $scope.items = createSimpleList(1);
+                $scope.items = createSimpleList();
                 $scope.$on(ux.datagrid.events.STATS_UPDATE, function (event, result) {
                     $scope.stats = result;
                     $scope.$digest();

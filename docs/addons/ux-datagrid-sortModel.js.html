@@ -168,7 +168,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.1.1.1
+  <div class="summary"><p>uxDatagrid v.1.1.2
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -1524,11 +1524,15 @@ It stores the sorted state on the sortStatesModel to keep around until cleared.<
       <span class="dox_tag_name">sortOptions</span>
       <span class="dox_type">Object</span>
     </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">clear</span>
+      <span class="dox_type">Boolean=</span>
+    </div>
   </div>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">applySorts</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">applySorts</span><span class="p">(</span><span class="nx">ary</span><span class="p">,</span> <span class="nx">sortOptions</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">applySorts</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">applySorts</span><span class="p">(</span><span class="nx">ary</span><span class="p">,</span> <span class="nx">sortOptions</span><span class="p">,</span> <span class="nx">clear</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">pathStateRef</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">(),</span> <span class="nx">currentPathState</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">copy</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">);</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">sortOptions</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;apply sortOptions&quot;</span><span class="p">);</span>
@@ -1539,6 +1543,9 @@ It stores the sorted state on the sortStatesModel to keep around until cleared.<
                 <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">original</span><span class="p">)</span> <span class="p">{</span>
                     <span class="nx">lastSortResult</span> <span class="o">=</span> <span class="nx">original</span><span class="p">;</span>
                     <span class="k">return</span> <span class="nx">lastSortResult</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">clear</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">result</span><span class="p">.</span><span class="nx">clear</span><span class="p">();</span>
                 <span class="p">}</span>
                 <span class="nx">result</span><span class="p">.</span><span class="nx">setCache</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nx">original</span><span class="p">);</span>
 
@@ -1608,6 +1615,9 @@ It stores the sorted state on the sortStatesModel to keep around until cleared.<
                         <span class="p">}</span>
                         <span class="nx">lastSortResult</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
                         <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">clearDirty</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">);</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">enableCache</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">result</span><span class="p">.</span><span class="nx">clear</span><span class="p">();</span>
+                        <span class="p">}</span>
                     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 
 </pre></div>

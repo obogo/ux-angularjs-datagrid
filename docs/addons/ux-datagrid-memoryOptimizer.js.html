@@ -48,7 +48,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.1.1.1
+  <div class="summary"><p>uxDatagrid v.1.1.2
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -198,6 +198,8 @@ in the active range and remove their dom and destroy their scopes.</p>
                 <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scopes</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span> <span class="p">{</span>
                     <span class="kd">var</span> <span class="nx">s</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scopes</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
                     <span class="nx">inst</span><span class="p">.</span><span class="nx">activateScope</span><span class="p">(</span><span class="nx">s</span><span class="p">);</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">$$prevSibling</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">$$nextSibling</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
                     <span class="nx">s</span><span class="p">.</span><span class="nx">$destroy</span><span class="p">();</span>
                     <span class="nx">inst</span><span class="p">.</span><span class="nx">scopes</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
                 <span class="p">}</span>

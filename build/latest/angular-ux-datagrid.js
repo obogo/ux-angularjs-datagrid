@@ -942,7 +942,7 @@ function Flow(inst, dispatch) {
         inst = null;
     }
     inst = exports.logWrapper("Flow", inst || {}, "grey", dispatch);
-    inst.async = Object.prototype.hasOwnProperty.apply(inst, [ "async" ]) ? inst.async : true;
+    //    inst.async = Object.prototype.hasOwnProperty.apply(inst, ['async']) ? inst.async : true;
     inst.debug = Object.prototype.hasOwnProperty.apply(inst, [ "debug" ]) ? inst.debug : 0;
     inst.insert = insert;
     inst.add = add;
@@ -1794,6 +1794,10 @@ function Datagrid(scope, element, attr, $compile) {
         updateLinks();
         // update the $$childHead and $$nextSibling values to keep digest loops at a minimum count.
         // this dispatch needs to be after the digest so that it doesn't cause {} to show up in the render.
+        // the creep render cannot be synchronous. It needs to wait till done to render.
+        flow.add(onAfterUpdateWatchers, [ loop ], 0);
+    }
+    function onAfterUpdateWatchers(loop) {
         inst.dispatch(events.ON_AFTER_UPDATE_WATCHERS, loop);
     }
     /**
@@ -1911,7 +1915,7 @@ function Datagrid(scope, element, attr, $compile) {
                 flow.add(beforeRenderAfterDataChange);
                 flow.add(updateRowWatchers);
                 // this wait allows rows to finish calculating their heights and finish the digest before firing.
-                flow.add(afterRenderAfterDataChange, null, 0);
+                flow.add(afterRenderAfterDataChange);
                 //                flow.add(destroyOldContent);
                 flow.add(inst.dispatch, [ exports.datagrid.events.ON_AFTER_RENDER ]);
             } else {
@@ -2082,7 +2086,7 @@ function Datagrid(scope, element, attr, $compile) {
             buildRows(inst.data, true);
         }
         flow.add(inst.info, [ "reset complete" ]);
-        flow.add(dispatch, [ exports.datagrid.events.ON_AFTER_RESET ], 0);
+        flow.add(dispatch, [ exports.datagrid.events.ON_AFTER_RESET ]);
     }
     /**
      * ###<a name="forceRenderScope">forceRenderScope</a>###
@@ -2778,7 +2782,8 @@ ChunkArray.prototype.rangeOverlap = function(min, max, cushion) {
     cushion = cushion > 0 ? cushion : 0;
     min -= cushion;
     max += cushion;
-    while (min <= max && this.length) {
+    while (min <= max) {
+        // if min < max then a grid with only 1 items shows that row disabled.
         if (this.inRange(min)) {
             overlap = true;
             break;

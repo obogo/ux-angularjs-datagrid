@@ -153,7 +153,7 @@ function Flow(inst, dispatch) {
     }
 
     inst = exports.logWrapper('Flow', inst || {}, 'grey', dispatch);
-    inst.async = Object.prototype.hasOwnProperty.apply(inst, ['async']) ? inst.async : true;
+//    inst.async = Object.prototype.hasOwnProperty.apply(inst, ['async']) ? inst.async : true;
     inst.debug = Object.prototype.hasOwnProperty.apply(inst, ['debug']) ? inst.debug : 0;
     inst.insert = insert;
     inst.add = add;

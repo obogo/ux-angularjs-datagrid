@@ -873,6 +873,11 @@ function Datagrid(scope, element, attr, $compile) {
         inst.log("\tactivated %s", active.join(', '));
         updateLinks(); // update the $$childHead and $$nextSibling values to keep digest loops at a minimum count.
         // this dispatch needs to be after the digest so that it doesn't cause {} to show up in the render.
+        // the creep render cannot be synchronous. It needs to wait till done to render.
+        flow.add(onAfterUpdateWatchers, [loop], 0);
+    }
+
+    function onAfterUpdateWatchers(loop) {
         inst.dispatch(events.ON_AFTER_UPDATE_WATCHERS, loop);
     }
 
@@ -997,7 +1002,7 @@ function Datagrid(scope, element, attr, $compile) {
                 flow.add(beforeRenderAfterDataChange);
                 flow.add(updateRowWatchers);
                 // this wait allows rows to finish calculating their heights and finish the digest before firing.
-                flow.add(afterRenderAfterDataChange, null, 0);
+                flow.add(afterRenderAfterDataChange);
 //                flow.add(destroyOldContent);
                 flow.add(inst.dispatch, [exports.datagrid.events.ON_AFTER_RENDER]);
             } else {
@@ -1176,7 +1181,7 @@ function Datagrid(scope, element, attr, $compile) {
             buildRows(inst.data, true);
         }
         flow.add(inst.info, ["reset complete"]);
-        flow.add(dispatch, [exports.datagrid.events.ON_AFTER_RESET], 0);
+        flow.add(dispatch, [exports.datagrid.events.ON_AFTER_RESET]);// removed delay here because it causes the blink in the datagrid update.
     }
 
     /**

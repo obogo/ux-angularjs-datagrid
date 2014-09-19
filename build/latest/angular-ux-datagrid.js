@@ -2006,13 +2006,13 @@ function Datagrid(scope, element, attr, $compile) {
     function updateScope(item, index, list, oldTemplates) {
         var tpl, oldTemplate;
         if (scopes[index]) {
-            console.log("update scope %s", index);
+            //            console.log("update scope %s", index);
             oldTemplate = oldTemplates[index];
             delete scopes[index][oldTemplate.item];
             tpl = inst.templateModel.getTemplate(item);
             scopes[index][tpl.item] = item;
             if (tpl !== oldTemplates[index]) {
-                console.log("	replace %s %s %s", index, oldTemplate.height, tpl.height);
+                //                console.log("\treplace %s %s %s", index, oldTemplate.height, tpl.height);
                 onRowTemplateChange({}, item, oldTemplates[index].name, tpl.name, [], true);
             }
         }

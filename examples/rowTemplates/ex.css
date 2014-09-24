@@ -1,0 +1,29 @@
+.ex2 *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+}
+
+.ex2-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.ex2-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+.ex2-row.alt1 {
+    height: 30px;
+    background-color: #F00;
+}
+.ex2-row.alt1:nth-child(odd) {
+    background-color: #E00;
+}
+.ex2-row.alt2 {
+    background-color: #0F0;
+}
+.ex2-row.alt2:nth-child(odd) {
+    background-color: #0E0;
+}

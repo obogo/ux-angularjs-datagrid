@@ -1,0 +1,176 @@
+[ng-cloak] {
+    display: none;
+}
+
+body {
+    padding: 15px;
+}
+
+pre {
+    font-size: 10px;
+    padding: 0 !important;
+    border: 1px solid #ecf0f1;
+}
+
+code {
+    padding: 0 20px !important;
+    padding-bottom: 20px !important;
+}
+
+code i {
+    text-decoration: none;
+    font-style: normal;
+    background: #e67e22;
+    padding: 4px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+code i * {
+    color: #ffffff !important;
+}
+
+.hljs {
+    background: #F9F9F9;
+}
+
+.panel-ex {
+    float: left;
+    min-width: 300px;
+    max-width: 400px;
+    margin: 0 10px;
+    margin-bottom: 25px;
+    -webkit-box-shadow: 0px 3px 3px 0px rgba(50, 50, 50, 0.28);
+    -moz-box-shadow: 0px 3px 3px 0px rgba(50, 50, 50, 0.28);
+    box-shadow: 0px 3px 3px 0px rgba(50, 50, 50, 0.28);
+}
+
+.datagrid-icon {
+    display: inline-block;
+    background: url(../images/ux-datagrid.svg) no-repeat;
+    margin-top: 20px;
+    width: 40px;
+    height: 40px;
+}
+
+@media all and (max-width: 870px) {
+    .panel-ex {
+        width: 100%;
+        min-width: inherit;
+        max-width: 870px;
+    }
+}
+
+@media (min-width: 871px) and (max-width: 1200px) {
+    .panel-ex {
+        width: 47%;
+        min-width: inherit;
+        max-width: 1200px;
+    }
+}
+
+@media (min-width: 1201px) {
+    .panel-ex {
+        width: 31%;
+        min-width: inherit;
+        max-width: 1280px;
+    }
+}
+
+.panel-ex-head {
+    padding: 8px 15px;
+    background: #ecf0f1;
+    /*color: #ffffff;*/
+    margin-bottom: 0;
+    font-size: 18px;
+}
+
+.panel-ex-body {
+    padding: 10px;
+    border: 1px solid #ecf0f1;
+    height: 500px;
+    overflow-y: auto;
+}
+
+.panel-ex.no-shadow {
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+.panel-ex.no-shadow .panel-ex-body {
+    border: none;
+}
+
+
+/*.panel-ex-body p {*/
+    /*height: 120px;*/
+    /*overflow-y: auto;*/
+/*}*/
+
+.btn-icon {
+    padding: 3px 8px
+}
+
+.btn-icon span {
+    font-size: 24px;
+    line-height: 0;
+}
+
+.bs-callout {
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+    min-height: 130px;
+}
+
+.bs-callout-info {
+    border-left-color: #5bc0de;
+}
+
+
+.bs-example-modal .modal {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    z-index: 1;
+    display: block;
+}
+
+.label {
+    font-size: 90%;
+    font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;;
+    font-weight: normal;
+    background: #e67e22;
+}
+
+.label.black {
+    background: #000;
+}
+
+.well {
+    background: none;
+}
+
+*:focus {
+    outline: none !important;
+}
+
+.focus-highlight {
+    position: absolute;
+    -webkit-transition: left 100ms ease-out, top 100ms ease-out, width 100ms ease-out, height 100ms ease-out;
+    transition: left 100ms ease-out, top 100ms ease-out, width 100ms ease-out, height 100ms ease-out;
+    outline: 2px solid #FF0000;
+    outline-offset: 4px;
+    /*border: 2px solid #fff;*/
+    pointer-events: none;
+    margin-left: 0px;
+    margin-top: 0px;
+    pointer-events: none;
+    z-index: 1000;
+}

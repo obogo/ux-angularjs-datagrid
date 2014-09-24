@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>ux-Datagrid</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+    <!--<link rel="stylesheet" href="css/bootstrap.min.css"/>-->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/styles/googlecode.min.css">
+    <!--<link rel="stylesheet" href="css/googlecode.min.css">-->
+    <link rel="stylesheet" href="bower_components/github-fork-ribbon-css/gh-fork-ribbon.css"/>
+    <link rel="stylesheet" href="//code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css"/>
+    <!--<link rel="stylesheet" href="css/ionicons.min.css"/>-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<div style="position: relative;">
+    <div style="font-size: 36px;padding-left: 20px">
+        <span class="datagrid-icon" style="line-height: 0px;color:#3498db"></span> <strong>Datagrid</strong>
+    </div>
+    <div style="color:#c0392b;font-weight: bold;margin-left: 136px;margin-top: -4px">for AngularJS</div>
+
+    <div style="padding-top:20px;padding-left: 20px">
+        <h4>Built for handling VERY large lists in Angular and making them initialize quickly and scroll smoothly.</h4>
+
+        <p><strong>Datagrid for Angular JS</strong> no longer limits you to having to paginate your data. You can now load <b>HUGE</b> lists (Tested with <b><i>50,000 Rows!</i></b>) and <b>have your app scroll like a champ!</b></p>
+
+        <h3>Getting Started</h3>
+
+        <ul class="task-list">
+            <li><a href="#setup">Setup</a></li>
+            <li><a href="#simple">Simple Integration</a></li>
+            <li><a href="#usingAddons">How to use Addons</a></li>
+            <li><a href="#usingOptions">How to use Options</a></li>
+            <li><a href="#buildAddon">Build Your First Addon</a></li>
+        </ul>
+
+        <h3>Addons</h3>
+
+        <p>The datagrid is built with Addons/Plugins. So if there is functionality that you want that isn't there. Feel free to create your own addon! Here are some of the built in ones.</p>
+        <ul class="task-list">
+            <li><a href="#multipleTemplates">Different Item Renderers (Row Templates)</a></li>
+            <li><a href="#groupedData">Grouped Data</a></li>
+            <li><a href="#columns">Columned Data (Like Tables)</a></li>
+            <li><a href="#infiniteScroll">Infinite Scroll</a></li>
+            <li><a href="#collapsibleGroups">Collapsible Groups (starts expanded)</a></li>
+            <li><a href="#expandableGroups">Expandable Groups (starts collapsed)</a></li>
+            <li><a href="#expandingRows">Expanding Rows</a></li>
+            <li><a href="#focusManager">Focus Manager</a></li>
+            <li><a href="#scrollHistory">Scroll History</a></li>
+            <li><a href="#sortModelGrouped">Sort Model (Grouped)</a></li>
+            <li><a href="#sortModel">Sort Model (UnGrouped)</a></li>
+            <li><a href="#serverSideSorting">Sort Model (UnGrouped)</a></li>
+            <li><a href="#gridLogger">Grid Logs</a></li>
+            <li><a href="#memoryOptimizer">Memory Optimizer</a></li>
+            <li><a href="#scrollBar">Scroll Bar</a></li>
+            <li><a href="#scrollBounce">Scroll Bounce</a></li>
+            <li><a href="#disableHoverWhileScrolling">Disable Hover While Scrolling</a> (<a href="http://www.thecssninja.com/javascript/pointer-events-60fps">Why?</a>)</li>
+            <li><a href="#doubleScroll">Double Scroller</a></li>
+        </ul>
+    </div>
+</div>
+
+<!--// Include the base scripts //-->
+<link rel="stylesheet" type="text/css" href="css/default.css">
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>
+<!--<script src="js/angular.min.js"></script>-->
+<!--<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/angular-ux-datagrid.js"></script>-->
+<script src="js/angular-ux-datagrid.js"></script>
+
+<div>
+    <!-- Getting Started/Setup -->
+    <a name="#setup"></a>
+    <div class="panel-ex">
+        <div class="panel-ex-head">Getting Started / Setup</div>
+
+        <div class="panel-ex-body">
+            <p>Start by adding the <span class="label">angular-ux-datagrid.js</span> to your project. You can download it by <a href="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/angular-ux-datagrid.js">right clicking this link and saving the file</a>.</p>
+<pre><code class="javascript railscasts">
+    &lt;script src="angular-ux-datagrid.js"&gt;&lt;/script&gt;
+</code></pre>
+        <p>Then adding the <span class="label">ux</span> to your app module. This registers the datagrid directive.</p>
+<pre><code class="javascript railscasts">
+    var app = angular.module('app', [<i>'ux'</i>]);
+</code></pre>
+
+        <p>Now we need to setup a controller with some items for us to display in our datagrid.</p>
+<pre><code class="javascript railscasts">
+    angular.module('app').controller('myCtrl', function($scope) {
+        var items = [];
+        for (var i = 0; i < 100; i += 1) {
+            items.push({id:i});
+        }
+        $scope.items = items;
+    });
+</code></pre>
+
+        </div>
+    </div>
+
+    ##simple##
+
+    <div>
+    <!-- Using Addons -->
+    <a name="#usingAddons"></a>
+    <div class="panel-ex">
+        <div class="panel-ex-head">Using Addons</div>
+
+        <div class="panel-ex-body">
+            <p><span class="label">Addons</span> allow you to change the behavior or add features to the datagrid. First you need to include the addon that you want. Let's start with <a href="https://github.com/webux/ux-angularjs-datagrid/blob/master/build/latest/addons/ux-datagrid-scrollBar.js" target="ref">ScrollBar</a></span>.</p>
+<pre><code class="javascript railscasts">
+    &lt;script src="ux-datagrid-scrollBar.js"&gt;&lt;/script&gt;
+</code></pre>
+        <p>Now we need add the addon to the grid that we are using. We do this by adding an addons attribute to the html.</p>
+<pre><code class="javascript railscasts">
+    &ltdiv ux-datagrid="items" <i>addons="scrollBar"</i>>...
+</code></pre>
+
+        <p>That's really it. You can add as many addons to a grid as you like.</p>
+<pre><code class="javascript railscasts">
+    &ltdiv ux-datagrid="items" <i>addons="scrollBar scrollBounce"</i>>...
+</code></pre>
+
+        </div>
+    </div>
+
+    <div>
+    <!-- Using Options -->
+    <a name="#usingOptions"></a>
+    <div class="panel-ex">
+        <div class="panel-ex-head">Using Options</div>
+
+        <div class="panel-ex-body">
+            <p><span class="label">Options</span> configure different parts or the datagrid, or configure an addon. The datagrid comes with a list of global options. Those are on <span class="label">ux.datagrid.options</span>. When you add options to a grid gets a copy of the global options. Any options that you pass to the grid then override or add to that options object on that grid only.</p>
+<pre><code class="html railscasts">
+    &ltdiv ux-datagrid="items" <i>options="{smartUpdate:false}"</i>>...
+</code></pre>
+
+        <p>So if you want to change the behavior for all grids, then you can modify the global options by just overriding them directly on the <span class="label">ux.datagrid.options</span>.</p>
+<pre><code class="javascript railscasts">
+    ux.datgrid.options.smartUpdate = false;
+</code></pre>
+
+        </div>
+    </div>
+
+    <div>
+    <!-- Build Your First Addon -->
+    <a name="#buildAddon"></a>
+    <div class="panel-ex">
+        <div class="panel-ex-head">Build Your First Addon</div>
+
+        <div class="panel-ex-body">
+            <p>Let's first set the stage. You have a grid, and you want to make it show different templates for each row. The first part we need is to know how to tell what item gets what template. So we will make an addon to do this.</p>
+
+            <p>Let's also assume for this example that your data looks like this. You have a type property on most of your objects that you are using to tell them apart.</p>
+<pre><code class="javascript railscasts">
+$scope.items = [
+        {id:0},
+        {id:0, type: 'alt1'},
+        {id:1, type: 'alt2'},
+    ];
+
+</code></pre>
+
+            <p>Given that data, we want to have different rows for each type. So we will setup our addon to override the names so it will use those type values.</p>
+<pre><code class="javascript railscasts">
+angular.module('ux').factory('whichTemplate', function () {
+    return function (inst) {
+        // now we override it with our method so we decide what template gets displayed for each row.
+        inst.templateModel.getTemplate = function (item) {
+            // item would be the item in your array of data provided to the datagrid.
+            // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.
+            var name = item.type || 'row';
+            // now we get the template from the name.
+            return inst.templateModel.getTemplateByName(name);
+        };
+    };
+});
+</code></pre>
+
+            <p>Now we just need to make sure we have templates for each of those types.</p>
+<pre><code class="html railscasts">
+&lt;div ng-controller="ctrl">
+    &lt;div ux-datagrid="items">
+        &lt;script type="template/html" template-item="item">
+            &lt;div class="ex2-row">&lt;span>{{item.id}}&lt;/span>&lt;/div>
+        &lt;/script>
+        &lt;script type="template/html" template-name="alt1" template-item="item">
+            &lt;div class="ex2-row alt1">&lt;span>ALT1: {{item.id}}&lt;/span>&lt;/div>
+        &lt;/script>
+        &lt;script type="template/html" template-name="alt2" template-item="item">
+            &lt;div class="ex2-row alt2">&lt;span>This {{item.id}} is ALT2&lt;/span>&lt;/div>
+        &lt;/script>
+    &lt;/div>
+&lt;/div>
+</code></pre>
+
+            <p>In <span class="label">Different Item Renderers</span> you will see this in action.</p>
+
+        </div>
+    </div>
+
+    ##rowTemplates##
+
+        <p>MORE EXAMPLES TO COME</p>
+
+</div>
+
+<div class="github-fork-ribbon-wrapper right">
+    <div class="github-fork-ribbon">
+        <a href="https://github.com/webux/ux-angularjs-datagrid" fm-parent="14" fm-id="53" tabindex="-1">Fork me on GitHub</a>
+    </div>
+</div>
+
+</body>
+</html>

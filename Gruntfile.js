@@ -28,9 +28,40 @@ module.exports = function (grunt) {
                             match: /\#{2}(\w+)\#{2}/g,
                             replacement: function(match, p1) {
                                 // look up the file and write it.
-                                return grunt.file.read('examples/' + p1 + '/ex.html') + "\n\
+                                var content =  grunt.file.read('examples/' + p1 + '/ex.html') + "\n\
                                 <link rel=\"stylesheet\" type=\"text/css\" href=\"examples/" + p1 + "/ex.css\">\n\
                                 <script src=\"examples/" + p1 + "/ex.js\"></script>";
+
+                                if (content.indexOf('##html##') !== -1) {
+                                    var html = content.split("\n");
+                                    var i = 0, len = html.length, matching = false, match = [];
+                                    while (i < len) {
+                                        // turn it off before the comment.
+                                        if (html[i].indexOf("html:end") !== -1) {
+                                            matching = false;
+                                        }
+                                        if (matching) {
+                                            match.push(html[i]);
+                                        }
+                                        // don't set until after he comment.
+                                        if (html[i].indexOf("html:start") !== -1) {
+                                            matching = true;
+                                        }
+                                        i += 1;
+                                    }
+                                    grunt.log.writeln(("Found " + match.length + " lines for html/template").green);
+                                    content = content.split('##html##').join(match.join("\n").replace(/</gim, '&lt;'));
+                                }
+
+                                if (content.indexOf('##css##') !== -1) {
+                                    content = content.split('##css##').join(grunt.file.read('examples/' + p1 + '/ex.css'));
+                                }
+
+                                if (content.indexOf('##js##') !== -1) {
+                                    content = content.split('##js##').join(grunt.file.read('examples/' + p1 + '/ex.js').replace(/(.*?\/\/ignore\s?\n)/g, '').replace(/^\s{4}/gmi, ''));
+                                }
+
+                                return content;
                             }
                         }
                     ]
@@ -40,7 +71,7 @@ module.exports = function (grunt) {
                         expand: false,
                         flatten: false,
                         src: ['index.tpl.html'],
-                        dest: '../index.html'
+                        dest: 'index.html'
                     }
                 ]
             }

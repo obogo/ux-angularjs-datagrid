@@ -10,6 +10,9 @@ pre {
     font-size: 10px;
     padding: 0 !important;
     border: 1px solid #ecf0f1;
+    max-height: 300px;
+    overflow:auto;
+    white-space: nowrap;
 }
 
 code {
@@ -103,10 +106,9 @@ code i * {
     border: none;
 }
 
-
 /*.panel-ex-body p {*/
-    /*height: 120px;*/
-    /*overflow-y: auto;*/
+/*height: 120px;*/
+/*overflow-y: auto;*/
 /*}*/
 
 .btn-icon {
@@ -131,7 +133,6 @@ code i * {
     border-left-color: #5bc0de;
 }
 
-
 .bs-example-modal .modal {
     position: relative;
     top: auto;
@@ -155,22 +156,4 @@ code i * {
 
 .well {
     background: none;
-}
-
-*:focus {
-    outline: none !important;
-}
-
-.focus-highlight {
-    position: absolute;
-    -webkit-transition: left 100ms ease-out, top 100ms ease-out, width 100ms ease-out, height 100ms ease-out;
-    transition: left 100ms ease-out, top 100ms ease-out, width 100ms ease-out, height 100ms ease-out;
-    outline: 2px solid #FF0000;
-    outline-offset: 4px;
-    /*border: 2px solid #fff;*/
-    pointer-events: none;
-    margin-left: 0px;
-    margin-top: 0px;
-    pointer-events: none;
-    z-index: 1000;
 }

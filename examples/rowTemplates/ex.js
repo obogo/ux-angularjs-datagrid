@@ -1,10 +1,10 @@
-/* global angular */
-(function () {
+/* global angular *///ignore
+(function () {//ignore
     var name = 'ex2';
     angular.module(name, ['ux'])
-        .controller('tabs', function ($scope) {
-            $scope.tab = 'html';
-        })
+        .controller('tabs', function ($scope) {//ignore
+            $scope.tab = 'html';//ignore
+        })//ignore
         .controller('ctrl', function ($scope) {
             var i = 0, len = 100, items = [], types = ['row', 'alt1', 'alt2'];
             while (i < len) {
@@ -26,5 +26,5 @@
             };
         };
     });
-    angular.bootstrap(document.querySelector("*[ng-app='" + name + "']"), [name]);
-}());
+    angular.bootstrap(document.querySelector("*[ng-app='" + name + "']"), [name]);//ignore
+}());//ignore

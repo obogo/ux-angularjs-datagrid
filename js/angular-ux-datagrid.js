@@ -227,7 +227,8 @@ exports.datagrid = {
         creepLimit: 500,
         // - **<a name="options.smartUpdate">smartUpdate</a>** when this is enabled if the array changes the order of things but not the templates that they render in then
         // this will not do a normal reset, but will just re-render the visible area with the changes and as you scroll the changes will update.
-        smartUpdate: true
+        smartUpdate: true,
+        readyToRenderRetryMax: 10
     },
     /**
      * ###<a name="coreAddons">coreAddons</a>###
@@ -750,27 +751,42 @@ function toArray(obj) {
  * > JavaScript is not required to leave those two objects in the same order.
  * > replace sort from ECMAScript with this bubble sort to make it accurate
  */
-function sort(ary, compareFn) {
-    var c, len, v, rlen, holder;
-    if (!compareFn) {
-        // default compare function.
-        compareFn = function(a, b) {
-            return a > b ? 1 : a < b ? -1 : 0;
-        };
-    }
-    len = ary.length;
-    rlen = len - 1;
-    for (c = 0; c < len; c += 1) {
-        for (v = 0; v < rlen; v += 1) {
-            if (compareFn(ary[v], ary[v + 1]) > 0) {
-                holder = ary[v + 1];
-                ary[v + 1] = ary[v];
-                ary[v] = holder;
+// Using QuickSort instead of Bubble Sort method. Speed on large arrays is HUGE. Once over 1000 items, the bubble sort is very slow. QuickSort is faster than native sort.
+var sort = function() {
+    function partition(array, left, right, fn) {
+        var cmp = array[right - 1], minEnd = left, maxEnd, dir = 0;
+        for (maxEnd = left; maxEnd < right - 1; maxEnd += 1) {
+            dir = fn(array[maxEnd], cmp);
+            if (dir < 0) {
+                swap(array, maxEnd, minEnd);
+            }
+            if (dir <= 0) {
+                // don't move them if they are the same.
+                minEnd += 1;
             }
         }
+        swap(array, minEnd, right - 1);
+        return minEnd;
     }
-    return ary;
-}
+    function swap(array, i, j) {
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+        return array;
+    }
+    function quickSort(array, left, right, fn) {
+        if (left < right) {
+            var p = partition(array, left, right, fn);
+            quickSort(array, left, p, fn);
+            quickSort(array, p + 1, right, fn);
+        }
+        return array;
+    }
+    return function(array, fn) {
+        var result = quickSort(array, 0, array.length, fn);
+        return result;
+    };
+}();
 
 exports.util = exports.util || {};
 
@@ -1286,8 +1302,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Event} event
      */
     function onResize(event) {
-        // we need to wait a moment for the browser to finish the resize, then adjust and fire the event.
-        flow.add(updateHeights, [], 100);
+        forceRedraw();
     }
     /**
      * ##<a name="swapItem">swapItem</a>##
@@ -1742,7 +1757,7 @@ function Datagrid(scope, element, attr, $compile) {
      * deactivates any scopes that were active before that are not still active.
      */
     function updateRowWatchers() {
-        var loop = getStartingIndex(), offset = loop.i * 40, lastActive = [].concat(active), lastActiveIndex, s, prevS;
+        var loop = getStartingIndex(), offset = loop.i * 40, lastActive = [].concat(active), lastActiveIndex, s, prevS, digestLater = false;
         if (loop.i < 0) {
             // then scroll is negative. ignore it.
             return;
@@ -1773,7 +1788,9 @@ function Datagrid(scope, element, attr, $compile) {
                     }
                     // make sure to put them into active in the right order.
                     active.push(loop.i);
-                    safeDigest(s);
+                    if (!safeDigest(s, true)) {
+                        digestLater = true;
+                    }
                     s.$digested = true;
                 }
             }
@@ -1796,6 +1813,11 @@ function Datagrid(scope, element, attr, $compile) {
         // this dispatch needs to be after the digest so that it doesn't cause {} to show up in the render.
         // the creep render cannot be synchronous. It needs to wait till done to render.
         flow.add(onAfterUpdateWatchers, [ loop ], 0);
+        if (digestLater) {
+            flow.add(function() {
+                safeDigest(scope);
+            });
+        }
     }
     function onAfterUpdateWatchers(loop) {
         inst.dispatch(events.ON_AFTER_UPDATE_WATCHERS, loop);
@@ -1873,6 +1895,11 @@ function Datagrid(scope, element, attr, $compile) {
             dispatch(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE);
         }
     }
+    function whenReadyToRender() {
+        flow.add(inst.updateViewportHeight, null, 0);
+        // have it wait a moment for the height to change.
+        flow.add(render);
+    }
     /**
      * ###<a name="readyToRender">readyToRender</a>###
      * the datagrid requires a height to be able to render. If the datagrid is compiled
@@ -1882,11 +1909,13 @@ function Datagrid(scope, element, attr, $compile) {
     function readyToRender() {
         if (!viewHeight) {
             waitCount += 1;
-            if (waitCount < 2) {
+            if (waitCount < inst.options.readyToRenderRetryMax) {
                 inst.info("datagrid is waiting for element to have a height.");
-                flow.add(inst.updateViewportHeight, null, 0);
-                // have it wait a moment for the height to change.
-                flow.add(render);
+                var unwatch = scope.$watch(function() {
+                    unwatch();
+                    readyToRender();
+                });
+                whenReadyToRender();
             } else {
                 flow.warn("Datagrid: Unable to determine a height for the datagrid. Cannot render. Exiting.");
             }
@@ -1927,11 +1956,21 @@ function Datagrid(scope, element, attr, $compile) {
     }
     /**
      * ###<a name="update">update</a>###
-     * force the datagrid to fire a data change update.
+     * force the datagrid to fire a data change update or fire a redraw if that fails.
      */
     function update() {
         inst.warn("force update");
-        onDataChanged(scope.$eval(attr.uxDatagrid), inst.data);
+        if (!onDataChanged(scope.$eval(attr.uxDatagrid), inst.data)) {
+            forceRedraw();
+        }
+    }
+    /**
+     * ###<a name="forceUpdate">forceUpdate</a>###
+     * force the datagrid to fire a data change update.
+     */
+    function forceRedraw() {
+        // we need to wait a moment for the browser to finish the resize, then adjust and fire the event.
+        flow.add(updateHeights, [], 100);
     }
     /**
      * ###<a name="dirtyCheckData">dirtyCheckData</a>###
@@ -1976,6 +2015,7 @@ function Datagrid(scope, element, attr, $compile) {
      * map the new data to the old data object and update the scopes.
      */
     function mapData(newVal, oldVal) {
+        //TODO: there is some error here that is causing the rows now not to compile.
         inst.log("	mapData()");
         var oldTemplates = [];
         // get temp cache for templates
@@ -2035,12 +2075,15 @@ function Datagrid(scope, element, attr, $compile) {
             }
             values.dirty = true;
             flow.add(changeData, [ newVal, oldVal ]);
+            return true;
         } else if (isDataReallyChanged(newVal)) {
             // we just want to update the data values and scope values, because no templates changed.
             values.dirty = true;
             mapData(newVal, oldVal);
             flow.add(updateHeights, [], 0);
+            return true;
         }
+        return false;
     }
     function isDataReallyChanged(newVal) {
         // loop through the data and make sure it hasn't already been updated by swap.
@@ -2441,7 +2484,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * @returns {*}
      */
     function updateList(list) {
-        if (_list.length !== list.length) {
+        if (_rows.length !== list.length) {
             return chunkDom(list, _chunkSize, _templateStartCache, _templateEndCache, _el);
         } else {
             var i = 0, len = list.length;
@@ -2450,7 +2493,6 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
                 i += 1;
             }
         }
-        return el;
     }
     /**
      * Update the item using the normalized index to map to the chunkArray.

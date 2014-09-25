@@ -1,0 +1,16 @@
+.sorting *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+}
+
+.sorting-row {
+    background-color:#6699CC;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.sorting-row:nth-child(odd) {
+    background-color:#5588BB;
+}

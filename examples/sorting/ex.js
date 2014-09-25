@@ -1,6 +1,6 @@
 /* global angular *///ignore
 (function () {//ignore
-    var name = 'ex1';
+    var name = 'sorting';
     angular.module(name, ['ux'])
         .controller('tabs', function ($scope) {//ignore
             $scope.tab = 'html';//ignore
@@ -12,5 +12,10 @@
                 i += 1;
             }
             $scope.items = items;
+
+            $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function(evt, grid) {
+                $scope.grid = grid;
+            });
         });
+    angular.bootstrap(document.querySelector("*[ng-app='" + name + "']"), [name]);//ignore
 }());//ignore

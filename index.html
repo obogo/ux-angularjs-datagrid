@@ -24,7 +24,7 @@
     <div style="color:#c0392b;font-weight: bold;margin-left: 136px;margin-top: -4px">for AngularJS</div>
 
     <div style="padding-top:20px;padding-left: 20px">
-        <h4>Built for handling VERY large lists in Angular and making them initialize quickly and scroll smoothly.</h4>
+        <h4>Built for handling <i>VERY LARGE LISTS</i> in Angular and making them initialize quickly and scroll smoothly.</h4>
 
         <p><strong>Datagrid for Angular JS</strong> no longer limits you to having to paginate your data. You can now load <b>HUGE</b> lists (Tested with <b><i>50,000 Rows!</i></b>) and <b>have your app scroll like a champ!</b></p>
 
@@ -69,7 +69,11 @@
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>
 <!--<script src="js/angular.min.js"></script>-->
 <!--<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/angular-ux-datagrid.js"></script>-->
+<!--<script src="js/angular-ux-datagrid_oldSort.js"></script>-->
 <script src="js/angular-ux-datagrid.js"></script>
+<!--<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/addons/ux-datagrid-sortModel.js"></script>-->
+<script src="js/ux-datagrid-sortModel.js"></script>
+<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/addons/ux-datagrid-gridLogger.js"></script>
 
 <div>
     <!-- Getting Started/Setup -->
@@ -114,18 +118,18 @@
         <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
     </ul>
 <pre ng-show="tab=='html'"><code class="html railscasts">
-&lt;div ng-controller="ctrl" class="ex1">
-&lt;div <i>ux-datagrid</i>="<i>item</i>">
-    &lt;script type="template/html" template-item="item">
-        &lt;div class="ex1-row">&lt;span>{{item.id}}&lt;/span>&lt;/div>
-    &lt;/script>
-&lt;/div>
+&lt;div ng-controller="ctrl">
+    &lt;div ux-datagrid="items">
+        &lt;script type="template/html" template-item="item">
+            &lt;div class="ex1-row">&lt;span>{{item.id}}&lt;/span>&lt;/div>
+        &lt;/script>
+    &lt;/div>
 &lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .ex1 *[ux-datagrid] {
     width: 100%;
-    height: 100px;
+    height: 150px;
 }
 
 .ex1-row {
@@ -141,23 +145,28 @@
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-angular.module('ex1').controller('ctrl', function($scope) {
-var items = [];
-for (var i = 0; i < 100; i += 1) {
-    items.push({id:i});
-}
-$scope.items = items;
-});
+var name = 'ex1';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, len = 100, items = [];
+        while (i < len) {
+            items.push({id: i});
+            i += 1;
+        }
+        $scope.items = items;
+    });
+
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
-            <div ng-controller="ctrl">
-                <div ux-datagrid="items">
-                    <script type="template/html" template-item="item">
-                        <div class="ex1-row"><span>{{item.id}}</span></div>
-                    </script>
-                </div>
-            </div>
-
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div ux-datagrid="items">
+        <script type="template/html" template-item="item">
+            <div class="ex1-row"><span>{{item.id}}</span></div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
         </div>
     </div>
                                 <link rel="stylesheet" type="text/css" href="examples/simple/ex.css">
@@ -277,8 +286,8 @@ angular.module('ux').factory('whichTemplate', function () {
         <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
     </ul>
 <pre ng-show="tab=='html'"><code class="html railscasts">
-&lt;div ng-controller="ctrl" class="ex2">
-    &lt;div ux-datagrid="items">
+&lt;div ng-controller="ctrl">
+    &lt;div ux-datagrid="items" addons="whichTemplate">
         &lt;script type="template/html" template-item="item">
             &lt;div class="ex2-row">&lt;span>Default {{item.id}}&lt;/span>&lt;/div>
         &lt;/script>
@@ -308,29 +317,33 @@ angular.module('ux').factory('whichTemplate', function () {
 .ex2-row:nth-child(odd) {
     background-color:#dfdfdf;
 }
-.alt1 {
+.ex2-row.alt1 {
+    height: 30px;
     background-color: #F00;
 }
-.alt2 {
+.ex2-row.alt1:nth-child(odd) {
+    background-color: #E00;
+}
+.ex2-row.alt2 {
     background-color: #0F0;
+}
+.ex2-row.alt2:nth-child(odd) {
+    background-color: #0E0;
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-angular.module('ex2', ['ux'])
-    .controller('tabs', function ($scope) {
-        $scope.tab = 'html';
-    })
+var name = 'ex2';
+angular.module(name, ['ux'])
     .controller('ctrl', function ($scope) {
-        var i = 0, len = 100, items = [];
+        var i = 0, len = 100, items = [], types = ['row', 'alt1', 'alt2'];
         while (i < len) {
-            items.push({id: i});
+            items.push({id: i, type: types[Math.floor(Math.random()*types.length)]});
             i += 1;
         }
         $scope.items = items;
     });
 angular.module('ux').factory('whichTemplate', function () {
-
-    return function (inst) {
+     return function (inst) {
         // now we override it with our method so we decide what template gets displayed for each row.
         inst.templateModel.getTemplate = function (item) {
             // item would be the item in your array of data provided to the datagrid.
@@ -341,26 +354,100 @@ angular.module('ux').factory('whichTemplate', function () {
         };
     };
 });
+
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
-            <div ng-controller="ctrl">
-                <div ux-datagrid="items" addons="whichTemplate">
-                    <script type="template/html" template-item="item">
-                        <div class="ex2-row"><span>Default {{item.id}}</span></div>
-                    </script>
-                    <script type="template/html" template-name="alt1" template-item="item">
-                        <div class="ex2-row alt1"><span>ALT1: {{item.id}}</span></div>
-                    </script>
-                    <script type="template/html" template-name="alt2" template-item="item">
-                        <div class="ex2-row alt2"><span>This {{item.id}} is ALT2</span></div>
-                    </script>
-                </div>
-            </div>
-
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div ux-datagrid="items" addons="whichTemplate">
+        <script type="template/html" template-item="item">
+            <div class="ex2-row"><span>Default {{item.id}}</span></div>
+        </script>
+        <script type="template/html" template-name="alt1" template-item="item">
+            <div class="ex2-row alt1"><span>ALT1: {{item.id}}</span></div>
+        </script>
+        <script type="template/html" template-name="alt2" template-item="item">
+            <div class="ex2-row alt2"><span>This {{item.id}} is ALT2</span></div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
         </div>
     </div>
                                 <link rel="stylesheet" type="text/css" href="examples/rowTemplates/ex.css">
                                 <script src="examples/rowTemplates/ex.js"></script>
+
+    <!-- **************************** Sorting ********************************** -->
+    <a name="#sortModel"></a>
+    <div class="panel-ex sorting" ng-app="sorting">
+        <div class="panel-ex-head">Sorting</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>The <span class="label">ux-datagrid-sortModel</span> addon allows you to do sorting by adding the addon and setting a few options.</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+&lt;div ng-controller="ctrl">
+    &lt;button type="button" class="btn-primary" ng-click="grid.sortModel.toggleSort('id')">Click To Sort ({{grid.sortModel.getSortStateOf('id')||'none'}})&lt;/button>
+    &lt;div ux-datagrid="datagrid.sortModel.applySorts(items)" addons="sortModel" options="{sortModel:{sorts:{id:'none'}}}">
+        &lt;script type="template/html" template-item="item">
+            &lt;div class="sorting-row">&lt;span>{{item.id}}&lt;/span>&lt;/div>
+        &lt;/script>
+    &lt;/div>
+&lt;/div>
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+.sorting *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+}
+
+.sorting-row {
+    background-color:#6699CC;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.sorting-row:nth-child(odd) {
+    background-color:#5588BB;
+}
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+var name = 'sorting';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, len = 100, items = [];
+        while (i < len) {
+            items.push({id: i});
+            i += 1;
+        }
+        $scope.items = items;
+         $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function(evt, grid) {
+            $scope.grid = grid;
+        });
+    });
+
+</code></pre>
+            <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <button type="button" class="btn-primary" ng-click="grid.sortModel.toggleSort('id')">Click To Sort ({{grid.sortModel.getSortStateOf('id')||'none'}})</button>
+    <div ux-datagrid="datagrid.sortModel.applySorts(items)" addons="sortModel" options="{sortModel:{sorts:{id:'none'}}}">
+        <script type="template/html" template-item="item">
+            <div class="sorting-row"><span>{{item.id}}</span></div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>
+                                <link rel="stylesheet" type="text/css" href="examples/sorting/ex.css">
+                                <script src="examples/sorting/ex.js"></script>
 
         <p>MORE EXAMPLES TO COME</p>
 

@@ -1,10 +1,10 @@
-<!-- **************************** A Simple Datagrid ********************************** -->
-    <a name="#simple"></a>
-    <div class="panel-ex ex1" ng-app="ex1">
-        <div class="panel-ex-head">A Simple Datagrid</div>
+<!-- **************************** Sorting ********************************** -->
+    <a name="#sortModel"></a>
+    <div class="panel-ex sorting" ng-app="sorting">
+        <div class="panel-ex-head">Sorting</div>
 
         <div class="panel-ex-body" ng-controller="tabs">
-            <p>Start by adding the <span class="label">ux-datagrid</span> on a DOM container element. (Typically this will be a DIV).</p>
+            <p>The <span class="label">ux-datagrid-sortModel</span> addon allows you to do sorting by adding the addon and setting a few options.</p>
     <ul class="nav nav-tabs" role="tablist">
         <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
         <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
@@ -22,9 +22,10 @@
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
 <!-- html:start -->
 <div ng-controller="ctrl">
-    <div ux-datagrid="items">
+    <button type="button" class="btn-primary" ng-click="grid.sortModel.toggleSort('id')">Click To Sort ({{grid.sortModel.getSortStateOf('id')||'none'}})</button>
+    <div ux-datagrid="datagrid.sortModel.applySorts(items)" addons="sortModel" options="{sortModel:{sorts:{id:'none'}}}">
         <script type="template/html" template-item="item">
-            <div class="ex1-row"><span>{{item.id}}</span></div>
+            <div class="sorting-row"><span>{{item.id}}</span></div>
         </script>
     </div>
 </div>

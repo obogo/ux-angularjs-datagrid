@@ -11,85 +11,29 @@
         <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
     </ul>
 <pre ng-show="tab=='html'"><code class="html railscasts">
-&lt;div ng-controller="ctrl" class="ex2">
-    &lt;div ux-datagrid="items">
-        &lt;script type="template/html" template-item="item">
-            &lt;div class="ex2-row">&lt;span>Default {{item.id}}&lt;/span>&lt;/div>
-        &lt;/script>
-        &lt;script type="template/html" template-name="alt1" template-item="item">
-            &lt;div class="ex2-row alt1">&lt;span>ALT1: {{item.id}}&lt;/span>&lt;/div>
-        &lt;/script>
-        &lt;script type="template/html" template-name="alt2" template-item="item">
-            &lt;div class="ex2-row alt2">&lt;span>This {{item.id}} is ALT2&lt;/span>&lt;/div>
-        &lt;/script>
-    &lt;/div>
-&lt;/div>
+##html##
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
-.ex2 *[ux-datagrid] {
-    width: 100%;
-    height: 150px;
-}
-
-.ex2-row {
-    background-color:#efefef;
-    height: 20px;
-    line-height: 20px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-.ex2-row:nth-child(odd) {
-    background-color:#dfdfdf;
-}
-.alt1 {
-    background-color: #F00;
-}
-.alt2 {
-    background-color: #0F0;
-}
+##css##
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-angular.module('ex2', ['ux'])
-    .controller('tabs', function ($scope) {
-        $scope.tab = 'html';
-    })
-    .controller('ctrl', function ($scope) {
-        var i = 0, len = 100, items = [];
-        while (i < len) {
-            items.push({id: i});
-            i += 1;
-        }
-        $scope.items = items;
-    });
-angular.module('ux').factory('whichTemplate', function () {
-
-    return function (inst) {
-        // now we override it with our method so we decide what template gets displayed for each row.
-        inst.templateModel.getTemplate = function (item) {
-            // item would be the item in your array of data provided to the datagrid.
-            // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.
-            var name = item.type || 'row';
-            // now we get the template from the name.
-            return inst.templateModel.getTemplateByName(name);
-        };
-    };
-});
+##js##
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
-            <div ng-controller="ctrl">
-                <div ux-datagrid="items" addons="whichTemplate">
-                    <script type="template/html" template-item="item">
-                        <div class="ex2-row"><span>Default {{item.id}}</span></div>
-                    </script>
-                    <script type="template/html" template-name="alt1" template-item="item">
-                        <div class="ex2-row alt1"><span>ALT1: {{item.id}}</span></div>
-                    </script>
-                    <script type="template/html" template-name="alt2" template-item="item">
-                        <div class="ex2-row alt2"><span>This {{item.id}} is ALT2</span></div>
-                    </script>
-                </div>
-            </div>
-
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div ux-datagrid="items" addons="whichTemplate">
+        <script type="template/html" template-item="item">
+            <div class="ex2-row"><span>Default {{item.id}}</span></div>
+        </script>
+        <script type="template/html" template-name="alt1" template-item="item">
+            <div class="ex2-row alt1"><span>ALT1: {{item.id}}</span></div>
+        </script>
+        <script type="template/html" template-name="alt2" template-item="item">
+            <div class="ex2-row alt2"><span>This {{item.id}} is ALT2</span></div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
         </div>
     </div>

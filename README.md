@@ -6,6 +6,8 @@
 
 [![Build Status](https://travis-ci.org/obogo/ux-angularjs-datagrid.svg?branch=master)](https://travis-ci.org/obogo/ux-angularjs-datagrid)
 
+[Examples (in progress)](http://webux.github.io/ux-angularjs-datagrid/)
+
 **Highly performant list and datagrid for AngularJS** designed for mobile devices which just makes it all the better on a desktop.
 
 Most lists work with recycled or just in time created rows for long lists in angular. **Datagrid doesn't work that way because in order to get a smooth scrolling experience on a mobile device you need to allow the browser to handle the scrolling as much as possible**. So to accomplish this Datagrid works on a chunking algorithm to create pieces as they come into view, but never destroy them until the whole grid is destroyed. This allows the scrolling experience to be smooth because GPU is leveraged from the browser as the dom is considered to be static until in view.

@@ -146,7 +146,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * @returns {*}
      */
     function updateList(list) {
-        if (_list.length !== list.length) {
+        if (_rows.length !== list.length) {
             return chunkDom(list, _chunkSize, _templateStartCache, _templateEndCache, _el);
         } else {
             var i = 0, len = list.length;
@@ -155,7 +155,6 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
                 i += 1;
             }
         }
-        return el;
     }
 
     /**

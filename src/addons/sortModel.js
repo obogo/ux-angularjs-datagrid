@@ -495,6 +495,7 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
          * @returns {*}
          */
         result.applySorts = function applySorts(ary, sortOptions, clear) {
+var start = Date.now();
             var pathStateRef = sortStatesModel.getPathState(),
                 currentPathState = angular.copy(pathStateRef);
             if (sortOptions) {
@@ -512,6 +513,7 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
                 }
                 result.setCache('', original);// the original is always without any sort options.
                 if (!result.$processing) {
+console.log("\tstep1 %s", Date.now() - start);
                     result.$processing = true;
                     var key = sortStatesModel.createKeyFromStates(pathStateRef), event,
                         pathState = angular.copy(pathStateRef); // clone so they cannot mess with the data directly.
@@ -522,11 +524,13 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
                         if (!result.getCache(key) || result.getCache(key).length !== original.length) {
                             result.log("\tstore sort %s", key);
                             result.setCache(key, original && original.slice(0) || []); // clone it
+console.log("\tstep1.1 %s", Date.now() - start);
                             ux.each(pathState.$order, applyListSort, {
                                 grouped: inst.grouped,
                                 pathState: pathState,
                                 ary: result.getCache(key)
                             });
+console.log("\tstep1.2 %s", Date.now() - start);
                         } else {
                             result.log("\tpull sort from cache");
                         }
@@ -540,9 +544,11 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
                         lastSortResult = original;
                     }
                     result.$processing = false;
+console.log("\tstep2 %s", Date.now() - start);
                     inst.dispatch(exports.datagrid.events.ON_AFTER_SORT, key, pathState, currentPathState);
                 }
             }
+console.log("Finished at %s", Date.now() - start);
             return lastSortResult;
         };
 

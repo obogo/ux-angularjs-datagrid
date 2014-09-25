@@ -333,8 +333,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Event} event
      */
     function onResize(event) {
-        // we need to wait a moment for the browser to finish the resize, then adjust and fire the event.
-        flow.add(updateHeights, [], 100);
+        forceRedraw();
     }
 
     /**
@@ -827,7 +826,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function updateRowWatchers() {
         var loop = getStartingIndex(), offset = loop.i * 40, lastActive = [].concat(active),
-            lastActiveIndex, s, prevS;
+            lastActiveIndex, s, prevS, digestLater = false;
         if (loop.i < 0) {// then scroll is negative. ignore it.
             return;
         }
@@ -853,7 +852,9 @@ function Datagrid(scope, element, attr, $compile) {
                     }
                     // make sure to put them into active in the right order.
                     active.push(loop.i);
-                    safeDigest(s);
+                    if (!safeDigest(s, true)) {
+                        digestLater = true;
+                    }
                     s.$digested = true;
                 }
             }
@@ -875,6 +876,11 @@ function Datagrid(scope, element, attr, $compile) {
         // this dispatch needs to be after the digest so that it doesn't cause {} to show up in the render.
         // the creep render cannot be synchronous. It needs to wait till done to render.
         flow.add(onAfterUpdateWatchers, [loop], 0);
+        if (digestLater) {
+            flow.add(function () {
+                safeDigest(scope);
+            });
+        }
     }
 
     function onAfterUpdateWatchers(loop) {
@@ -960,6 +966,11 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
 
+    function whenReadyToRender() {
+        flow.add(inst.updateViewportHeight, null, 0);// have it wait a moment for the height to change.
+        flow.add(render);
+    }
+
     /**
      * ###<a name="readyToRender">readyToRender</a>###
      * the datagrid requires a height to be able to render. If the datagrid is compiled
@@ -969,10 +980,13 @@ function Datagrid(scope, element, attr, $compile) {
     function readyToRender() {
         if (!viewHeight) {
             waitCount += 1;
-            if (waitCount < 2) {
+            if (waitCount < inst.options.readyToRenderRetryMax) {
                 inst.info("datagrid is waiting for element to have a height.");
-                flow.add(inst.updateViewportHeight, null, 0);// have it wait a moment for the height to change.
-                flow.add(render);
+                var unwatch = scope.$watch(function() {
+                    unwatch();
+                    readyToRender();
+                });
+                whenReadyToRender();
             } else {
                 flow.warn("Datagrid: Unable to determine a height for the datagrid. Cannot render. Exiting.");
             }
@@ -1015,11 +1029,22 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="update">update</a>###
-     * force the datagrid to fire a data change update.
+     * force the datagrid to fire a data change update or fire a redraw if that fails.
      */
     function update() {
         inst.warn("force update");
-        onDataChanged(scope.$eval(attr.uxDatagrid), inst.data);
+        if (!onDataChanged(scope.$eval(attr.uxDatagrid), inst.data)) {
+            forceRedraw();
+        }
+    }
+
+    /**
+     * ###<a name="forceUpdate">forceUpdate</a>###
+     * force the datagrid to fire a data change update.
+     */
+    function forceRedraw() {
+        // we need to wait a moment for the browser to finish the resize, then adjust and fire the event.
+        flow.add(updateHeights, [], 100);
     }
 
     /**
@@ -1068,6 +1093,7 @@ function Datagrid(scope, element, attr, $compile) {
      * map the new data to the old data object and update the scopes.
      */
     function mapData(newVal, oldVal) {
+//TODO: there is some error here that is causing the rows now not to compile.
         inst.log("\tmapData()");
         var oldTemplates = [];// get temp cache for templates
         exports.each(inst.getData(), cacheOldTemplates, oldTemplates);
@@ -1128,12 +1154,15 @@ function Datagrid(scope, element, attr, $compile) {
             }
             values.dirty = true;
             flow.add(changeData, [newVal, oldVal]);
+            return true;
         } else if (isDataReallyChanged(newVal)) {
             // we just want to update the data values and scope values, because no templates changed.
             values.dirty = true;
             mapData(newVal, oldVal);
             flow.add(updateHeights, [], 0);
+            return true;
         }
+        return false;
     }
 
     function isDataReallyChanged(newVal) {

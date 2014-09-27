@@ -3,9 +3,9 @@
 /**
  * <a name="ux.datagrid"></a>
  * ##Datagrid Directive##
- * The datagrid manages the `core addons` to build the initial list and provide the public api necessary
+ * The datagrid manages the `core addons` to build the initial list and provide the public API necessary
  * to communicate with other addons.
- * Datagrid uses script templates inside of the dom to create your elements. Addons that are added to the addon
+ * Datagrid uses script templates inside of the DOM to create your elements. Addons are added to the `addon`
  * attribute.
  * @param {Scope} scope
  * @param {DOMElement} element
@@ -17,13 +17,13 @@
 function Datagrid(scope, element, attr, $compile) {
     // **<a name="flow">flow</a>** flow management for methods of the datagrid. Keeping functions firing in the correct order especially if async methods are executed.
     var flow;
-    // **<a name="waitCount">waitCount</a>** waiting to render. If it fails too many times. it will die.
+    // **<a name="waitCount">waitCount</a>** waiting to render. If it fails too many times it will die.
     var waitCount = 0;
     // **<a name="changeWatcherSet">changeWatcherSet</a>** flag for change watchers.
     var changeWatcherSet = false;
     // **<a name="unwatchers">unwatchers</a>** list of scope listeners that we want to clear on destroy
     var unwatchers = [];
-    // **<a name="content">content</a>** the dom element with all of the chunks.
+    // **<a name="content">content</a>** the DOM element with all of the chunks.
     var content;
     // **<a name="oldContent">oldContent</a>** the temporary content when the grid is being reset.
     var oldContent;
@@ -47,7 +47,7 @@ function Datagrid(scope, element, attr, $compile) {
     var state = states.BUILDING;
     // **<a name="values">values</a>** `values` is the object that is used to share data for scrolling and other shared values.
     var values = {
-        // - <a name="values.dirty"></a>if the data is dirty and a render has not happended since the data change.
+        // - <a name="values.dirty"></a>if the data is dirty and a render has not happened since the data change.
         dirty: false,
         // - <a name="values.scroll"></a>current scroll value of the grid
         scroll: 0,
@@ -84,7 +84,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="setupExports">setupExports</a>###
-     * Build out the public api variables for the datagrid.
+     * Build out the public API variables for the datagrid.
      */
     function setupExports() {
         inst.uid = exports.uid();
@@ -140,10 +140,10 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="createContent">createContent</a>###
-     * The [content](#content) dom element is the only direct child created by the datagrid.
-     * It is used so append all of the `chunks` so that the it can be scrolled.
-     * If the dom element is provided with the class [content](#content) then that dom element will be used
-     * allowing the user to add custom classes directly tot he [content](#content) dom element.
+     * The [content](#content) DOM element is the only direct child created by the datagrid.
+     * It is used to append all of the `chunks` so that it can be scrolled.
+     * If the DOM element is provided with the class [content](#content) then that DOM element will be used
+     * allowing the user to add custom classes directly to the [content](#content) DOM element.
      * @returns {JQLite}
      */
     function createContent() {
@@ -169,8 +169,8 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="getClassesFromOldContent">getClassesFromOldContent</a>###
-     * If the old content exists it may have been an original dom element passed to the datagrid. If so we want
-     * to keep that dom elements classes in tact.
+     * If the old content exists it may have been an original DOM element passed to the datagrid. If so we want
+     * to keep that DOM element's classes in tact.
      * @returns {string}
      */
     function getClassesFromOldContent() {
@@ -187,7 +187,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="filterOldContent">filterOldContent</a>###
-     * filter the list of content dom to remove any references to the [oldContent][#oldContent].
+     * filter the list of content DOM to remove any references to the [oldContent][#oldContent].
      * @param cnt
      * @param index
      * @param list
@@ -225,19 +225,19 @@ function Datagrid(scope, element, attr, $compile) {
     function waitForElementReady(count) {
         if (!inst.element[0].offsetHeight) {
             if (count < 1) {
-                // if they are doing custom compiling. They may compile before addit it to the dom.
+                // if they are doing custom compiling. They may compile before adding it to the DOM.
                 // allow a pass to happen just in case.
                 flow.add(waitForElementReady, [count + 1], 0);// retry.
                 return;
             } else {
-                flow.warn("Datagrid: Dom Element does not have a height.");
+                flow.warn("Datagrid: DOM Element does not have a height.");
             }
         }
         if (options.templateModel && options.templateModel.templates) {
             flow.add(inst.templateModel.createTemplatesFromData, [options.templateModel.templates], 0);
         }
-        flow.add(inst.templateModel.createTemplates, null, 0); // allow element to be added to dom.
-        // if the templates have different heights. Then they are dynamic.
+        flow.add(inst.templateModel.createTemplates, null, 0); // allow element to be added to DOM.
+        // if the templates have different heights then they are dynamic.
         flow.add(function updateDynamicRowHeights() {
             options.dynamicRowHeights = inst.templateModel.dynamicHeights();
         });
@@ -247,7 +247,7 @@ function Datagrid(scope, element, attr, $compile) {
     /**
      * ###<a name="addListeners">addListeners</a>###
      * Adds listeners. Notice that all listeners are added to the unwatchers array so that they can be cleared
-     * before references are removed to avoid memory leaks with circular references amd to prevent events from
+     * before references are removed to avoid memory leaks with circular references and to prevent events from
      * being listened to while the destroy is happening.
      */
     function addListeners() {
@@ -274,14 +274,14 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="setupChangeWatcher">setupChangeWatcher</a>###
-     * When a change happens update the dom.
+     * When a change happens update the DOM.
      */
     function setupChangeWatcher() {
         if (!changeWatcherSet) {
             inst.log("setupChangeWatcher");
             changeWatcherSet = true;
             unwatchers.push(scope.$watchCollection(attr.uxDatagrid, onDataChangeFromWatcher));
-            // force intial watcher.
+            // force initial watcher.
             var d = scope.$eval(attr.uxDatagrid);
             if (d && d.length) {
                 flow.add(render);
@@ -318,7 +318,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="calculateViewportHeight">calculateViewportHeight</a>###
-     * Calculate Viewport Height can be expensive. Depending on the number of dom elemnts.
+     * Calculate Viewport Height can be expensive. Depending on the number of DOM elements.
      * so if you need to use this method, use it sparingly because you may experience performance
      * issues if overused.
      */
@@ -329,7 +329,7 @@ function Datagrid(scope, element, attr, $compile) {
     /**
      * ###<a name="onResize">onResize</a>###
      * When a resize happens dispatch that event for addons to listen to so events happen after
-     * the grid has performed it's changes.
+     * the grid has performed its changes.
      * @param {Event} event
      */
     function onResize(event) {
@@ -388,7 +388,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="getRowElm">getRowElm</a>###
-     * Return the dom element at that row index.
+     * Return the DOM element at that row index.
      * @param {Number} index
      * @returns {element|*}
      */
@@ -398,7 +398,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="getExistingRow">getExistingRow</a>###
-     * Return the dom element at that row index. This will not build it if it doesn't exist.
+     * Return the DOM element at that row index. This will not build it if it doesn't exist.
      * @param {Number} index
      * @returns {element|*}
      */
@@ -428,7 +428,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="getRowIndexFromElement">getRowIndexFromElement</a>###
-     * Get the index of a row from a reference to a dom element that is contained within a row.
+     * Get the index of a row from a reference to a DOM element that is contained within a row.
      * @param {JQLite|DOMElement} el
      * @returns {*}
      */
@@ -458,8 +458,8 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="getRowOffset">getRowOffset</a>###
-     * Return the scroll offset of a row by it's index. All offsets are cached, they get updated if
-     * a row template changes, because it may change it height as well.
+     * Return the scroll offset of a row by its index. All offsets are cached. They get updated if
+     * a row template changes, because it may change the height as well.
      * @param {Number} index
      * @returns {*}
      */
@@ -503,7 +503,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="createDom">createDom</a>###
-     * This starts off the chunking. It creates all of the dom chunks, rows, etc for the datagrid.
+     * This starts off the chunking. It creates all of the DOM chunks, rows, etc for the datagrid.
      * @param {Array} list
      */
     function createDom(list) {
@@ -551,7 +551,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="buildRows">buildRows</a>###
-     * Set the state to <a name="states.BUILDING">states.BUILDING</a>. Then build the dom.
+     * Set the state to <a name="states.BUILDING">states.BUILDING</a>. Then build the DOM.
      * @param {Array} list
      * @param {Boolean=} forceRender
      */
@@ -570,7 +570,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="ready">ready</a>###
-     * Set the state to <a href="states.ON_READY">states.READY</a> and start the first render.
+     * Set the state to <a href="states.READY">states.READY</a> and start the first render.
      */
     function ready() {
         inst.log("\tready");
@@ -675,11 +675,11 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     /**
-     * ###<a name="desctivateScope">deactivateScope</a>###
-     * One of the core features to the datagrid's performance it the ability to make only the scopes
-     * that are in view to render. This deactivates a scope by removing it's $$watchers that angular
+     * ###<a name="deactivateScope">deactivateScope</a>###
+     * One of the core features to the datagrid's performance is the ability to make only the scopes
+     * that are in view to render. This deactivates a scope by removing its $$watchers that angular
      * uses to know that it needs to digest. Thus inactivating the row. We also remove all watchers from
-     * child scopes recursively storing them on each child in a separate variable to activation later.
+     * child scopes recursively storing them on each child in a separate variable to activate later.
      * They need to be reactivated before being destroyed for proper cleanup.
      * $$childHead and $$nextSibling variables are also updated for angular so that it will not even iterate
      * over a scope that is deactivated. It becomes completely hidden from the digest.
@@ -770,7 +770,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="getStartingIndex">getStartingIndex</a>###
-     * Because the datagrid can render as many as 50k rows. It becomes necessary to optimize loops by
+     * Because the datagrid can render as many as 50k rows it becomes necessary to optimize loops by
      * determining the index to start checking for deactivated and activated scopes at instead of iterating
      * all of the items. This greatly improves a render because it only iterates from where the last render was.
      * It does this by taking the last first active element and then counting from there till we get to the top
@@ -825,7 +825,7 @@ function Datagrid(scope, element, attr, $compile) {
      * deactivates any scopes that were active before that are not still active.
      */
     function updateRowWatchers() {
-        var loop = getStartingIndex(), offset = loop.i * 40, lastActive = [].concat(active),
+        var loop = getStartingIndex(), offset, lastActive = [].concat(active),
             lastActiveIndex, s, prevS, digestLater = false;
         if (loop.i < 0) {// then scroll is negative. ignore it.
             return;
@@ -974,7 +974,7 @@ function Datagrid(scope, element, attr, $compile) {
     /**
      * ###<a name="readyToRender">readyToRender</a>###
      * the datagrid requires a height to be able to render. If the datagrid is compiled
-     * and not added to the dom it will not have a height until added to the dom. If this fails it will wait till the next
+     * and not added to the DOM it will not have a height until added to the DOM. If this fails it will wait until the next
      * frame to check the height. If that fails it exits.
      */
     function readyToRender() {
@@ -1000,7 +1000,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="render">render</a>###
-     * depending on the state of the datagrid this will create necessary dom, compile rows, or
+     * depending on the state of the datagrid this will create necessary DOM, compile rows, or
      * digest <a href="#activeRange">activeRange</a> of rows.
      */
     function render() {
@@ -1050,7 +1050,7 @@ function Datagrid(scope, element, attr, $compile) {
     /**
      * ###<a name="dirtyCheckData">dirtyCheckData</a>###
      * Compare the new and the old value. If the item number is the same, and no templates
-     * have changed. Than just update the scopes and run the watchers instead of doing a reset.
+     * have changed then just update the scopes and run the watchers instead of doing a reset.
      * @param {Array} newVal
      * @param {Array} oldVal
      */
@@ -1106,7 +1106,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="cacheOldTemplates>cacheOldTemplates</a>###
-     * temporally cache old templates for mapping so we can tell if a template changed
+     * temporarily cache old templates for mapping so we can tell if a template changed
      * when a scope changed.
      * @param item
      * @param index
@@ -1298,7 +1298,7 @@ function Datagrid(scope, element, attr, $compile) {
 
     /**
      * ###<a name="dispatch">dispatch</a>###
-     * handle dispaching of events from the datagrid.
+     * handle dispatching of events from the datagrid.
      * @param {String} event
      * @returns {Object}
      */
@@ -1308,7 +1308,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function forceGarbageCollection() {
-        // concept is to crate a large object that will cause the browser to garbage collect before creating it.
+        // concept is to create a large object that will cause the browser to garbage collect before creating it.
         // then since it has no reference it gets removed.
         clearInterval(gcIntv);
         if (!inst.shuttingDown) {
@@ -1329,7 +1329,7 @@ function Datagrid(scope, element, attr, $compile) {
      * used to destroy the scopes of all rows in the datagrid that are compiled.
      */
     function destroyScopes() {
-        // because child scopes may not be in order because of rendering techniques. We must loop through
+        // because child scopes may not be in order because of rendering techniques we must loop through
         // all scopes and destroy them manually.
         var lastScope, nextScope, i = 0;
         each(scopes, function (s, index) {
@@ -1397,7 +1397,6 @@ function Datagrid(scope, element, attr, $compile) {
         states = null;
         events = null;
         options = null;
-        values = null;
         logEvents = null;
         $compile = null;
     }

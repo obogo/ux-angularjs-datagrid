@@ -2566,9 +2566,9 @@ return</span>
 </div>
 
 
-<p>The datagrid manages the <code>core addons</code> to build the initial list and provide the public api necessary
+<p>The datagrid manages the <code>core addons</code> to build the initial list and provide the public API necessary
 to communicate with other addons.
-Datagrid uses script templates inside of the dom to create your elements. Addons that are added to the addon
+Datagrid uses script templates inside of the DOM to create your elements. Addons are added to the <code>addon</code>
 attribute.</p>
   </div>
   <div class="body">
@@ -2618,7 +2618,7 @@ attribute.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-71" id="section-71">&#182;</a>
 </div>
-<p><strong><a name="waitCount">waitCount</a></strong> waiting to render. If it fails too many times. it will die.</p>
+<p><strong><a name="waitCount">waitCount</a></strong> waiting to render. If it fails too many times it will die.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">var</span> <span class="nx">waitCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
@@ -2657,7 +2657,7 @@ attribute.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-74" id="section-74">&#182;</a>
 </div>
-<p><strong><a name="content">content</a></strong> the dom element with all of the chunks.</p>
+<p><strong><a name="content">content</a></strong> the DOM element with all of the chunks.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">var</span> <span class="nx">content</span><span class="p">;</span>
@@ -2814,7 +2814,7 @@ attribute.</p>
   <a class="pilcrow" href="#section-86" id="section-86">&#182;</a>
 </div>
 <ul>
-<li><a name="values.dirty"></a>if the data is dirty and a render has not happended since the data change.</li>
+<li><a name="values.dirty"></a>if the data is dirty and a render has not happened since the data change.</li>
 </ul>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
@@ -3009,7 +3009,7 @@ attribute.</p>
 </div>
 
 
-<p>Build out the public api variables for the datagrid.</p>
+<p>Build out the public API variables for the datagrid.</p>
   </div>
   <div class="body">
   </div>
@@ -3108,10 +3108,10 @@ attribute.</p>
 </div>
 
 
-<p>The <a href="#content">content</a> dom element is the only direct child created by the datagrid.
-It is used so append all of the <code>chunks</code> so that the it can be scrolled.
-If the dom element is provided with the class <a href="#content">content</a> then that dom element will be used
-allowing the user to add custom classes directly tot he <a href="#content">content</a> dom element.</p>
+<p>The <a href="#content">content</a> DOM element is the only direct child created by the datagrid.
+It is used to append all of the <code>chunks</code> so that it can be scrolled.
+If the DOM element is provided with the class <a href="#content">content</a> then that DOM element will be used
+allowing the user to add custom classes directly to the <a href="#content">content</a> DOM element.</p>
   </div>
   <div class="body">
   </div>
@@ -3167,8 +3167,8 @@ allowing the user to add custom classes directly tot he <a href="#content">conte
 </div>
 
 
-<p>If the old content exists it may have been an original dom element passed to the datagrid. If so we want
-to keep that dom elements classes in tact.</p>
+<p>If the old content exists it may have been an original DOM element passed to the datagrid. If so we want
+to keep that DOM element's classes in tact.</p>
   </div>
   <div class="body">
   </div>
@@ -3215,7 +3215,7 @@ to keep that dom elements classes in tact.</p>
 </div>
 
 
-<p>filter the list of content dom to remove any references to the [oldContent][#oldContent].</p>
+<p>filter the list of content DOM to remove any references to the [oldContent][#oldContent].</p>
   </div>
   <div class="body">
   </div>
@@ -3332,7 +3332,7 @@ to be available, but only wait a little then exit.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-109" id="section-109">&#182;</a>
 </div>
-<p>if they are doing custom compiling. They may compile before addit it to the dom.
+<p>if they are doing custom compiling. They may compile before adding it to the DOM.
 allow a pass to happen just in case.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
@@ -3351,7 +3351,7 @@ allow a pass to happen just in case.</p>
         <td class="code highlight"><div class="highlight"><pre>
                 <span class="k">return</span><span class="p">;</span>
             <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                <span class="nx">flow</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;Datagrid: Dom Element does not have a height.&quot;</span><span class="p">);</span>
+                <span class="nx">flow</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;Datagrid: DOM Element does not have a height.&quot;</span><span class="p">);</span>
             <span class="p">}</span>
         <span class="p">}</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">templateModel</span> <span class="o">&amp;&amp;</span> <span class="nx">options</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">templates</span><span class="p">)</span> <span class="p">{</span>
@@ -3367,8 +3367,8 @@ allow a pass to happen just in case.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-111" id="section-111">&#182;</a>
 </div>
-<p>allow element to be added to dom.
-if the templates have different heights. Then they are dynamic.</p>
+<p>allow element to be added to DOM.
+if the templates have different heights then they are dynamic.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">flow</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="kd">function</span> <span class="nx">updateDynamicRowHeights</span><span class="p">()</span> <span class="p">{</span>
@@ -3392,7 +3392,7 @@ if the templates have different heights. Then they are dynamic.</p>
 
 
 <p>Adds listeners. Notice that all listeners are added to the unwatchers array so that they can be cleared
-before references are removed to avoid memory leaks with circular references amd to prevent events from
+before references are removed to avoid memory leaks with circular references and to prevent events from
 being listened to while the destroy is happening.</p>
   </div>
   <div class="body">
@@ -3434,7 +3434,7 @@ being listened to while the destroy is happening.</p>
 </div>
 
 
-<p>When a change happens update the dom.</p>
+<p>When a change happens update the DOM.</p>
   </div>
   <div class="body">
   </div>
@@ -3455,7 +3455,7 @@ being listened to while the destroy is happening.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-114" id="section-114">&#182;</a>
 </div>
-<p>force intial watcher.</p>
+<p>force initial watcher.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
             <span class="kd">var</span> <span class="nx">d</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$eval</span><span class="p">(</span><span class="nx">attr</span><span class="p">.</span><span class="nx">uxDatagrid</span><span class="p">);</span>
@@ -3570,7 +3570,7 @@ being listened to while the destroy is happening.</p>
 </div>
 
 
-<p>Calculate Viewport Height can be expensive. Depending on the number of dom elemnts.
+<p>Calculate Viewport Height can be expensive. Depending on the number of DOM elements.
 so if you need to use this method, use it sparingly because you may experience performance
 issues if overused.</p>
   </div>
@@ -3598,7 +3598,7 @@ issues if overused.</p>
 
 
 <p>When a resize happens dispatch that event for addons to listen to so events happen after
-the grid has performed it's changes.</p>
+the grid has performed its changes.</p>
   </div>
   <div class="body">
   </div>
@@ -3777,7 +3777,7 @@ this way. Only change them to a different reference. Adding or Removing requires
 </div>
 
 
-<p>Return the dom element at that row index.</p>
+<p>Return the DOM element at that row index.</p>
   </div>
   <div class="body">
   </div>
@@ -3809,7 +3809,7 @@ this way. Only change them to a different reference. Adding or Removing requires
 </div>
 
 
-<p>Return the dom element at that row index. This will not build it if it doesn't exist.</p>
+<p>Return the DOM element at that row index. This will not build it if it doesn't exist.</p>
   </div>
   <div class="body">
   </div>
@@ -3905,7 +3905,7 @@ this way. Only change them to a different reference. Adding or Removing requires
 </div>
 
 
-<p>Get the index of a row from a reference to a dom element that is contained within a row.</p>
+<p>Get the index of a row from a reference to a DOM element that is contained within a row.</p>
   </div>
   <div class="body">
   </div>
@@ -3961,8 +3961,8 @@ this way. Only change them to a different reference. Adding or Removing requires
 </div>
 
 
-<p>Return the scroll offset of a row by it's index. All offsets are cached, they get updated if
-a row template changes, because it may change it height as well.</p>
+<p>Return the scroll offset of a row by its index. All offsets are cached. They get updated if
+a row template changes, because it may change the height as well.</p>
   </div>
   <div class="body">
   </div>
@@ -4096,7 +4096,7 @@ a row template changes, because it may change it height as well.</p>
 </div>
 
 
-<p>This starts off the chunking. It creates all of the dom chunks, rows, etc for the datagrid.</p>
+<p>This starts off the chunking. It creates all of the DOM chunks, rows, etc for the datagrid.</p>
   </div>
   <div class="body">
   </div>
@@ -4227,7 +4227,7 @@ a row template changes, because it may change it height as well.</p>
 </div>
 
 
-<p>Set the state to <a name="states.BUILDING">states.BUILDING</a>. Then build the dom.</p>
+<p>Set the state to <a name="states.BUILDING">states.BUILDING</a>. Then build the DOM.</p>
   </div>
   <div class="body">
   </div>
@@ -4273,7 +4273,7 @@ a row template changes, because it may change it height as well.</p>
 </div>
 
 
-<p>Set the state to <a href="states.ON_READY">states.READY</a> and start the first render.</p>
+<p>Set the state to <a href="states.READY">states.READY</a> and start the first render.</p>
   </div>
   <div class="body">
   </div>
@@ -4602,15 +4602,15 @@ so that event listeners do not get stuck on broadcast.</p>
 <div class="pilwrap" id="deactivatescope">
   <h3>
     <a href="#deactivatescope" name="deactivatescope" class="pilcrow">&#182;</a>
-    <a name="desctivateScope">deactivateScope</a>
+    <a name="deactivateScope">deactivateScope</a>
   </h3>
 </div>
 
 
-<p>One of the core features to the datagrid's performance it the ability to make only the scopes
-that are in view to render. This deactivates a scope by removing it's $$watchers that angular
+<p>One of the core features to the datagrid's performance is the ability to make only the scopes
+that are in view to render. This deactivates a scope by removing its $$watchers that angular
 uses to know that it needs to digest. Thus inactivating the row. We also remove all watchers from
-child scopes recursively storing them on each child in a separate variable to activation later.
+child scopes recursively storing them on each child in a separate variable to activate later.
 They need to be reactivated before being destroyed for proper cleanup.
 $$childHead and $$nextSibling variables are also updated for angular so that it will not even iterate
 over a scope that is deactivated. It becomes completely hidden from the digest.</p>
@@ -4840,7 +4840,7 @@ to fully make sure the scope is as if it was before it was deactivated.</p>
 </div>
 
 
-<p>Because the datagrid can render as many as 50k rows. It becomes necessary to optimize loops by
+<p>Because the datagrid can render as many as 50k rows it becomes necessary to optimize loops by
 determining the index to start checking for deactivated and activated scopes at instead of iterating
 all of the items. This greatly improves a render because it only iterates from where the last render was.
 It does this by taking the last first active element and then counting from there till we get to the top
@@ -4955,7 +4955,7 @@ deactivates any scopes that were active before that are not still active.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">updateRowWatchers</span><span class="p">()</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">loop</span> <span class="o">=</span> <span class="nx">getStartingIndex</span><span class="p">(),</span> <span class="nx">offset</span> <span class="o">=</span> <span class="nx">loop</span><span class="p">.</span><span class="nx">i</span> <span class="o">*</span> <span class="mi">40</span><span class="p">,</span> <span class="nx">lastActive</span> <span class="o">=</span> <span class="p">[].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">active</span><span class="p">),</span> <span class="nx">lastActiveIndex</span><span class="p">,</span> <span class="nx">s</span><span class="p">,</span> <span class="nx">prevS</span><span class="p">,</span> <span class="nx">digestLater</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">loop</span> <span class="o">=</span> <span class="nx">getStartingIndex</span><span class="p">(),</span> <span class="nx">offset</span><span class="p">,</span> <span class="nx">lastActive</span> <span class="o">=</span> <span class="p">[].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">active</span><span class="p">),</span> <span class="nx">lastActiveIndex</span><span class="p">,</span> <span class="nx">s</span><span class="p">,</span> <span class="nx">prevS</span><span class="p">,</span> <span class="nx">digestLater</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">loop</span><span class="p">.</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
 
 </pre></div>
@@ -5333,7 +5333,7 @@ hide scopes that are deactivated from angular's knowledge so digest loops are as
 
 
 <p>the datagrid requires a height to be able to render. If the datagrid is compiled
-and not added to the dom it will not have a height until added to the dom. If this fails it will wait till the next
+and not added to the DOM it will not have a height until added to the DOM. If this fails it will wait until the next
 frame to check the height. If that fails it exits.</p>
   </div>
   <div class="body">
@@ -5376,7 +5376,7 @@ frame to check the height. If that fails it exits.</p>
 </div>
 
 
-<p>depending on the state of the datagrid this will create necessary dom, compile rows, or
+<p>depending on the state of the datagrid this will create necessary DOM, compile rows, or
 digest <a href="#activeRange">activeRange</a> of rows.</p>
   </div>
   <div class="body">
@@ -5525,7 +5525,7 @@ digest <a href="#activeRange">activeRange</a> of rows.</p>
 
 
 <p>Compare the new and the old value. If the item number is the same, and no templates
-have changed. Than just update the scopes and run the watchers instead of doing a reset.</p>
+have changed then just update the scopes and run the watchers instead of doing a reset.</p>
   </div>
   <div class="body">
   </div>
@@ -5697,7 +5697,7 @@ have changed. Than just update the scopes and run the watchers instead of doing 
 </div>
 
 
-<p>temporally cache old templates for mapping so we can tell if a template changed
+<p>temporarily cache old templates for mapping so we can tell if a template changed
 when a scope changed.</p>
   </div>
   <div class="body">
@@ -6189,7 +6189,7 @@ If a rowIndex is specified, only update ones affected by that row, otherwise upd
 </div>
 
 
-<p>handle dispaching of events from the datagrid.</p>
+<p>handle dispatching of events from the datagrid.</p>
   </div>
   <div class="body">
   </div>
@@ -6229,7 +6229,7 @@ If a rowIndex is specified, only update ones affected by that row, otherwise upd
 <div class="pilwrap">
   <a class="pilcrow" href="#section-215" id="section-215">&#182;</a>
 </div>
-<p>concept is to crate a large object that will cause the browser to garbage collect before creating it.
+<p>concept is to create a large object that will cause the browser to garbage collect before creating it.
 then since it has no reference it gets removed.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
@@ -6278,7 +6278,7 @@ then since it has no reference it gets removed.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-217" id="section-217">&#182;</a>
 </div>
-<p>because child scopes may not be in order because of rendering techniques. We must loop through
+<p>because child scopes may not be in order because of rendering techniques we must loop through
 all scopes and destroy them manually.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
@@ -6444,7 +6444,6 @@ all scopes and destroy them manually.</p>
         <span class="nx">states</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
         <span class="nx">events</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
         <span class="nx">options</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-        <span class="nx">values</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
         <span class="nx">logEvents</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
         <span class="nx">$compile</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
     <span class="p">}</span>

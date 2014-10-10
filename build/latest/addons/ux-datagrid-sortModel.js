@@ -473,7 +473,6 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
          * @returns {*}
          */
         result.applySorts = function applySorts(ary, sortOptions, clear) {
-            var start = Date.now();
             var pathStateRef = sortStatesModel.getPathState(), currentPathState = angular.copy(pathStateRef);
             if (sortOptions) {
                 result.log("apply sortOptions");

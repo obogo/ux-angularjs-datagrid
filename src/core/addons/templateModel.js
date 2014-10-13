@@ -79,7 +79,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
                 item: itemName,
                 template: template,
                 originalTemplate: originalTemplate,
-                height: wrapper.offsetHeight
+                height: calculateRowHeight(wrapper.children[0])
             };
             result.log('template: %s %o', name, templateData);
             if (!templateData.height) {
@@ -204,6 +204,18 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             });
         }
 
+        /**
+         * ###<a name="calculateRoHeight">calculateRowHeight</a>###
+         * Unify any height calculations for row height.
+         * Do not use this function unless you have no choice. Overuse of this function will result in
+         * poor datagrid performance.
+         * @param el
+         */
+        function calculateRowHeight(el) {
+            var computedStyle = window.getComputedStyle(el);
+            return el.offsetHeight + parseInt(computedStyle.marginTop, 10) + parseInt(computedStyle.marginBottom, 10);
+        }
+
         function updateTemplateHeights() {
             //TODO: needs unit tested.
             var i = inst.values.activeRange.min, len = inst.values.activeRange.max - i, row, tpl, rowHeight, changed = false,
@@ -212,7 +224,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
                 tpl = result.getTemplate(inst.getData()[i]);
                 if (!heightCache[tpl.name]) {
                     row = inst.getRowElm(i);
-                    rowHeight = row[0].offsetHeight;
+                    rowHeight = calculateRowHeight(row[0]);
                     if (rowHeight !== tpl.height) {
                         tpl.height = rowHeight;
                         changed = true;
@@ -250,6 +262,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         result.getTemplates = getTemplates;
         result.getTemplateName = getTemplateName;
         result.getTemplateByName = getTemplateByName;
+        result.calculateRowHeight = calculateRowHeight;
         result.templateCount = countTemplates;
         result.dynamicHeights = dynamicHeights;
         result.averageTemplateHeight = averageTemplateHeight;

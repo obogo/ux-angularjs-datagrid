@@ -958,7 +958,7 @@ function Datagrid(scope, element, attr, $compile) {
         var tplHeight;
         if (values.dirty && values.activeRange.max >= 0) {
             values.dirty = false;
-            tplHeight = getRowElm(values.activeRange.min)[0].offsetHeight;
+            tplHeight = inst.templateModel.calculateRowHeight(getRowElm(values.activeRange.min)[0]);
             if (inst.getData().length && tplHeight !== inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min])) {
                 inst.templateModel.updateTemplateHeights();
             }

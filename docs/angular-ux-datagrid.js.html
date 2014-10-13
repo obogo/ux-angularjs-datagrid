@@ -393,6 +393,9 @@
       <div class="heading h3">
         <a href="#gettemplate">getTemplate</a>
       </div>
+      <div class="heading h3">
+        <a href="#calculaterowheight">calculateRowHeight</a>
+      </div>
     </div>
   </div>
   <div id="sidebar-toggle"></div>
@@ -411,7 +414,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.1.1.2
+  <div class="summary"><p>uxDatagrid v.1.1.3
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -507,7 +510,7 @@ on a per grid basis.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.1.2&quot;</span><span class="p">,</span>
+    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.1.3&quot;</span><span class="p">,</span>
 
 </pre></div>
         </td>
@@ -5294,7 +5297,7 @@ hide scopes that are deactivated from angular's knowledge so digest loops are as
         <span class="kd">var</span> <span class="nx">tplHeight</span><span class="p">;</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">dirty</span> <span class="o">&amp;&amp;</span> <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">values</span><span class="p">.</span><span class="nx">dirty</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
-            <span class="nx">tplHeight</span> <span class="o">=</span> <span class="nx">getRowElm</span><span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span><span class="p">)[</span><span class="mi">0</span><span class="p">].</span><span class="nx">offsetHeight</span><span class="p">;</span>
+            <span class="nx">tplHeight</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">calculateRowHeight</span><span class="p">(</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span><span class="p">)[</span><span class="mi">0</span><span class="p">]);</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">().</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">tplHeight</span> <span class="o">!==</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplateHeight</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">()[</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span><span class="p">]))</span> <span class="p">{</span>
                 <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">updateTemplateHeights</span><span class="p">();</span>
             <span class="p">}</span>
@@ -5467,7 +5470,9 @@ digest <a href="#activeRange">activeRange</a> of rows.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">update</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">inst</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;force update&quot;</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;force update&quot;</span><span class="p">);</span>
+        <span class="p">}</span>
         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">onDataChanged</span><span class="p">(</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$eval</span><span class="p">(</span><span class="nx">attr</span><span class="p">.</span><span class="nx">uxDatagrid</span><span class="p">),</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">))</span> <span class="p">{</span>
             <span class="nx">forceRedraw</span><span class="p">();</span>
         <span class="p">}</span>
@@ -9671,7 +9676,7 @@ will all be able to represented by template rows.</p>
                 <span class="nx">item</span><span class="o">:</span> <span class="nx">itemName</span><span class="p">,</span>
                 <span class="nx">template</span><span class="o">:</span> <span class="nx">template</span><span class="p">,</span>
                 <span class="nx">originalTemplate</span><span class="o">:</span> <span class="nx">originalTemplate</span><span class="p">,</span>
-                <span class="nx">height</span><span class="o">:</span> <span class="nx">wrapper</span><span class="p">.</span><span class="nx">offsetHeight</span>
+                <span class="nx">height</span><span class="o">:</span> <span class="nx">calculateRowHeight</span><span class="p">(</span><span class="nx">wrapper</span><span class="p">.</span><span class="nx">children</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="p">};</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;template: %s %o&quot;</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">templateData</span><span class="p">);</span>
             <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">templateData</span><span class="p">.</span><span class="nx">height</span><span class="p">)</span> <span class="p">{</span>
@@ -9828,6 +9833,41 @@ will all be able to represented by template rows.</p>
                 <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_ROW_TEMPLATE_CHANGE</span><span class="p">,</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">oldTemplate</span><span class="p">,</span> <span class="nx">newTemplateName</span><span class="p">,</span> <span class="nx">classes</span><span class="p">);</span>
             <span class="p">});</span>
         <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="calculaterowheight">
+  <h3>
+    <a href="#calculaterowheight" name="calculaterowheight" class="pilcrow">&#182;</a>
+    <a name="calculateRoHeight">calculateRowHeight</a>
+  </h3>
+</div>
+
+
+<p>Unify any height calculations for row height.
+Do not use this function unless you have no choice. Overuse of this function will result in
+poor datagrid performance.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">el
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">calculateRowHeight</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">computedStyle</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">getComputedStyle</span><span class="p">(</span><span class="nx">el</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">el</span><span class="p">.</span><span class="nx">offsetHeight</span> <span class="o">+</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">computedStyle</span><span class="p">.</span><span class="nx">marginTop</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">computedStyle</span><span class="p">.</span><span class="nx">marginBottom</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+        <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">updateTemplateHeights</span><span class="p">()</span> <span class="p">{</span>
 
 </pre></div>
@@ -9836,7 +9876,7 @@ will all be able to represented by template rows.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-317" id="section-317">&#182;</a>
+  <a class="pilcrow" href="#section-318" id="section-318">&#182;</a>
 </div>
 <p>TODO: needs unit tested.</p>
         </td>
@@ -9846,7 +9886,7 @@ will all be able to represented by template rows.</p>
                 <span class="nx">tpl</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">()[</span><span class="nx">i</span><span class="p">]);</span>
                 <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">heightCache</span><span class="p">[</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">name</span><span class="p">])</span> <span class="p">{</span>
                     <span class="nx">row</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
-                    <span class="nx">rowHeight</span> <span class="o">=</span> <span class="nx">row</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">offsetHeight</span><span class="p">;</span>
+                    <span class="nx">rowHeight</span> <span class="o">=</span> <span class="nx">calculateRowHeight</span><span class="p">(</span><span class="nx">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
                     <span class="k">if</span> <span class="p">(</span><span class="nx">rowHeight</span> <span class="o">!==</span> <span class="nx">tpl</span><span class="p">.</span><span class="nx">height</span><span class="p">)</span> <span class="p">{</span>
                         <span class="nx">tpl</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">rowHeight</span><span class="p">;</span>
                         <span class="nx">changed</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
@@ -9880,6 +9920,7 @@ will all be able to represented by template rows.</p>
         <span class="nx">result</span><span class="p">.</span><span class="nx">getTemplates</span> <span class="o">=</span> <span class="nx">getTemplates</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">getTemplateName</span> <span class="o">=</span> <span class="nx">getTemplateName</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">getTemplateByName</span> <span class="o">=</span> <span class="nx">getTemplateByName</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">calculateRowHeight</span> <span class="o">=</span> <span class="nx">calculateRowHeight</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">templateCount</span> <span class="o">=</span> <span class="nx">countTemplates</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">dynamicHeights</span> <span class="o">=</span> <span class="nx">dynamicHeights</span><span class="p">;</span>
         <span class="nx">result</span><span class="p">.</span><span class="nx">averageTemplateHeight</span> <span class="o">=</span> <span class="nx">averageTemplateHeight</span><span class="p">;</span>

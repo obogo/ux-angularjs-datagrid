@@ -1959,7 +1959,9 @@ function Datagrid(scope, element, attr, $compile) {
      * force the datagrid to fire a data change update or fire a redraw if that fails.
      */
     function update() {
-        inst.warn("force update");
+        if (inst) {
+            inst.warn("force update");
+        }
         if (!onDataChanged(scope.$eval(attr.uxDatagrid), inst.data)) {
             forceRedraw();
         }

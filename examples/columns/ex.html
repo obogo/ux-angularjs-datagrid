@@ -1,10 +1,10 @@
-<!-- **************************** Sorting ********************************** -->
-    <a name="sortModel"></a>
-    <div class="panel-ex sorting" ng-app="sorting">
-        <div class="panel-ex-head">Sorting</div>
+<!-- **************************** Columns ********************************** -->
+    <a name="columns"></a>
+    <div class="panel-ex columns" ng-app="columns">
+        <div class="panel-ex-head">Columns</div>
 
         <div class="panel-ex-body" ng-controller="tabs">
-            <p>The <span class="label">ux-datagrid-sortModel</span> addon allows you to do sorting by adding the addon and setting a few options.</p>
+            <p>Start by adding the <span class="label">ux-datagrid</span> on a DOM container element. (Typically this will be a DIV).</p>
     <ul class="nav nav-tabs" role="tablist">
         <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
         <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
@@ -22,10 +22,15 @@
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
 <!-- html:start -->
 <div ng-controller="ctrl">
-    <button type="button" class="btn-primary" ng-click="grid.sortModel.toggleSort('id')">Click To Sort ({{grid.sortModel.getSortStateOf('id')||'none'}})</button>
-    <div ux-datagrid="datagrid.sortModel.applySorts(items)" addons="sortModel" options="{sortModel:{sorts:{id:'none'}}}">
+    <div ux-datagrid="items">
         <script type="template/html" template-item="item">
-            <div class="sorting-row"><span>{{item.id}}</span></div>
+            <div class="columns-row">
+                <div class="col col1">{{item.id}}</div>
+                <div class="col col2">{{item.firstName}}</div>
+                <div class="col col3">{{item.lastName}}</div>
+                <div class="col col4">{{item.age}}</div>
+                <div class="col col5">{{item.kids}}</div>
+            </div>
         </script>
     </div>
 </div>

@@ -15,15 +15,7 @@
     background-color:#dfdfdf;
 }
 .grouped-row.alt1 {
-    height: 30px;
-    background-color: #F00;
-}
-.grouped-row.alt1:nth-child(odd) {
-    background-color: #E00;
-}
-.grouped-row.alt2 {
-    background-color: #0F0;
-}
-.grouped-row.alt2:nth-child(odd) {
-    background-color: #0E0;
+    height: 20px;
+    background-color: #666;
+    color: #FFF;
 }

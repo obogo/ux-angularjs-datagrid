@@ -82,7 +82,7 @@ bower install "ux-datagrid"
 
 <div>
     <!-- Getting Started/Setup -->
-    <a name="#setup"></a>
+    <a name="setup"></a>
     <div class="panel-ex">
         <div class="panel-ex-head">Getting Started / Setup</div>
 
@@ -113,7 +113,7 @@ bower install "ux-datagrid"
 
 <div>
     <!-- Default Recommended CSS -->
-    <a name="#defaultCSS"></a>
+    <a name="defaultCSS"></a>
     <div class="panel-ex">
         <div class="panel-ex-head">Default Recommended CSS</div>
 
@@ -157,7 +157,7 @@ bower install "ux-datagrid"
     </div>
 
     <!-- **************************** A Simple Datagrid ********************************** -->
-    <a name="#simple"></a>
+    <a name="simple"></a>
     <div class="panel-ex ex1" ng-app="ex1">
         <div class="panel-ex-head">A Simple Datagrid</div>
 
@@ -229,7 +229,7 @@ angular.module(name, ['ux'])
 
     <div>
     <!-- Using Addons -->
-    <a name="#usingAddons"></a>
+    <a name="usingAddons"></a>
     <div class="panel-ex">
         <div class="panel-ex-head">Using Addons</div>
 
@@ -253,7 +253,7 @@ angular.module(name, ['ux'])
 
     <div>
     <!-- Using Options -->
-    <a name="#usingOptions"></a>
+    <a name="usingOptions"></a>
     <div class="panel-ex">
         <div class="panel-ex-head">Using Options</div>
 
@@ -273,7 +273,7 @@ angular.module(name, ['ux'])
 
     <div>
     <!-- Build Your First Addon -->
-    <a name="#buildAddon"></a>
+    <a name="buildAddon"></a>
     <div class="panel-ex">
         <div class="panel-ex-head">Build Your First Addon</div>
 
@@ -329,7 +329,7 @@ angular.module('ux').factory('whichTemplate', function () {
     </div>
 
     <!-- **************************** Different Item Renderers ********************************** -->
-    <a name="#multipleTemplates"></a>
+    <a name="multipleTemplates"></a>
     <div class="panel-ex ex2" ng-app="ex2">
         <div class="panel-ex-head">Different Item Renderers</div>
 
@@ -356,7 +356,35 @@ angular.module('ux').factory('whichTemplate', function () {
 &lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
+.ex2 *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+}
 
+.ex2-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.ex2-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+.ex2-row.alt1 {
+    height: 30px;
+    background-color: #F00;
+}
+.ex2-row.alt1:nth-child(odd) {
+    background-color: #E00;
+}
+.ex2-row.alt2 {
+    background-color: #0F0;
+}
+.ex2-row.alt2:nth-child(odd) {
+    background-color: #0E0;
+}
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
 var name = 'ex2';
@@ -404,8 +432,8 @@ angular.module('ux').factory('whichTemplate', function () {
                                 <link rel="stylesheet" type="text/css" href="examples/rowTemplates/ex.css">
                                 <script src="examples/rowTemplates/ex.js"></script>
 
-    <!-- **************************** Different Item Renderers ********************************** -->
-    <a name="#multipleTemplates"></a>
+    <!-- **************************** Grouped Data ********************************** -->
+    <a name="groupedData"></a>
     <div class="panel-ex grouped" ng-app="grouped">
         <div class="panel-ex-head">Grouped Data</div>
 
@@ -429,7 +457,27 @@ angular.module('ux').factory('whichTemplate', function () {
 &lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
+.grouped *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+}
 
+.grouped-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.grouped-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+.grouped-row.alt1 {
+    height: 20px;
+    background-color: #666;
+    color: #FFF;
+}
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
 var name = 'grouped';
@@ -481,8 +529,136 @@ angular.module('ux').factory('whichTemplate', function () {
                                 <link rel="stylesheet" type="text/css" href="examples/grouped/ex.css">
                                 <script src="examples/grouped/ex.js"></script>
 
+    <!-- **************************** Columns ********************************** -->
+    <a name="columns"></a>
+    <div class="panel-ex columns" ng-app="columns">
+        <div class="panel-ex-head">Columns</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>Start by adding the <span class="label">ux-datagrid</span> on a DOM container element. (Typically this will be a DIV).</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+&lt;div ng-controller="ctrl">
+    &lt;div ux-datagrid="items">
+        &lt;script type="template/html" template-item="item">
+            &lt;div class="columns-row">
+                &lt;div class="col col1">{{item.id}}&lt;/div>
+                &lt;div class="col col2">{{item.firstName}}&lt;/div>
+                &lt;div class="col col3">{{item.lastName}}&lt;/div>
+                &lt;div class="col col4">{{item.age}}&lt;/div>
+                &lt;div class="col col5">{{item.kids}}&lt;/div>
+            &lt;/div>
+        &lt;/script>
+    &lt;/div>
+&lt;/div>
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+.columns *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+    box-sizing: border-box;
+}
+
+.columns-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.columns-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+.columns-row {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse; /** THIS IS VERY IMPORTANT OR CHUNKS WITH BORDERS WILL OVERLAP EACH OTHER **/
+    height: 20px;
+}
+
+.columns-row .col {
+    display: table-cell !important;
+    position: relative;
+    text-align: center;
+    border-right: 1px solid #999;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.columns-row .col1 {
+    width: 20px;
+}
+
+.columns-row .col2 {
+    text-transform: capitalize;/* uppercase the word */
+    text-align: left;
+    width: 20%;
+}
+
+.columns-row .col3 {
+    text-transform: capitalize;/* uppercase the word */
+    text-align: left;
+}
+
+.columns-row .col4 {
+    width: 40px;
+}
+
+.columns-row .col5 {
+    width: 40px;
+}
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+var name = 'columns';
+function getName(len) {
+    var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';
+    while (str.length < len) {
+        str += alpha[Math.floor(Math.random() * alpha.length)];
+    }
+    return str;
+}
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, j, len = 10, items = [], item, childLen = 0;
+        while (i < len) {
+            item = {id: i, firstName:getName(10), lastName:getName(10), age: Math.floor(Math.random() * 50 + 18), kids: Math.floor(Math.random() * 10)};
+            items.push(item);
+            i += 1;
+        }
+        $scope.items = items;
+    });
+
+</code></pre>
+            <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div ux-datagrid="items">
+        <script type="template/html" template-item="item">
+            <div class="columns-row">
+                <div class="col col1">{{item.id}}</div>
+                <div class="col col2">{{item.firstName}}</div>
+                <div class="col col3">{{item.lastName}}</div>
+                <div class="col col4">{{item.age}}</div>
+                <div class="col col5">{{item.kids}}</div>
+            </div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>
+                                <link rel="stylesheet" type="text/css" href="examples/columns/ex.css">
+                                <script src="examples/columns/ex.js"></script>
+
     <!-- **************************** Sorting ********************************** -->
-    <a name="#sortModel"></a>
+    <a name="sortModel"></a>
     <div class="panel-ex sorting" ng-app="sorting">
         <div class="panel-ex-head">Sorting</div>
 

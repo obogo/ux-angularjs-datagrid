@@ -49,7 +49,7 @@ module.exports = function (grunt) {
                                         }
                                         i += 1;
                                     }
-                                    grunt.log.writeln(("Found " + match.length + " lines for html/template").green);
+                                    grunt.log.writeln(("Found " + p1 + " " + match.length + " lines for html/template").green);
                                     content = content.split('##html##').join(match.join("\n").replace(/</gim, '&lt;'));
                                 }
 

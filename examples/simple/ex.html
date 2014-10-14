@@ -5,6 +5,9 @@
 
         <div class="panel-ex-body" ng-controller="tabs">
             <p>Start by adding the <span class="label">ux-datagrid</span> on a DOM container element. (Typically this will be a DIV).</p>
+            <p>Take special note to the <span class="label black">script</span> tags. The templates are contained in them. This keeps the browser from evaluating the html inside and allows us auto complete of html is most editors.</p>
+            <p>The <span class="label">template-name</span> sets the name of that template if you don't specify one, the name becomes default. If you have two with the same or no name, they will overwrite each other. </p>
+            <p>The <span class="label">template-item</span> sets the name by which you want to reference the data on your scope for that row. (ex 'item' == $scope.item).</p>
     <ul class="nav nav-tabs" role="tablist">
         <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
         <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>

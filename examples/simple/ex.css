@@ -10,6 +10,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    margin-top: 5px;
 }
 .ex1-row:nth-child(odd) {
     background-color:#dfdfdf;

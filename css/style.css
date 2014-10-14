@@ -34,6 +34,23 @@ code i * {
     color: #ffffff !important;
 }
 
+.bower {
+    position: absolute;
+    margin-top: -50px;
+    right: 0px;
+    width: 220px;
+}
+
+.bower:after {
+    content:'';
+    position: absolute;
+    left: -4px;
+    top: -4px;
+    background: url(../images/bower_icon.png) no-repeat;
+    width: 24px;
+    height: 21px;
+}
+
 .hljs {
     background: #F9F9F9;
 }

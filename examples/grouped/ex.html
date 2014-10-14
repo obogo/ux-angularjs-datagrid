@@ -1,7 +1,7 @@
 <!-- **************************** Different Item Renderers ********************************** -->
     <a name="#multipleTemplates"></a>
-    <div class="panel-ex ex2" ng-app="ex2">
-        <div class="panel-ex-head">Different Item Renderers</div>
+    <div class="panel-ex grouped" ng-app="grouped">
+        <div class="panel-ex-head">Grouped Data</div>
 
         <div class="panel-ex-body" ng-controller="tabs">
             <p>Start by adding the <span class="label">ux-datagrid</span> on a DOM container element. (Typically this will be a DIV).</p>
@@ -22,15 +22,12 @@
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
 <!-- html:start -->
 <div ng-controller="ctrl">
-    <div ux-datagrid="items" addons="whichTemplate">
-        <script type="template/html" template-item="item">
-            <div class="ex2-row"><span>Default {{item.id}}</span></div>
+    <div ux-datagrid="items" addons="whichTemplate" grouped="'children'">
+        <script type="template/html" template-name="row" template-item="item">
+            <div class="grouped-row"><span>Default {{item.id}}</span></div>
         </script>
-        <script type="template/html" template-name="alt1" template-item="item">
-            <div class="ex2-row alt1"><span>ALT1: {{item.id}}</span></div>
-        </script>
-        <script type="template/html" template-name="alt2" template-item="item">
-            <div class="ex2-row alt2"><span>This {{item.id}} is ALT2</span></div>
+        <script type="template/html" template-name="group" template-item="group">
+            <div class="grouped-row alt1"><span>Group: {{group.id}}</span></div>
         </script>
     </div>
 </div>

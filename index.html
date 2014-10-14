@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 <html>
 <head lang="en">
     <meta charset="UTF-8">
     <title>ux-Datagrid</title>
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
-    <!--<link rel="stylesheet" href="css/bootstrap.min.css"/>-->
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/styles/googlecode.min.css">
-    <!--<link rel="stylesheet" href="css/googlecode.min.css">-->
+    <!--<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>-->
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/styles/googlecode.min.css">-->
+    <link rel="stylesheet" href="css/googlecode.min.css">
     <link rel="stylesheet" href="bower_components/github-fork-ribbon-css/gh-fork-ribbon.css"/>
-    <link rel="stylesheet" href="//code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css"/>
-    <!--<link rel="stylesheet" href="css/ionicons.min.css"/>-->
+    <!--<link rel="stylesheet" href="//code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css"/>-->
+    <link rel="stylesheet" href="css/ionicons.min.css"/>
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/highlight.min.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     <link rel="stylesheet" href="css/style.css"/>
@@ -30,8 +29,15 @@
 
         <h3>Getting Started</h3>
 
+<div class="bower">
+<pre><code class="html railscasts">
+bower install "ux-datagrid"
+</code></pre>
+</div>
+
         <ul class="task-list">
             <li><a href="#setup">Setup</a></li>
+            <li><a href="#defaultCSS">Default Recommended CSS (fades for uncompiled rows)</a></li>
             <li><a href="#simple">Simple Integration</a></li>
             <li><a href="#usingAddons">How to use Addons</a></li>
             <li><a href="#usingOptions">How to use Options</a></li>
@@ -53,7 +59,7 @@
             <li><a href="#scrollHistory">Scroll History</a></li>
             <li><a href="#sortModelGrouped">Sort Model (Grouped)</a></li>
             <li><a href="#sortModel">Sort Model (UnGrouped)</a></li>
-            <li><a href="#serverSideSorting">Sort Model (UnGrouped)</a></li>
+            <li><a href="#serverSideSorting">Server Sort (Combined with infinite scroll)</a></li>
             <li><a href="#gridLogger">Grid Logs</a></li>
             <li><a href="#memoryOptimizer">Memory Optimizer</a></li>
             <li><a href="#scrollBar">Scroll Bar</a></li>
@@ -66,14 +72,13 @@
 
 <!--// Include the base scripts //-->
 <link rel="stylesheet" type="text/css" href="css/default.css">
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>
-<!--<script src="js/angular.min.js"></script>-->
-<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/angular-ux-datagrid.js"></script>
-<!--<script src="js/angular-ux-datagrid_oldSort.js"></script>-->
-<!--<script src="js/angular-ux-datagrid.js"></script>-->
-<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/addons/ux-datagrid-sortModel.js"></script>
-<!--<script src="js/ux-datagrid-sortModel.js"></script>-->
-<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/addons/ux-datagrid-gridLogger.js"></script>
+<!--<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>-->
+<script src="bower_components/angular/angular.min.js"></script>
+<!--<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/angular-ux-datagrid.js"></script>-->
+<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.js"></script>
+<!--<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/addons/ux-datagrid-sortModel.js"></script>-->
+<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-sortModel.js"></script>
+<!--<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/addons/ux-datagrid-gridLogger.js"></script>-->
 
 <div>
     <!-- Getting Started/Setup -->
@@ -105,6 +110,52 @@
         </div>
     </div>
 
+
+<div>
+    <!-- Default Recommended CSS -->
+    <a name="#defaultCSS"></a>
+    <div class="panel-ex">
+        <div class="panel-ex-head">Default Recommended CSS</div>
+
+        <div class="panel-ex-body">
+
+    <p>The <span class="label">default CSS</span> that every grid should have. This <span class="label">makes rows fade in</span> after they render. And hides them until they are rendered.</p>
+    <p><span class="label">NOTE:</span>To make rows fade in correctly each row must have it's content in at least one child element. For example if I have a row that has a name in it and the row is a div. Then the row should have a span, and then the name. This allows the css to fade it in without hiding the entire row, because it only hides the contents of a row until it is rendered.</p>
+<pre><code class="css railscasts">
+.datagrid-row > * {
+   -webkit-transition: opacity 0.5s ease-out;
+   -moz-transition: opacity 0.5s ease-out;
+   -ms-transition: opacity 0.5s ease-out;
+   -o-transition: opacity 0.5s ease-out;
+   transition: opacity 0.5s ease-out;
+}
+
+.uncompiled > * {
+   visibility: hidden;
+   opacity: 0;
+}
+
+.compiled > * {
+   opacity: 1;
+}
+
+.datagrid-chunk {
+   opacity: 0;
+   -webkit-transition: opacity 0.5s ease-out;
+   -moz-transition: opacity 0.5s ease-out;
+   -ms-transition: opacity 0.5s ease-out;
+   -o-transition: opacity 0.5s ease-out;
+   transition: opacity 0.5s ease-out;
+}
+
+.datagrid-chunk-ready {
+   opacity: 1;
+}
+</code></pre>
+
+        </div>
+    </div>
+
     <!-- **************************** A Simple Datagrid ********************************** -->
     <a name="#simple"></a>
     <div class="panel-ex ex1" ng-app="ex1">
@@ -112,6 +163,9 @@
 
         <div class="panel-ex-body" ng-controller="tabs">
             <p>Start by adding the <span class="label">ux-datagrid</span> on a DOM container element. (Typically this will be a DIV).</p>
+            <p>Take special note to the <span class="label black">script</span> tags. The templates are contained in them. This keeps the browser from evaluating the html inside and allows us auto complete of html is most editors.</p>
+            <p>The <span class="label">template-name</span> sets the name of that template if you don't specify one, the name becomes default. If you have two with the same or no name, they will overwrite each other. </p>
+            <p>The <span class="label">template-item</span> sets the name by which you want to reference the data on your scope for that row. (ex 'item' == $scope.item).</p>
     <ul class="nav nav-tabs" role="tablist">
         <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
         <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
@@ -139,6 +193,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    margin-top: 5px;
 }
 .ex1-row:nth-child(odd) {
     background-color:#dfdfdf;
@@ -301,35 +356,7 @@ angular.module('ux').factory('whichTemplate', function () {
 &lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
-.ex2 *[ux-datagrid] {
-    width: 100%;
-    height: 150px;
-}
 
-.ex2-row {
-    background-color:#efefef;
-    height: 20px;
-    line-height: 20px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-.ex2-row:nth-child(odd) {
-    background-color:#dfdfdf;
-}
-.ex2-row.alt1 {
-    height: 30px;
-    background-color: #F00;
-}
-.ex2-row.alt1:nth-child(odd) {
-    background-color: #E00;
-}
-.ex2-row.alt2 {
-    background-color: #0F0;
-}
-.ex2-row.alt2:nth-child(odd) {
-    background-color: #0E0;
-}
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
 var name = 'ex2';
@@ -376,6 +403,83 @@ angular.module('ux').factory('whichTemplate', function () {
     </div>
                                 <link rel="stylesheet" type="text/css" href="examples/rowTemplates/ex.css">
                                 <script src="examples/rowTemplates/ex.js"></script>
+
+    <!-- **************************** Different Item Renderers ********************************** -->
+    <a name="#multipleTemplates"></a>
+    <div class="panel-ex grouped" ng-app="grouped">
+        <div class="panel-ex-head">Grouped Data</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>Start by adding the <span class="label">ux-datagrid</span> on a DOM container element. (Typically this will be a DIV).</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+&lt;div ng-controller="ctrl">
+    &lt;div ux-datagrid="items" addons="whichTemplate" grouped="'children'">
+        &lt;script type="template/html" template-name="row" template-item="item">
+            &lt;div class="grouped-row">&lt;span>Default {{item.id}}&lt;/span>&lt;/div>
+        &lt;/script>
+        &lt;script type="template/html" template-name="group" template-item="group">
+            &lt;div class="grouped-row alt1">&lt;span>Group: {{group.id}}&lt;/span>&lt;/div>
+        &lt;/script>
+    &lt;/div>
+&lt;/div>
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+var name = 'grouped';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, j, len = 10, items = [], item, childLen = 0;
+        while (i < len) {
+            item = {id: i, children:[]};
+            items.push(item);
+            childLen = Math.random() * 10;
+            j = 0;
+            while(j < childLen) {
+                item.children.push({id: i + '.' + j});
+                j += 1;
+            }
+            i += 1;
+        }
+        $scope.items = items;
+    });
+angular.module('ux').factory('whichTemplate', function () {
+     return function (inst) {
+        // now we override it with our method so we decide what template gets displayed for each row.
+        inst.templateModel.getTemplate = function (item) {
+            // item would be the item in your array of data provided to the datagrid.
+            // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.
+            var name = item.children ? 'group' : 'row';
+            // now we get the template from the name.
+            return inst.templateModel.getTemplateByName(name);
+        };
+    };
+});
+
+</code></pre>
+            <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div ux-datagrid="items" addons="whichTemplate" grouped="'children'">
+        <script type="template/html" template-name="row" template-item="item">
+            <div class="grouped-row"><span>Default {{item.id}}</span></div>
+        </script>
+        <script type="template/html" template-name="group" template-item="group">
+            <div class="grouped-row alt1"><span>Group: {{group.id}}</span></div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>
+                                <link rel="stylesheet" type="text/css" href="examples/grouped/ex.css">
+                                <script src="examples/grouped/ex.js"></script>
 
     <!-- **************************** Sorting ********************************** -->
     <a name="#sortModel"></a>

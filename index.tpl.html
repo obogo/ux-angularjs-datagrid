@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 <html>
 <head lang="en">
     <meta charset="UTF-8">
     <title>ux-Datagrid</title>
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
-    <!--<link rel="stylesheet" href="css/bootstrap.min.css"/>-->
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/styles/googlecode.min.css">
-    <!--<link rel="stylesheet" href="css/googlecode.min.css">-->
+    <!--<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>-->
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/styles/googlecode.min.css">-->
+    <link rel="stylesheet" href="css/googlecode.min.css">
     <link rel="stylesheet" href="bower_components/github-fork-ribbon-css/gh-fork-ribbon.css"/>
-    <link rel="stylesheet" href="//code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css"/>
-    <!--<link rel="stylesheet" href="css/ionicons.min.css"/>-->
+    <!--<link rel="stylesheet" href="//code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css"/>-->
+    <link rel="stylesheet" href="css/ionicons.min.css"/>
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/highlight.min.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     <link rel="stylesheet" href="css/style.css"/>
@@ -30,8 +29,15 @@
 
         <h3>Getting Started</h3>
 
+<div class="bower">
+<pre><code class="html railscasts">
+bower install "ux-datagrid"
+</code></pre>
+</div>
+
         <ul class="task-list">
             <li><a href="#setup">Setup</a></li>
+            <li><a href="#defaultCSS">Default Recommended CSS (fades for uncompiled rows)</a></li>
             <li><a href="#simple">Simple Integration</a></li>
             <li><a href="#usingAddons">How to use Addons</a></li>
             <li><a href="#usingOptions">How to use Options</a></li>
@@ -53,7 +59,7 @@
             <li><a href="#scrollHistory">Scroll History</a></li>
             <li><a href="#sortModelGrouped">Sort Model (Grouped)</a></li>
             <li><a href="#sortModel">Sort Model (UnGrouped)</a></li>
-            <li><a href="#serverSideSorting">Sort Model (UnGrouped)</a></li>
+            <li><a href="#serverSideSorting">Server Sort (Combined with infinite scroll)</a></li>
             <li><a href="#gridLogger">Grid Logs</a></li>
             <li><a href="#memoryOptimizer">Memory Optimizer</a></li>
             <li><a href="#scrollBar">Scroll Bar</a></li>
@@ -66,14 +72,13 @@
 
 <!--// Include the base scripts //-->
 <link rel="stylesheet" type="text/css" href="css/default.css">
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>
-<!--<script src="js/angular.min.js"></script>-->
-<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/angular-ux-datagrid.js"></script>
-<!--<script src="js/angular-ux-datagrid_oldSort.js"></script>-->
-<!--<script src="js/angular-ux-datagrid.js"></script>-->
-<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/addons/ux-datagrid-sortModel.js"></script>
-<!--<script src="js/ux-datagrid-sortModel.js"></script>-->
-<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/addons/ux-datagrid-gridLogger.js"></script>
+<!--<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>-->
+<script src="bower_components/angular/angular.min.js"></script>
+<!--<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/angular-ux-datagrid.js"></script>-->
+<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.js"></script>
+<!--<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/addons/ux-datagrid-sortModel.js"></script>-->
+<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-sortModel.js"></script>
+<!--<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/addons/ux-datagrid-gridLogger.js"></script>-->
 
 <div>
     <!-- Getting Started/Setup -->
@@ -100,6 +105,52 @@
         }
         $scope.items = items;
     });
+</code></pre>
+
+        </div>
+    </div>
+
+
+<div>
+    <!-- Default Recommended CSS -->
+    <a name="#defaultCSS"></a>
+    <div class="panel-ex">
+        <div class="panel-ex-head">Default Recommended CSS</div>
+
+        <div class="panel-ex-body">
+
+    <p>The <span class="label">default CSS</span> that every grid should have. This <span class="label">makes rows fade in</span> after they render. And hides them until they are rendered.</p>
+    <p><span class="label">NOTE:</span>To make rows fade in correctly each row must have it's content in at least one child element. For example if I have a row that has a name in it and the row is a div. Then the row should have a span, and then the name. This allows the css to fade it in without hiding the entire row, because it only hides the contents of a row until it is rendered.</p>
+<pre><code class="css railscasts">
+.datagrid-row > * {
+   -webkit-transition: opacity 0.5s ease-out;
+   -moz-transition: opacity 0.5s ease-out;
+   -ms-transition: opacity 0.5s ease-out;
+   -o-transition: opacity 0.5s ease-out;
+   transition: opacity 0.5s ease-out;
+}
+
+.uncompiled > * {
+   visibility: hidden;
+   opacity: 0;
+}
+
+.compiled > * {
+   opacity: 1;
+}
+
+.datagrid-chunk {
+   opacity: 0;
+   -webkit-transition: opacity 0.5s ease-out;
+   -moz-transition: opacity 0.5s ease-out;
+   -ms-transition: opacity 0.5s ease-out;
+   -o-transition: opacity 0.5s ease-out;
+   transition: opacity 0.5s ease-out;
+}
+
+.datagrid-chunk-ready {
+   opacity: 1;
+}
 </code></pre>
 
         </div>
@@ -209,6 +260,8 @@ angular.module('ux').factory('whichTemplate', function () {
     </div>
 
     ##rowTemplates##
+
+    ##grouped##
 
     ##sorting##
 

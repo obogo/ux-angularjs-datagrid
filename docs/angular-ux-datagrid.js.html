@@ -5305,7 +5305,7 @@ hide scopes that are deactivated from angular's knowledge so digest loops are as
         <span class="p">}</span>
     <span class="p">}</span>
     <span class="kd">function</span> <span class="nx">whenReadyToRender</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">flow</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">updateViewportHeight</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+        <span class="nx">flow</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">updateViewportHeight</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">waitCount</span><span class="p">);</span>
 
 </pre></div>
         </td>
@@ -5349,10 +5349,6 @@ frame to check the height. If that fails it exits.</p>
             <span class="nx">waitCount</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">waitCount</span> <span class="o">&lt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">readyToRenderRetryMax</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">inst</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;datagrid is waiting for element to have a height.&quot;</span><span class="p">);</span>
-                <span class="kd">var</span> <span class="nx">unwatch</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$watch</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-                    <span class="nx">unwatch</span><span class="p">();</span>
-                    <span class="nx">readyToRender</span><span class="p">();</span>
-                <span class="p">});</span>
                 <span class="nx">whenReadyToRender</span><span class="p">();</span>
             <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
                 <span class="nx">flow</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;Datagrid: Unable to determine a height for the datagrid. Cannot render. Exiting.&quot;</span><span class="p">);</span>
@@ -5362,6 +5358,7 @@ frame to check the height. If that fails it exits.</p>
         <span class="k">if</span> <span class="p">(</span><span class="nx">waitCount</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;datagrid has height of %s.&quot;</span><span class="p">,</span> <span class="nx">viewHeight</span><span class="p">);</span>
         <span class="p">}</span>
+        <span class="nx">waitCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
         <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
     <span class="p">}</span>
 

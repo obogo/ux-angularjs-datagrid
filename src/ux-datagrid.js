@@ -967,7 +967,7 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function whenReadyToRender() {
-        flow.add(inst.updateViewportHeight, null, 0);// have it wait a moment for the height to change.
+        flow.add(inst.updateViewportHeight, null, waitCount);// have it wait a moment for the height to change.
         flow.add(render);
     }
 
@@ -982,10 +982,6 @@ function Datagrid(scope, element, attr, $compile) {
             waitCount += 1;
             if (waitCount < inst.options.readyToRenderRetryMax) {
                 inst.info("datagrid is waiting for element to have a height.");
-                var unwatch = scope.$watch(function() {
-                    unwatch();
-                    readyToRender();
-                });
                 whenReadyToRender();
             } else {
                 flow.warn("Datagrid: Unable to determine a height for the datagrid. Cannot render. Exiting.");
@@ -995,6 +991,7 @@ function Datagrid(scope, element, attr, $compile) {
         if (waitCount) {
             inst.info("datagrid has height of %s.", viewHeight);
         }
+        waitCount = 0;
         return true;
     }
 

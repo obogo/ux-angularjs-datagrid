@@ -209,7 +209,9 @@ exports.datagrid = {
         // - **<a name="options.smartUpdate">smartUpdate</a>** when this is enabled if the array changes the order of things but not the templates that they render in then
         // this will not do a normal reset, but will just re-render the visible area with the changes and as you scroll the changes will update.
         smartUpdate: true,
+        // - **<a name="options.readyToRenderRetryMax">readyToRenderRetryMax</a>** how many times the datagrid will try to get a height before it gives up.
         readyToRenderRetryMax: 10,
+        // - **<a name="options.minHeight">minHeight</a>** if a height cannot be found, the datagrid will assume this minHeight. It will then resize to whatever height the element is resized to later.
         minHeight: 100
         //TODO: need to create global addons object.
     },

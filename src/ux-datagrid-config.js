@@ -209,7 +209,8 @@ exports.datagrid = {
         // - **<a name="options.smartUpdate">smartUpdate</a>** when this is enabled if the array changes the order of things but not the templates that they render in then
         // this will not do a normal reset, but will just re-render the visible area with the changes and as you scroll the changes will update.
         smartUpdate: true,
-        readyToRenderRetryMax: 10
+        readyToRenderRetryMax: 10,
+        minHeight: 100
         //TODO: need to create global addons object.
     },
     /**

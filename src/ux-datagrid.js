@@ -210,7 +210,7 @@ function Datagrid(scope, element, attr, $compile) {
      * `start` is called after the addons are added.
      */
     function start() {
-        inst.dispatch(exports.datagrid.events.ON_INIT);
+        inst.dispatch(exports.datagrid.events.ON_INIT, inst);
         content = createContent();
         waitForElementReady(0);
     }
@@ -306,6 +306,9 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function updateViewportHeight() {
         viewHeight = inst.calculateViewportHeight();
+        if (!viewHeight) {
+            viewHeight = options.minHeight;
+        }
     }
 
     /**
@@ -978,6 +981,7 @@ function Datagrid(scope, element, attr, $compile) {
      * frame to check the height. If that fails it exits.
      */
     function readyToRender() {
+        updateViewportHeight();
         if (!viewHeight) {
             waitCount += 1;
             if (waitCount < inst.options.readyToRenderRetryMax) {

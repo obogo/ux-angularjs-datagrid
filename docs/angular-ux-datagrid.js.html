@@ -1125,7 +1125,8 @@ this will not do a normal reset, but will just re-render the visible area with t
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">smartUpdate</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nx">readyToRenderRetryMax</span><span class="o">:</span> <span class="mi">10</span>
+        <span class="nx">readyToRenderRetryMax</span><span class="o">:</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="nx">minHeight</span><span class="o">:</span> <span class="mi">100</span>
     <span class="p">},</span>
 
 </pre></div>
@@ -3288,7 +3289,7 @@ to keep that DOM element's classes in tact.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">start</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_INIT</span><span class="p">);</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_INIT</span><span class="p">,</span> <span class="nx">inst</span><span class="p">);</span>
         <span class="nx">content</span> <span class="o">=</span> <span class="nx">createContent</span><span class="p">();</span>
         <span class="nx">waitForElementReady</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
     <span class="p">}</span>
@@ -3532,6 +3533,9 @@ being listened to while the destroy is happening.</p>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">updateViewportHeight</span><span class="p">()</span> <span class="p">{</span>
         <span class="nx">viewHeight</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">calculateViewportHeight</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">viewHeight</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">viewHeight</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">minHeight</span><span class="p">;</span>
+        <span class="p">}</span>
     <span class="p">}</span>
 
 </pre></div>
@@ -5345,6 +5349,7 @@ frame to check the height. If that fails it exits.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">readyToRender</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">updateViewportHeight</span><span class="p">();</span>
         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">viewHeight</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">waitCount</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">waitCount</span> <span class="o">&lt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">readyToRenderRetryMax</span><span class="p">)</span> <span class="p">{</span>

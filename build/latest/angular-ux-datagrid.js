@@ -228,7 +228,8 @@ exports.datagrid = {
         // - **<a name="options.smartUpdate">smartUpdate</a>** when this is enabled if the array changes the order of things but not the templates that they render in then
         // this will not do a normal reset, but will just re-render the visible area with the changes and as you scroll the changes will update.
         smartUpdate: true,
-        readyToRenderRetryMax: 10
+        readyToRenderRetryMax: 100,
+        minHeight: 100
     },
     /**
      * ###<a name="coreAddons">coreAddons</a>###
@@ -1187,7 +1188,7 @@ function Datagrid(scope, element, attr, $compile) {
      * `start` is called after the addons are added.
      */
     function start() {
-        inst.dispatch(exports.datagrid.events.ON_INIT);
+        inst.dispatch(exports.datagrid.events.ON_INIT, inst);
         content = createContent();
         waitForElementReady(0);
     }
@@ -1278,6 +1279,9 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function updateViewportHeight() {
         viewHeight = inst.calculateViewportHeight();
+        if (!viewHeight) {
+            viewHeight = options.minHeight;
+        }
     }
     /**
      * ###<a name="isReady">isReady</a>###
@@ -1907,6 +1911,7 @@ function Datagrid(scope, element, attr, $compile) {
      * frame to check the height. If that fails it exits.
      */
     function readyToRender() {
+        updateViewportHeight();
         if (!viewHeight) {
             waitCount += 1;
             if (waitCount < inst.options.readyToRenderRetryMax) {

@@ -1,9 +1,24 @@
 {
-    "name": "uxDatagrid",
+    "name": "ux-angularjs-datagrid",
     "version": "1.1.3",
     "filename": "datagrid",
     "packageName": "ux",
+    "main": "./build/latest/angular-ux-datagrid.js",
     "dependencies": {},
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/webux/ux-angularjs-datagrid"
+    },
+    "bugs": {
+        "url": "https://github.com/webux/ux-angularjs-datagrid/issues"
+    },
+    "homepage": "http://webux.github.io/ux-angularjs-datagrid/",
+    "keywords": [
+        "angular",
+        "datagrid",
+        "angularjs",
+        "grid"
+    ],
     "devDependencies": {
         "colors": "latest",
         "express": "latest",

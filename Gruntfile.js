@@ -7,7 +7,7 @@ module.exports = function (grunt) {
             '* https://github.com/webux/ux-angularjs-datagrid\n' +
             '* License: MIT.\n' +
             '*/\n',
-        wrapStart: '(function(exports, global){\n',
+        wrapStart: '(function (exports, global) {\nif (typeof define === "function" && define.amd) {\n  define(exports);\n} else if (typeof module !== "undefined" && module.exports) {\n  module.exports = exports;\n} else {\n  global.<%= pkg.packageName %> = exports;\n}\n\n',
         wrapEnd: '\n}(this.<%= pkg.packageName %> = this.<%= pkg.packageName %> || {}, function() {return this;}()));\n',
         jshint: {
             // define the files to lint

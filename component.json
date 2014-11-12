@@ -1,0 +1,7 @@
+{
+  "name": "ux-angularjs-datagrid",
+  "scripts": [
+    "build/latest/angular-ux-datagrid.js"
+  ],
+  "main": "build/latest/angular-ux-datagrid.js"
+}

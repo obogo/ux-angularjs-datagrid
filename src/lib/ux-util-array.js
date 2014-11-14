@@ -37,13 +37,15 @@ var sort = (function () {
         for (maxEnd = left; maxEnd < right - 1; maxEnd += 1) {
             dir = fn(array[maxEnd], cmp);
             if (dir < 0) {
-                swap(array, maxEnd, minEnd);
-            }
-            if(dir <= 0) {// don't move them if they are the same.
+                if (maxEnd !== minEnd) {
+                    swap(array, maxEnd, minEnd);
+                }
                 minEnd += 1;
             }
         }
-        swap(array, minEnd, right - 1);
+        if (fn(array[minEnd], cmp)) {// 1 || -1
+            swap(array, minEnd, right - 1);
+        }
         return minEnd;
     }
 

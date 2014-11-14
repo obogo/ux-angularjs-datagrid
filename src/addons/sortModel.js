@@ -664,6 +664,18 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
         };
 
         /**
+         * ##<a name="toggleSort">toggleSort</a>###
+         * Sets the sort value to asc, desc, or none
+         * @param {String} name
+         * @param {String='none'} state
+         */
+        result.setSortStateOf = function (name, state) {
+            if (state === 'none' || state === 'asc' || state === 'desc') {
+                sortStatesModel.setState(name, state);
+            }
+        };
+
+        /**
          * ###<a name="clear">clear</a>###
          * clear all cached sort values for this grid.
          */

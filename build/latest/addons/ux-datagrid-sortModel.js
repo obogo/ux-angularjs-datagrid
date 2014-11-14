@@ -1,5 +1,5 @@
 /*
-* ux-angularjs-datagrid v.1.1.4
+* ux-angularjs-datagrid v.1.1.5
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -642,6 +642,17 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
             //            result.clear();
             result.applySorts(original);
             inst.dispatch(exports.datagrid.events.ON_AFTER_TOGGLE_SORT, name);
+        };
+        /**
+         * ##<a name="toggleSort">toggleSort</a>###
+         * Sets the sort value to asc, desc, or none
+         * @param {String} name
+         * @param {String='none'} state
+         */
+        result.setSortStateOf = function(name, state) {
+            if (state === "none" || state === "asc" || state === "desc") {
+                sortStatesModel.setState(name, state);
+            }
         };
         /**
          * ###<a name="clear">clear</a>###

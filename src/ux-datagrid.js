@@ -106,6 +106,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.dispatch = dispatch;
         inst.activateScope = activateScope;
         inst.deactivateScope = deactivateScope;
+        inst.updateLinks = updateLinks;
         inst.render = function () {
             flow.add(render);
         };
@@ -519,6 +520,20 @@ function Datagrid(scope, element, attr, $compile) {
         inst.log("created %s dom elements", len);
     }
 
+    function link(index, s) {
+        s = s || getScope(index);
+        var prev = getScope(index - 1), next = getScope(index + 1);
+        if (prev) {
+            prev.$$nextSibling = s;
+        }
+        s.$$prevSibling = prev;
+        s.$$nextSibling = next;
+        if (s.$$nextSibling) {
+            s.$$nextSibling.$$prevSibling = s;
+        }
+        scopes[index] = s;
+    }
+
     /**
      * ###<a name="compileRow">compileRow</a>###
      * Compile a row at that index. This creates the scope for that row when compiled. It does not perform a digest.
@@ -533,12 +548,8 @@ function Datagrid(scope, element, attr, $compile) {
         }
         if (!s) {
             s = scope.$new();
-            prev = getScope(index - 1);
             tpl = inst.templateModel.getTemplate(inst.data[index]);
-            if (prev) {
-                prev.$$nextSibling = s;
-                s.$$prevSibling = prev;
-            }
+            link(index, s);
             s.$status = options.compiledClass;
             s[tpl.item] = inst.data[index]; // set the data to the scope.
             s.$index = index;
@@ -1246,7 +1257,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function onRowTemplateChange(evt, item, oldTemplate, newTemplate, classes, skipUpdateHeights) {
         var index = inst.getNormalizedIndex(item), el = getExistingRow(index),
-            s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope(), replaceEl;
+            s = getScope(index), replaceEl;
         if (s !== scope) {
             replaceEl = angular.element(inst.templateModel.getTemplateByName(newTemplate).template);
             replaceEl.addClass(options.uncompiledClass);
@@ -1255,6 +1266,7 @@ function Datagrid(scope, element, attr, $compile) {
             }
             el.parent()[0].replaceChild(replaceEl[0], el[0]);
             activateScope(s);
+            link(index, s);
             el.remove();
             s.$destroy();
             scopes[index] = null;

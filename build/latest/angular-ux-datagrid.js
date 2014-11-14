@@ -1,5 +1,5 @@
 /*
-* ux-angularjs-datagrid v.1.1.4
+* ux-angularjs-datagrid v.1.1.5
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -53,7 +53,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.1.4",
+    version: "1.1.5",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -769,14 +769,16 @@ var sort = function() {
         for (maxEnd = left; maxEnd < right - 1; maxEnd += 1) {
             dir = fn(array[maxEnd], cmp);
             if (dir < 0) {
-                swap(array, maxEnd, minEnd);
-            }
-            if (dir <= 0) {
-                // don't move them if they are the same.
+                if (maxEnd !== minEnd) {
+                    swap(array, maxEnd, minEnd);
+                }
                 minEnd += 1;
             }
         }
-        swap(array, minEnd, right - 1);
+        if (fn(array[minEnd], cmp)) {
+            // 1 || -1
+            swap(array, minEnd, right - 1);
+        }
         return minEnd;
     }
     function swap(array, i, j) {
@@ -1093,6 +1095,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.dispatch = dispatch;
         inst.activateScope = activateScope;
         inst.deactivateScope = deactivateScope;
+        inst.updateLinks = updateLinks;
         inst.render = function() {
             flow.add(render);
         };
@@ -1478,6 +1481,19 @@ function Datagrid(scope, element, attr, $compile) {
         inst.rowsLength = len;
         inst.log("created %s dom elements", len);
     }
+    function link(index, s) {
+        s = s || getScope(index);
+        var prev = getScope(index - 1), next = getScope(index + 1);
+        if (prev) {
+            prev.$$nextSibling = s;
+        }
+        s.$$prevSibling = prev;
+        s.$$nextSibling = next;
+        if (s.$$nextSibling) {
+            s.$$nextSibling.$$prevSibling = s;
+        }
+        scopes[index] = s;
+    }
     /**
      * ###<a name="compileRow">compileRow</a>###
      * Compile a row at that index. This creates the scope for that row when compiled. It does not perform a digest.
@@ -1492,12 +1508,8 @@ function Datagrid(scope, element, attr, $compile) {
         }
         if (!s) {
             s = scope.$new();
-            prev = getScope(index - 1);
             tpl = inst.templateModel.getTemplate(inst.data[index]);
-            if (prev) {
-                prev.$$nextSibling = s;
-                s.$$prevSibling = prev;
-            }
+            link(index, s);
             s.$status = options.compiledClass;
             s[tpl.item] = inst.data[index];
             // set the data to the scope.
@@ -2175,7 +2187,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Boolean=} skipUpdateHeights - useful to turn off when doing multiple row template changes.
      */
     function onRowTemplateChange(evt, item, oldTemplate, newTemplate, classes, skipUpdateHeights) {
-        var index = inst.getNormalizedIndex(item), el = getExistingRow(index), s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope(), replaceEl;
+        var index = inst.getNormalizedIndex(item), el = getExistingRow(index), s = getScope(index), replaceEl;
         if (s !== scope) {
             replaceEl = angular.element(inst.templateModel.getTemplateByName(newTemplate).template);
             replaceEl.addClass(options.uncompiledClass);
@@ -2184,6 +2196,7 @@ function Datagrid(scope, element, attr, $compile) {
             }
             el.parent()[0].replaceChild(replaceEl[0], el[0]);
             activateScope(s);
+            link(index, s);
             el.remove();
             s.$destroy();
             scopes[index] = null;

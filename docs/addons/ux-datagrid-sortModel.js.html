@@ -144,6 +144,9 @@
       <div class="heading h3">
         <a href="#togglesort">toggleSort</a>
       </div>
+      <div class="heading h2">
+        <a href="#togglesort">toggleSort</a>
+      </div>
       <div class="heading h3">
         <a href="#clear">clear</a>
       </div>
@@ -168,7 +171,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>uxDatagrid v.1.1.3
+  <div class="summary"><p>ux-angularjs-datagrid v.1.1.5
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -177,7 +180,15 @@ License: MIT.</p>
   </div>
 </div>
         </td>
-        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
+        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">)</span> <span class="p">{</span>
+<span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">define</span> <span class="o">===</span> <span class="s2">&quot;function&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">define</span><span class="p">.</span><span class="nx">amd</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">define</span><span class="p">(</span><span class="nx">exports</span><span class="p">);</span>
+<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">module</span> <span class="o">!==</span> <span class="s2">&quot;undefined&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">;</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+  <span class="nx">global</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">;</span>
+<span class="p">}</span>
+
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_SORT</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onBeforeSort&quot;</span><span class="p">;</span>
 
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_SORT</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onAfterSort&quot;</span><span class="p">;</span>
@@ -1990,6 +2001,45 @@ If the states already exist apply those states on the render.</p>
         <td class="code highlight"><div class="highlight"><pre>
             <span class="nx">result</span><span class="p">.</span><span class="nx">applySorts</span><span class="p">(</span><span class="nx">original</span><span class="p">);</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_TOGGLE_SORT</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="togglesort">
+  <h2>
+    <a href="#togglesort" name="togglesort" class="pilcrow">&#182;</a>
+    <a name="toggleSort">toggleSort</a>
+  </h2>
+</div>
+
+
+<p>Sets the sort value to asc, desc, or none</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">name</span>
+      <span class="dox_type">String</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">state
+</span>
+      <span class="dox_type">String='none'</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">setSortStateOf</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">state</span> <span class="o">===</span> <span class="s2">&quot;none&quot;</span> <span class="o">||</span> <span class="nx">state</span> <span class="o">===</span> <span class="s2">&quot;asc&quot;</span> <span class="o">||</span> <span class="nx">state</span> <span class="o">===</span> <span class="s2">&quot;desc&quot;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">setState</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">state</span><span class="p">);</span>
+            <span class="p">}</span>
         <span class="p">};</span>
 
 </pre></div>

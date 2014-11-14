@@ -3,6 +3,7 @@ angular.module('ux').factory('memoryOptimizer', function () {
    return ['inst', function (inst) {
        inst.options.memoryOptimizer = inst.options.memoryOptimizer || {};
        var result = exports.logWrapper('memoryOptimizer', {}, 'redOrange', inst.dispatch),
+           intv,
            defaultOptions = {
                range: inst.options.creepLimit * 2 || 200
            },
@@ -27,6 +28,15 @@ angular.module('ux').factory('memoryOptimizer', function () {
         * in the active range and remove their dom and destroy their scopes.
         */
        function optimizeRows() {
+           clearPending();
+           intv = setTimeout(_optimizeRows, 1000);
+       }
+
+       function clearPending() {
+           clearTimeout(intv);
+       }
+
+       function _optimizeRows() {
            // first we need to destroy each scope that is not active.
            var i = 0, iLen = inst.scopes.length, indexes, chunk, chunks = {}, chunksLength = 0;
            while (i < iLen) {
@@ -44,6 +54,7 @@ angular.module('ux').factory('memoryOptimizer', function () {
            if (chunksLength) {
                exports.each(chunks, decompileChunk);
                inst.gc();
+               inst.updateLinks();
            }
        }
 
@@ -81,6 +92,7 @@ angular.module('ux').factory('memoryOptimizer', function () {
            return index >= min && index < max;
        }
 
+       inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, clearPending));
        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, optimizeRows));
 
        disableCreep();

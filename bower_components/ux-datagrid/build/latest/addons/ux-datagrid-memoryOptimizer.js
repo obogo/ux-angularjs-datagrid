@@ -1,16 +1,24 @@
 /*
-* uxDatagrid v.1.1.2
+* ux-angularjs-datagrid v.1.1.5
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */
-(function(exports, global){
+(function (exports, global) {
+if (typeof define === "function" && define.amd) {
+  define(exports);
+} else if (typeof module !== "undefined" && module.exports) {
+  module.exports = exports;
+} else {
+  global.ux = exports;
+}
+
 exports.datagrid.events.ON_MEMORY_OPTIMIZED = "datagrid:onMemoryOptimized";
 
 angular.module("ux").factory("memoryOptimizer", function() {
     return [ "inst", function(inst) {
         inst.options.memoryOptimizer = inst.options.memoryOptimizer || {};
-        var result = exports.logWrapper("memoryOptimizer", {}, "redOrange", inst.dispatch), defaultOptions = {
+        var result = exports.logWrapper("memoryOptimizer", {}, "redOrange", inst.dispatch), intv, defaultOptions = {
             range: inst.options.creepLimit * 2 || 200
         }, options = inst.options.memoryOptimizer = exports.extend(defaultOptions, inst.options.memoryOptimizer);
         /**
@@ -31,6 +39,13 @@ angular.module("ux").factory("memoryOptimizer", function() {
         * in the active range and remove their dom and destroy their scopes.
         */
         function optimizeRows() {
+            clearPending();
+            intv = setTimeout(_optimizeRows, 1e3);
+        }
+        function clearPending() {
+            clearTimeout(intv);
+        }
+        function _optimizeRows() {
             // first we need to destroy each scope that is not active.
             var i = 0, iLen = inst.scopes.length, indexes, chunk, chunks = {}, chunksLength = 0;
             while (i < iLen) {
@@ -49,6 +64,7 @@ angular.module("ux").factory("memoryOptimizer", function() {
             if (chunksLength) {
                 exports.each(chunks, decompileChunk);
                 inst.gc();
+                inst.updateLinks();
             }
         }
         /**
@@ -83,6 +99,7 @@ angular.module("ux").factory("memoryOptimizer", function() {
             min = min < 0 ? 0 : min;
             return index >= min && index < max;
         }
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, clearPending));
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, optimizeRows));
         disableCreep();
         inst.memoryOptimizer = result;

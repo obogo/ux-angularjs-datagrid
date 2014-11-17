@@ -55,6 +55,10 @@ code i * {
     background: #F9F9F9;
 }
 
+.panel-wrapper {
+    padding-right: 20px;
+}
+
 .panel-ex {
     float: left;
     min-width: 300px;
@@ -74,43 +78,33 @@ code i * {
     height: 40px;
 }
 
-@media all and (max-width: 870px) {
-    .panel-ex {
-        width: 100%;
-        min-width: inherit;
-        max-width: 870px;
-    }
-}
-
-@media (min-width: 871px) and (max-width: 1200px) {
-    .panel-ex {
-        width: 47%;
-        min-width: inherit;
-        max-width: 1200px;
-    }
-}
-
-@media (min-width: 1201px) {
-    .panel-ex {
-        width: 31%;
-        min-width: inherit;
-        max-width: 1280px;
-    }
+.panel-ex {
+    width: 100%;
+    min-width: inherit;
+    max-width: 100%;
 }
 
 .panel-ex-head {
     padding: 8px 15px;
-    background: #ecf0f1;
-    /*color: #ffffff;*/
+    background: #3498db;
+    color: #ffffff;
     margin-bottom: 0;
     font-size: 18px;
+    -webkit-border-top-right-radius: 10px;
+    -moz-border-top-right-radius: 10px;
+    -ms-border-top-right-radius: 10px;
+    -o-border-top-right-radius: 10px;
+    border-top-right-radius: 10px;
+    -webkit-border-top-left-radius: 10px;
+    -moz-border-top-left-radius: 10px;
+    -ms-border-top-left-radius: 10px;
+    -o-border-top-left-radius: 10px;
+    border-top-left-radius: 10px;
 }
 
 .panel-ex-body {
     padding: 10px;
     border: 1px solid #ecf0f1;
-    height: 500px;
-    overflow-y: auto;
 }
 
 .panel-ex.no-shadow {
@@ -122,11 +116,6 @@ code i * {
 .panel-ex.no-shadow .panel-ex-body {
     border: none;
 }
-
-/*.panel-ex-body p {*/
-/*height: 120px;*/
-/*overflow-y: auto;*/
-/*}*/
 
 .btn-icon {
     padding: 3px 8px

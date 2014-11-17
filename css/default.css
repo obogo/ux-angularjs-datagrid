@@ -7,6 +7,14 @@
     opacity: 1;
 }
 
+.datagrid-row {
+    -webkit-transition: opacity 0.5s ease-out;
+    -moz-transition: opacity 0.5s ease-out;
+    -ms-transition: opacity 0.5s ease-out;
+    -o-transition: opacity 0.5s ease-out;
+    transition: opacity 0.5s ease-out;
+}
+
 .datagrid-chunk {
     opacity: 0;
     -webkit-transition: opacity 0.5s ease-out;

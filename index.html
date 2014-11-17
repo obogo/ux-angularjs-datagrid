@@ -52,35 +52,36 @@ bower install "ux-datagrid"
             <li><a href="#groupedData">Grouped Data</a></li>
             <li><a href="#columns">Columned Data (Like Tables)</a></li>
             <li><a href="#infiniteScroll">Infinite Scroll</a></li>
-            <li><a href="#collapsibleGroups">Collapsible Groups (starts expanded)</a></li>
-            <li><a href="#expandableGroups">Expandable Groups (starts collapsed)</a></li>
-            <li><a href="#expandingRows">Expanding Rows</a></li>
-            <li><a href="#focusManager">Focus Manager</a></li>
-            <li><a href="#scrollHistory">Scroll History</a></li>
-            <li><a href="#sortModelGrouped">Sort Model (Grouped)</a></li>
-            <li><a href="#sortModel">Sort Model (UnGrouped)</a></li>
-            <li><a href="#serverSideSorting">Server Sort (Combined with infinite scroll)</a></li>
-            <li><a href="#gridLogger">Grid Logs</a></li>
-            <li><a href="#memoryOptimizer">Memory Optimizer</a></li>
+            <li><span href="#collapsibleGroups">Collapsible Groups (starts expanded)</span></li>
+            <li><span href="#expandableGroups">Expandable Groups (starts collapsed)</span></li>
+            <li><span href="#expandingRows">Expanding Rows</span></li>
+            <li><span href="#focusManager">Focus Manager</span></li>
+            <li><span href="#spreadSheet">How to make a spread sheet</span></li>
+            <li><span href="#scrollHistory">Scroll History</span></li>
+            <li><span href="#sortModelGrouped">Sort Model (Grouped)</span></li>
+            <li><span href="#sortModel">Sort Model (UnGrouped)</span></li>
+            <li><span href="#serverSideSorting">Server Sort (Combined with infinite scroll)</span></li>
+            <li><span href="#gridLogger">Grid Logs</span></li>
+            <li><span href="#memoryOptimizer">Memory Optimizer</span></li>
             <li><a href="#scrollBar">Scroll Bar</a></li>
-            <li><a href="#scrollBounce">Scroll Bounce</a></li>
-            <li><a href="#disableHoverWhileScrolling">Disable Hover While Scrolling</a> (<a href="http://www.thecssninja.com/javascript/pointer-events-60fps">Why?</a>)</li>
-            <li><a href="#doubleScroll">Double Scroller</a></li>
+            <li><span href="#scrollBounce">Scroll Bounce</span></li>
+            <li><span href="#disableHoverWhileScrolling">Disable Hover While Scrolling</span> (<a href="http://www.thecssninja.com/javascript/pointer-events-60fps">Why?</a>)</li>
+            <li><span href="#doubleScroll">Double Scroller</span></li>
         </ul>
     </div>
 </div>
 
 <!--// Include the base scripts //-->
 <link rel="stylesheet" type="text/css" href="css/default.css">
-<!--<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>-->
-<script src="bower_components/angular/angular.min.js"></script>
-<!--<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/angular-ux-datagrid.js"></script>-->
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>
+<!--<script src="bower_components/angular/angular.min.js"></script>-->
 <script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.js"></script>
-<!--<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/addons/ux-datagrid-sortModel.js"></script>-->
+<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-infiniteScroll.js"></script>
+<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBar.js"></script>
+<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBounce.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-sortModel.js"></script>
-<!--<script src="//rawgit.com/webux/ux-angularjs-datagrid/master/build/latest/addons/ux-datagrid-gridLogger.js"></script>-->
 
-<div>
+<div class="panel-wrapper">
     <!-- Getting Started/Setup -->
     <a name="setup"></a>
     <div class="panel-ex">
@@ -657,6 +658,260 @@ angular.module(name, ['ux'])
                                 <link rel="stylesheet" type="text/css" href="examples/columns/ex.css">
                                 <script src="examples/columns/ex.js"></script>
 
+    <!-- **************************** Infnite Scroll ********************************** -->
+    <a name="infiniteScroll"></a>
+    <div class="panel-ex infiniteScrollEx" ng-app="infiniteScrollEx">
+        <div class="panel-ex-head">Infinite Scroll</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>We want to show a row that is loading while we wait for data and then update when that data arrives.</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+&lt;div ng-controller="ctrl">
+    &lt;div ux-datagrid="items" addons="infiniteScroll" options="{infiniteScroll: {limit:200}}">
+        &lt;script type="template/html" template-item="item">
+            &lt;div class="infiniteScrollEx-row">&lt;span>Default {{item.id}}&lt;/span>&lt;/div>
+        &lt;/script>
+        &lt;script type="template/html" template-name="loadingRow" template-item="item">
+            &lt;div class="infiniteScrollEx-row loading-row">&lt;span>loading...&lt;/span>&lt;/div>
+        &lt;/script>
+    &lt;/div>
+&lt;/div>
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+.infiniteScrollEx *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+}
+
+.infiniteScrollEx .datagrid-chunk {
+    -webkit-transition: opacity 0s ease-out;
+    -moz-transition: opacity 0s ease-out;
+    -ms-transition: opacity 0s ease-out;
+    -o-transition: opacity 0s ease-out;
+    transition: opacity 0s ease-out;
+}
+
+.infiniteScrollEx-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.infiniteScrollEx-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+.infiniteScrollEx-row.loading-row {
+    height: 20px;
+    background-color: #999;
+    color: #FFF;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 20px;
+}
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+var name = 'infiniteScrollEx';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope, $timeout) {
+        var datagrid;
+        $scope.add = function(len) {
+            var i = 0, items = $scope.items || [];
+            while (i < len) {
+                items.push({id: items.length});
+                i += 1;
+            }
+            $scope.items = items;
+        };
+        $scope.add(10);
+        // listen to the bottom scroll event.
+        $scope.$on(ux.datagrid.events.ON_SCROLL_TO_BOTTOM, function () {
+            if ($scope.items.length < datagrid.options.infiniteScroll.limit) {
+                // we are doing a timeout here to simulate time that an ajax call may need to get the paginated data.
+                $timeout(function () {
+                    $scope.add(10);
+                }, 1000, true);
+            }
+        });
+        $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+            datagrid = inst;
+        });
+    });
+
+</code></pre>
+            <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div ux-datagrid="items" addons="infiniteScroll" options="{infiniteScroll: {limit:200}}">
+        <script type="template/html" template-item="item">
+            <div class="infiniteScrollEx-row"><span>Default {{item.id}}</span></div>
+        </script>
+        <script type="template/html" template-name="loadingRow" template-item="item">
+            <div class="infiniteScrollEx-row loading-row"><span>loading...</span></div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>
+                                <link rel="stylesheet" type="text/css" href="examples/infiniteScroll/ex.css">
+                                <script src="examples/infiniteScroll/ex.js"></script>
+
+    <!-- **************************** Scroll Bar ********************************** -->
+    <a name="scrollBar"></a>
+    <div class="panel-ex scrollBarEx" ng-app="scrollBarEx">
+        <div class="panel-ex-head">Scroll Bar</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>Adding a scroll bar to the scrolled content.</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+&lt;div ng-controller="ctrl" class="scrollBarExCtrl">
+    &lt;div ux-datagrid="items" addons="scrollBar">
+        &lt;script type="template/html" template-item="item">
+            &lt;div class="infiniteScrollEx-row">&lt;span>Default {{item.id}}&lt;/span>&lt;/div>
+        &lt;/script>
+    &lt;/div>
+&lt;/div>
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+.scrollBarExCtrl {
+    position:relative;
+}
+
+.scrollBarEx *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+    position: relative;
+}
+
+.scrollBarEx-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.scrollBarEx-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+var name = 'scrollBarEx';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        $scope.add = function(len) {
+            var i = 0, items = $scope.items || [];
+            while (i < len) {
+                items.push({id: items.length});
+                i += 1;
+            }
+            $scope.items = items;
+        };
+        $scope.add(100);
+    });
+
+</code></pre>
+<!-- html:start -->
+<div ng-controller="ctrl" class="scrollBarExCtrl">
+    <div ux-datagrid="items" addons="scrollBar">
+        <script type="template/html" template-item="item">
+            <div class="infiniteScrollEx-row"><span>Default {{item.id}}</span></div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>
+                                <link rel="stylesheet" type="text/css" href="examples/scrollBar/ex.css">
+                                <script src="examples/scrollBar/ex.js"></script>
+
+    <!-- **************************** Scroll Bounce ********************************** -->
+    <a name="scrollBounce"></a>
+    <div class="panel-ex scrollBounceEx" ng-app="scrollBounceEx">
+        <div class="panel-ex-head">Scroll Bounce</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>Adding a scroll bounce to the scrolled content.</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+&lt;div ng-controller="ctrl" class="scrollBounceExCtrl">
+    &lt;div ux-datagrid="items" addons="scrollBar, scrollBounce">
+        &lt;script type="template/html" template-item="item">
+            &lt;div class="infiniteScrollEx-row">&lt;span>Default {{item.id}}&lt;/span>&lt;/div>
+        &lt;/script>
+    &lt;/div>
+&lt;/div>
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+.scrollBounceExCtrl {
+    position:relative;
+}
+
+.scrollBounceEx *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+    position: relative;
+}
+
+.scrollBounceEx-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.scrollBounceEx-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+var name = 'scrollBounceEx';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        $scope.add = function(len) {
+            var i = 0, items = $scope.items || [];
+            while (i < len) {
+                items.push({id: items.length});
+                i += 1;
+            }
+            $scope.items = items;
+        };
+        $scope.add(50);
+    });
+
+</code></pre>
+            <p><i class="label">ScrollBounce</i> needs the <i class="label">ScrollBar</i> to work. Because it uses the events from it.</p>
+<!-- html:start -->
+<div ng-controller="ctrl" class="scrollBounceExCtrl">
+    <div ux-datagrid="items" addons="scrollBar, scrollBounce">
+        <script type="template/html" template-item="item">
+            <div class="infiniteScrollEx-row"><span>Default {{item.id}}</span></div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>
+                                <link rel="stylesheet" type="text/css" href="examples/scrollBounce/ex.css">
+                                <script src="examples/scrollBounce/ex.js"></script>
+
     <!-- **************************** Sorting ********************************** -->
     <a name="sortModel"></a>
     <div class="panel-ex sorting" ng-app="sorting">
@@ -735,7 +990,7 @@ angular.module(name, ['ux'])
 
 <div class="github-fork-ribbon-wrapper right">
     <div class="github-fork-ribbon">
-        <a href="https://github.com/webux/ux-angularjs-datagrid" fm-parent="14" fm-id="53" tabindex="-1">Fork me on GitHub</a>
+        <a href="https://github.com/webux/ux-angularjs-datagrid" fm-parent="14" fm-id="53" tabindex="-1">View on GitHub</a>
     </div>
 </div>
 

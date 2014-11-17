@@ -1,10 +1,18 @@
 /*
-* uxDatagrid v.1.1.2
+* ux-angularjs-datagrid v.1.1.5
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */
-(function(exports, global){
+(function (exports, global) {
+if (typeof define === "function" && define.amd) {
+  define(exports);
+} else if (typeof module !== "undefined" && module.exports) {
+  module.exports = exports;
+} else {
+  global.ux = exports;
+}
+
 exports.datagrid.events.ON_BEFORE_SORT = "datagrid:onBeforeSort";
 
 exports.datagrid.events.ON_AFTER_SORT = "datagrid:onAfterSort";
@@ -473,7 +481,6 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
          * @returns {*}
          */
         result.applySorts = function applySorts(ary, sortOptions, clear) {
-            var start = Date.now();
             var pathStateRef = sortStatesModel.getPathState(), currentPathState = angular.copy(pathStateRef);
             if (sortOptions) {
                 result.log("apply sortOptions");
@@ -635,6 +642,17 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
             //            result.clear();
             result.applySorts(original);
             inst.dispatch(exports.datagrid.events.ON_AFTER_TOGGLE_SORT, name);
+        };
+        /**
+         * ##<a name="toggleSort">toggleSort</a>###
+         * Sets the sort value to asc, desc, or none
+         * @param {String} name
+         * @param {String='none'} state
+         */
+        result.setSortStateOf = function(name, state) {
+            if (state === "none" || state === "asc" || state === "desc") {
+                sortStatesModel.setState(name, state);
+            }
         };
         /**
          * ###<a name="clear">clear</a>###

@@ -1,10 +1,18 @@
 /*
-* uxDatagrid v.1.1.2
+* ux-angularjs-datagrid v.1.1.5
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */
-(function(exports, global){
+(function (exports, global) {
+if (typeof define === "function" && define.amd) {
+  define(exports);
+} else if (typeof module !== "undefined" && module.exports) {
+  module.exports = exports;
+} else {
+  global.ux = exports;
+}
+
 /*global ux */
 // we want to override the default scrolling if it is an IOS device.
 angular.module("ux").factory("windowScroll", function() {

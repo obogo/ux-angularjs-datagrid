@@ -1,10 +1,18 @@
 /*
-* uxDatagrid v.1.1.3
+* ux-angularjs-datagrid v.1.1.5
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */
-(function(exports, global){
+(function (exports, global) {
+if (typeof define === "function" && define.amd) {
+  define(exports);
+} else if (typeof module !== "undefined" && module.exports) {
+  module.exports = exports;
+} else {
+  global.ux = exports;
+}
+
 exports.errors = {
     E1000: "Datagrid cannot have a height of 0",
     E1001: "RENDER STATE INVALID. The only valid render states are those on ux.datagrid.states",
@@ -45,7 +53,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.1.3",
+    version: "1.1.5",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -228,7 +236,10 @@ exports.datagrid = {
         // - **<a name="options.smartUpdate">smartUpdate</a>** when this is enabled if the array changes the order of things but not the templates that they render in then
         // this will not do a normal reset, but will just re-render the visible area with the changes and as you scroll the changes will update.
         smartUpdate: true,
-        readyToRenderRetryMax: 10
+        // - **<a name="options.readyToRenderRetryMax">readyToRenderRetryMax</a>** how many times the datagrid will try to get a height before it gives up.
+        readyToRenderRetryMax: 10,
+        // - **<a name="options.minHeight">minHeight</a>** if a height cannot be found, the datagrid will assume this minHeight. It will then resize to whatever height the element is resized to later.
+        minHeight: 100
     },
     /**
      * ###<a name="coreAddons">coreAddons</a>###
@@ -758,14 +769,16 @@ var sort = function() {
         for (maxEnd = left; maxEnd < right - 1; maxEnd += 1) {
             dir = fn(array[maxEnd], cmp);
             if (dir < 0) {
-                swap(array, maxEnd, minEnd);
-            }
-            if (dir <= 0) {
-                // don't move them if they are the same.
+                if (maxEnd !== minEnd) {
+                    swap(array, maxEnd, minEnd);
+                }
                 minEnd += 1;
             }
         }
-        swap(array, minEnd, right - 1);
+        if (fn(array[minEnd], cmp)) {
+            // 1 || -1
+            swap(array, minEnd, right - 1);
+        }
         return minEnd;
     }
     function swap(array, i, j) {
@@ -1082,6 +1095,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.dispatch = dispatch;
         inst.activateScope = activateScope;
         inst.deactivateScope = deactivateScope;
+        inst.updateLinks = updateLinks;
         inst.render = function() {
             flow.add(render);
         };
@@ -1187,7 +1201,7 @@ function Datagrid(scope, element, attr, $compile) {
      * `start` is called after the addons are added.
      */
     function start() {
-        inst.dispatch(exports.datagrid.events.ON_INIT);
+        inst.dispatch(exports.datagrid.events.ON_INIT, inst);
         content = createContent();
         waitForElementReady(0);
     }
@@ -1278,6 +1292,9 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function updateViewportHeight() {
         viewHeight = inst.calculateViewportHeight();
+        if (!viewHeight) {
+            viewHeight = options.minHeight;
+        }
     }
     /**
      * ###<a name="isReady">isReady</a>###
@@ -1464,6 +1481,19 @@ function Datagrid(scope, element, attr, $compile) {
         inst.rowsLength = len;
         inst.log("created %s dom elements", len);
     }
+    function link(index, s) {
+        s = s || getScope(index);
+        var prev = getScope(index - 1), next = getScope(index + 1);
+        if (prev) {
+            prev.$$nextSibling = s;
+        }
+        s.$$prevSibling = prev;
+        s.$$nextSibling = next;
+        if (s.$$nextSibling) {
+            s.$$nextSibling.$$prevSibling = s;
+        }
+        scopes[index] = s;
+    }
     /**
      * ###<a name="compileRow">compileRow</a>###
      * Compile a row at that index. This creates the scope for that row when compiled. It does not perform a digest.
@@ -1478,12 +1508,8 @@ function Datagrid(scope, element, attr, $compile) {
         }
         if (!s) {
             s = scope.$new();
-            prev = getScope(index - 1);
             tpl = inst.templateModel.getTemplate(inst.data[index]);
-            if (prev) {
-                prev.$$nextSibling = s;
-                s.$$prevSibling = prev;
-            }
+            link(index, s);
             s.$status = options.compiledClass;
             s[tpl.item] = inst.data[index];
             // set the data to the scope.
@@ -1896,7 +1922,7 @@ function Datagrid(scope, element, attr, $compile) {
         }
     }
     function whenReadyToRender() {
-        flow.add(inst.updateViewportHeight, null, 0);
+        flow.add(inst.updateViewportHeight, null, waitCount);
         // have it wait a moment for the height to change.
         flow.add(render);
     }
@@ -1907,14 +1933,11 @@ function Datagrid(scope, element, attr, $compile) {
      * frame to check the height. If that fails it exits.
      */
     function readyToRender() {
+        updateViewportHeight();
         if (!viewHeight) {
             waitCount += 1;
             if (waitCount < inst.options.readyToRenderRetryMax) {
                 inst.info("datagrid is waiting for element to have a height.");
-                var unwatch = scope.$watch(function() {
-                    unwatch();
-                    readyToRender();
-                });
                 whenReadyToRender();
             } else {
                 flow.warn("Datagrid: Unable to determine a height for the datagrid. Cannot render. Exiting.");
@@ -1924,6 +1947,7 @@ function Datagrid(scope, element, attr, $compile) {
         if (waitCount) {
             inst.info("datagrid has height of %s.", viewHeight);
         }
+        waitCount = 0;
         return true;
     }
     /**
@@ -1959,7 +1983,9 @@ function Datagrid(scope, element, attr, $compile) {
      * force the datagrid to fire a data change update or fire a redraw if that fails.
      */
     function update() {
-        inst.warn("force update");
+        if (inst) {
+            inst.warn("force update");
+        }
         if (!onDataChanged(scope.$eval(attr.uxDatagrid), inst.data)) {
             forceRedraw();
         }
@@ -2161,7 +2187,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Boolean=} skipUpdateHeights - useful to turn off when doing multiple row template changes.
      */
     function onRowTemplateChange(evt, item, oldTemplate, newTemplate, classes, skipUpdateHeights) {
-        var index = inst.getNormalizedIndex(item), el = getExistingRow(index), s = el.hasClass(options.uncompiledClass) ? compileRow(index) : el.scope(), replaceEl;
+        var index = inst.getNormalizedIndex(item), el = getExistingRow(index), s = getScope(index), replaceEl;
         if (s !== scope) {
             replaceEl = angular.element(inst.templateModel.getTemplateByName(newTemplate).template);
             replaceEl.addClass(options.uncompiledClass);
@@ -2170,6 +2196,7 @@ function Datagrid(scope, element, attr, $compile) {
             }
             el.parent()[0].replaceChild(replaceEl[0], el[0]);
             activateScope(s);
+            link(index, s);
             el.remove();
             s.$destroy();
             scopes[index] = null;

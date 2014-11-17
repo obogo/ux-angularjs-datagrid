@@ -1,0 +1,36 @@
+<!-- **************************** Infnite Scroll ********************************** -->
+    <a name="infiniteScroll"></a>
+    <div class="panel-ex infiniteScrollEx" ng-app="infiniteScrollEx">
+        <div class="panel-ex-head">Infinite Scroll</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>We want to show a row that is loading while we wait for data and then update when that data arrives.</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+##html##
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+##css##
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+##js##
+</code></pre>
+            <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div ux-datagrid="items" addons="infiniteScroll" options="{infiniteScroll: {limit:200}}">
+        <script type="template/html" template-item="item">
+            <div class="infiniteScrollEx-row"><span>Default {{item.id}}</span></div>
+        </script>
+        <script type="template/html" template-name="loadingRow" template-item="item">
+            <div class="infiniteScrollEx-row loading-row"><span>loading...</span></div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>

@@ -808,7 +808,7 @@ function Datagrid(scope, element, attr, $compile) {
                 visibleScrollStart: scroll + options.cushion,
                 visibleScrollEnd: scroll + height - options.cushion
             };
-        result.startIndex = result.i = getOffsetIndex(scroll);
+        result.startIndex = result.i = inst.getOffsetIndex(scroll);
         if (inst.rowsLength && result.startIndex === result.end) {
             throw new Error(exports.errors.E1002);
         }
@@ -851,7 +851,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.log("\tscroll %s visibleScrollStart %s visibleScrollEnd %s", values.scroll, loop.visibleScrollStart, loop.visibleScrollEnd);
         while (loop.i < inst.rowsLength) {
             prevS = scope.$$childHead ? scopes[loop.i - 1] : null;
-            offset = getRowOffset(loop.i); // this is where the chunks and rows get created is when they are requested if they don't exist.
+            offset = inst.getRowOffset(loop.i); // this is where the chunks and rows get created is when they are requested if they don't exist.
             if ((offset >= loop.visibleScrollStart && offset <= loop.visibleScrollEnd)) {
                 s = compileRow(loop.i); // only compiles if it is not already compiled. Still returns the scope.
                 if (loop.started === undefined) {

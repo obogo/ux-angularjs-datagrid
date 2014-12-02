@@ -12,7 +12,7 @@ describe("sortModel", function () {
                 scope.items.push({id: i.toString(), name: i.toString(36)});
             }
             var exp =
-                sortModel({
+                sortModel[1]({
                     scope: scope,
                     unwatchers: [],
                     options: {

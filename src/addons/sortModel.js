@@ -450,7 +450,7 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
  */
 angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStatesModel) {
 
-    return function sortModel(inst) {
+    return ['inst', function sortModel(inst) {
         // cache is the stored sort values. It needs to be cleared if the data changes.
         var result = exports.logWrapper('sortModel', {}, 'blue', inst.dispatch), sorts = {}, original, cache = {},
             options = inst.options.sortModel || {}, lastSortResult;
@@ -702,5 +702,5 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
         inst.sortModel = result;
         addSortsFromOptions();
         return inst;
-    };
+    }];
 }]);

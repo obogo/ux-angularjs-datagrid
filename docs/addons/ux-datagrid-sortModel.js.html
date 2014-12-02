@@ -171,7 +171,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>ux-angularjs-datagrid v.1.1.5
+  <div class="summary"><p>ux-angularjs-datagrid v.1.1.6
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -1386,7 +1386,7 @@ It stores the sorted state on the sortStatesModel to keep around until cleared.<
         </td>
         <td class="code highlight"><div class="highlight"><pre>
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;sortModel&quot;</span><span class="p">,</span> <span class="p">[</span> <span class="s2">&quot;sortStatesModel&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">sortStatesModel</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kd">function</span> <span class="nx">sortModel</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="s2">&quot;inst&quot;</span><span class="p">,</span> <span class="kd">function</span> <span class="nx">sortModel</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
 
 </pre></div>
         </td>
@@ -2100,7 +2100,7 @@ If the states already exist apply those states on the render.</p>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">sortModel</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
         <span class="nx">addSortsFromOptions</span><span class="p">();</span>
         <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
-    <span class="p">};</span>
+    <span class="p">}</span> <span class="p">];</span>
 <span class="p">}</span> <span class="p">]);</span>
 <span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
 </pre></div>

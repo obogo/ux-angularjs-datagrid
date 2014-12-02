@@ -69,7 +69,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>ux-angularjs-datagrid v.1.1.5
+  <div class="summary"><p>ux-angularjs-datagrid v.1.1.6
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -360,7 +360,7 @@ instance.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;scrollHistory&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">,</span> <span class="nx">scrollHistoryModel</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="s2">&quot;inst&quot;</span><span class="p">,</span> <span class="s2">&quot;scrollHistoryModel&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">,</span> <span class="nx">scrollHistoryModel</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;scrollHistory&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">ready</span><span class="p">,</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollHistory</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollHistory</span><span class="p">.</span><span class="nx">path</span> <span class="o">||</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nx">scrollPos</span><span class="p">,</span> <span class="nx">waitingForAfterDataChange</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[];</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollHistory</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollHistory</span><span class="p">.</span><span class="nx">ignoreParams</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">path</span> <span class="o">=</span> <span class="nx">scrollHistoryModel</span><span class="p">.</span><span class="nx">getPath</span><span class="p">().</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">).</span><span class="nx">shift</span><span class="p">();</span>
@@ -580,7 +580,7 @@ keep events from firing during the destroy process.</p>
         <span class="p">};</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollHistory</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
         <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
-    <span class="p">};</span>
+    <span class="p">}</span> <span class="p">];</span>
 <span class="p">});</span>
 <span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
 </pre></div>

@@ -27,7 +27,7 @@ angular.module('ux').factory('gridLogger', function () {
         return ary;
     }
 
-    return function gridLogger(inst, $rootScope) {
+    return ['inst', '$rootScope', function gridLogger(inst, $rootScope) {
         var result = {};
         // listen to events and write them.
         function onLog(event) {
@@ -93,5 +93,5 @@ angular.module('ux').factory('gridLogger', function () {
         inst.unwatchers.push($rootScope.$on(exports.datagrid.events.ERROR, onError));
 
         inst.logger = result;
-    };
+    }];
 });

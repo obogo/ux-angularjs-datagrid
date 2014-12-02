@@ -14,7 +14,8 @@ angular.module('ux').directive('uxDoubleScroll', ['$window', function ($window) 
                 selector = scope.$eval(attr.uxDoubleScroll),
                 target,
                 targetOffset = scope.$eval(attr.targetOffset) || 0,
-                lockOffset = scope.$eval(attr.lockOffset),
+                dynamicOffset = scope.$eval(attr.dynamicOffset),
+                targetPadding = scope.$eval(attr.targetPadding),
                 grid, // reference to the datagrid instance
                 myScroll,// iScroll for the doubleScroll.
                 scrollModel, // the grid scrollModel.
@@ -280,12 +281,17 @@ angular.module('ux').directive('uxDoubleScroll', ['$window', function ($window) 
                     }
                     //TODO: need to add padding and margin as well.
                     cpStyle = $window.getComputedStyle(children[i]);
-                    paddingTop = parseInt(cpStyle.paddingTop, 10);
-                    paddingBottom = parseInt(cpStyle.paddingBottom, 10);
+                    if (targetPadding !== false) {
+                        paddingTop = parseInt(cpStyle.paddingTop, 10);
+                        paddingBottom = parseInt(cpStyle.paddingBottom, 10);
+                    } else {
+                        paddingTop = 0;
+                        paddingBottom = 0;
+                    }
                     offsetTop += children[i].offsetHeight + paddingTop + paddingBottom;
                     i += 1;
                 }
-                if (lockOffset) {
+                if (dynamicOffset) {
                     targetOffset = offsetTop;
                 }
                 return offsetTop;

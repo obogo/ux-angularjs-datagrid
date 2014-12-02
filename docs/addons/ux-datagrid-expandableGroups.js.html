@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ux-datagrid-expandableGroups.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../doc-style.css" />
+  <script src="../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../", thisFile = "Users/wes/PhpstormProjects/wes/webux/ux-datagrid//addons/ux-datagrid-expandableGroups.js", defaultSidebar = true;
+  </script>
+  <script src="../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+      <div class="heading h2">
+        <a href="#expandablegroups">expandableGroups</a>
+      </div>
+      <div class="heading h3">
+        <a href="#generatedata">generateData</a>
+      </div>
+      <div class="heading h3">
+        <a href="#isgroup">isGroup</a>
+      </div>
+      <div class="heading h3">
+        <a href="#setdata">setData</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getdata">getData</a>
+      </div>
+      <div class="heading h3">
+        <a href="#update">update</a>
+      </div>
+      <div class="heading h3">
+        <a href="#convertindex">convertIndex</a>
+      </div>
+      <div class="heading h3">
+        <a href="#expand">expand</a>
+      </div>
+      <div class="heading h3">
+        <a href="#collapse">collapse</a>
+      </div>
+      <div class="heading h3">
+        <a href="#toggle">toggle</a>
+      </div>
+      <div class="heading h3">
+        <a href="#isexpanded">isExpanded</a>
+      </div>
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>ux-datagrid-expandableGroups.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>ux-angularjs-datagrid v.1.1.6
+(c) 2014, WebUX
+<a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
+License: MIT.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">)</span> <span class="p">{</span>
+<span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">define</span> <span class="o">===</span> <span class="s2">&quot;function&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">define</span><span class="p">.</span><span class="nx">amd</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">define</span><span class="p">(</span><span class="nx">exports</span><span class="p">);</span>
+<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">module</span> <span class="o">!==</span> <span class="s2">&quot;undefined&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">;</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+  <span class="nx">global</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">COLLAPSE_ALL_GROUPS</span> <span class="o">=</span> <span class="s2">&quot;datagrid:collapseAllGroups&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">EXPAND_ALL_GROUPS</span> <span class="o">=</span> <span class="s2">&quot;datagrid:expandAllGroups&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">COLLAPSE_GROUP</span> <span class="o">=</span> <span class="s2">&quot;datagrid:collapseGroup&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">EXPAND_GROUP</span> <span class="o">=</span> <span class="s2">&quot;datagrid:expandGroup&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">TOGGLE_GROUP</span> <span class="o">=</span> <span class="s2">&quot;datagrid:toggleGroup&quot;</span><span class="p">;</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="expandablegroups">
+  <h2>
+    <a href="#expandablegroups" name="expandablegroups" class="pilcrow">&#182;</a>
+    <a name="expandableGroups">expandableGroups</a>
+  </h2>
+</div>
+
+
+<p>The expandable groups works on the concept of remvoing items from the array that are collapsed.
+So it keeps the original array that is sent, or if it is setAgain it will collapse all.
+By default all of these are collapsed. Hence the name expandableGroups.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;expandableGroups&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="s2">&quot;inst&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;expandableGroups&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;orange&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">options</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">expandableGroups</span> <span class="o">||</span> <span class="p">{},</span> <span class="nx">expanded</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">resultData</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">instSetData</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">setData</span><span class="p">,</span> <span class="nx">getNormalized</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="generatedata">
+  <h3>
+    <a href="#generatedata" name="generatedata" class="pilcrow">&#182;</a>
+    <a name="generateData">generateData</a>
+  </h3>
+</div>
+
+
+<p>Generate an array of only the items that should be shown. A normalized array.
+It uses the same array instance and does not create a new one.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">generateData</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">resultData</span><span class="p">.</span><span class="nx">length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">normalized</span> <span class="o">=</span> <span class="nx">getNormalized</span><span class="p">(),</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">j</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">iLen</span> <span class="o">=</span> <span class="nx">normalized</span> <span class="o">&amp;&amp;</span> <span class="nx">normalized</span><span class="p">.</span><span class="nx">length</span> <span class="o">||</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">item</span><span class="p">;</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">iLen</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">item</span> <span class="o">=</span> <span class="nx">normalized</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">isGroup</span><span class="p">(</span><span class="nx">item</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nx">j</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="nx">resultData</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">expanded</span><span class="p">[</span><span class="nx">j</span><span class="p">])</span> <span class="p">{</span>
+                    <span class="nx">resultData</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">normalized</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">resultData</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nb">window</span><span class="p">.</span><span class="nx">console</span> <span class="o">&amp;&amp;</span> <span class="nb">window</span><span class="p">.</span><span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;ExpandableGroups does not work with async loaded groups. It cannot keep the indexes in sync. Try this example http://jsfiddle.net/wesjones/3Wg79/&quot;</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="isgroup">
+  <h3>
+    <a href="#isgroup" name="isgroup" class="pilcrow">&#182;</a>
+    <a name="isGroup">isGroup</a>
+  </h3>
+</div>
+
+
+<p>Determine if an item is a group or not.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">item</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">isGroup</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">hideEmptyGroups</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">item</span><span class="p">[</span><span class="nx">inst</span><span class="p">.</span><span class="nx">grouped</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="nx">item</span><span class="p">[</span><span class="nx">inst</span><span class="p">.</span><span class="nx">grouped</span><span class="p">].</span><span class="nx">length</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">item</span><span class="p">[</span><span class="nx">inst</span><span class="p">.</span><span class="nx">grouped</span><span class="p">];</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="setdata">
+  <h3>
+    <a href="#setdata" name="setdata" class="pilcrow">&#182;</a>
+    <a name="setData">setData</a>
+  </h3>
+</div>
+
+
+<p>We ned to override the setData method that is assigned in the normalizeModel so that we can
+replace the return value with our overridden array that has collapsed rows removed from the array.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">data</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">grouped</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">setData</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">grouped</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">instSetData</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">inst</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+            <span class="nx">generateData</span><span class="p">();</span>
+            <span class="k">return</span> <span class="nx">resultData</span><span class="p">;</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getdata">
+  <h3>
+    <a href="#getdata" name="getdata" class="pilcrow">&#182;</a>
+    <a name="getData">getData</a>
+  </h3>
+</div>
+
+
+<p>Override the getData so no one can get the other data than what is supposed to be shown for normalized data.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">resultData</span><span class="p">;</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="update">
+  <h3>
+    <a href="#update" name="update" class="pilcrow">&#182;</a>
+    <a name="update">update</a>
+  </h3>
+</div>
+
+
+<p>Regenerate the normalized data and cause the grid to update.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">update</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">generateData</span><span class="p">();</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="convertindex">
+  <h3>
+    <a href="#convertindex" name="convertindex" class="pilcrow">&#182;</a>
+    <a name="convertIndex">convertIndex</a>
+  </h3>
+</div>
+
+
+<p>This will convert a row index into a group index so they can collapse correctly.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">index</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">convertIndex</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">isGroup</span><span class="p">(</span><span class="nx">resultData</span><span class="p">[</span><span class="nx">i</span><span class="p">]))</span> <span class="p">{</span>
+                    <span class="nx">j</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">j</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="expand">
+  <h3>
+    <a href="#expand" name="expand" class="pilcrow">&#182;</a>
+    <a name="expand">expand</a>
+  </h3>
+</div>
+
+
+<p>Expand the group.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">rowIndex</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">isGroupIndex
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">expand</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">,</span> <span class="nx">isGroupIndex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">groupIndex</span> <span class="o">=</span> <span class="nx">isGroupIndex</span> <span class="o">?</span> <span class="nx">rowIndex</span> <span class="o">:</span> <span class="nx">convertIndex</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">);</span>
+            <span class="nx">expanded</span><span class="p">[</span><span class="nx">groupIndex</span><span class="p">]</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="nx">update</span><span class="p">();</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="collapse">
+  <h3>
+    <a href="#collapse" name="collapse" class="pilcrow">&#182;</a>
+    <a name="collapse">collapse</a>
+  </h3>
+</div>
+
+
+<p>Collapse the group.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">rowIndex</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">isGroupIndex
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">collapse</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">,</span> <span class="nx">isGroupIndex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">groupIndex</span> <span class="o">=</span> <span class="nx">isGroupIndex</span> <span class="o">?</span> <span class="nx">rowIndex</span> <span class="o">:</span> <span class="nx">convertIndex</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">);</span>
+            <span class="k">delete</span> <span class="nx">expanded</span><span class="p">[</span><span class="nx">groupIndex</span><span class="p">];</span>
+            <span class="nx">update</span><span class="p">();</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="toggle">
+  <h3>
+    <a href="#toggle" name="toggle" class="pilcrow">&#182;</a>
+    <a name="toggle">toggle</a>
+  </h3>
+</div>
+
+
+<p>Toggle the collapse or expanse of a group.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">rowIndex
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">toggle</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">groupIndex</span> <span class="o">=</span> <span class="nx">convertIndex</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">expanded</span><span class="p">[</span><span class="nx">groupIndex</span><span class="p">])</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">collapse</span><span class="p">(</span><span class="nx">groupIndex</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">expand</span><span class="p">(</span><span class="nx">groupIndex</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="isexpanded">
+  <h3>
+    <a href="#isexpanded" name="isexpanded" class="pilcrow">&#182;</a>
+    <a name="isExpanded">isExpanded</a>
+  </h3>
+</div>
+
+
+<p>Special Thanks to <a href='https://github.com/Krisa'>https://github.com/Krisa</a>
+Public method to allow other elements to tell if it is expanded. Such as for CSS.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">rowIndex</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">isExpanded</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">groupIndex</span> <span class="o">=</span> <span class="nx">convertIndex</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">);</span>
+            <span class="k">return</span> <span class="o">!!</span><span class="nx">expanded</span><span class="p">[</span><span class="nx">groupIndex</span><span class="p">];</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-13" id="section-13">&#182;</a>
+</div>
+<p>Add listeners.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">EXPAND_GROUP</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">expand</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+        <span class="p">}));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">COLLAPSE_GROUP</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">collapse</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+        <span class="p">}));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">TOGGLE_GROUP</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">toggle</span><span class="p">(</span><span class="nx">convertIndex</span><span class="p">(</span><span class="nx">index</span><span class="p">));</span>
+        <span class="p">}));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">COLLAPSE_ALL_GROUPS</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">expanded</span> <span class="o">=</span> <span class="p">{};</span>
+            <span class="nx">update</span><span class="p">();</span>
+        <span class="p">}));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">EXPAND_ALL_GROUPS</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">originalData</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getOriginalData</span><span class="p">();</span>
+            <span class="nx">expanded</span> <span class="o">=</span> <span class="p">{};</span>
+            <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">originalData</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">expanded</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="p">});</span>
+            <span class="nx">update</span><span class="p">();</span>
+        <span class="p">}));</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-14" id="section-14">&#182;</a>
+</div>
+<p>assign public api to datagrid.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">expandableGroups</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
+    <span class="p">}</span> <span class="p">];</span>
+<span class="p">});</span>
+<span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

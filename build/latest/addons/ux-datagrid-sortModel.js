@@ -1,5 +1,5 @@
 /*
-* ux-angularjs-datagrid v.1.1.5
+* ux-angularjs-datagrid v.1.1.6
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -441,7 +441,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
  * @param {Object} sortStatesModel
  */
 angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStatesModel) {
-    return function sortModel(inst) {
+    return [ "inst", function sortModel(inst) {
         // cache is the stored sort values. It needs to be cleared if the data changes.
         var result = exports.logWrapper("sortModel", {}, "blue", inst.dispatch), sorts = {}, original, cache = {}, options = inst.options.sortModel || {}, lastSortResult;
         /**
@@ -678,6 +678,6 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
         inst.sortModel = result;
         addSortsFromOptions();
         return inst;
-    };
+    } ];
 } ]);
 }(this.ux = this.ux || {}, function() {return this;}()));

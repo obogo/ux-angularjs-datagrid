@@ -1,5 +1,5 @@
 /*
-* ux-angularjs-datagrid v.1.1.5
+* ux-angularjs-datagrid v.1.1.6
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -25,7 +25,7 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
         link: function(scope, element, attr) {
             var result = exports.logWrapper("doubleScroll", {}, "red", function() {
                 scope.$emit.apply(scope, arguments);
-            }), el = element[0], selector = scope.$eval(attr.uxDoubleScroll), target, targetOffset = scope.$eval(attr.targetOffset) || 0, lockOffset = scope.$eval(attr.lockOffset), grid, // reference to the datagrid instance
+            }), el = element[0], selector = scope.$eval(attr.uxDoubleScroll), target, targetOffset = scope.$eval(attr.targetOffset) || 0, dynamicOffset = scope.$eval(attr.dynamicOffset), targetPadding = scope.$eval(attr.targetPadding), grid, // reference to the datagrid instance
             myScroll, // iScroll for the doubleScroll.
             scrollModel, // the grid scrollModel.
             enabled, unwatchRender, unwatchOffset, lastOffsetTop = 0, lastOffsetHeight, intv, lastY = 0, momentum = 0, gridScrollIntv, useIScroll = detectIScroll();
@@ -268,12 +268,17 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                     }
                     //TODO: need to add padding and margin as well.
                     cpStyle = $window.getComputedStyle(children[i]);
-                    paddingTop = parseInt(cpStyle.paddingTop, 10);
-                    paddingBottom = parseInt(cpStyle.paddingBottom, 10);
+                    if (targetPadding !== false) {
+                        paddingTop = parseInt(cpStyle.paddingTop, 10);
+                        paddingBottom = parseInt(cpStyle.paddingBottom, 10);
+                    } else {
+                        paddingTop = 0;
+                        paddingBottom = 0;
+                    }
                     offsetTop += children[i].offsetHeight + paddingTop + paddingBottom;
                     i += 1;
                 }
-                if (lockOffset) {
+                if (dynamicOffset) {
                     targetOffset = offsetTop;
                 }
                 return offsetTop;

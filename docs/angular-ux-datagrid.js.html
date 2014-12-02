@@ -414,7 +414,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>ux-angularjs-datagrid v.1.1.5
+  <div class="summary"><p>ux-angularjs-datagrid v.1.1.6
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -518,7 +518,7 @@ on a per grid basis.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.1.5&quot;</span><span class="p">,</span>
+    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.1.6&quot;</span><span class="p">,</span>
 
 </pre></div>
         </td>
@@ -3078,6 +3078,7 @@ attribute.</p>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span> <span class="o">=</span> <span class="nx">dispatch</span><span class="p">;</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">activateScope</span> <span class="o">=</span> <span class="nx">activateScope</span><span class="p">;</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">deactivateScope</span> <span class="o">=</span> <span class="nx">deactivateScope</span><span class="p">;</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">updateLinks</span> <span class="o">=</span> <span class="nx">updateLinks</span><span class="p">;</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">render</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
             <span class="nx">flow</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">render</span><span class="p">);</span>
         <span class="p">};</span>
@@ -4187,6 +4188,19 @@ a row template changes, because it may change the height as well.</p>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">rowsLength</span> <span class="o">=</span> <span class="nx">len</span><span class="p">;</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;created %s dom elements&quot;</span><span class="p">,</span> <span class="nx">len</span><span class="p">);</span>
     <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">link</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">s</span> <span class="o">=</span> <span class="nx">s</span> <span class="o">||</span> <span class="nx">getScope</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">prev</span> <span class="o">=</span> <span class="nx">getScope</span><span class="p">(</span><span class="nx">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="nx">next</span> <span class="o">=</span> <span class="nx">getScope</span><span class="p">(</span><span class="nx">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">prev</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">prev</span><span class="p">.</span><span class="nx">$$nextSibling</span> <span class="o">=</span> <span class="nx">s</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nx">s</span><span class="p">.</span><span class="nx">$$prevSibling</span> <span class="o">=</span> <span class="nx">prev</span><span class="p">;</span>
+        <span class="nx">s</span><span class="p">.</span><span class="nx">$$nextSibling</span> <span class="o">=</span> <span class="nx">next</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">$$nextSibling</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">s</span><span class="p">.</span><span class="nx">$$nextSibling</span><span class="p">.</span><span class="nx">$$prevSibling</span> <span class="o">=</span> <span class="nx">s</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nx">scopes</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="nx">s</span><span class="p">;</span>
+    <span class="p">}</span>
 
 </pre></div>
         </td>
@@ -4227,12 +4241,8 @@ a row template changes, because it may change the height as well.</p>
         <span class="p">}</span>
         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">s</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$new</span><span class="p">();</span>
-            <span class="nx">prev</span> <span class="o">=</span> <span class="nx">getScope</span><span class="p">(</span><span class="nx">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
             <span class="nx">tpl</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">index</span><span class="p">]);</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">prev</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">prev</span><span class="p">.</span><span class="nx">$$nextSibling</span> <span class="o">=</span> <span class="nx">s</span><span class="p">;</span>
-                <span class="nx">s</span><span class="p">.</span><span class="nx">$$prevSibling</span> <span class="o">=</span> <span class="nx">prev</span><span class="p">;</span>
-            <span class="p">}</span>
+            <span class="nx">link</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="nx">s</span><span class="p">);</span>
             <span class="nx">s</span><span class="p">.</span><span class="nx">$status</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">compiledClass</span><span class="p">;</span>
             <span class="nx">s</span><span class="p">[</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">item</span><span class="p">]</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
 
@@ -6123,7 +6133,7 @@ the <a href="#values.activeRange">activeRange</a></p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">onRowTemplateChange</span><span class="p">(</span><span class="nx">evt</span><span class="p">,</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">oldTemplate</span><span class="p">,</span> <span class="nx">newTemplate</span><span class="p">,</span> <span class="nx">classes</span><span class="p">,</span> <span class="nx">skipUpdateHeights</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getNormalizedIndex</span><span class="p">(</span><span class="nx">item</span><span class="p">),</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">getExistingRow</span><span class="p">(</span><span class="nx">index</span><span class="p">),</span> <span class="nx">s</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">hasClass</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">uncompiledClass</span><span class="p">)</span> <span class="o">?</span> <span class="nx">compileRow</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="o">:</span> <span class="nx">el</span><span class="p">.</span><span class="nx">scope</span><span class="p">(),</span> <span class="nx">replaceEl</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getNormalizedIndex</span><span class="p">(</span><span class="nx">item</span><span class="p">),</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">getExistingRow</span><span class="p">(</span><span class="nx">index</span><span class="p">),</span> <span class="nx">s</span> <span class="o">=</span> <span class="nx">getScope</span><span class="p">(</span><span class="nx">index</span><span class="p">),</span> <span class="nx">replaceEl</span><span class="p">;</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">s</span> <span class="o">!==</span> <span class="nx">scope</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">replaceEl</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplateByName</span><span class="p">(</span><span class="nx">newTemplate</span><span class="p">).</span><span class="nx">template</span><span class="p">);</span>
             <span class="nx">replaceEl</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">uncompiledClass</span><span class="p">);</span>
@@ -6132,6 +6142,7 @@ the <a href="#values.activeRange">activeRange</a></p>
             <span class="p">}</span>
             <span class="nx">el</span><span class="p">.</span><span class="nx">parent</span><span class="p">()[</span><span class="mi">0</span><span class="p">].</span><span class="nx">replaceChild</span><span class="p">(</span><span class="nx">replaceEl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
             <span class="nx">activateScope</span><span class="p">(</span><span class="nx">s</span><span class="p">);</span>
+            <span class="nx">link</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="nx">s</span><span class="p">);</span>
             <span class="nx">el</span><span class="p">.</span><span class="nx">remove</span><span class="p">();</span>
             <span class="nx">s</span><span class="p">.</span><span class="nx">$destroy</span><span class="p">();</span>
             <span class="nx">scopes</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>

@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>sortModelGroups.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../doc-style.css" />
+  <script src="../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../", thisFile = "Users/wes/PhpstormProjects/wes/webux/ux-datagrid//addons/sortModelGroups.js", defaultSidebar = true;
+  </script>
+  <script src="../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+      <div class="heading h2">
+        <a href="#sortstatesmodel">sortStatesModel</a>
+      </div>
+      <div class="heading h3">
+        <a href="#isprivate">isPrivate</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getcurrentpath">getCurrentPath</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getcurrentpathwithoutparams">getCurrentPathWithoutParams</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getpath">getPath</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getallowmultiplestates">getAllowMultipleStates</a>
+      </div>
+      <div class="heading h3">
+        <a href="#setallowmultiplestates">setAllowMultipleStates</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getignoreparamsinpath">getIgnoreParamsInPath</a>
+      </div>
+      <div class="heading h3">
+        <a href="#setignoreparamsinpath">setIgnoreParamsInPath</a>
+      </div>
+      <div class="heading h3">
+        <a href="#haspathstate">hasPathState</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getpathstate">getPathState</a>
+      </div>
+      <div class="heading h3">
+        <a href="#setpathstate">setPathState</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getstate">getState</a>
+      </div>
+      <div class="heading h3">
+        <a href="#setstate">setState</a>
+      </div>
+      <div class="heading h3">
+        <a href="#createkeyfromstates">createKeyFromStates</a>
+      </div>
+      <div class="heading h3">
+        <a href="#createkeyfromstate">createKeyFromState</a>
+      </div>
+      <div class="heading h3">
+        <a href="#toggle">toggle</a>
+      </div>
+      <div class="heading h3">
+        <a href="#dirtystate">dirtyState</a>
+      </div>
+      <div class="heading h3">
+        <a href="#cleardirty">clearDirty</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getnextstate">getNextState</a>
+      </div>
+      <div class="heading h3">
+        <a href="#hasdirtysortstate">hasDirtySortState</a>
+      </div>
+      <div class="heading h3">
+        <a href="#cleansortvalue">cleanSortValue</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getlocale">getLocale</a>
+      </div>
+      <div class="heading h3">
+        <a href="#sortvaluecompare">sortValueCompare</a>
+      </div>
+      <div class="heading h3">
+        <a href="#sortnone">sortNone</a>
+      </div>
+      <div class="heading h3">
+        <a href="#createascsort">createAscSort</a>
+      </div>
+      <div class="heading h3">
+        <a href="#createdescsort">createDescSort</a>
+      </div>
+      <div class="heading h3">
+        <a href="#clear">clear</a>
+      </div>
+      <div class="heading h3">
+        <a href="#clearall">clearAll</a>
+      </div>
+      <div class="heading h2">
+        <a href="#sortmodel">sortModel</a>
+      </div>
+      <div class="heading h3">
+        <a href="#addsortcolumn">addSortColumn</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getcache">getCache</a>
+      </div>
+      <div class="heading h3">
+        <a href="#setcache">setCache</a>
+      </div>
+      <div class="heading h3">
+        <a href="#applysorts">applySorts</a>
+      </div>
+      <div class="heading h3">
+        <a href="#sortarray">sortArray</a>
+      </div>
+      <div class="heading h3">
+        <a href="#applylistsort">applyListSort</a>
+      </div>
+      <div class="heading h3">
+        <a href="#isapplied">isApplied</a>
+      </div>
+      <div class="heading h3">
+        <a href="#getsortstateof">getSortStateOf</a>
+      </div>
+      <div class="heading h3">
+        <a href="#"></a>
+      </div>
+      <div class="heading h3">
+        <a href="#getsortkey">getSortKey</a>
+      </div>
+      <div class="heading h3">
+        <a href="#sortgroups">sortGroups</a>
+      </div>
+      <div class="heading h3">
+        <a href="#addsortsfromoptions">addSortsFromOptions</a>
+      </div>
+      <div class="heading h3">
+        <a href="#togglesort">toggleSort</a>
+      </div>
+      <div class="heading h3">
+        <a href="#clear">clear</a>
+      </div>
+      <div class="heading h3">
+        <a href="#destroy">destroy</a>
+      </div>
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>sortModelGroups.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>uxDatagrid v.1.0.3
+(c) 2014, WebUX
+<a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
+License: MIT.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">){</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_SORT</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onBeforeSort&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_SORT</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onAfterSort&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_TOGGLE_SORT</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onBeforeToggleSort&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_TOGGLE_SORT</span> <span class="o">=</span> <span class="s2">&quot;datagrid:onAfterToggleSort&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">CLEAR_SORTS</span> <span class="o">=</span> <span class="s2">&quot;datagrid:clearSorts&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">CLEAR_ALL_SORTS</span> <span class="o">=</span> <span class="s2">&quot;datagrid:clearAllSorts&quot;</span><span class="p">;</span>
+
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">service</span><span class="p">(</span><span class="s2">&quot;sortStatesModel&quot;</span><span class="p">,</span> <span class="p">[</span> <span class="s2">&quot;$location&quot;</span><span class="p">,</span> <span class="s2">&quot;$rootScope&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">$location</span><span class="p">,</span> <span class="nx">$rootScope</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary"><hr />
+
+
+<div class="pilwrap" id="sortstatesmodel">
+  <h2>
+    <a href="#sortstatesmodel" name="sortstatesmodel" class="pilcrow">&#182;</a>
+    <a name="sortStatesModel">sortStatesModel</a>
+  </h2>
+</div>
+
+
+<p>ColumnStates for sorting. Singleton.
+Keeps track of weather a column is sorted or not.
+It persists based on the path.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Type</div>
+    <div class="dox_tag_detail">
+      <span class="dox_type">Object
+************************************************************************************</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">sortStatesModel</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;columnSortStatesModel&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">$rootScope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">$rootScope</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+        <span class="p">}),</span> <span class="nx">sortOptions</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nx">ASC</span><span class="o">:</span> <span class="s2">&quot;asc&quot;</span><span class="p">,</span>
+            <span class="nx">DESC</span><span class="o">:</span> <span class="s2">&quot;desc&quot;</span><span class="p">,</span>
+            <span class="nx">NONE</span><span class="o">:</span> <span class="s2">&quot;none&quot;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>}, lastPath = "", states = {}, multipleStates = {}, ignoreParamsInPath = {}, <br />
+The default of weather multiple states are allowed or not.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Type</div>
+    <div class="dox_tag_detail">
+      <span class="dox_type">Boolean
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">defaultAllowMultipleStates</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="isprivate">
+  <h3>
+    <a href="#isprivate" name="isprivate" class="pilcrow">&#182;</a>
+    <a name="isPrivate">isPrivate</a>
+  </h3>
+</div>
+
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">prop</span>
+      <span class="dox_type">String</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">isPrivate</span><span class="p">(</span><span class="nx">prop</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">charAt</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;$&quot;</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getcurrentpath">
+  <h3>
+    <a href="#getcurrentpath" name="getcurrentpath" class="pilcrow">&#182;</a>
+    <a name="getCurrentPath">getCurrentPath</a>
+  </h3>
+</div>
+
+
+<p>Get the whole url as a key to store the scroll value against.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getCurrentPath</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">$location</span><span class="p">.</span><span class="nx">path</span><span class="p">();</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getcurrentpathwithoutparams">
+  <h3>
+    <a href="#getcurrentpathwithoutparams" name="getcurrentpathwithoutparams" class="pilcrow">&#182;</a>
+    <a name="getCurrentPathWithoutParams">getCurrentPathWithoutParams</a>
+  </h3>
+</div>
+
+
+<p>Return just the url without any GET/Search params.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getCurrentPathWithoutParams</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">getCurrentPath</span><span class="p">().</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">).</span><span class="nx">shift</span><span class="p">();</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getpath">
+  <h3>
+    <a href="#getpath" name="getpath" class="pilcrow">&#182;</a>
+    <a name="getPath">getPath</a>
+  </h3>
+</div>
+
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Returns</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name"></span>
+      <span class="dox_type">string
+</span>
+      <span>{string}</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getPath</span><span class="p">()</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">path</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">getIgnoreParamsInPath</span><span class="p">())</span> <span class="p">{</span>
+                <span class="nx">path</span> <span class="o">=</span> <span class="nx">getCurrentPathWithoutParams</span><span class="p">();</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">path</span> <span class="o">=</span> <span class="nx">getCurrentPath</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">path</span> <span class="o">!==</span> <span class="nx">lastPath</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;getPath changed from %s to %s&quot;</span><span class="p">,</span> <span class="nx">lastPath</span><span class="p">,</span> <span class="nx">path</span><span class="p">);</span>
+                <span class="nx">lastPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">path</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getallowmultiplestates">
+  <h3>
+    <a href="#getallowmultiplestates" name="getallowmultiplestates" class="pilcrow">&#182;</a>
+    <a name="getAllowMultipleStates">getAllowMultipleStates</a>
+  </h3>
+</div>
+
+
+<p>Check for allowing of multipleStates on a per path basis or
+fall back on the defaultAllowMultipleStates</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Returns</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name"></span>
+      <span class="dox_type">Boolean
+</span>
+      <span>{Boolean}</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getAllowMultipleStates</span><span class="p">()</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">multipleStates</span><span class="p">[</span><span class="nx">getPath</span><span class="p">()];</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">result</span> <span class="o">===</span> <span class="kc">true</span> <span class="o">||</span> <span class="nx">result</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">defaultAllowMultipleStates</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="setallowmultiplestates">
+  <h3>
+    <a href="#setallowmultiplestates" name="setallowmultiplestates" class="pilcrow">&#182;</a>
+    <a name="setAllowMultipleStates">setAllowMultipleStates</a>
+  </h3>
+</div>
+
+
+<p>Set the allow multiple states on a per path basis.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">value</span>
+      <span class="dox_type">Boolean</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">path
+</span>
+      <span class="dox_type">String=</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">setAllowMultipleStates</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">path</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">path</span> <span class="o">=</span> <span class="nx">path</span> <span class="o">||</span> <span class="nx">getPath</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setAllowMultipleStates %s&quot;</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+                <span class="nx">multipleStates</span><span class="p">[</span><span class="nx">path</span><span class="p">]</span> <span class="o">=</span> <span class="nx">value</span> <span class="o">===</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="o">!!</span><span class="nx">multipleStates</span><span class="p">[</span><span class="nx">path</span><span class="p">];</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getignoreparamsinpath">
+  <h3>
+    <a href="#getignoreparamsinpath" name="getignoreparamsinpath" class="pilcrow">&#182;</a>
+    <a name="getIgnoreParamsInPath">getIgnoreParamsInPath</a>
+  </h3>
+</div>
+
+
+<p>Return weather params are ignored in storing path values.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Returns</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name"></span>
+      <span class="dox_type">Boolean
+</span>
+      <span>{Boolean}</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getIgnoreParamsInPath</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">ignoreParamsInPath</span><span class="p">[</span><span class="nx">getCurrentPathWithoutParams</span><span class="p">()]</span> <span class="o">===</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="setignoreparamsinpath">
+  <h3>
+    <a href="#setignoreparamsinpath" name="setignoreparamsinpath" class="pilcrow">&#182;</a>
+    <a name="setIgnoreParamsInPath">setIgnoreParamsInPath</a>
+  </h3>
+</div>
+
+
+<p>Change if path is stored with or without params.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">value
+</span>
+      <span class="dox_type">Boolean</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">setIgnoreParamsInPath</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setIgnoreParamsInPath %s&quot;</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+            <span class="nx">ignoreParamsInPath</span><span class="p">[</span><span class="nx">getCurrentPathWithoutParams</span><span class="p">()]</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="haspathstate">
+  <h3>
+    <a href="#haspathstate" name="haspathstate" class="pilcrow">&#182;</a>
+    <a name="hasPathState">hasPathState</a>
+  </h3>
+</div>
+
+
+<p>See if there is a path that is registered or not.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">path</span>
+      <span class="dox_type">String=</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">hasPathState</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">path</span> <span class="o">=</span> <span class="nx">path</span> <span class="o">||</span> <span class="nx">getPath</span><span class="p">();</span>
+            <span class="k">return</span> <span class="o">!!</span><span class="nx">states</span><span class="p">[</span><span class="nx">path</span><span class="p">];</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getpathstate">
+  <h3>
+    <a href="#getpathstate" name="getpathstate" class="pilcrow">&#182;</a>
+    <a name="getPathState">getPathState</a>
+  </h3>
+</div>
+
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">path</span>
+      <span class="dox_type">String=</span>
+    </div>
+    <div class="dox_tag_title">Returns</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name"></span>
+      <span class="dox_type">*</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">path</span> <span class="o">=</span> <span class="nx">path</span> <span class="o">||</span> <span class="nx">getPath</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">states</span><span class="p">[</span><span class="nx">path</span><span class="p">])</span> <span class="p">{</span>
+                <span class="nx">states</span><span class="p">[</span><span class="nx">path</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="nx">$dirty</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+                    <span class="nx">$path</span><span class="o">:</span> <span class="nx">path</span><span class="p">,</span>
+                    <span class="nx">$order</span><span class="o">:</span> <span class="p">[]</span>
+                <span class="p">};</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">states</span><span class="p">[</span><span class="nx">path</span><span class="p">];</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="setpathstate">
+  <h3>
+    <a href="#setpathstate" name="setpathstate" class="pilcrow">&#182;</a>
+    <a name="setPathState">setPathState</a>
+  </h3>
+</div>
+
+
+<p>Override all of the path states.
+Any columnNames not passed are set to none if not allow multiples.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">pathState
+</span>
+      <span class="dox_type">Object</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">setPathState</span><span class="p">(</span><span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">columnName</span><span class="p">,</span> <span class="nx">currentPathState</span> <span class="o">=</span> <span class="nx">getPathState</span><span class="p">();</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setPathState %s to %s&quot;</span><span class="p">,</span> <span class="nx">currentPathState</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
+            <span class="nx">setIgnoreParamsInPath</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+            <span class="k">for</span> <span class="p">(</span><span class="nx">columnName</span> <span class="k">in</span> <span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">pathState</span><span class="p">,</span> <span class="p">[</span> <span class="nx">columnName</span> <span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">currentPathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">columnName</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nx">setState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">],</span> <span class="nx">currentPathState</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getstate">
+  <h3>
+    <a href="#getstate" name="getstate" class="pilcrow">&#182;</a>
+    <a name="getState">getState</a>
+  </h3>
+</div>
+
+
+<p>Returns the current state at the currentPath of the columnName.
+'none', 'asc', 'desc'</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">columnName</span>
+    </div>
+    <div class="dox_tag_title">Returns</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name"></span>
+      <span class="dox_type">String
+</span>
+      <span>{String}</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">=</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">];</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="setstate">
+  <h3>
+    <a href="#setstate" name="setstate" class="pilcrow">&#182;</a>
+    <a name="setState">setState</a>
+  </h3>
+</div>
+
+
+<p>Set the state at the currentPath for that columnName.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">columnName</span>
+      <span class="dox_type">String</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">state</span>
+      <span class="dox_type">String</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">pathState
+</span>
+      <span class="dox_type">Object=</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">setState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">state</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">prevState</span><span class="p">;</span>
+            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">columnName</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">prevState</span> <span class="o">=</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">];</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">getAllowMultipleStates</span><span class="p">(</span><span class="nx">pathState</span><span class="p">.</span><span class="nx">$path</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nx">index</span> <span class="o">=</span> <span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">columnName</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">index</span> <span class="o">!==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">state</span> <span class="o">!==</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">getAllowMultipleStates</span><span class="p">())</span> <span class="p">{</span>
+                        <span class="nx">clear</span><span class="p">(</span><span class="nx">pathState</span><span class="p">);</span>
+                    <span class="p">}</span>
+                    <span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">columnName</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">=</span> <span class="nx">state</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">prevState</span> <span class="o">&amp;&amp;</span> <span class="nx">state</span> <span class="o">===</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="nx">dirtyState</span><span class="p">(</span><span class="nx">pathState</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="createkeyfromstates">
+  <h3>
+    <a href="#createkeyfromstates" name="createkeyfromstates" class="pilcrow">&#182;</a>
+    <a name="createKeyFromStates">createKeyFromStates</a>
+  </h3>
+</div>
+
+
+<p>converts the path state into a string key. ex("description:asc|index:desc")</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">pathState</span>
+      <span class="dox_type">Object=</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">createKeyFromStates</span><span class="p">(</span><span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="kd">var</span> <span class="nx">combo</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="nx">text</span><span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="nx">pathState</span><span class="o">:</span> <span class="nx">pathState</span>
+            <span class="p">};</span>
+            <span class="nx">exports</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">,</span> <span class="nx">createKeyFromState</span><span class="p">,</span> <span class="nx">combo</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">combo</span><span class="p">.</span><span class="nx">text</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="createkeyfromstate">
+  <h3>
+    <a href="#createkeyfromstate" name="createkeyfromstate" class="pilcrow">&#182;</a>
+    <a name="createKeyFromState">createKeyFromState</a>
+  </h3>
+</div>
+
+
+<p>converts the state into a key string. ex("description:asc")</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">columnName</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">index</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">list</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">combo
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">createKeyFromState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">combo</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">columnName</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">combo</span><span class="p">.</span><span class="nx">text</span> <span class="o">+=</span> <span class="p">(</span><span class="nx">combo</span><span class="p">.</span><span class="nx">text</span><span class="p">.</span><span class="nx">length</span> <span class="o">?</span> <span class="s2">&quot;|&quot;</span> <span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="nx">columnName</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">combo</span><span class="p">.</span><span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">];</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="toggle">
+  <h3>
+    <a href="#toggle" name="toggle" class="pilcrow">&#182;</a>
+    <a name="toggle">toggle</a>
+  </h3>
+</div>
+
+
+<p>Increment the columnName's state to the next in the list.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">columnName
+</span>
+      <span class="dox_type">String</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">toggle</span><span class="p">(</span><span class="nx">columnName</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">state</span> <span class="o">=</span> <span class="nx">getState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">),</span> <span class="nx">nextState</span> <span class="o">=</span> <span class="nx">getNextState</span><span class="p">(</span><span class="nx">state</span><span class="p">);</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;toggle %s from %s to %s&quot;</span><span class="p">,</span> <span class="nx">columnName</span><span class="p">,</span> <span class="nx">state</span><span class="p">,</span> <span class="nx">nextState</span><span class="p">);</span>
+            <span class="nx">setState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">nextState</span><span class="p">);</span>
+            <span class="nx">dirtyState</span><span class="p">();</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="dirtystate">
+  <h3>
+    <a href="#dirtystate" name="dirtystate" class="pilcrow">&#182;</a>
+    <a name="dirtyState">dirtyState</a>
+  </h3>
+</div>
+
+
+<p>Sets a state to dirty for the next lookup.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">pathState
+</span>
+      <span class="dox_type">Object=</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">dirtyState</span><span class="p">(</span><span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;dirtyState %s&quot;</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
+            <span class="nx">pathState</span><span class="p">.</span><span class="nx">$dirty</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="cleardirty">
+  <h3>
+    <a href="#cleardirty" name="cleardirty" class="pilcrow">&#182;</a>
+    <a name="clearDirty">clearDirty</a>
+  </h3>
+</div>
+
+
+<p>clears the dirty state.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">pathState
+</span>
+      <span class="dox_type">Object=</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">clearDirty</span><span class="p">(</span><span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;clearDirty %s&quot;</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
+            <span class="nx">pathState</span><span class="p">.</span><span class="nx">$dirty</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getnextstate">
+  <h3>
+    <a href="#getnextstate" name="getnextstate" class="pilcrow">&#182;</a>
+    <a name="getNextState">getNextState</a>
+  </h3>
+</div>
+
+
+<p>calculate the next state would be given a currentState. Used for toggling states.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">state</span>
+      <span class="dox_type">String</span>
+    </div>
+    <div class="dox_tag_title">Returns</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name"></span>
+      <span class="dox_type">String
+</span>
+      <span>{String}</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getNextState</span><span class="p">(</span><span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">ASC</span><span class="p">;</span>
+            <span class="k">switch</span> <span class="p">(</span><span class="nx">state</span><span class="p">)</span> <span class="p">{</span>
+              <span class="k">case</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="o">:</span>
+                <span class="nx">result</span> <span class="o">=</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">ASC</span><span class="p">;</span>
+                <span class="k">break</span><span class="p">;</span>
+
+              <span class="k">case</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">ASC</span><span class="o">:</span>
+                <span class="nx">result</span> <span class="o">=</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">DESC</span><span class="p">;</span>
+                <span class="k">break</span><span class="p">;</span>
+
+              <span class="k">case</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">DESC</span><span class="o">:</span>
+                <span class="nx">result</span> <span class="o">=</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">;</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="hasdirtysortstate">
+  <h3>
+    <a href="#hasdirtysortstate" name="hasdirtysortstate" class="pilcrow">&#182;</a>
+    <a name="hasDirtySortState">hasDirtySortState</a>
+  </h3>
+</div>
+
+
+<p>Determines if a state is dirty or not.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">pathState</span>
+      <span class="dox_type">String=</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">hasDirtySortState</span><span class="p">(</span><span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="k">return</span> <span class="nx">pathState</span><span class="p">.</span><span class="nx">$dirty</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="cleansortvalue">
+  <h3>
+    <a href="#cleansortvalue" name="cleansortvalue" class="pilcrow">&#182;</a>
+    <a name="cleanSortValue">cleanSortValue</a>
+  </h3>
+</div>
+
+
+<p>Clears up undefined and null values.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">value</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">cleanSortValue</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-25" id="section-25">&#182;</a>
+</div>
+<p>undefined and null should be compared as an empty string.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">value</span> <span class="o">===</span> <span class="kc">undefined</span> <span class="o">||</span> <span class="nx">value</span> <span class="o">===</span> <span class="kc">null</span> <span class="o">?</span> <span class="s2">&quot;&quot;</span> <span class="o">:</span> <span class="nx">value</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">result</span> <span class="o">===</span> <span class="s2">&quot;string&quot;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">result</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getlocale">
+  <h3>
+    <a href="#getlocale" name="getlocale" class="pilcrow">&#182;</a>
+    <a name="getLocale">getLocale</a>
+  </h3>
+</div>
+
+
+<p>Listed so it can be overridden for different locals. override by setting the method on ux.datagrid.sortStatesModel.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">getLocale</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s2">&quot;en&quot;</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="sortvaluecompare">
+  <h3>
+    <a href="#sortvaluecompare" name="sortvaluecompare" class="pilcrow">&#182;</a>
+    <a name="sortValueCompare">sortValueCompare</a>
+  </h3>
+</div>
+
+
+<p>Compare the string values for sorting.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">a</span>
+      <span class="dox_type">String</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">v</span>
+      <span class="dox_type">String</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">sortValueCompare</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">a</span> <span class="o">=</span> <span class="nx">cleanSortValue</span><span class="p">(</span><span class="nx">a</span><span class="p">);</span>
+            <span class="nx">b</span> <span class="o">=</span> <span class="nx">cleanSortValue</span><span class="p">(</span><span class="nx">b</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">a</span> <span class="o">&gt;</span> <span class="nx">b</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="nx">a</span> <span class="o">&lt;</span> <span class="nx">b</span> <span class="o">?</span> <span class="o">-</span><span class="mi">1</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="sortnone">
+  <h3>
+    <a href="#sortnone" name="sortnone" class="pilcrow">&#182;</a>
+    <a name="sortNone">sortNone</a>
+  </h3>
+</div>
+
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">a</span>
+      <span class="dox_type">*</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">b</span>
+      <span class="dox_type">*</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">sortNone</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="createascsort">
+  <h3>
+    <a href="#createascsort" name="createascsort" class="pilcrow">&#182;</a>
+    <a name="createAscSort">createAscSort</a>
+  </h3>
+</div>
+
+
+<p>Create an ASC sort wrapped on that property.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">property</span>
+      <span class="dox_type">String</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">createAscSort</span><span class="p">(</span><span class="nx">property</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kd">function</span> <span class="nx">asc</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">av</span> <span class="o">=</span> <span class="nx">a</span><span class="p">[</span><span class="nx">property</span><span class="p">],</span> <span class="nx">bv</span> <span class="o">=</span> <span class="nx">b</span><span class="p">[</span><span class="nx">property</span><span class="p">];</span>
+                <span class="k">return</span> <span class="nx">sortValueCompare</span><span class="p">(</span><span class="nx">av</span><span class="p">,</span> <span class="nx">bv</span><span class="p">);</span>
+            <span class="p">};</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="createdescsort">
+  <h3>
+    <a href="#createdescsort" name="createdescsort" class="pilcrow">&#182;</a>
+    <a name="createDescSort">createDescSort</a>
+  </h3>
+</div>
+
+
+<p>Create a DESC sort wrapped on that property.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">property</span>
+      <span class="dox_type">String</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">createDescSort</span><span class="p">(</span><span class="nx">property</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kd">function</span> <span class="nx">desc</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">av</span> <span class="o">=</span> <span class="nx">a</span><span class="p">[</span><span class="nx">property</span><span class="p">],</span> <span class="nx">bv</span> <span class="o">=</span> <span class="nx">b</span><span class="p">[</span><span class="nx">property</span><span class="p">];</span>
+                <span class="k">return</span> <span class="o">-</span><span class="nx">sortValueCompare</span><span class="p">(</span><span class="nx">av</span><span class="p">,</span> <span class="nx">bv</span><span class="p">);</span>
+            <span class="p">};</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="clear">
+  <h3>
+    <a href="#clear" name="clear" class="pilcrow">&#182;</a>
+    <a name="clear">clear</a>
+  </h3>
+</div>
+
+
+<p>Clear the states for the currentPath.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">pathState
+</span>
+      <span class="dox_type">Object=</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">clear</span><span class="p">(</span><span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">i</span><span class="p">;</span>
+            <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">getPathState</span><span class="p">(</span><span class="nx">getPath</span><span class="p">());</span>
+            <span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">.</span><span class="nx">length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="k">in</span> <span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">pathState</span><span class="p">,</span> <span class="p">[</span> <span class="nx">i</span> <span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">pathState</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="clearall">
+  <h3>
+    <a href="#clearall" name="clearall" class="pilcrow">&#182;</a>
+    <a name="clearAll">clearAll</a>
+  </h3>
+</div>
+
+
+<p>Clear all stored sorts.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">clearAll</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">states</span> <span class="o">=</span> <span class="p">{};</span>
+            <span class="nx">multipleStates</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="p">}</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getPath</span> <span class="o">=</span> <span class="nx">getPath</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getAllowMultipleStates</span> <span class="o">=</span> <span class="nx">getAllowMultipleStates</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">setAllowMultipleStates</span> <span class="o">=</span> <span class="nx">setAllowMultipleStates</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getIgnoreParamsInPath</span> <span class="o">=</span> <span class="nx">getIgnoreParamsInPath</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">setIgnoreParamsInPath</span> <span class="o">=</span> <span class="nx">setIgnoreParamsInPath</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">hasPathState</span> <span class="o">=</span> <span class="nx">hasPathState</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getPathState</span> <span class="o">=</span> <span class="nx">getPathState</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">setPathState</span> <span class="o">=</span> <span class="nx">setPathState</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getState</span> <span class="o">=</span> <span class="nx">getState</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">setState</span> <span class="o">=</span> <span class="nx">setState</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">toggle</span> <span class="o">=</span> <span class="nx">toggle</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">dirtyState</span> <span class="o">=</span> <span class="nx">dirtyState</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">clearDirty</span> <span class="o">=</span> <span class="nx">clearDirty</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">sortNone</span> <span class="o">=</span> <span class="nx">sortNone</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">createAscSort</span> <span class="o">=</span> <span class="nx">createAscSort</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">createDescSort</span> <span class="o">=</span> <span class="nx">createDescSort</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">hasDirtySortState</span> <span class="o">=</span> <span class="nx">hasDirtySortState</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">createKeyFromStates</span> <span class="o">=</span> <span class="nx">createKeyFromStates</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">isPrivate</span> <span class="o">=</span> <span class="nx">isPrivate</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getLocale</span> <span class="o">=</span> <span class="nx">getLocale</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">clear</span> <span class="o">=</span> <span class="nx">clear</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">clearAll</span> <span class="o">=</span> <span class="nx">clearAll</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">sortOptions</span> <span class="o">=</span> <span class="nx">sortOptions</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+    <span class="p">}();</span>
+    <span class="k">return</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">sortStatesModel</span><span class="p">;</span>
+<span class="p">}</span> <span class="p">]);</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="sortmodel">
+  <h2>
+    <a href="#sortmodel" name="sortmodel" class="pilcrow">&#182;</a>
+    <a name="sortModel">sortModel</a>
+  </h2>
+</div>
+
+
+<p>The sortModel addon is used to apply sorting to the contents of the grid.
+It stores the sorted state on the sortStatesModel to keep around until cleared.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">sortStatesModel
+</span>
+      <span class="dox_type">Object</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;sortModel&quot;</span><span class="p">,</span> <span class="p">[</span> <span class="s2">&quot;sortStatesModel&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">sortStatesModel</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kd">function</span> <span class="nx">sortModel</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-34" id="section-34">&#182;</a>
+</div>
+<p>cache is the stored sort values. It needs to be cleared if the data changes.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;sortModel&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">sorts</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">original</span><span class="p">,</span> <span class="nx">cache</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">lastSortResult</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="addsortcolumn">
+  <h3>
+    <a href="#addsortcolumn" name="addsortcolumn" class="pilcrow">&#182;</a>
+    <a name="addSortColumn">addSortColumn</a>
+  </h3>
+</div>
+
+
+<p>add a column so that it's sort state can be toggled and used.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">name</span>
+      <span class="dox_type">String</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">methods
+</span>
+      <span class="dox_type">Object</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">addSortColumn</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">addSortColumn</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">methods</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">sorts</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">methods</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">();</span>
+            <span class="nx">pathState</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">||</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">;</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getcache">
+  <h3>
+    <a href="#getcache" name="getcache" class="pilcrow">&#182;</a>
+    <a name="getCache">getCache</a>
+  </h3>
+</div>
+
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">key</span>
+      <span class="dox_type">String</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">cache</span><span class="p">[</span><span class="nx">key</span><span class="p">];</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="setcache">
+  <h3>
+    <a href="#setcache" name="setcache" class="pilcrow">&#182;</a>
+    <a name="setCache">setCache</a>
+  </h3>
+</div>
+
+
+<p>Stores the sort value locally so that if that sort is again performed it will not need to process.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">key</span>
+      <span class="dox_type">String</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">value
+</span>
+      <span class="dox_type">Array</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">setCache</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">setCache</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">cache</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="applysorts">
+  <h3>
+    <a href="#applysorts" name="applysorts" class="pilcrow">&#182;</a>
+    <a name="applySorts">applySorts</a>
+  </h3>
+</div>
+
+
+<p>Apply the sorts to the array. Pull from cache if it exists.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">ary</span>
+      <span class="dox_type">Array</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">sortOptions</span>
+      <span class="dox_type">Object</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">applySorts</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">applySorts</span><span class="p">(</span><span class="nx">ary</span><span class="p">,</span> <span class="nx">sortOptions</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">pathStateRef</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">(),</span> <span class="nx">currentPathState</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">copy</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">sortOptions</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;apply sortOptions&quot;</span><span class="p">);</span>
+                <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">setPathState</span><span class="p">(</span><span class="nx">sortOptions</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">original</span> <span class="o">!==</span> <span class="nx">ary</span> <span class="o">||</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">hasDirtySortState</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">original</span> <span class="o">=</span> <span class="nx">ary</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">original</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">lastSortResult</span> <span class="o">=</span> <span class="nx">original</span><span class="p">;</span>
+                    <span class="k">return</span> <span class="nx">lastSortResult</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">setCache</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nx">original</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-39" id="section-39">&#182;</a>
+</div>
+<p>the original is always without any sort options.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">result</span><span class="p">.</span><span class="nx">$processing</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">result</span><span class="p">.</span><span class="nx">$processing</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                    <span class="kd">var</span> <span class="nx">key</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">createKeyFromStates</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">),</span> <span class="nx">event</span><span class="p">,</span> <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">copy</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-40" id="section-40">&#182;</a>
+</div>
+<p>clone so they cannot mess with the data directly.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="nx">result</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;applySorts %s&quot;</span><span class="p">,</span> <span class="nx">key</span><span class="p">);</span>
+                    <span class="nx">event</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_SORT</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">currentPathState</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-41" id="section-41">&#182;</a>
+</div>
+<p>prevent default on event to prevent sort.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">defaultPrevented</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="o">||</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">).</span><span class="nx">length</span> <span class="o">!==</span> <span class="nx">original</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  store sort %s&quot;</span><span class="p">,</span> <span class="nx">key</span><span class="p">);</span>
+                            <span class="nx">result</span><span class="p">.</span><span class="nx">setCache</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">original</span> <span class="o">&amp;&amp;</span> <span class="nx">original</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">||</span> <span class="p">[]);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-42" id="section-42">&#182;</a>
+</div>
+<p>clone it</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                            <span class="nx">ux</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">,</span> <span class="nx">applyListSort</span><span class="p">,</span> <span class="p">{</span>
+                                <span class="nx">grouped</span><span class="o">:</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">grouped</span><span class="p">,</span>
+                                <span class="nx">pathState</span><span class="o">:</span> <span class="nx">pathState</span><span class="p">,</span>
+                                <span class="nx">ary</span><span class="o">:</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span>
+                            <span class="p">});</span>
+                        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  pull sort from cache&quot;</span><span class="p">);</span>
+                        <span class="p">}</span>
+                        <span class="nx">lastSortResult</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getCache</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
+                        <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">clearDirty</span><span class="p">(</span><span class="nx">pathStateRef</span><span class="p">);</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-43" id="section-43">&#182;</a>
+</div>
+<p>TODO: need to unit test this to make sure it works with async sort.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                        <span class="nx">lastSortResult</span> <span class="o">=</span> <span class="nx">original</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    <span class="nx">result</span><span class="p">.</span><span class="nx">$processing</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_SORT</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">,</span> <span class="nx">currentPathState</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">lastSortResult</span><span class="p">;</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="sortarray">
+  <h3>
+    <a href="#sortarray" name="sortarray" class="pilcrow">&#182;</a>
+    <a name="sortArray">sortArray</a>
+  </h3>
+</div>
+
+
+<p>Perform the sort dictated by the state.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">ary</span>
+      <span class="dox_type">Array</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">columnName</span>
+      <span class="dox_type">String</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">pathState</span>
+      <span class="dox_type">Object</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">sortArray</span><span class="p">(</span><span class="nx">ary</span><span class="p">,</span> <span class="nx">columnName</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">state</span> <span class="o">=</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">];</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">state</span> <span class="o">&amp;&amp;</span> <span class="nx">sorts</span><span class="p">[</span><span class="nx">columnName</span><span class="p">])</span> <span class="p">{</span>
+                <span class="nx">ux</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">array</span><span class="p">.</span><span class="nx">sort</span><span class="p">(</span><span class="nx">ary</span><span class="p">,</span> <span class="nx">sorts</span><span class="p">[</span><span class="nx">columnName</span><span class="p">][</span><span class="nx">state</span><span class="p">]);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">ary</span><span class="p">;</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="applylistsort">
+  <h3>
+    <a href="#applylistsort" name="applylistsort" class="pilcrow">&#182;</a>
+    <a name="applyListSort">applyListSort</a>
+  </h3>
+</div>
+
+
+<p>Take into consideration for grouped data and apply the appropriate sorts for the array.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">columnName</span>
+      <span class="dox_type">String</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">index</span>
+      <span class="dox_type">Number</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">list</span>
+      <span class="dox_type">Array</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">data
+</span>
+      <span class="dox_type">Object</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">applyListSort</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">list</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">len</span><span class="p">;</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">grouped</span> <span class="o">&amp;&amp;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">ary</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">ary</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">grouped</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">result</span><span class="p">.</span><span class="nx">sortGroups</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">len</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">ary</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+          <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">data</span><span class="p">.</span><span class="nx">ary</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">extend</span><span class="p">({},</span> <span class="nx">data</span><span class="p">.</span><span class="nx">ary</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-46" id="section-46">&#182;</a>
+</div>
+<p>shallow copy</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">data</span><span class="p">.</span><span class="nx">ary</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">data</span><span class="p">.</span><span class="nx">grouped</span><span class="p">]</span> <span class="o">=</span> <span class="nx">sortArray</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">ary</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">data</span><span class="p">.</span><span class="nx">grouped</span><span class="p">].</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nx">columnName</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">pathState</span><span class="p">);</span>
+          <span class="p">}</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+          <span class="nx">sortArray</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">ary</span><span class="p">,</span> <span class="nx">columnName</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">pathState</span><span class="p">);</span>
+        <span class="p">}</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">sortArray</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">ary</span><span class="p">,</span> <span class="nx">columnName</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">pathState</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="isapplied">
+  <h3>
+    <a href="#isapplied" name="isapplied" class="pilcrow">&#182;</a>
+    <a name="isApplied">isApplied</a>
+  </h3>
+</div>
+
+
+<p>Determine if that sort is already applied.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">name</span>
+      <span class="dox_type">String</span>
+    </div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">methodName</span>
+      <span class="dox_type">String</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">isApplied</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">isApplied</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">methodName</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">()[</span><span class="nx">name</span><span class="p">]</span> <span class="o">===</span> <span class="nx">methodName</span><span class="p">;</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getsortstateof">
+  <h3>
+    <a href="#getsortstateof" name="getsortstateof" class="pilcrow">&#182;</a>
+    <a name="getSortStateOf">getSortStateOf</a>
+  </h3>
+</div>
+
+
+<p>Get the current sort state of that column.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">name</span>
+      <span class="dox_type">String</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getSortStateOf</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">getSortStateOf</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">()[</span><span class="nx">name</span><span class="p">];</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="">
+  <h3>
+    <a href="#" name="" class="pilcrow">&#182;</a>
+    <a name="multipleSort"></a>
+  </h3>
+</div>
+
+
+<p>Enable or disable multiple state sorting.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Type</div>
+    <div class="dox_tag_detail">
+      <span class="dox_type">setAllowMultipleStates
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">multipleSort</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">setAllowMultipleStates</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="getsortkey">
+  <h3>
+    <a href="#getsortkey" name="getsortkey" class="pilcrow">&#182;</a>
+    <a name="getSortkey">getSortKey</a>
+  </h3>
+</div>
+
+
+<p>Get the sortKey for a state.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Type</div>
+    <div class="dox_tag_detail">
+      <span class="dox_type">Function</span>
+      <span class="dox_type">createKeyFromStates
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">getSortKey</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">createKeyFromStates</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="sortgroups">
+  <h3>
+    <a href="#sortgroups" name="sortgroups" class="pilcrow">&#182;</a>
+    <a name="sortGroups">sortGroups</a>
+  </h3>
+</div>
+
+
+<p>Use true to sort groups; false to sort children within groups.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Type</div>
+    <div class="dox_tag_detail">
+      <span class="dox_type">boolean
+</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">sortGroups</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="addsortsfromoptions">
+  <h3>
+    <a href="#addsortsfromoptions" name="addsortsfromoptions" class="pilcrow">&#182;</a>
+    <a name="addSortsFromOptions">addSortsFromOptions</a>
+  </h3>
+</div>
+
+
+<p>Based on the options passed, automatically add sort columns for those and create states.
+If the states already exist apply those states on the render.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="kd">function</span> <span class="nx">addSortsFromOptions</span><span class="p">()</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">methods</span><span class="p">,</span> <span class="nx">alreadyHasState</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">hasPathState</span><span class="p">(),</span> <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sorts</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="k">in</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sorts</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sorts</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">===</span> <span class="s2">&quot;object&quot;</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">setState</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sorts</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">value</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-53" id="section-53">&#182;</a>
+</div>
+<p>value is the default sort state.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                        <span class="nx">methods</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sorts</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">alreadyHasState</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">setState</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sorts</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">pathState</span><span class="p">);</span>
+                        <span class="p">}</span>
+                        <span class="nx">methods</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="nx">asc</span><span class="o">:</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">createAscSort</span><span class="p">(</span><span class="nx">i</span><span class="p">),</span>
+                            <span class="nx">desc</span><span class="o">:</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">createDescSort</span><span class="p">(</span><span class="nx">i</span><span class="p">),</span>
+                            <span class="nx">none</span><span class="o">:</span> <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">sortNone</span>
+                        <span class="p">};</span>
+                    <span class="p">}</span>
+                    <span class="nx">result</span><span class="p">.</span><span class="nx">addSortColumn</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">methods</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sortGroups</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">sortGroups</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">}</span>
+        <span class="p">}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="togglesort">
+  <h3>
+    <a href="#togglesort" name="togglesort" class="pilcrow">&#182;</a>
+    <a name="toggleSort">toggleSort</a>
+  </h3>
+</div>
+
+
+<p>Sorts always toggle clockwise none -> asc -> desc.</p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">name
+</span>
+      <span class="dox_type">String</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">toggleSort</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">toggleSort</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;toggleSort %s&quot;</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_TOGGLE_SORT</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">creepRenderModel</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">creepRenderModel</span><span class="p">.</span><span class="nx">stop</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">toggle</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-55" id="section-55">&#182;</a>
+</div>
+
+<div class="highlight"><pre><code>       <span class="n">result</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+</code></pre></div>
+
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">result</span><span class="p">.</span><span class="nx">applySorts</span><span class="p">(</span><span class="nx">original</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_TOGGLE_SORT</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="clear">
+  <h3>
+    <a href="#clear" name="clear" class="pilcrow">&#182;</a>
+    <a name="clear">clear</a>
+  </h3>
+</div>
+
+
+<p>clear all cached sort values for this grid.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">clear</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">clear</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">cache</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="p">};</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs"><div class="dox">
+  <div class="summary">
+<div class="pilwrap" id="destroy">
+  <h3>
+    <a href="#destroy" name="destroy" class="pilcrow">&#182;</a>
+    <a name="destroy">destroy</a>
+  </h3>
+</div>
+
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">destroy</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">destroy</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">result</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">lastSortResult</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">sorts</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">cache</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">original</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">sortModel</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">inst</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">CLEAR_SORTS</span><span class="p">,</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">clear</span><span class="p">));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">CLEAR_ALL_SORTS</span><span class="p">,</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">clearAll</span><span class="p">));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">sortModel</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
+        <span class="nx">addSortsFromOptions</span><span class="p">();</span>
+        <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">}</span> <span class="p">]);</span>
+<span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

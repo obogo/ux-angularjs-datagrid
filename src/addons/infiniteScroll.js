@@ -4,7 +4,7 @@
  * @type {string}
  */
 angular.module('ux').factory('infiniteScroll', function () {
-    return function infiniteScroll(inst, $filter) {
+    return ['inst', '$filter', function infiniteScroll(inst, $filter) {
         var result = {}, scrollOffset = -1, loadingRow = {_template: 'loadingRow'}, unwatchers = [];
 
         /**
@@ -102,5 +102,5 @@ angular.module('ux').factory('infiniteScroll', function () {
         result.enable();
 
         inst.infiniteScroll = result;
-    };
+    }];
 });

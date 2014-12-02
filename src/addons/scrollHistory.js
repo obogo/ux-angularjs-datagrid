@@ -89,7 +89,7 @@ angular.module('ux').service('scrollHistoryModel', ['$location', '$rootScope', f
  */
 angular.module('ux').factory('scrollHistory', function () {
 
-    return function (inst, scrollHistoryModel) {
+    return ['inst', 'scrollHistoryModel', function (inst, scrollHistoryModel) {
         var result = exports.logWrapper('scrollHistory', {}, 'blue', inst.dispatch), ready,
             path = inst.options.scrollHistory && inst.options.scrollHistory.path || '', scrollPos,
             waitingForAfterDataChange = false, unwatchers = [];
@@ -200,5 +200,5 @@ angular.module('ux').factory('scrollHistory', function () {
 
         inst.scrollHistory = result;
         return inst;
-    };
+    }];
 });

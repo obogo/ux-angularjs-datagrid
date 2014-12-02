@@ -1,5 +1,5 @@
 /*
-* ux-angularjs-datagrid v.1.1.5
+* ux-angularjs-datagrid v.1.1.6
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -99,7 +99,7 @@ angular.module("ux").service("scrollHistoryModel", [ "$location", "$rootScope", 
  * instance.
  */
 angular.module("ux").factory("scrollHistory", function() {
-    return function(inst, scrollHistoryModel) {
+    return [ "inst", "scrollHistoryModel", function(inst, scrollHistoryModel) {
         var result = exports.logWrapper("scrollHistory", {}, "blue", inst.dispatch), ready, path = inst.options.scrollHistory && inst.options.scrollHistory.path || "", scrollPos, waitingForAfterDataChange = false, unwatchers = [];
         if (inst.options.scrollHistory && inst.options.scrollHistory.ignoreParams) {
             path = scrollHistoryModel.getPath().split("?").shift();
@@ -200,6 +200,6 @@ angular.module("ux").factory("scrollHistory", function() {
         };
         inst.scrollHistory = result;
         return inst;
-    };
+    } ];
 });
 }(this.ux = this.ux || {}, function() {return this;}()));

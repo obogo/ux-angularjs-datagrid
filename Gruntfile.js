@@ -107,10 +107,10 @@ module.exports = function (grunt) {
             build_min: {
                 options: {
                     report: 'gzip',
-                    mangle: false,
+                    mangle: true,
                     compress: true,
                     preserveComments: 'none',
-                    beautify: false,
+                    sourceMap: true,
                     banner: '<%= banner %><%= wrapStart %>',
                     footer: '<%= wrapEnd %>'
                 },
@@ -123,6 +123,59 @@ module.exports = function (grunt) {
                         'src/core/Flow.js',
                         'src/ux-datagrid.js',
                         'src/core/addons/*.js'
+                    ],
+                    'build/latest/addons/desktop/ux-<%= pkg.filename %>-focusManager.min.js': [
+                        'src/addons/libs/ux-visibility.js',
+                        'src/addons/libs/ux-selector.js',
+                        'src/addons/desktop/gridFocusManager.js'
+                    ],
+                    'build/latest/addons/desktop/ux-<%= pkg.filename %>-disableHoverWhileScrolling.min.js': [
+                        'src/addons/desktop/disableHoverWhileScrolling.js'
+                    ],
+                    'build/latest/addons/touch/ux-<%= pkg.filename %>-iscroll.min.js': [
+                        'src/addons/touch/iScrollAddon.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-collapsibleGroups.min.js': [
+                        'src/addons/collapsibleGroups.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-expandableGroups.min.js': [
+                        'src/addons/expandableGroups.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-expandRows.min.js': [
+                        'src/addons/expandRows.js'
+                    ],
+//                    'build/latest/addons/ux-<%= pkg.filename %>-findInList.min.js': [
+//                        'src/addons/findInList.js'
+//                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-gridLogger.min.js': [
+                        'src/addons/gridLogger.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-infiniteScroll.min.js': [
+                        'src/addons/infiniteScroll.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-scrollHistory.min.js': [
+                        'src/addons/scrollHistory.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-sortModel.min.js': [
+                        'src/addons/sortModel.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-statsModel.min.js': [
+                        'src/addons/statsModel.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-windowScroll.min.js': [
+                        'src/addons/windowScroll.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-memoryOptimizer.min.js': [
+                        'src/addons/memoryOptimizer.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-scrollBar.min.js': [
+                        'src/addons/scrollBar.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-scrollBounce.min.js': [
+                        'src/addons/scrollBounce.js'
+                    ],
+                    'build/latest/other/ux-doubleScroll.min.js': [
+                        'src/other/doubleScroll.js'
                     ]
                 }
             }
@@ -178,7 +231,7 @@ module.exports = function (grunt) {
         },
         jasmine: {
             tests: {
-                src: ['vendor/angular.js', 'vendor/angular-mocks.js', 'build/latest/angular-ux-datagrid.js', 'build/latest/addons/**/*.js', 'build/latest/other/**/*.js'],
+                src: ['vendor/angular.js', 'vendor/angular-mocks.js', 'build/latest/angular-ux-datagrid.min.js', 'build/latest/addons/**/*.min.js', 'build/latest/other/**/*.min.js'],
                 options: {
                     specs: 'test/unit/tests/**/*.js'
                 }
@@ -189,9 +242,6 @@ module.exports = function (grunt) {
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-ngmin');
-    grunt.loadNpmTasks('grunt-contrib-compress');
-    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-replace');
     grunt.loadNpmTasks('grunt-contrib-jasmine');

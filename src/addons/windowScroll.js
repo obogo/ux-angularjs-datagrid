@@ -2,7 +2,7 @@
 // we want to override the default scrolling if it is an IOS device.
 angular.module('ux').factory('windowScroll', function () {
 
-    return function windowScroll(inst) {
+    return ['inst', function windowScroll(inst) {
         var result = inst.scrollModel;
         inst.calculateViewportHeight = function () {
             return window.screen.height;
@@ -31,5 +31,5 @@ angular.module('ux').factory('windowScroll', function () {
 
         inst.scope.$on(ux.datagrid.events.ON_READY, resetScroll);
         return inst;
-    };
+    }];
 });

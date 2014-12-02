@@ -9,6 +9,7 @@
     "main": "build/latest/angular-ux-datagrid.js",
     "ignore": [
         "**/.*",
+        "*.json",
         "node_modules",
         "bower_components",
         "test",

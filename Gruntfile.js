@@ -111,6 +111,7 @@ module.exports = function (grunt) {
                     compress: true,
                     preserveComments: 'none',
                     sourceMap: true,
+                    sourceMapIncludeSources: true,
                     banner: '<%= banner %><%= wrapStart %>',
                     footer: '<%= wrapEnd %>'
                 },

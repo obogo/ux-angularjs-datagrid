@@ -6,7 +6,7 @@
         "wesjones <cybus10@gmail.com>"
     ],
     "description": "A high performance datagrid for angularjs",
-    "main": "build/latest/**/*.js",
+    "main": "build/latest/angular-ux-datagrid.js",
     "ignore": [
         "**/.*",
         "node_modules",

@@ -41,6 +41,7 @@
     "commit": "239507b74c4f5915a235ce1cab475245596a3ddd"
   },
   "_source": "git://github.com/webux/ux-angularjs-datagrid.git",
-  "_target": "~1.1.2",
-  "_originalSource": "ux-datagrid"
+  "_target": "~1.1.5",
+  "_originalSource": "ux-datagrid",
+  "_direct": true
 }

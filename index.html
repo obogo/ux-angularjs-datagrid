@@ -75,7 +75,7 @@ bower install "ux-datagrid"
 <link rel="stylesheet" type="text/css" href="css/default.css">
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>
 <!--<script src="bower_components/angular/angular.min.js"></script>-->
-<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.js"></script>
+<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.min.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-infiniteScroll.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBar.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBounce.js"></script>
@@ -544,6 +544,13 @@ angular.module('ux').factory('whichTemplate', function () {
     </ul>
 <pre ng-show="tab=='html'"><code class="html railscasts">
 &lt;div ng-controller="ctrl">
+    &lt;div class="columns-row columns-header">
+        &lt;div class="col col1">ID&lt;/div>
+        &lt;div class="col col2">First Name&lt;/div>
+        &lt;div class="col col3">Last Name&lt;/div>
+        &lt;div class="col col4">Age&lt;/div>
+        &lt;div class="col col5">Kids&lt;/div>
+    &lt;/div>
     &lt;div ux-datagrid="items">
         &lt;script type="template/html" template-item="item">
             &lt;div class="columns-row">
@@ -581,6 +588,11 @@ angular.module('ux').factory('whichTemplate', function () {
     width: 100%;
     border-collapse: collapse; /** THIS IS VERY IMPORTANT OR CHUNKS WITH BORDERS WILL OVERLAP EACH OTHER **/
     height: 20px;
+}
+
+.columns-row.columns-header {
+    background-color: #000;
+    color: #FFF;
 }
 
 .columns-row .col {
@@ -640,6 +652,13 @@ angular.module(name, ['ux'])
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
 <!-- html:start -->
 <div ng-controller="ctrl">
+    <div class="columns-row columns-header">
+        <div class="col col1">ID</div>
+        <div class="col col2">First Name</div>
+        <div class="col col3">Last Name</div>
+        <div class="col col4">Age</div>
+        <div class="col col5">Kids</div>
+    </div>
     <div ux-datagrid="items">
         <script type="template/html" template-item="item">
             <div class="columns-row">

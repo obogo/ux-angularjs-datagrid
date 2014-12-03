@@ -23,6 +23,11 @@
     height: 20px;
 }
 
+.columns-row.columns-header {
+    background-color: #000;
+    color: #FFF;
+}
+
 .columns-row .col {
     display: table-cell !important;
     position: relative;

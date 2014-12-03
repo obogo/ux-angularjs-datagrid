@@ -22,6 +22,13 @@
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
 <!-- html:start -->
 <div ng-controller="ctrl">
+    <div class="columns-row columns-header">
+        <div class="col col1">ID</div>
+        <div class="col col2">First Name</div>
+        <div class="col col3">Last Name</div>
+        <div class="col col4">Age</div>
+        <div class="col col5">Kids</div>
+    </div>
     <div ux-datagrid="items">
         <script type="template/html" template-item="item">
             <div class="columns-row">

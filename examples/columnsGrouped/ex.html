@@ -1,0 +1,55 @@
+<!-- **************************** Grouped Columns ********************************** -->
+    <a name="columnsGrouped"></a>
+    <div class="panel-ex columnsGrouped" ng-app="columnsGrouped">
+        <div class="panel-ex-head">Columned Data (like tables)</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>Start by adding the <span class="label">ux-datagrid</span> on a DOM container element. (Typically this will be a DIV).</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+##html##
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+##css##
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+##js##
+</code></pre>
+            <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div class="columnsGrouped-row columnsGrouped-header">
+        <div class="col col1">ID</div>
+        <div class="col col2">First Name</div>
+        <div class="col col3">Last Name</div>
+        <div class="col col4">Age</div>
+        <div class="col col5">Kids</div>
+    </div>
+    <div ux-datagrid="items" grouped="'children'" addons="whichTemplate">
+        <script type="template/html" template-name="row" template-item="item">
+            <div class="columnsGrouped-row">
+                <div class="col col1">{{item.id}}</div>
+                <div class="col col2">{{item.firstName}}</div>
+                <div class="col col3">{{item.lastName}}</div>
+                <div class="col col4">{{item.age}}</div>
+                <div class="col col5">{{item.kids}}</div>
+            </div>
+        </script>
+        <script type="template/html" template-name="group" template-item="group">
+            <div class="columnsGrouped-group columnsGrouped-row">
+                <div class="col col1">ID</div>
+                <div class="col col2">First Name</div>
+                <div class="col col3">Last Name</div>
+                <div class="col col4">Age</div>
+                <div class="col col5">Kids</div>
+            </div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>

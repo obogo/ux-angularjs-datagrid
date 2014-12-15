@@ -1,6 +1,15 @@
 /* global angular *///ignore
 (function () {//ignore
-    var name = 'grouped';
+    var name = 'columnsGrouped';
+
+    function getName(len) {
+        var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';
+        while (str.length < len) {
+            str += alpha[Math.floor(Math.random() * alpha.length)];
+        }
+        return str;
+    }
+
     angular.module(name, ['ux'])
         .controller('tabs', function ($scope) {//ignore
             $scope.tab = 'html';//ignore
@@ -15,7 +24,13 @@
                 childLen = Math.random() * 10;
                 j = 0;
                 while (j < childLen) {
-                    item.children.push({id: i + '.' + j});
+                    item.children.push({
+                        id: i + '.' + j,
+                        firstName: getName(10),
+                        lastName: getName(10),
+                        age: Math.floor(Math.random() * 50 + 18),
+                        kids: Math.floor(Math.random() * 10)
+                    });
                     j += 1;
                 }
                 i += 1;

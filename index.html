@@ -51,6 +51,7 @@ bower install "ux-datagrid"
             <li><a href="#multipleTemplates">Different Item Renderers (Row Templates)</a></li>
             <li><a href="#groupedData">Grouped Data</a></li>
             <li><a href="#columns">Columned Data (Like Tables)</a></li>
+            <li><a href="#columnsGrouped">Columns and Groups (Like Tables of Tables)</a></li>
             <li><a href="#infiniteScroll">Infinite Scroll</a></li>
             <li><span href="#collapsibleGroups">Collapsible Groups (starts expanded)</span></li>
             <li><span href="#expandableGroups">Expandable Groups (starts collapsed)</span></li>
@@ -484,13 +485,15 @@ angular.module('ux').factory('whichTemplate', function () {
 var name = 'grouped';
 angular.module(name, ['ux'])
     .controller('ctrl', function ($scope) {
+        // we are going to create some grouped data. Array of items with .children arrays of items.
+        // top level items become the group headers, the children items become the rows.
         var i = 0, j, len = 10, items = [], item, childLen = 0;
         while (i < len) {
-            item = {id: i, children:[]};
+            item = {id: i, children: []};
             items.push(item);
             childLen = Math.random() * 10;
             j = 0;
-            while(j < childLen) {
+            while (j < childLen) {
                 item.children.push({id: i + '.' + j});
                 j += 1;
             }
@@ -676,6 +679,205 @@ angular.module(name, ['ux'])
     </div>
                                 <link rel="stylesheet" type="text/css" href="examples/columns/ex.css">
                                 <script src="examples/columns/ex.js"></script>
+
+    <!-- **************************** Grouped Columns ********************************** -->
+    <a name="columnsGrouped"></a>
+    <div class="panel-ex columnsGrouped" ng-app="columnsGrouped">
+        <div class="panel-ex-head">Columned Data (like tables)</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>Start by adding the <span class="label">ux-datagrid</span> on a DOM container element. (Typically this will be a DIV).</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+&lt;div ng-controller="ctrl">
+    &lt;div class="columnsGrouped-row columnsGrouped-header">
+        &lt;div class="col col1">ID&lt;/div>
+        &lt;div class="col col2">First Name&lt;/div>
+        &lt;div class="col col3">Last Name&lt;/div>
+        &lt;div class="col col4">Age&lt;/div>
+        &lt;div class="col col5">Kids&lt;/div>
+    &lt;/div>
+    &lt;div ux-datagrid="items" grouped="'children'" addons="whichTemplate">
+        &lt;script type="template/html" template-name="row" template-item="item">
+            &lt;div class="columnsGrouped-row">
+                &lt;div class="col col1">{{item.id}}&lt;/div>
+                &lt;div class="col col2">{{item.firstName}}&lt;/div>
+                &lt;div class="col col3">{{item.lastName}}&lt;/div>
+                &lt;div class="col col4">{{item.age}}&lt;/div>
+                &lt;div class="col col5">{{item.kids}}&lt;/div>
+            &lt;/div>
+        &lt;/script>
+        &lt;script type="template/html" template-name="group" template-item="group">
+            &lt;div class="columnsGrouped-group columnsGrouped-row">
+                &lt;div class="col col1">ID&lt;/div>
+                &lt;div class="col col2">First Name&lt;/div>
+                &lt;div class="col col3">Last Name&lt;/div>
+                &lt;div class="col col4">Age&lt;/div>
+                &lt;div class="col col5">Kids&lt;/div>
+            &lt;/div>
+        &lt;/script>
+    &lt;/div>
+&lt;/div>
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+.columnsGrouped *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+    box-sizing: border-box;
+}
+
+.columnsGrouped-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.columnsGrouped-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+.columnsGrouped-row {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse; /** THIS IS VERY IMPORTANT OR CHUNKS WITH BORDERS WILL OVERLAP EACH OTHER **/
+    height: 20px;
+}
+
+.columnsGrouped-group {
+    background-color: #666;
+    color: #FFF;
+}
+.columnsGrouped-group:nth-child(odd) {
+    background-color: #666;
+}
+
+.columnsGrouped-row.columnsGrouped-header {
+    background-color: #000;
+    color: #FFF;
+}
+
+.columnsGrouped-row .col {
+    display: table-cell !important;
+    position: relative;
+    text-align: center;
+    border-right: 1px solid #999;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.columnsGrouped-row .col1 {
+    width: 20px;
+}
+
+.columnsGrouped-row .col2 {
+    text-transform: capitalize;/* uppercase the word */
+    text-align: left;
+    width: 20%;
+}
+
+.columnsGrouped-row .col3 {
+    text-transform: capitalize;/* uppercase the word */
+    text-align: left;
+}
+
+.columnsGrouped-row .col4 {
+    width: 40px;
+}
+
+.columnsGrouped-row .col5 {
+    width: 40px;
+}
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+var name = 'columnsGrouped';
+ function getName(len) {
+    var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';
+    while (str.length < len) {
+        str += alpha[Math.floor(Math.random() * alpha.length)];
+    }
+    return str;
+}
+ angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        // we are going to create some grouped data. Array of items with .children arrays of items.
+        // top level items become the group headers, the children items become the rows.
+        var i = 0, j, len = 10, items = [], item, childLen = 0;
+        while (i < len) {
+            item = {id: i, children: []};
+            items.push(item);
+            childLen = Math.random() * 10;
+            j = 0;
+            while (j < childLen) {
+                item.children.push({
+                    id: i + '.' + j,
+                    firstName: getName(10),
+                    lastName: getName(10),
+                    age: Math.floor(Math.random() * 50 + 18),
+                    kids: Math.floor(Math.random() * 10)
+                });
+                j += 1;
+            }
+            i += 1;
+        }
+        $scope.items = items;
+    });
+angular.module('ux').factory('whichTemplate', function () {
+     return function (inst) {
+        // now we override it with our method so we decide what template gets displayed for each row.
+        inst.templateModel.getTemplate = function (item) {
+            // item would be the item in your array of data provided to the datagrid.
+            // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.
+            var name = item.children ? 'group' : 'row';
+            // now we get the template from the name.
+            return inst.templateModel.getTemplateByName(name);
+        };
+    };
+});
+
+</code></pre>
+            <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div class="columnsGrouped-row columnsGrouped-header">
+        <div class="col col1">ID</div>
+        <div class="col col2">First Name</div>
+        <div class="col col3">Last Name</div>
+        <div class="col col4">Age</div>
+        <div class="col col5">Kids</div>
+    </div>
+    <div ux-datagrid="items" grouped="'children'" addons="whichTemplate">
+        <script type="template/html" template-name="row" template-item="item">
+            <div class="columnsGrouped-row">
+                <div class="col col1">{{item.id}}</div>
+                <div class="col col2">{{item.firstName}}</div>
+                <div class="col col3">{{item.lastName}}</div>
+                <div class="col col4">{{item.age}}</div>
+                <div class="col col5">{{item.kids}}</div>
+            </div>
+        </script>
+        <script type="template/html" template-name="group" template-item="group">
+            <div class="columnsGrouped-group columnsGrouped-row">
+                <div class="col col1">ID</div>
+                <div class="col col2">First Name</div>
+                <div class="col col3">Last Name</div>
+                <div class="col col4">Age</div>
+                <div class="col col5">Kids</div>
+            </div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>
+                                <link rel="stylesheet" type="text/css" href="examples/columnsGrouped/ex.css">
+                                <script src="examples/columnsGrouped/ex.js"></script>
 
     <!-- **************************** Infnite Scroll ********************************** -->
     <a name="infiniteScroll"></a>

@@ -53,8 +53,8 @@ bower install "ux-datagrid"
             <li><a href="#columns">Columned Data (Like Tables)</a></li>
             <li><a href="#columnsGrouped">Columns and Groups (Like Tables of Tables)</a></li>
             <li><a href="#infiniteScroll">Infinite Scroll</a></li>
-            <li><span href="#collapsibleGroups">Collapsible Groups (starts expanded)</span></li>
-            <li><span href="#expandableGroups">Expandable Groups (starts collapsed)</span></li>
+            <li><a href="#collapsibleGroups">Collapsible Groups (starts expanded)</a></li>
+            <li><a href="#expandableGroups">Expandable Groups (starts collapsed)</a></li>
             <li><span href="#expandingRows">Expanding Rows</span></li>
             <li><span href="#focusManager">Focus Manager</span></li>
             <li><span href="#spreadSheet">How to make a spread sheet</span></li>
@@ -77,7 +77,10 @@ bower install "ux-datagrid"
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>
 <!--<script src="bower_components/angular/angular.min.js"></script>-->
 <script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.min.js"></script>
+<!--<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.js"></script>-->
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-infiniteScroll.js"></script>
+<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-collapsibleGroups.js"></script>
+<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-expandableGroups.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBar.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBounce.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-sortModel.js"></script>
@@ -271,6 +274,10 @@ angular.module('ux').factory('whichTemplate', function () {
 
     ##infiniteScroll##
 
+    ##collapsibleGroups##
+
+    ##expandableGroups##
+
     ##scrollBar##
 
     ##scrollBounce##
@@ -286,6 +293,6 @@ angular.module('ux').factory('whichTemplate', function () {
         <a href="https://github.com/webux/ux-angularjs-datagrid" fm-parent="14" fm-id="53" tabindex="-1">View on GitHub</a>
     </div>
 </div>
-
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 </body>
 </html>

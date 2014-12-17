@@ -1,0 +1,52 @@
+<!-- **************************** Expandable Groups********************************** -->
+    <a name="expandableGroups"></a>
+    <div class="panel-ex expandableGroups" ng-app="expandableGroups">
+        <div class="panel-ex-head">Expandable Groups <a href="https://rawgit.com/webux/ux-angularjs-datagrid/master/docs/addons/ux-datagrid-expandableGroups.js.html" target="_blank" class="label fa fa-external-link"> View Docs</a></div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p><span class="label">expandableGroups</span> works on the concept of starting out with rows already collapsed. It basically shuffles items in the grid by removing rows that are collapsed out. So the grid just renders what is there. Expanding the row will then put those rows back in.</p>
+            <p>You can use the option of <span class="label">hideEmptyGroups</span> to have expandableGroups automatically remove groups that have no children.</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+##html##
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+##css##
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+##js##
+</code></pre>
+            <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div class="expandableGroups-row expandableGroups-header">
+        <div class="col col1">ID</div>
+        <div class="col col2">First Name</div>
+        <div class="col col3">Last Name</div>
+        <div class="col col4">Age</div>
+        <div class="col col5">Kids</div>
+    </div>
+    <div ux-datagrid="items" class="datagrid" grouped="'children'" addons="whichTemplate, expandableGroups">
+        <script type="template/html" template-name="group" template-item="group">
+            <div class="expandableGroups-group" ng-click="datagrid.expandableGroups.toggle($index)">
+                <div class="col col3">{{group.title}} - <i>(Click to expand)</i></div>
+            </div>
+        </script>
+        <script type="template/html" template-name="row" template-item="item">
+            <div class="expandableGroups-row">
+                <div class="col col1">{{item.id}}</div>
+                <div class="col col2">{{item.firstName}}</div>
+                <div class="col col3">{{item.lastName}}</div>
+                <div class="col col4">{{item.age}}</div>
+                <div class="col col5">{{item.kids}}</div>
+            </div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>

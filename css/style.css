@@ -154,6 +154,7 @@ code i * {
     font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;;
     font-weight: normal;
     background: #e67e22;
+    padding-top: 6px;
 }
 
 .label.black {

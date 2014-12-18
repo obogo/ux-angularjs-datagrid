@@ -1,0 +1,67 @@
+.spreadSheet *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+}
+
+.spreadSheet * {
+    box-sizing: border-box;
+}
+
+.spreadSheet-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.spreadSheet-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+.spreadSheet-row {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse; /** THIS IS VERY IMPORTANT OR CHUNKS WITH BORDERS WILL OVERLAP EACH OTHER **/
+    border-spacing: 0px;
+    height: 20px;
+    line-height: 20px;
+    cell-padding: 0px;
+    cell-spacing: 0px;
+    border-bottom: 1px solid #CCC;
+}
+
+.spreadSheet-group {
+    background-color: #666;
+    color: #FFF;
+}
+.spreadSheet-group:nth-child(odd) {
+    background-color: #666;
+}
+
+.spreadSheet-row.spreadSheet-header {
+    background-color: #000;
+    color: #FFF;
+}
+
+.spreadSheet-row .col {
+    position: relative;
+    display: table-cell !important;
+    position: relative;
+    text-align: center;
+    border-right: 1px solid #999;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 20%;
+    padding: 0px;
+    border-right: 1px solid #CCC;
+}
+
+.spreadSheet-row input {
+    width: 100%;
+    height: 100%;
+    border:none;
+    padding: 0px;
+    margin: 0px;
+}

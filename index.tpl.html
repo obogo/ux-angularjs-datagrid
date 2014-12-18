@@ -63,7 +63,7 @@ bower install "ux-datagrid"
             <li><a href="#collapsibleGroups">Collapsible Groups (starts expanded)</a></li>
             <li><a href="#expandableGroups">Expandable Groups (starts collapsed)</a></li>
             <li><span href="#expandingRows">Expanding Rows</span></li>
-            <li><span href="#focusManager">Focus Manager</span></li>
+            <li><a href="#spreadSheet">Focus Manager (spreadsheet)</a></li>
             <li><span href="#spreadSheet">How to make a spread sheet</span></li>
             <li><span href="#scrollHistory">Scroll History</span></li>
             <li><span href="#sortModelGrouped">Sort Model (Grouped)</span></li>
@@ -83,14 +83,19 @@ bower install "ux-datagrid"
 <link rel="stylesheet" type="text/css" href="css/default.css">
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>
 <!--<script src="bower_components/angular/angular.min.js"></script>-->
-<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.min.js"></script>
-<!--<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.js"></script>-->
+<!--<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.min.js"></script>-->
+<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-infiniteScroll.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-collapsibleGroups.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-expandableGroups.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBar.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBounce.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-sortModel.js"></script>
+<script src="bower_components/ux-datagrid/build/latest/addons/desktop/ux-datagrid-focusManager.js"></script>
+
+
+<link rel="stylesheet" type="text/css" href="vendor/jsonview/ux-jsonview.css">
+<script src="vendor/jsonview/ux-jsonview.js"></script>
 
 <div class="panel-wrapper">
     <!-- Getting Started/Setup -->
@@ -284,6 +289,8 @@ angular.module('ux').factory('whichTemplate', function () {
     ##collapsibleGroups##
 
     ##expandableGroups##
+
+    ##spreadSheet##
 
     ##scrollBar##
 

@@ -63,7 +63,7 @@ bower install "ux-datagrid"
             <li><a href="#collapsibleGroups">Collapsible Groups (starts expanded)</a></li>
             <li><a href="#expandableGroups">Expandable Groups (starts collapsed)</a></li>
             <li><span href="#expandingRows">Expanding Rows</span></li>
-            <li><span href="#focusManager">Focus Manager</span></li>
+            <li><a href="#spreadSheet">Focus Manager (spreadsheet)</a></li>
             <li><span href="#spreadSheet">How to make a spread sheet</span></li>
             <li><span href="#scrollHistory">Scroll History</span></li>
             <li><span href="#sortModelGrouped">Sort Model (Grouped)</span></li>
@@ -83,14 +83,19 @@ bower install "ux-datagrid"
 <link rel="stylesheet" type="text/css" href="css/default.css">
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>
 <!--<script src="bower_components/angular/angular.min.js"></script>-->
-<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.min.js"></script>
-<!--<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.js"></script>-->
+<!--<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.min.js"></script>-->
+<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-infiniteScroll.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-collapsibleGroups.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-expandableGroups.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBar.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBounce.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-sortModel.js"></script>
+<script src="bower_components/ux-datagrid/build/latest/addons/desktop/ux-datagrid-focusManager.js"></script>
+
+
+<link rel="stylesheet" type="text/css" href="vendor/jsonview/ux-jsonview.css">
+<script src="vendor/jsonview/ux-jsonview.js"></script>
 
 <div class="panel-wrapper">
     <!-- Getting Started/Setup -->
@@ -1376,6 +1381,163 @@ angular.module('ux').factory('whichTemplate', function () {
     </div>
                                 <link rel="stylesheet" type="text/css" href="examples/expandableGroups/ex.css">
                                 <script src="examples/expandableGroups/ex.js"></script>
+
+    <!-- **************************** Spread Sheet ********************************** -->
+    <a name="spreadSheet"></a>
+    <div class="panel-ex spreadSheet" ng-app="spreadSheet">
+        <div class="panel-ex-head">Spreadsheet with FocusManager <a href="https://rawgit.com/webux/ux-angularjs-datagrid/master/docs/addons/ux-datagrid-focusManager.js.html" target="_blank" class="label fa fa-external-link"> View Docs</a></div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>A simple spreadsheet. Using the <i class="label">GridFocusManager</i> you are able to get spreadsheet like behavior. Enter key will go down rows, tab will go across. </p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+&lt;div ng-controller="ctrl">
+    &lt;div class="spreadSheet-row spreadSheet-header">
+        &lt;div class="col">&lt;/div>
+        &lt;div class="col">A&lt;/div>
+        &lt;div class="col">B&lt;/div>
+        &lt;div class="col">C&lt;/div>
+        &lt;div class="col">D&lt;/div>
+    &lt;/div>
+    &lt;div ux-datagrid="items" addons="gridFocusManager">
+        &lt;script type="template/html" template-item="item">
+            &lt;div class="spreadSheet-row">
+                &lt;div class="col">{{$index + 1}}&lt;/div>
+                &lt;div class="col">&lt;input type="text" ng-model="item.A">&lt;/div>
+                &lt;div class="col">&lt;input type="text" ng-model="item.B">&lt;/div>
+                &lt;div class="col">&lt;input type="text" ng-model="item.C">&lt;/div>
+                &lt;div class="col">&lt;input type="text" ng-model="item.D">&lt;/div>
+            &lt;/div>
+        &lt;/script>
+    &lt;/div>
+    &lt;br/>
+    Expand the elements below to see the data update realtime.&lt;a href="https://github.com/webux/ux-angularjs-jsonview" target="_blank" class="label fa fa-external-link"> ux-jsonview&lt;/a>
+    &lt;br/>
+    &lt;div ux-jsonview ng-model="items">&lt;/div>
+&lt;/div>
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+.spreadSheet *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+}
+
+.spreadSheet * {
+    box-sizing: border-box;
+}
+
+.spreadSheet-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.spreadSheet-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+.spreadSheet-row {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse; /** THIS IS VERY IMPORTANT OR CHUNKS WITH BORDERS WILL OVERLAP EACH OTHER **/
+    border-spacing: 0px;
+    height: 20px;
+    line-height: 20px;
+    cell-padding: 0px;
+    cell-spacing: 0px;
+    border-bottom: 1px solid #CCC;
+}
+
+.spreadSheet-group {
+    background-color: #666;
+    color: #FFF;
+}
+.spreadSheet-group:nth-child(odd) {
+    background-color: #666;
+}
+
+.spreadSheet-row.spreadSheet-header {
+    background-color: #000;
+    color: #FFF;
+}
+
+.spreadSheet-row .col {
+    position: relative;
+    display: table-cell !important;
+    position: relative;
+    text-align: center;
+    border-right: 1px solid #999;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 20%;
+    padding: 0px;
+    border-right: 1px solid #CCC;
+}
+
+.spreadSheet-row input {
+    width: 100%;
+    height: 100%;
+    border:none;
+    padding: 0px;
+    margin: 0px;
+}
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+var name = 'spreadSheet';
+ angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        // we are going to create some grouped data. Array of items with .children arrays of items.
+        // top level items become the group headers, the children items become the rows.
+        var i, j, len = 10, items = [], row, columns = ['A', 'B', 'C', 'D'], jlen = columns.length;
+        for(i = 0; i < len; i += 1) {
+            row = {};
+            for(j = 0; j < jlen; j += 1) {
+                row[columns[j]] = '';
+            }
+            items.push(row);
+        }
+        $scope.items = items;
+    });
+
+</code></pre>
+            <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div class="spreadSheet-row spreadSheet-header">
+        <div class="col"></div>
+        <div class="col">A</div>
+        <div class="col">B</div>
+        <div class="col">C</div>
+        <div class="col">D</div>
+    </div>
+    <div ux-datagrid="items" addons="gridFocusManager">
+        <script type="template/html" template-item="item">
+            <div class="spreadSheet-row">
+                <div class="col">{{$index + 1}}</div>
+                <div class="col"><input type="text" ng-model="item.A"></div>
+                <div class="col"><input type="text" ng-model="item.B"></div>
+                <div class="col"><input type="text" ng-model="item.C"></div>
+                <div class="col"><input type="text" ng-model="item.D"></div>
+            </div>
+        </script>
+    </div>
+    <br/>
+    Expand the elements below to see the data update realtime.<a href="https://github.com/webux/ux-angularjs-jsonview" target="_blank" class="label fa fa-external-link"> ux-jsonview</a>
+    <br/>
+    <div ux-jsonview ng-model="items"></div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>
+                                <link rel="stylesheet" type="text/css" href="examples/spreadSheet/ex.css">
+                                <script src="examples/spreadSheet/ex.js"></script>
 
     <!-- **************************** Scroll Bar ********************************** -->
     <a name="scrollBar"></a>

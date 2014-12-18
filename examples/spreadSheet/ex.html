@@ -1,0 +1,50 @@
+<!-- **************************** Spread Sheet ********************************** -->
+    <a name="spreadSheet"></a>
+    <div class="panel-ex spreadSheet" ng-app="spreadSheet">
+        <div class="panel-ex-head">Spreadsheet with FocusManager <a href="https://rawgit.com/webux/ux-angularjs-datagrid/master/docs/addons/ux-datagrid-focusManager.js.html" target="_blank" class="label fa fa-external-link"> View Docs</a></div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>A simple spreadsheet. Using the <i class="label">GridFocusManager</i> you are able to get spreadsheet like behavior. Enter key will go down rows, tab will go across. </p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+##html##
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+##css##
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+##js##
+</code></pre>
+            <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div class="spreadSheet-row spreadSheet-header">
+        <div class="col"></div>
+        <div class="col">A</div>
+        <div class="col">B</div>
+        <div class="col">C</div>
+        <div class="col">D</div>
+    </div>
+    <div ux-datagrid="items" addons="gridFocusManager">
+        <script type="template/html" template-item="item">
+            <div class="spreadSheet-row">
+                <div class="col">{{$index + 1}}</div>
+                <div class="col"><input type="text" ng-model="item.A"></div>
+                <div class="col"><input type="text" ng-model="item.B"></div>
+                <div class="col"><input type="text" ng-model="item.C"></div>
+                <div class="col"><input type="text" ng-model="item.D"></div>
+            </div>
+        </script>
+    </div>
+    <br/>
+    Expand the elements below to see the data update realtime.<a href="https://github.com/webux/ux-angularjs-jsonview" target="_blank" class="label fa fa-external-link"> ux-jsonview</a>
+    <br/>
+    <div ux-jsonview ng-model="items"></div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>

@@ -1,0 +1,35 @@
+<!-- **************************** Grid Logger ********************************** -->
+    <a name="gridLogger"></a>
+    <div class="panel-ex gridLogger" ng-app="gridLogger">
+        <div class="panel-ex-head">Grid Logs</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>Grid logs are used to gather logs from the datagrid and all of it's addons and log it to the console. It colors them differently for each addon to make it easier to read (limited browser support). So make sure to <span class="label">check the console!</span></p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+##html##
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+##css##
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+##js##
+</code></pre>
+            <p>There are different options for the logging to help filter it down. <span class="label">{debug:{all:1, Flow:0}}</span> is what I use most of the time. It gives you all of the logs except the Flow control. If the internal flow control logs are turned on, then you see it's internal handling of methods to make sure they are fired in the correct order. I don't think most will care to use that.. It can be quite verbose.</p>
+            <p>But what you notice from this is that you can turn the logs on and off for any particular module just by listing it's name and giving it a 1 or a 0. If you wanted to turn off logs for the templateModel then you would add <span class="label">templateModel:0</span> to the options of the debug.</p>
+            <p>You could try using this set of options below to turn off the events. <span class="label">{debug:{all:1, Flow:0, events:0}}</span>. </p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div ux-datagrid="items" addons="gridLogger" options="{debug:{all:1, Flow:0}}">
+        <script type="template/html" template-item="item">
+            <div class="gridLogger-row"><span>Default {{item.id}}</span></div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>

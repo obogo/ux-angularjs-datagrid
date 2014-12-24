@@ -64,12 +64,11 @@ bower install "ux-datagrid"
             <li><a href="#expandableGroups">Expandable Groups (starts collapsed)</a></li>
             <li><span href="#expandingRows">Expanding Rows</span></li>
             <li><a href="#spreadSheet">Focus Manager (spreadsheet)</a></li>
-            <li><span href="#spreadSheet">How to make a spread sheet</span></li>
             <li><span href="#scrollHistory">Scroll History</span></li>
             <li><span href="#sortModelGrouped">Sort Model (Grouped)</span></li>
             <li><a href="#sortModel">Sort Model (UnGrouped)</a></li>
             <li><span href="#serverSideSorting">Server Sort (Combined with infinite scroll)</span></li>
-            <li><span href="#gridLogger">Grid Logs</span></li>
+            <li><a href="#gridLogger">Grid Logs</a></li>
             <li><span href="#memoryOptimizer">Memory Optimizer</span></li>
             <li><a href="#scrollBar">Scroll Bar</a></li>
             <li><a href="#scrollBounce">Scroll Bounce</a></li>
@@ -88,6 +87,7 @@ bower install "ux-datagrid"
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-infiniteScroll.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-collapsibleGroups.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-expandableGroups.js"></script>
+<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-gridLogger.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBar.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBounce.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-sortModel.js"></script>
@@ -1538,6 +1538,87 @@ var name = 'spreadSheet';
     </div>
                                 <link rel="stylesheet" type="text/css" href="examples/spreadSheet/ex.css">
                                 <script src="examples/spreadSheet/ex.js"></script>
+
+    <!-- **************************** Grid Logger ********************************** -->
+    <a name="gridLogger"></a>
+    <div class="panel-ex gridLogger" ng-app="gridLogger">
+        <div class="panel-ex-head">Grid Logs</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>Grid logs are used to gather logs from the datagrid and all of it's addons and log it to the console. It colors them differently for each addon to make it easier to read (limited browser support). So make sure to <span class="label">check the console!</span></p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+&lt;div ng-controller="ctrl">
+    &lt;div ux-datagrid="items" addons="gridLogger" options="{debug:{all:1, Flow:0}}">
+        &lt;script type="template/html" template-item="item">
+            &lt;div class="gridLogger-row">&lt;span>Default {{item.id}}&lt;/span>&lt;/div>
+        &lt;/script>
+    &lt;/div>
+&lt;/div>
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+.gridLogger *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+}
+
+.gridLogger-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.gridLogger-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+var name = 'gridLogger';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, len = 100, items = [], types = ['row', 'alt1', 'alt2'];
+        while (i < len) {
+            items.push({id: i, type: types[Math.floor(Math.random()*types.length)]});
+            i += 1;
+        }
+        $scope.items = items;
+    });
+angular.module('ux').factory('whichTemplate', function () {
+     return function (inst) {
+        // now we override it with our method so we decide what template gets displayed for each row.
+        inst.templateModel.getTemplate = function (item) {
+            // item would be the item in your array of data provided to the datagrid.
+            // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.
+            var name = item.type || 'row';
+            // now we get the template from the name.
+            return inst.templateModel.getTemplateByName(name);
+        };
+    };
+});
+
+</code></pre>
+            <p>There are different options for the logging to help filter it down. <span class="label">{debug:{all:1, Flow:0}}</span> is what I use most of the time. It gives you all of the logs except the Flow control. If the internal flow control logs are turned on, then you see it's internal handling of methods to make sure they are fired in the correct order. I don't think most will care to use that.. It can be quite verbose.</p>
+            <p>But what you notice from this is that you can turn the logs on and off for any particular module just by listing it's name and giving it a 1 or a 0. If you wanted to turn off logs for the templateModel then you would add <span class="label">templateModel:0</span> to the options of the debug.</p>
+            <p>You could try using this set of options below to turn off the events. <span class="label">{debug:{all:1, Flow:0, events:0}}</span>. </p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div ux-datagrid="items" addons="gridLogger" options="{debug:{all:1, Flow:0}}">
+        <script type="template/html" template-item="item">
+            <div class="gridLogger-row"><span>Default {{item.id}}</span></div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>
+                                <link rel="stylesheet" type="text/css" href="examples/gridLogger/ex.css">
+                                <script src="examples/gridLogger/ex.js"></script>
 
     <!-- **************************** Scroll Bar ********************************** -->
     <a name="scrollBar"></a>

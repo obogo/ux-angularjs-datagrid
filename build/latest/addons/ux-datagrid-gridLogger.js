@@ -1,5 +1,5 @@
 /*
-* ux-angularjs-datagrid v.1.1.7
+* ux-angularjs-datagrid v.1.1.8
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -70,7 +70,8 @@ angular.module("ux").factory("gridLogger", function() {
             if (hasPermissionToLog(lvl, args[1])) {
                 logArgs = getArgs(arguments[1], 1);
                 if (window.console && console[methods[zl]]) {
-                    console[methods[zl]].apply(console, result.format(logArgs, lvl, event));
+                    // make it IE9 compatible.
+                    Function.prototype.apply.call(console[methods[zl]], console, result.format(logArgs, lvl, event));
                 }
             }
         }

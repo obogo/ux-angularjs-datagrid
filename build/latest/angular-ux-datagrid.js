@@ -1,5 +1,5 @@
 /*
-* ux-angularjs-datagrid v.1.1.7
+* ux-angularjs-datagrid v.1.1.8
 * (c) 2014, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
@@ -53,7 +53,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.1.7",
+    version: "1.1.8",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`

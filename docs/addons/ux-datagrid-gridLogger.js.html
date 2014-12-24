@@ -36,7 +36,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>ux-angularjs-datagrid v.1.1.7
+  <div class="summary"><p>ux-angularjs-datagrid v.1.1.8
 (c) 2014, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -122,7 +122,19 @@ License: MIT.</p>
             <span class="k">if</span> <span class="p">(</span><span class="nx">hasPermissionToLog</span><span class="p">(</span><span class="nx">lvl</span><span class="p">,</span> <span class="nx">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="p">{</span>
                 <span class="nx">logArgs</span> <span class="o">=</span> <span class="nx">getArgs</span><span class="p">(</span><span class="nx">arguments</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">);</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">console</span> <span class="o">&amp;&amp;</span> <span class="nx">console</span><span class="p">[</span><span class="nx">methods</span><span class="p">[</span><span class="nx">zl</span><span class="p">]])</span> <span class="p">{</span>
-                    <span class="nx">console</span><span class="p">[</span><span class="nx">methods</span><span class="p">[</span><span class="nx">zl</span><span class="p">]].</span><span class="nx">apply</span><span class="p">(</span><span class="nx">console</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">format</span><span class="p">(</span><span class="nx">logArgs</span><span class="p">,</span> <span class="nx">lvl</span><span class="p">,</span> <span class="nx">event</span><span class="p">));</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>make it IE9 compatible.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="nb">Function</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">apply</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">console</span><span class="p">[</span><span class="nx">methods</span><span class="p">[</span><span class="nx">zl</span><span class="p">]],</span> <span class="nx">console</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">format</span><span class="p">(</span><span class="nx">logArgs</span><span class="p">,</span> <span class="nx">lvl</span><span class="p">,</span> <span class="nx">event</span><span class="p">));</span>
                 <span class="p">}</span>
             <span class="p">}</span>
         <span class="p">}</span>

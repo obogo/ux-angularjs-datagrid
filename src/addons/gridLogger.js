@@ -63,8 +63,8 @@ angular.module('ux').factory('gridLogger', function () {
             var logArgs, zl = lvl - 1, event = args[0];
             if (hasPermissionToLog(lvl, args[1])) {
                 logArgs = getArgs(arguments[1], 1);
-                if (window.console && console[methods[zl]]) {
-                    console[methods[zl]].apply(console, result.format(logArgs, lvl, event));
+                if (window.console && console[methods[zl]]) {// make it IE9 compatible.
+                    Function.prototype.apply.call(console[methods[zl]], console, result.format(logArgs, lvl, event));
                 }
             }
         }

@@ -415,7 +415,7 @@
 </div>
 <div class="dox">
   <div class="summary"><p>ux-angularjs-datagrid v.1.1.8
-(c) 2014, WebUX
+(c) 2015, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
   </div>
@@ -5346,11 +5346,14 @@ hide scopes that are deactivated from angular's knowledge so digest loops are as
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">afterRenderAfterDataChange</span><span class="p">()</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">tplHeight</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">tplHeight</span><span class="p">,</span> <span class="nx">oldHeight</span><span class="p">;</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">dirty</span> <span class="o">&amp;&amp;</span> <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">values</span><span class="p">.</span><span class="nx">dirty</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
             <span class="nx">tplHeight</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">calculateRowHeight</span><span class="p">(</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span><span class="p">)[</span><span class="mi">0</span><span class="p">]);</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">().</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">tplHeight</span> <span class="o">!==</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplateHeight</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">()[</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span><span class="p">]))</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">().</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">tplHeight</span> <span class="o">!==</span> <span class="p">(</span><span class="nx">oldHeight</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplateHeight</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">()[</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span><span class="p">])))</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">console</span> <span class="o">&amp;&amp;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;Template height change from &quot;</span> <span class="o">+</span> <span class="nx">oldHeight</span> <span class="o">+</span> <span class="s2">&quot; to &quot;</span> <span class="o">+</span> <span class="nx">tplHeight</span> <span class="o">+</span> <span class="s2">&quot;. This can cause gaps in the datagrid.&quot;</span><span class="p">);</span>
+                <span class="p">}</span>
                 <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">updateTemplateHeights</span><span class="p">();</span>
             <span class="p">}</span>
             <span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_RENDER_AFTER_DATA_CHANGE</span><span class="p">);</span>

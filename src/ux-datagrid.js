@@ -969,11 +969,14 @@ function Datagrid(scope, element, attr, $compile) {
      * after the data has changed this is fired after the following render.
      */
     function afterRenderAfterDataChange() {
-        var tplHeight;
+        var tplHeight, oldHeight;
         if (values.dirty && values.activeRange.max >= 0) {
             values.dirty = false;
             tplHeight = inst.templateModel.calculateRowHeight(getRowElm(values.activeRange.min)[0]);
-            if (inst.getData().length && tplHeight !== inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min])) {
+            if (inst.getData().length && tplHeight !== (oldHeight = inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min]))) {
+                if (window.console && console.warn) {
+                    console.warn('Template height change from ' + oldHeight + ' to ' + tplHeight + '. This can cause gaps in the datagrid.');
+                }
                 inst.templateModel.updateTemplateHeights();
             }
             dispatch(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE);

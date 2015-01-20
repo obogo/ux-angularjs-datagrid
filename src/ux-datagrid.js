@@ -621,7 +621,9 @@ function Datagrid(scope, element, attr, $compile) {
 //        s.$evalAsync();// this sometimes takes too long so I see {{}} brackets briefly.
         if (!isDigesting(s)) {
             s.$digest();
+            return true;
         }
+        return false;
     }
 
     /**
@@ -973,7 +975,7 @@ function Datagrid(scope, element, attr, $compile) {
         if (values.dirty && values.activeRange.max >= 0) {
             values.dirty = false;
             tplHeight = inst.templateModel.calculateRowHeight(getRowElm(values.activeRange.min)[0]);
-            if (inst.getData().length && tplHeight !== (oldHeight = inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min]))) {
+            if (flow.async && inst.getData().length && tplHeight !== (oldHeight = inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min]))) {
                 if (window.console && console.warn) {
                     console.warn('Template height change from ' + oldHeight + ' to ' + tplHeight + '. This can cause gaps in the datagrid.');
                 }
@@ -1030,8 +1032,8 @@ function Datagrid(scope, element, attr, $compile) {
                 inst.dispatch(exports.datagrid.events.ON_BEFORE_RENDER);
                 flow.add(beforeRenderAfterDataChange);
                 flow.add(updateRowWatchers);
-                // this wait allows rows to finish calculating their heights and finish the digest before firing.
-                flow.add(afterRenderAfterDataChange);
+                // if we do not wait here row heights show too tall because the rows are evaluated at their height before being digetsted.
+                flow.add(afterRenderAfterDataChange, [], 0);
 //                flow.add(destroyOldContent);
                 flow.add(inst.dispatch, [exports.datagrid.events.ON_AFTER_RENDER]);
             } else {

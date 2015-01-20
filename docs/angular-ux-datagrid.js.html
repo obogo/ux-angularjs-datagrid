@@ -414,7 +414,7 @@
   <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
 </div>
 <div class="dox">
-  <div class="summary"><p>ux-angularjs-datagrid v.1.1.8
+  <div class="summary"><p>ux-angularjs-datagrid v.1.1.9
 (c) 2015, WebUX
 <a href='https://github.com/webux/ux-angularjs-datagrid'>https://github.com/webux/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -518,7 +518,7 @@ on a per grid basis.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.1.8&quot;</span><span class="p">,</span>
+    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.1.9&quot;</span><span class="p">,</span>
 
 </pre></div>
         </td>
@@ -4426,7 +4426,9 @@ while this is not recommended by angular it is effective.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isDigesting</span><span class="p">(</span><span class="nx">s</span><span class="p">))</span> <span class="p">{</span>
             <span class="nx">s</span><span class="p">.</span><span class="nx">$digest</span><span class="p">();</span>
+            <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
         <span class="p">}</span>
+        <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
     <span class="p">}</span>
 
 </pre></div>
@@ -5350,7 +5352,7 @@ hide scopes that are deactivated from angular's knowledge so digest loops are as
         <span class="k">if</span> <span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">dirty</span> <span class="o">&amp;&amp;</span> <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">values</span><span class="p">.</span><span class="nx">dirty</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
             <span class="nx">tplHeight</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">calculateRowHeight</span><span class="p">(</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span><span class="p">)[</span><span class="mi">0</span><span class="p">]);</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">().</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">tplHeight</span> <span class="o">!==</span> <span class="p">(</span><span class="nx">oldHeight</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplateHeight</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">()[</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span><span class="p">])))</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">flow</span><span class="p">.</span><span class="nx">async</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">().</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">tplHeight</span> <span class="o">!==</span> <span class="p">(</span><span class="nx">oldHeight</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">templateModel</span><span class="p">.</span><span class="nx">getTemplateHeight</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">()[</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span><span class="p">])))</span> <span class="p">{</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">console</span> <span class="o">&amp;&amp;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">)</span> <span class="p">{</span>
                     <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;Template height change from &quot;</span> <span class="o">+</span> <span class="nx">oldHeight</span> <span class="o">+</span> <span class="s2">&quot; to &quot;</span> <span class="o">+</span> <span class="nx">tplHeight</span> <span class="o">+</span> <span class="s2">&quot;. This can cause gaps in the datagrid.&quot;</span><span class="p">);</span>
                 <span class="p">}</span>
@@ -5472,10 +5474,10 @@ digest <a href="#activeRange">activeRange</a> of rows.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-186" id="section-186">&#182;</a>
 </div>
-<p>this wait allows rows to finish calculating their heights and finish the digest before firing.</p>
+<p>if we do not wait here row heights show too tall because the rows are evaluated at their height before being digetsted.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-                <span class="nx">flow</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">afterRenderAfterDataChange</span><span class="p">);</span>
+                <span class="nx">flow</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">afterRenderAfterDataChange</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">0</span><span class="p">);</span>
 
 </pre></div>
         </td>

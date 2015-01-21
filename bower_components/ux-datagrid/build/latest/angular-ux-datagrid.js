@@ -1,6 +1,6 @@
 /*
-* ux-angularjs-datagrid v.1.1.5
-* (c) 2014, WebUX
+* ux-angularjs-datagrid v.1.1.8
+* (c) 2015, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -53,7 +53,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.1.5",
+    version: "1.1.8",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1754,7 +1754,7 @@ function Datagrid(scope, element, attr, $compile) {
             visibleScrollStart: scroll + options.cushion,
             visibleScrollEnd: scroll + height - options.cushion
         };
-        result.startIndex = result.i = getOffsetIndex(scroll);
+        result.startIndex = result.i = inst.getOffsetIndex(scroll);
         if (inst.rowsLength && result.startIndex === result.end) {
             throw new Error(exports.errors.E1002);
         }
@@ -1797,7 +1797,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.log("	scroll %s visibleScrollStart %s visibleScrollEnd %s", values.scroll, loop.visibleScrollStart, loop.visibleScrollEnd);
         while (loop.i < inst.rowsLength) {
             prevS = scope.$$childHead ? scopes[loop.i - 1] : null;
-            offset = getRowOffset(loop.i);
+            offset = inst.getRowOffset(loop.i);
             // this is where the chunks and rows get created is when they are requested if they don't exist.
             if (offset >= loop.visibleScrollStart && offset <= loop.visibleScrollEnd) {
                 s = compileRow(loop.i);
@@ -1911,11 +1911,14 @@ function Datagrid(scope, element, attr, $compile) {
      * after the data has changed this is fired after the following render.
      */
     function afterRenderAfterDataChange() {
-        var tplHeight;
+        var tplHeight, oldHeight;
         if (values.dirty && values.activeRange.max >= 0) {
             values.dirty = false;
             tplHeight = inst.templateModel.calculateRowHeight(getRowElm(values.activeRange.min)[0]);
-            if (inst.getData().length && tplHeight !== inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min])) {
+            if (inst.getData().length && tplHeight !== (oldHeight = inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min]))) {
+                if (window.console && console.warn) {
+                    console.warn("Template height change from " + oldHeight + " to " + tplHeight + ". This can cause gaps in the datagrid.");
+                }
                 inst.templateModel.updateTemplateHeights();
             }
             dispatch(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE);

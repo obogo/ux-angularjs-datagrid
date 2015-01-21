@@ -1,6 +1,6 @@
 /*
-* ux-angularjs-datagrid v.1.1.5
-* (c) 2014, WebUX
+* ux-angularjs-datagrid v.1.1.8
+* (c) 2015, WebUX
 * https://github.com/webux/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -19,7 +19,7 @@ if (typeof define === "function" && define.amd) {
  * @type {string}
  */
 angular.module("ux").factory("infiniteScroll", function() {
-    return function infiniteScroll(inst, $filter) {
+    return [ "inst", "$filter", function infiniteScroll(inst, $filter) {
         var result = {}, scrollOffset = -1, loadingRow = {
             _template: "loadingRow"
         }, unwatchers = [];
@@ -109,6 +109,6 @@ angular.module("ux").factory("infiniteScroll", function() {
         };
         result.enable();
         inst.infiniteScroll = result;
-    };
+    } ];
 });
 }(this.ux = this.ux || {}, function() {return this;}()));

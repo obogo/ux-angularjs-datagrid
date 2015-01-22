@@ -1,10 +1,10 @@
 module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-        banner: '/*\n' +
+        banner: '/*!\n' +
             '* <%= pkg.name %> v.<%= pkg.version %>\n' +
-            '* (c) ' + new Date().getFullYear() + ', WebUX\n' +
-            '* https://github.com/webux/ux-angularjs-datagrid\n' +
+            '* (c) ' + new Date().getFullYear() + ', Obogo\n' +
+            '* https://github.com/obogo/ux-angularjs-datagrid\n' +
             '* License: MIT.\n' +
             '*/\n',
         wrapStart: '(function (exports, global) {\nif (typeof define === "function" && define.amd) {\n  define(exports);\n} else if (typeof module !== "undefined" && module.exports) {\n  module.exports = exports;\n} else {\n  global.<%= pkg.packageName %> = exports;\n}\n\n',

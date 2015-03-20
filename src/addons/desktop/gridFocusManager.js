@@ -1,5 +1,7 @@
 exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME = "ux-datagrid:focusToPrevElementOfSame";
 exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME = "ux-datagrid:focusToNextElementOfSame";
+exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME_FAILURE = "ux-datagrid:focusToPrevElementOfSameFailure";
+exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME_FAILURE = "ux-datagrid:focusToNextElementOfSameFailure";
 exports.datagrid.events.ON_SCROLL_TO_TOP_ENTER = "ux-datagrid:onScrollToTopEnter";
 exports.datagrid.events.ON_SCROLL_TO_BOTTOM_ENTER = "ux-datagrid:onScrollToBottomEnter";
 /**
@@ -360,10 +362,10 @@ angular.module('ux').factory('gridFocusManager', function () {
             var success = false;
             // we now need to scroll the row into view if it is not.
             inst.scrollModel.scrollIntoView(inst.getRowIndexFromElement(focusEl), true);
-            if (focusEl[0].select) {// TODO: if no jquery. There may be no select.
-                focusEl[0].select();
-            }
             if (focusEl[0]) {
+                if (focusEl[0].select) {
+                    focusEl[0].select();
+                }
                 focusEl[0].focus();
                 success = true;
             }
@@ -441,12 +443,20 @@ angular.module('ux').factory('gridFocusManager', function () {
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_RENDER, addListeners));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME, function () {
             if (inst.element[0].contains(document.activeElement)) {
-                throttleNextPrev(focusToPrevRowElement);
+                throttleNextPrev(function(activeElement) {
+                    if(!focusToPrevRowElement(activeElement)) {
+                        inst.scope.$emit(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME_FAILURE);
+                    }
+                });
             }
         }));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME, function () {
             if (inst.element[0].contains(document.activeElement)) {
-                throttleNextPrev(focusToNextRowElement);
+                throttleNextPrev(function(activeElement) {
+                    if(!focusToNextRowElement(activeElement)) {
+                        inst.scope.$emit(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME_FAILURE);
+                    }
+                });
             }
         }));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER, onResize));

@@ -214,13 +214,16 @@ angular.module('ux').factory('expandRows', function () {
             clearTimeout(intv);
             intv = setTimeout(function () {
                 clearTimeout(intv);
-                // check for last row. On expansion it needs to scroll down.
-                if (state === states.opened && index === inst.data.length - 1 && inst.getViewportHeight() < inst.getContentHeight()) {
-                    inst.scrollModel.scrollToBottom(true);
-                }
                 inst.scrollModel.scrollIntoView(index, true);
                 inst.dispatch(exports.datagrid.events.ROW_TRANSITION_COMPLETE);
                 opening = false;
+
+                inst.flow.add(function() {
+                    // check for last row. On expansion it needs to scroll down.
+                    if (state === states.opened && index === inst.data.length - 1 && inst.getViewportHeight() < inst.getContentHeight()) {
+                        inst.scrollModel.scrollToBottom(true);
+                    }
+                }, [], 0);
             }, 0);
         }
 

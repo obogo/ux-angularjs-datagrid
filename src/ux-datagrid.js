@@ -1263,7 +1263,7 @@ function Datagrid(scope, element, attr, $compile) {
     function onRowTemplateChange(evt, item, oldTemplate, newTemplate, classes, skipUpdateHeights) {
         var index = inst.getNormalizedIndex(item), el = getExistingRow(index),
             s = getScope(index), replaceEl;
-        if (s !== scope) {
+        if (s && s !== scope) {// no scope if that row was removed.
             replaceEl = angular.element(inst.templateModel.getTemplateByName(newTemplate).template);
             replaceEl.addClass(options.uncompiledClass);
             while (classes && classes.length) {

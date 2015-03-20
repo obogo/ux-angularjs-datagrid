@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.1.9
+* ux-angularjs-datagrid v.1.2.0
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -53,7 +53,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.1.9",
+    version: "1.2.0",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -209,7 +209,7 @@ exports.datagrid = {
             // - **<a name="options.scrollModel.manual">scrollModel.manual</a>** if set to true then touch move events will be used to scroll and calculate coasting.
             manual: true,
             // - **<a name="options.scrollModel.simulateClick">scrollModel.simulateClick</a>** defaulted to true for android, and false for iOS.
-            simulateClick: !isIOS
+            simulateClick: false
         },
         // - **<a name="options.compiledClass">compiledClass</a>** after a row has been compiled the uncompiled class is removed and compiled is added.
         compiledClass: "compiled",
@@ -2193,7 +2193,8 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function onRowTemplateChange(evt, item, oldTemplate, newTemplate, classes, skipUpdateHeights) {
         var index = inst.getNormalizedIndex(item), el = getExistingRow(index), s = getScope(index), replaceEl;
-        if (s !== scope) {
+        if (s && s !== scope) {
+            // no scope if that row was removed.
             replaceEl = angular.element(inst.templateModel.getTemplateByName(newTemplate).template);
             replaceEl.addClass(options.uncompiledClass);
             while (classes && classes.length) {
@@ -3722,9 +3723,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         return -c * (t /= d) * (t - 2) + b;
     };
     result.click = function(e) {
+        //TODO: this needs to deprecate because this has finally been fixed in android. (Feb 5th 2015)
         // simulate click on android. Ignore on IOS.
-        if (!exports.datagrid.isIOS || inst.options.scrollModel.simulateClick) {
-            if (inst.options.scrollModel.simulateClick) {
+        if (inst.options.scrollModel.simulateClick) {
+            if (inst.options.scrollModel.simulateClick && target && !/(SELECT|INPUT|TEXTAREA)/i.test(target.tagName)) {
                 result.killEvent(e);
             }
             var target = e.target, ev;

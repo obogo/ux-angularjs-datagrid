@@ -415,7 +415,7 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.1.9
+ux-angularjs-datagrid v.1.2.0
 (c) 2015, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -519,7 +519,7 @@ on a per grid basis.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.1.9&quot;</span><span class="p">,</span>
+    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.2.0&quot;</span><span class="p">,</span>
 
 </pre></div>
         </td>
@@ -990,7 +990,7 @@ transitions on newly created chunks.</li>
 </ul>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-            <span class="nx">simulateClick</span><span class="o">:</span> <span class="o">!</span><span class="nx">isIOS</span>
+            <span class="nx">simulateClick</span><span class="o">:</span> <span class="kc">false</span>
         <span class="p">},</span>
 
 </pre></div>
@@ -9039,8 +9039,8 @@ will all be able to represented by template rows.</p>
 <p>simulate click on android. Ignore on IOS.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">isIOS</span> <span class="o">||</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">simulateClick</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">simulateClick</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">simulateClick</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">isIOS</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">simulateClick</span> <span class="o">&amp;&amp;</span> <span class="nx">target</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="sr">/(SELECT|INPUT|TEXTAREA)/i</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">target</span><span class="p">.</span><span class="nx">tagName</span><span class="p">))</span> <span class="p">{</span>
                 <span class="nx">result</span><span class="p">.</span><span class="nx">killEvent</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
             <span class="p">}</span>
             <span class="kd">var</span> <span class="nx">target</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">,</span> <span class="nx">ev</span><span class="p">;</span>

@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.1.9
+* ux-angularjs-datagrid v.1.2.0
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -22,7 +22,7 @@ angular.module("ux").factory("infiniteScroll", function() {
     return [ "inst", "$filter", function infiniteScroll(inst, $filter) {
         var result = {}, scrollOffset = -1, loadingRow = {
             _template: "loadingRow"
-        }, unwatchers = [];
+        }, unwatchers = [], focusAfterSelector;
         /**
          * Set the default values for the infiniteScroll options.
          * enable: true, limit: 0
@@ -44,6 +44,7 @@ angular.module("ux").factory("infiniteScroll", function() {
             if (inst.options.infiniteScroll.enable && newVal) {
                 var limit = getLimit();
                 if (limit) {
+                    buildFocusAfterUpdateSelector();
                     event.newValue = $filter("limitTo")(newVal, limit);
                     if (event.newValue.length < limit) {
                         event.preventDefault();
@@ -52,6 +53,23 @@ angular.module("ux").factory("infiniteScroll", function() {
                 }
             }
         };
+        function buildFocusAfterUpdateSelector() {
+            // this will only happen if you have focusManager addon loaded.
+            // and the activeElement is in the grid.
+            if (ux.selector && inst.element[0].contains(document.activeElement)) {
+                // get the row id of the focused element.
+                var rowIndex = inst.getRowIndexFromElement(document.activeElement);
+                var rowEl = inst.getRowElm(rowIndex);
+                focusAfterSelector = {
+                    rowIndex: rowIndex,
+                    selector: ux.selector.quickSelector(document.activeElement, rowEl[0], inst.options.gridFocusManager && inst.options.gridFocusManager.filterClasses || [])
+                };
+                // drop the visible off selector if it exists.
+                focusAfterSelector.selector = focusAfterSelector.selector.replace(/:visible$/, "");
+            } else {
+                focusAfterSelector = null;
+            }
+        }
         /**
          * ###<a name="getLimit">getLimit</a>
          * Return the limit of the options. Execute function or number to return limit.
@@ -63,6 +81,7 @@ angular.module("ux").factory("infiniteScroll", function() {
             }
             return inst.options.infiniteScroll.limit || 0;
         }
+        result.getLimit = getLimit;
         /**
          * ###<a name="addExtraRow">addExtraRow</a>###
          * Add the extra row to the normalized grid data for the loading row.
@@ -79,7 +98,18 @@ angular.module("ux").factory("infiniteScroll", function() {
             }
         };
         result.afterRowsAdded = function(event) {
+            var el, focusEl;
             inst.element.removeClass("loadingInfiniteRowData");
+            if (focusAfterSelector) {
+                el = inst.getRowElm(focusAfterSelector.rowIndex);
+                focusEl = el[0].querySelector(focusAfterSelector.selector);
+                if (focusEl.select) {
+                    focusEl.select();
+                }
+                if (focusEl) {
+                    focusEl.focus();
+                }
+            }
         };
         /**
          * ###<a name="enable">enable</a>###

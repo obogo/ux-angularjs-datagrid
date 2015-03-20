@@ -11,6 +11,7 @@ angular.module('ux').factory('disableHoverWhileScrolling', function () {
 
         function init() {
             inst.flow.log("init");
+//TODO: need to remove dynamic style sheets and use inline css.
             ux.css.createClass('grid', '.' + name + ' *', "pointer-events: none !important;");
         }
 

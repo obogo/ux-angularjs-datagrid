@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.1.9
+* ux-angularjs-datagrid v.1.2.0
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -23,6 +23,7 @@ angular.module("ux").factory("scrollBar", function() {
         } else {
             parent.appendChild(scrollBarElm);
         }
+        //TODO: need to remove dynamic style sheets and use inline css.
         if (!exports.css.getSelector(".datagrid-scrollbar")) {
             exports.css.createClass("datagrid-scrollbar", ".datagrid-scrollbar", "box-sizing: border-box; " + "position: absolute; " + "top:0px; " + "right:0px; " + "width:6px; " + "background-color: rgba(0, 0, 0, 0.498039); " + "border: 1px solid rgba(255, 255, 255, 0.901961); " + "border-top-left-radius: 3px; " + "border-top-right-radius: 3px; " + "border-bottom-right-radius: 3px; " + "border-bottom-left-radius: 3px; " + "display: block; height: 476px; " + "background-position: initial initial; " + "background-repeat: initial initial;");
             exports.css.createClass("datagrid-scrollbar", ".scrolling", "opacity:1;");

@@ -13,7 +13,7 @@ angular.module('ux').factory('scrollBar', function () {
         } else {
             parent.appendChild(scrollBarElm);
         }
-
+//TODO: need to remove dynamic style sheets and use inline css.
         if (!exports.css.getSelector('.datagrid-scrollbar')) {
             exports.css.createClass('datagrid-scrollbar', '.datagrid-scrollbar', 'box-sizing: border-box; ' +
                 'position: absolute; ' +

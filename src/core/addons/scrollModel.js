@@ -201,9 +201,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
 
     result.click = function (e) {
+        //TODO: this needs to deprecate because this has finally been fixed in android. (Feb 5th 2015)
         // simulate click on android. Ignore on IOS.
-        if (!exports.datagrid.isIOS || inst.options.scrollModel.simulateClick) {
-            if (inst.options.scrollModel.simulateClick) {
+        if (inst.options.scrollModel.simulateClick) {
+            if (inst.options.scrollModel.simulateClick && target && !(/(SELECT|INPUT|TEXTAREA)/i).test(target.tagName)) {
                 result.killEvent(e);
             }
             var target = e.target,

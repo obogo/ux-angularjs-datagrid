@@ -20,6 +20,16 @@ module.exports = function (grunt) {
                 }
             }
         },
+        compile: {
+            hb: {// side click user
+                wrap: 'hb',
+                filename: 'hb',
+                build: 'vendor/hb',
+                scripts: {
+                    import: ['cssRules', 'throttle']
+                }
+            }
+        },
         replace: {
             build: {
                 options: {
@@ -81,6 +91,7 @@ module.exports = function (grunt) {
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-replace');
+    grunt.loadNpmTasks('hbjs');
 
     // Default task(s).
 //    grunt.registerTask('default', ['jshint', 'uglify', 'compress']);

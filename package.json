@@ -1,15 +1,16 @@
 {
-    "name": "uxDatagridIo",
-    "version": "0.0.1",
-    "filename": "datagridIo",
-    "packageName": "ux",
-    "dependencies": {},
-    "devDependencies": {
-        "grunt": "~0.4.1",
-        "grunt-contrib-jshint": "latest",
-        "grunt-replace": "latest"
-    },
-    "engines": {
-        "node": ">=0.8.0"
-    }
+  "name": "uxDatagridIo",
+  "version": "0.0.1",
+  "filename": "datagridIo",
+  "packageName": "ux",
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "latest",
+    "grunt-replace": "latest",
+    "hbjs": "^0.5.48"
+  },
+  "engines": {
+    "node": ">=0.8.0"
+  }
 }

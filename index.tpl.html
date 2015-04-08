@@ -60,6 +60,7 @@ bower install "ux-datagrid"
             <li><a href="#groupedData">Grouped Data</a></li>
             <li><a href="#columns">Columned Data (Like Tables)</a></li>
             <li><a href="#columnsGrouped">Columns and Groups (Like Tables of Tables)</a></li>
+            <li><a href="#resizeColumns">Resize Columned Data (Like Tables)</a></li>
             <li><a href="#infiniteScroll">Infinite Scroll</a></li>
             <li><a href="#collapsibleGroups">Collapsible Groups (starts expanded)</a></li>
             <li><a href="#expandableGroups">Expandable Groups (starts collapsed)</a></li>
@@ -94,6 +95,8 @@ bower install "ux-datagrid"
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-sortModel.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/desktop/ux-datagrid-focusManager.js"></script>
 
+<script src="vendor/hb/hb.js"></script>
+<script src="vendor/go-resize-columns/go-resize-columns.js"></script>
 
 <link rel="stylesheet" type="text/css" href="vendor/jsonview/ux-jsonview.css">
 <script src="vendor/jsonview/ux-jsonview.js"></script>
@@ -361,6 +364,8 @@ angular.module('ux').factory('whichTemplate', function () {
     ##columns##
 
     ##columnsGrouped##
+
+    ##resizeColumns##
 
     ##infiniteScroll##
 

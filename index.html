@@ -60,6 +60,7 @@ bower install "ux-datagrid"
             <li><a href="#groupedData">Grouped Data</a></li>
             <li><a href="#columns">Columned Data (Like Tables)</a></li>
             <li><a href="#columnsGrouped">Columns and Groups (Like Tables of Tables)</a></li>
+            <li><a href="#resizeColumns">Resize Columned Data (Like Tables)</a></li>
             <li><a href="#infiniteScroll">Infinite Scroll</a></li>
             <li><a href="#collapsibleGroups">Collapsible Groups (starts expanded)</a></li>
             <li><a href="#expandableGroups">Expandable Groups (starts collapsed)</a></li>
@@ -94,6 +95,8 @@ bower install "ux-datagrid"
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-sortModel.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/desktop/ux-datagrid-focusManager.js"></script>
 
+<script src="vendor/hb/hb.js"></script>
+<script src="vendor/go-resize-columns/go-resize-columns.js"></script>
 
 <link rel="stylesheet" type="text/css" href="vendor/jsonview/ux-jsonview.css">
 <script src="vendor/jsonview/ux-jsonview.js"></script>
@@ -971,6 +974,220 @@ angular.module('ux').factory('whichTemplate', function () {
     </div>
                                 <link rel="stylesheet" type="text/css" href="examples/columnsGrouped/ex.css">
                                 <script src="examples/columnsGrouped/ex.js"></script>
+
+    <!-- **************************** Columns ********************************** -->
+    <a name="resizeColumns"></a>
+    <div class="panel-ex resize-columns" ng-app="resizeColumns">
+        <div class="panel-ex-head">Resize Columned Data (like tables)</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>Allow columns to be resized. This cannot be done with a grid addon because it needs to affect both the elements of the grid and elements outside of it (the header columns).</p>
+            <p>There are a few specific rules for this to work. First of all you must provide a selector that will match both the header rows and the grid rows.</p>
+            <p>This selector will then be used to create dynamic style rules so it will affect all children. Putting a style tag on each row wouldn't work because they may not all be there (because of chunking), and it would be super slow.</p>
+            <p>NOTE: if you do not make your selector specific enough it will not override your current styles.</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+&lt;!-- view source grab these files -->
+&lt;!-- requires: vendor/hb/hb.js -->
+&lt;!-- requires: vendor/go-resize-columns/go-resize-columns.js -->
+&lt;div ng-controller="ctrl">
+    &lt;go-resize-columns selector="'.resize-columns-row'">&lt;/go-resize-columns>
+    &lt;div class="resize-columns-row resize-columns-header">
+        &lt;div class="col col1">ID&lt;/div>
+        &lt;div class="col col2">First Name&lt;/div>
+        &lt;div class="col col3">Last Name&lt;/div>
+        &lt;div class="col col4">Age&lt;/div>
+        &lt;div class="col col5">Kids&lt;/div>
+    &lt;/div>
+    &lt;div ux-datagrid="items">
+        &lt;script type="template/html" template-item="item">
+            &lt;div class="resize-columns-row">
+                &lt;div class="col col1">{{item.id}}&lt;/div>
+                &lt;div class="col col2">{{item.firstName}}&lt;/div>
+                &lt;div class="col col3">{{item.lastName}}&lt;/div>
+                &lt;div class="col col4">{{item.age}}&lt;/div>
+                &lt;div class="col col5">{{item.kids}}&lt;/div>
+            &lt;/div>
+        &lt;/script>
+    &lt;/div>
+&lt;/div>
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+.resize-columns *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+    box-sizing: border-box;
+}
+
+.resize-columns-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.resize-columns-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+.resize-columns-row {
+    position: relative;/* required to position drag handles */
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse; /** THIS IS VERY IMPORTANT OR CHUNKS WITH BORDERS WILL OVERLAP EACH OTHER **/
+    height: 20px;
+}
+
+.resize-columns-row.resize-columns-header {
+    background-color: #000;
+    color: #FFF;
+}
+
+.resize-columns-row .col {
+    display: table-cell !important;
+    position: relative;
+    text-align: center;
+    border-right: 1px solid #999;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.resize-columns-row .col1 {
+    width: 20px;
+}
+
+.resize-columns-row .col2 {
+    text-transform: capitalize;/* uppercase the word */
+    text-align: left;
+    width: 20%;
+}
+
+.resize-columns-row .col3 {
+    text-transform: capitalize;/* uppercase the word */
+    text-align: left;
+}
+
+.resize-columns-row .col4 {
+    width: 40px;
+}
+
+.resize-columns-row .col5 {
+    width: 40px;
+}
+
+.col-resize {
+    position: absolute;
+    z-index: 100;
+    width: 100%;
+    height: 0px;
+    overflow: visible;
+}
+.col-resize > div {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 5px;
+    min-height:5px;
+    background-color: transparent;
+    cursor: col-resize;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+    transform: translateX(-50%);
+}
+.col-resize > div:before {
+    content: '';
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    border: 5px solid transparent;
+    width: 0px;
+    height: 0px;
+    border-top-color: #999;
+    -webkit-transform: translate(-50%);
+    -moz-transform: translate(-50%);
+    -ms-transform: translate(-50%);
+    -o-transform: translate(-50%);
+    transform: translate(-50%);
+}
+.col-resize > div:after {
+    content: '';
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    width: 1px;
+    height: 100%;
+    background-color: #999;
+    -webkit-transform: translate(-50%);
+    -moz-transform: translate(-50%);
+    -ms-transform: translate(-50%);
+    -o-transform: translate(-50%);
+    transform: translate(-50%);
+}
+.col-resize > div:last-child:before, .col-resize > div:last-child:after {
+    display:none;
+}
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+var name = 'resizeColumns';
+function getName(len) {
+    var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';
+    while (str.length < len) {
+        str += alpha[Math.floor(Math.random() * alpha.length)];
+    }
+    return str;
+}
+ angular.module(name, ['ux','go'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, j, len = 10, items = [], item, childLen = 0;
+        while (i < len) {
+            item = {id: i, firstName:getName(10), lastName:getName(10), age: Math.floor(Math.random() * 50 + 18), kids: Math.floor(Math.random() * 10)};
+            items.push(item);
+            i += 1;
+        }
+        $scope.items = items;
+    });
+
+</code></pre>
+            <p>There are 2 script files required for this to work. <a href="https://github.com/obogo/hummingbird">hummingbird</a> vendor/hb/hb.js his file is needed to modify the css classes. You can just take this file as is. It is generated from hummingbird. For more info check out https://github.com/obogo/hummingbird and see the Gruntfile.js for configuration.</p>
+            <p>The other file is <a href="https://github.com/obogo/go-resize-columns">go-resize-columns.js</a> vendor/go-resize-columns/go-resize-columns.js which is the directive responsible for resizing the columns. It uses methods from the hb.js file.</p>
+<!-- html:start -->
+<!-- view source grab these files -->
+<!-- requires: vendor/hb/hb.js -->
+<!-- requires: vendor/go-resize-columns/go-resize-columns.js -->
+<div ng-controller="ctrl">
+    <go-resize-columns selector="'.resize-columns-row'"></go-resize-columns>
+    <div class="resize-columns-row resize-columns-header">
+        <div class="col col1">ID</div>
+        <div class="col col2">First Name</div>
+        <div class="col col3">Last Name</div>
+        <div class="col col4">Age</div>
+        <div class="col col5">Kids</div>
+    </div>
+    <div ux-datagrid="items">
+        <script type="template/html" template-item="item">
+            <div class="resize-columns-row">
+                <div class="col col1">{{item.id}}</div>
+                <div class="col col2">{{item.firstName}}</div>
+                <div class="col col3">{{item.lastName}}</div>
+                <div class="col col4">{{item.age}}</div>
+                <div class="col col5">{{item.kids}}</div>
+            </div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>
+                                <link rel="stylesheet" type="text/css" href="examples/resizeColumns/ex.css">
+                                <script src="examples/resizeColumns/ex.js"></script>
 
     <!-- **************************** Infnite Scroll ********************************** -->
     <a name="infiniteScroll"></a>

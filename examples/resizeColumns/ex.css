@@ -1,0 +1,117 @@
+.resize-columns *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+    box-sizing: border-box;
+}
+
+.resize-columns-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.resize-columns-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+.resize-columns-row {
+    position: relative;/* required to position drag handles */
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse; /** THIS IS VERY IMPORTANT OR CHUNKS WITH BORDERS WILL OVERLAP EACH OTHER **/
+    height: 20px;
+}
+
+.resize-columns-row.resize-columns-header {
+    background-color: #000;
+    color: #FFF;
+}
+
+.resize-columns-row .col {
+    display: table-cell !important;
+    position: relative;
+    text-align: center;
+    border-right: 1px solid #999;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.resize-columns-row .col1 {
+    width: 20px;
+}
+
+.resize-columns-row .col2 {
+    text-transform: capitalize;/* uppercase the word */
+    text-align: left;
+    width: 20%;
+}
+
+.resize-columns-row .col3 {
+    text-transform: capitalize;/* uppercase the word */
+    text-align: left;
+}
+
+.resize-columns-row .col4 {
+    width: 40px;
+}
+
+.resize-columns-row .col5 {
+    width: 40px;
+}
+
+.col-resize {
+    position: absolute;
+    z-index: 100;
+    width: 100%;
+    height: 0px;
+    overflow: visible;
+}
+.col-resize > div {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 5px;
+    min-height:5px;
+    background-color: transparent;
+    cursor: col-resize;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+    transform: translateX(-50%);
+}
+.col-resize > div:before {
+    content: '';
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    border: 5px solid transparent;
+    width: 0px;
+    height: 0px;
+    border-top-color: #999;
+    -webkit-transform: translate(-50%);
+    -moz-transform: translate(-50%);
+    -ms-transform: translate(-50%);
+    -o-transform: translate(-50%);
+    transform: translate(-50%);
+}
+.col-resize > div:after {
+    content: '';
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    width: 1px;
+    height: 100%;
+    background-color: #999;
+    -webkit-transform: translate(-50%);
+    -moz-transform: translate(-50%);
+    -ms-transform: translate(-50%);
+    -o-transform: translate(-50%);
+    transform: translate(-50%);
+}
+.col-resize > div:last-child:before, .col-resize > div:last-child:after {
+    display:none;
+}

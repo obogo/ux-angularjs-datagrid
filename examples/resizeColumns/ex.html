@@ -1,0 +1,54 @@
+<!-- **************************** Columns ********************************** -->
+    <a name="resizeColumns"></a>
+    <div class="panel-ex resize-columns" ng-app="resizeColumns">
+        <div class="panel-ex-head">Resize Columned Data (like tables)</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>Allow columns to be resized. This cannot be done with a grid addon because it needs to affect both the elements of the grid and elements outside of it (the header columns).</p>
+            <p>There are a few specific rules for this to work. First of all you must provide a selector that will match both the header rows and the grid rows.</p>
+            <p>This selector will then be used to create dynamic style rules so it will affect all children. Putting a style tag on each row wouldn't work because they may not all be there (because of chunking), and it would be super slow.</p>
+            <p>NOTE: if you do not make your selector specific enough it will not override your current styles.</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+##html##
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+##css##
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+##js##
+</code></pre>
+            <p>There are 2 script files required for this to work. <a href="https://github.com/obogo/hummingbird">hummingbird</a> vendor/hb/hb.js his file is needed to modify the css classes. You can just take this file as is. It is generated from hummingbird. For more info check out https://github.com/obogo/hummingbird and see the Gruntfile.js for configuration.</p>
+            <p>The other file is <a href="https://github.com/obogo/go-resize-columns">go-resize-columns.js</a> vendor/go-resize-columns/go-resize-columns.js which is the directive responsible for resizing the columns. It uses methods from the hb.js file.</p>
+<!-- html:start -->
+<!-- view source grab these files -->
+<!-- requires: vendor/hb/hb.js -->
+<!-- requires: vendor/go-resize-columns/go-resize-columns.js -->
+<div ng-controller="ctrl">
+    <go-resize-columns selector="'.resize-columns-row'"></go-resize-columns>
+    <div class="resize-columns-row resize-columns-header">
+        <div class="col col1">ID</div>
+        <div class="col col2">First Name</div>
+        <div class="col col3">Last Name</div>
+        <div class="col col4">Age</div>
+        <div class="col col5">Kids</div>
+    </div>
+    <div ux-datagrid="items">
+        <script type="template/html" template-item="item">
+            <div class="resize-columns-row">
+                <div class="col col1">{{item.id}}</div>
+                <div class="col col2">{{item.firstName}}</div>
+                <div class="col col3">{{item.lastName}}</div>
+                <div class="col col4">{{item.age}}</div>
+                <div class="col col5">{{item.kids}}</div>
+            </div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>

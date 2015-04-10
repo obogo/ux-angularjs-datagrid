@@ -133,7 +133,7 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.2.0
+ux-angularjs-datagrid v.1.2.1
 (c) 2015, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -843,6 +843,10 @@ it gets to the maxParent.</p>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_PREV_ELEMENT_OF_SAME</span> <span class="o">=</span> <span class="s2">&quot;ux-datagrid:focusToPrevElementOfSame&quot;</span><span class="p">;</span>
 
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_NEXT_ELEMENT_OF_SAME</span> <span class="o">=</span> <span class="s2">&quot;ux-datagrid:focusToNextElementOfSame&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_PREV_ELEMENT_OF_SAME_FAILURE</span> <span class="o">=</span> <span class="s2">&quot;ux-datagrid:focusToPrevElementOfSameFailure&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_NEXT_ELEMENT_OF_SAME_FAILURE</span> <span class="o">=</span> <span class="s2">&quot;ux-datagrid:focusToNextElementOfSameFailure&quot;</span><span class="p">;</span>
 
 <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_SCROLL_TO_TOP_ENTER</span> <span class="o">=</span> <span class="s2">&quot;ux-datagrid:onScrollToTopEnter&quot;</span><span class="p">;</span>
 
@@ -1895,22 +1899,10 @@ to increment.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollIntoView</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getRowIndexFromElement</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">),</span> <span class="kc">true</span><span class="p">);</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">select</span><span class="p">)</span> <span class="p">{</span>
-
-</pre></div>
-        </td>
-      </tr>
-      <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-53" id="section-53">&#182;</a>
-</div>
-<p>TODO: if no jquery. There may be no select.</p>
-        </td>
-        <td class="code highlight"><div class="highlight"><pre>
-                <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">select</span><span class="p">();</span>
-            <span class="p">}</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">select</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">select</span><span class="p">();</span>
+                <span class="p">}</span>
                 <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">focus</span><span class="p">();</span>
                 <span class="nx">success</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
             <span class="p">}</span>
@@ -1997,7 +1989,7 @@ However, possible bug here if a selector similar to this one doesn't exist for a
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-55" id="section-55">&#182;</a>
+  <a class="pilcrow" href="#section-54" id="section-54">&#182;</a>
 </div>
 <p>it has to match a pattern for each row. These are too unique.</p>
         </td>
@@ -2022,12 +2014,20 @@ However, possible bug here if a selector similar to this one doesn't exist for a
         <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_RENDER</span><span class="p">,</span> <span class="nx">addListeners</span><span class="p">));</span>
         <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_PREV_ELEMENT_OF_SAME</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">contains</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">activeElement</span><span class="p">))</span> <span class="p">{</span>
-                <span class="nx">throttleNextPrev</span><span class="p">(</span><span class="nx">focusToPrevRowElement</span><span class="p">);</span>
+                <span class="nx">throttleNextPrev</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">activeElement</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">focusToPrevRowElement</span><span class="p">(</span><span class="nx">activeElement</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_PREV_ELEMENT_OF_SAME_FAILURE</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">});</span>
             <span class="p">}</span>
         <span class="p">}));</span>
         <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_NEXT_ELEMENT_OF_SAME</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">contains</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">activeElement</span><span class="p">))</span> <span class="p">{</span>
-                <span class="nx">throttleNextPrev</span><span class="p">(</span><span class="nx">focusToNextRowElement</span><span class="p">);</span>
+                <span class="nx">throttleNextPrev</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">activeElement</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">focusToNextRowElement</span><span class="p">(</span><span class="nx">activeElement</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">FOCUS_TO_NEXT_ELEMENT_OF_SAME_FAILURE</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">});</span>
             <span class="p">}</span>
         <span class="p">}));</span>
         <span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_HEIGHTS_UPDATED_RENDER</span><span class="p">,</span> <span class="nx">onResize</span><span class="p">));</span>

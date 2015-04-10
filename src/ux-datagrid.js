@@ -812,6 +812,7 @@ function Datagrid(scope, element, attr, $compile) {
             };
         result.startIndex = result.i = inst.getOffsetIndex(scroll);
         if (inst.rowsLength && result.startIndex === result.end) {
+            result.startIndex = result.end - 1;
             throw new Error(exports.errors.E1002);
         }
         return result;

@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.2.0
+* ux-angularjs-datagrid v.1.2.1
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -53,7 +53,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.2.0",
+    version: "1.2.1",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1758,6 +1758,7 @@ function Datagrid(scope, element, attr, $compile) {
         };
         result.startIndex = result.i = inst.getOffsetIndex(scroll);
         if (inst.rowsLength && result.startIndex === result.end) {
+            result.startIndex = result.end - 1;
             throw new Error(exports.errors.E1002);
         }
         return result;

@@ -1,5 +1,5 @@
 ####[Releases](https://github.com/obogo/ux-angularjs-datagrid/releases)
-- Release 1.2.0 [Source Code (zip)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.1.8.zip) | [Source Code (tar.gz)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.2.0.tar.gz)
+- Release 1.2.1 [Source Code (zip)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.2.1.zip) | [Source Code (tar.gz)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.2.1.tar.gz)
 
 ## ux-datagrid : An Angular DataGrid ##
 ----------

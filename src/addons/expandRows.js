@@ -5,6 +5,7 @@ exports.datagrid.events.ROW_TRANSITION_COMPLETE = "datagrid:rowTransitionComplet
 exports.datagrid.events.COLLAPSE_ALL_EXPANDED_ROWS = "datagrid:collapseAllExpandedRows";
 exports.datagrid.options.expandRows = [];
 exports.datagrid.options.expandRows.autoClose = true;
+exports.datagrid.options.expandRows.scrollOnExpand = true;
 angular.module('ux').factory('expandRows', function () {
     //TODO: on change row template. This needs to collapse the row.
     return ['inst', function (inst) {
@@ -214,16 +215,20 @@ angular.module('ux').factory('expandRows', function () {
             clearTimeout(intv);
             intv = setTimeout(function () {
                 clearTimeout(intv);
-                inst.scrollModel.scrollIntoView(index, true);
+                if (inst.options.expandRows.scrollOnExpand) {
+                    inst.scrollModel.scrollIntoView(index, true);
+                }
                 inst.dispatch(exports.datagrid.events.ROW_TRANSITION_COMPLETE);
                 opening = false;
 
-                inst.flow.add(function() {
-                    // check for last row. On expansion it needs to scroll down.
-                    if (state === states.opened && index === inst.data.length - 1 && inst.getViewportHeight() < inst.getContentHeight()) {
-                        inst.scrollModel.scrollToBottom(true);
-                    }
-                }, [], 0);
+                if (inst.options.expandRows.scrollOnExpand) {
+                    inst.flow.add(function() {
+                        // check for last row. On expansion it needs to scroll down.
+                        if (state === states.opened && index === inst.data.length - 1 && inst.getViewportHeight() < inst.getContentHeight()) {
+                            inst.scrollModel.scrollToBottom(true);
+                        }
+                    }, [], 0);
+                }
             }, 0);
         }
 

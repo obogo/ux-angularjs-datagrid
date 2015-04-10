@@ -1757,9 +1757,6 @@ function Datagrid(scope, element, attr, $compile) {
             visibleScrollEnd: scroll + height - options.cushion
         };
         result.startIndex = result.i = inst.getOffsetIndex(scroll);
-        if (inst.rowsLength && result.startIndex === result.end) {
-            throw new Error(exports.errors.E1002);
-        }
         return result;
     }
     /**
@@ -1830,7 +1827,7 @@ function Datagrid(scope, element, attr, $compile) {
         }
         loop.ended = loop.i - 1;
         if (inst.rowsLength && values.activeRange.min < 0 && values.activeRange.max < 0) {
-            throw new Error(exports.errors.E1002);
+            inst.log("	no rows in view");
         }
         inst.log("	startIndex %s endIndex %s", loop.startIndex, loop.i);
         deactivateList(lastActive);

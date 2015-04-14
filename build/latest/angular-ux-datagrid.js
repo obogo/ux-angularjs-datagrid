@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.2.3
+* ux-angularjs-datagrid v.1.2.4
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -53,7 +53,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.2.3",
+    version: "1.2.4",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1758,7 +1758,8 @@ function Datagrid(scope, element, attr, $compile) {
         };
         result.startIndex = result.i = inst.getOffsetIndex(scroll);
         if (inst.rowsLength && result.startIndex === result.end) {
-            result.startIndex = result.end - 1;
+            result.startIndex = result.i = result.end - 1;
+            // always select at least one row.
             inst.log(exports.errors.E1002);
         }
         return result;
@@ -1895,8 +1896,8 @@ function Datagrid(scope, element, attr, $compile) {
      * ###<a name="updateMinMax">updateMinMax</a>###
      * takes an index that has just been activated and updates the min and max
      */
-    // values for later calculations to know the range.
     function updateMinMax(activeIndex) {
+        // values for later calculations to know the range.
         values.activeRange.min = values.activeRange.min < activeIndex && values.activeRange.min >= 0 ? values.activeRange.min : activeIndex;
         values.activeRange.max = values.activeRange.max > activeIndex && values.activeRange.max >= 0 ? values.activeRange.max : activeIndex;
     }

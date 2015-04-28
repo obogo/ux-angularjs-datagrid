@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.2.4
+* ux-angularjs-datagrid v.1.2.5
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -53,7 +53,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.2.4",
+    version: "1.2.5",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1899,7 +1899,7 @@ function Datagrid(scope, element, attr, $compile) {
     function updateMinMax(activeIndex) {
         // values for later calculations to know the range.
         values.activeRange.min = values.activeRange.min < activeIndex && values.activeRange.min >= 0 ? values.activeRange.min : activeIndex;
-        values.activeRange.max = values.activeRange.max > activeIndex && values.activeRange.max >= 0 ? values.activeRange.max : activeIndex;
+        values.activeRange.max = values.activeRange.max >= activeIndex && values.activeRange.max >= 0 ? values.activeRange.max : activeIndex;
     }
     /**
      * ###<a name="beforeRenderAfterDataChange">beforeRenderAfterDataChange</a>###

@@ -953,7 +953,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function updateMinMax(activeIndex) {// values for later calculations to know the range.
         values.activeRange.min = values.activeRange.min < activeIndex && values.activeRange.min >= 0 ? values.activeRange.min : activeIndex;
-        values.activeRange.max = values.activeRange.max > activeIndex && values.activeRange.max >= 0 ? values.activeRange.max : activeIndex;
+        values.activeRange.max = values.activeRange.max >= activeIndex && values.activeRange.max >= 0 ? values.activeRange.max : activeIndex;
     }
 
     /**

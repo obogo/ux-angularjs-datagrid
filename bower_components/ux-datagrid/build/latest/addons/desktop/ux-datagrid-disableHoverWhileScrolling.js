@@ -1,7 +1,7 @@
-/*
-* ux-angularjs-datagrid v.1.1.8
-* (c) 2015, WebUX
-* https://github.com/webux/ux-angularjs-datagrid
+/*!
+* ux-angularjs-datagrid v.1.2.5
+* (c) 2015, Obogo
+* https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
 (function (exports, global) {
@@ -24,6 +24,7 @@ angular.module("ux").factory("disableHoverWhileScrolling", function() {
         var name = "disable-hover-while-scrolling", timer;
         function init() {
             inst.flow.log("init");
+            //TODO: need to remove dynamic style sheets and use inline css.
             ux.css.createClass("grid", "." + name + " *", "pointer-events: none !important;");
         }
         function scrollStart() {

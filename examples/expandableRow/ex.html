@@ -1,0 +1,46 @@
+<!-- **************************** Expandable Row ********************************** -->
+    <a name="expandableRow"></a>
+    <div class="panel-ex expandableRow" ng-app="expandableRow">
+        <div class="panel-ex-head">Expandable Row</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>Allow a row to change it's height adding a css class to it. View the last row in the css to see the class that was added ".expandDefault".</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+##html##
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+##css##
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+##js##
+</code></pre>
+            <p>Clicking on the row will cause it to toggle expanded and collapsed</p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div class="expandableRow-row expandableRow-header">
+        <div class="col col1">ID</div>
+        <div class="col col2">First Name</div>
+        <div class="col col3">Last Name</div>
+        <div class="col col4">Age</div>
+        <div class="col col5">Kids</div>
+    </div>
+    <div ux-datagrid="items" data-addons="expandRows" data-options="{expandRows:[{template:'default', cls:'expandDefault'}]}">
+        <script type="template/html" template-item="item">
+            <div class="expandableRow-row" data-ng-click="datagrid.expandRows.toggle($index)">
+                <div class="col col1"><div>{{item.id}}</div></div>
+                <div class="col col2"><div>{{item.firstName}}</div></div>
+                <div class="col col3"><div>{{item.lastName}}</div></div>
+                <div class="col col4"><div>{{item.age}}</div></div>
+                <div class="col col5"><div>{{item.kids}}</div></div>
+            </div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>

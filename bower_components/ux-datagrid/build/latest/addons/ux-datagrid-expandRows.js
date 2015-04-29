@@ -1,7 +1,7 @@
-/*
-* ux-angularjs-datagrid v.1.1.8
-* (c) 2015, WebUX
-* https://github.com/webux/ux-angularjs-datagrid
+/*!
+* ux-angularjs-datagrid v.1.2.5
+* (c) 2015, Obogo
+* https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
 (function (exports, global) {
@@ -26,6 +26,8 @@ exports.datagrid.events.COLLAPSE_ALL_EXPANDED_ROWS = "datagrid:collapseAllExpand
 exports.datagrid.options.expandRows = [];
 
 exports.datagrid.options.expandRows.autoClose = true;
+
+exports.datagrid.options.expandRows.scrollOnExpand = true;
 
 angular.module("ux").factory("expandRows", function() {
     //TODO: on change row template. This needs to collapse the row.
@@ -143,7 +145,7 @@ angular.module("ux").factory("expandRows", function() {
                     elm[state === states.opened ? "addClass" : "removeClass"](tpl.cls);
                     elm.addClass("animating");
                 }
-                if (tpl.transition === false) {
+                if (!tpl.transition) {
                     // we need to wait for the heights to update before updating positions.
                     var evt = {
                         target: elm[0],
@@ -214,13 +216,19 @@ angular.module("ux").factory("expandRows", function() {
             clearTimeout(intv);
             intv = setTimeout(function() {
                 clearTimeout(intv);
-                // check for last row. On expansion it needs to scroll down.
-                if (state === states.opened && index === inst.data.length - 1 && inst.getViewportHeight() < inst.getContentHeight()) {
-                    inst.scrollModel.scrollToBottom(true);
+                if (inst.options.expandRows.scrollOnExpand) {
+                    inst.scrollModel.scrollIntoView(index, true);
                 }
-                inst.scrollModel.scrollIntoView(index, true);
                 inst.dispatch(exports.datagrid.events.ROW_TRANSITION_COMPLETE);
                 opening = false;
+                if (inst.options.expandRows.scrollOnExpand) {
+                    inst.flow.add(function() {
+                        // check for last row. On expansion it needs to scroll down.
+                        if (state === states.opened && index === inst.data.length - 1 && inst.getViewportHeight() < inst.getContentHeight()) {
+                            inst.scrollModel.scrollToBottom(true);
+                        }
+                    }, [], 0);
+                }
             }, 0);
         }
         function isExpanded(itemOrIndex) {

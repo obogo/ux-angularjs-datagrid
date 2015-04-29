@@ -1,7 +1,7 @@
-/*
-* ux-angularjs-datagrid v.1.1.8
-* (c) 2015, WebUX
-* https://github.com/webux/ux-angularjs-datagrid
+/*!
+* ux-angularjs-datagrid v.1.2.5
+* (c) 2015, Obogo
+* https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
 (function (exports, global) {
@@ -53,7 +53,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.1.8",
+    version: "1.2.5",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -209,7 +209,7 @@ exports.datagrid = {
             // - **<a name="options.scrollModel.manual">scrollModel.manual</a>** if set to true then touch move events will be used to scroll and calculate coasting.
             manual: true,
             // - **<a name="options.scrollModel.simulateClick">scrollModel.simulateClick</a>** defaulted to true for android, and false for iOS.
-            simulateClick: !isIOS
+            simulateClick: false
         },
         // - **<a name="options.compiledClass">compiledClass</a>** after a row has been compiled the uncompiled class is removed and compiled is added.
         compiledClass: "compiled",
@@ -1578,7 +1578,9 @@ function Datagrid(scope, element, attr, $compile) {
         //        s.$evalAsync();// this sometimes takes too long so I see {{}} brackets briefly.
         if (!isDigesting(s)) {
             s.$digest();
+            return true;
         }
+        return false;
     }
     /**
      * ###<a name="applyEventCounts">applyEventCounts</a>###
@@ -1756,7 +1758,9 @@ function Datagrid(scope, element, attr, $compile) {
         };
         result.startIndex = result.i = inst.getOffsetIndex(scroll);
         if (inst.rowsLength && result.startIndex === result.end) {
-            throw new Error(exports.errors.E1002);
+            result.startIndex = result.i = result.end - 1;
+            // always select at least one row.
+            inst.log(exports.errors.E1002);
         }
         return result;
     }
@@ -1892,8 +1896,8 @@ function Datagrid(scope, element, attr, $compile) {
      * ###<a name="updateMinMax">updateMinMax</a>###
      * takes an index that has just been activated and updates the min and max
      */
-    // values for later calculations to know the range.
     function updateMinMax(activeIndex) {
+        // values for later calculations to know the range.
         values.activeRange.min = values.activeRange.min < activeIndex && values.activeRange.min >= 0 ? values.activeRange.min : activeIndex;
         values.activeRange.max = values.activeRange.max > activeIndex && values.activeRange.max >= 0 ? values.activeRange.max : activeIndex;
     }
@@ -1915,7 +1919,7 @@ function Datagrid(scope, element, attr, $compile) {
         if (values.dirty && values.activeRange.max >= 0) {
             values.dirty = false;
             tplHeight = inst.templateModel.calculateRowHeight(getRowElm(values.activeRange.min)[0]);
-            if (inst.getData().length && tplHeight !== (oldHeight = inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min]))) {
+            if (flow.async && inst.getData().length && tplHeight !== (oldHeight = inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min]))) {
                 if (window.console && console.warn) {
                     console.warn("Template height change from " + oldHeight + " to " + tplHeight + ". This can cause gaps in the datagrid.");
                 }
@@ -1970,8 +1974,8 @@ function Datagrid(scope, element, attr, $compile) {
                 inst.dispatch(exports.datagrid.events.ON_BEFORE_RENDER);
                 flow.add(beforeRenderAfterDataChange);
                 flow.add(updateRowWatchers);
-                // this wait allows rows to finish calculating their heights and finish the digest before firing.
-                flow.add(afterRenderAfterDataChange);
+                // if we do not wait here row heights show too tall because the rows are evaluated at their height before being digetsted.
+                flow.add(afterRenderAfterDataChange, [], 0);
                 //                flow.add(destroyOldContent);
                 flow.add(inst.dispatch, [ exports.datagrid.events.ON_AFTER_RENDER ]);
             } else {
@@ -2191,7 +2195,8 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function onRowTemplateChange(evt, item, oldTemplate, newTemplate, classes, skipUpdateHeights) {
         var index = inst.getNormalizedIndex(item), el = getExistingRow(index), s = getScope(index), replaceEl;
-        if (s !== scope) {
+        if (s && s !== scope) {
+            // no scope if that row was removed.
             replaceEl = angular.element(inst.templateModel.getTemplateByName(newTemplate).template);
             replaceEl.addClass(options.uncompiledClass);
             while (classes && classes.length) {
@@ -3720,9 +3725,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         return -c * (t /= d) * (t - 2) + b;
     };
     result.click = function(e) {
+        //TODO: this needs to deprecate because this has finally been fixed in android. (Feb 5th 2015)
         // simulate click on android. Ignore on IOS.
-        if (!exports.datagrid.isIOS || inst.options.scrollModel.simulateClick) {
-            if (inst.options.scrollModel.simulateClick) {
+        if (inst.options.scrollModel.simulateClick) {
+            if (inst.options.scrollModel.simulateClick && target && !/(SELECT|INPUT|TEXTAREA)/i.test(target.tagName)) {
                 result.killEvent(e);
             }
             var target = e.target, ev;

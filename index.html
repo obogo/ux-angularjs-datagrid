@@ -64,7 +64,7 @@ bower install "ux-datagrid"
             <li><a href="#infiniteScroll">Infinite Scroll</a></li>
             <li><a href="#collapsibleGroups">Collapsible Groups (starts expanded)</a></li>
             <li><a href="#expandableGroups">Expandable Groups (starts collapsed)</a></li>
-            <li><span href="#expandingRows">Expanding Rows</span></li>
+            <li><a href="#expandableRow">Expandable Rows</a></li>
             <li><a href="#spreadSheet">Focus Manager (spreadsheet)</a></li>
             <li><span href="#scrollHistory">Scroll History</span></li>
             <li><span href="#sortModelGrouped">Sort Model (Grouped)</span></li>
@@ -93,6 +93,7 @@ bower install "ux-datagrid"
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBar.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBounce.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-sortModel.js"></script>
+<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-expandRows.js"></script>
 <script src="bower_components/ux-datagrid/build/latest/addons/desktop/ux-datagrid-focusManager.js"></script>
 
 <script src="vendor/hb/hb.js"></script>
@@ -1676,6 +1677,157 @@ angular.module('ux').factory('whichTemplate', function () {
     </div>
                                 <link rel="stylesheet" type="text/css" href="examples/expandableGroups/ex.css">
                                 <script src="examples/expandableGroups/ex.js"></script>
+
+    <!-- **************************** Expandable Row ********************************** -->
+    <a name="expandableRow"></a>
+    <div class="panel-ex expandableRow" ng-app="expandableRow">
+        <div class="panel-ex-head">Expandable Row</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>Allow a row to change it's height adding a css class to it. View the last row in the css to see the class that was added ".expandDefault".</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+&lt;div ng-controller="ctrl">
+    &lt;div class="expandableRow-row expandableRow-header">
+        &lt;div class="col col1">ID&lt;/div>
+        &lt;div class="col col2">First Name&lt;/div>
+        &lt;div class="col col3">Last Name&lt;/div>
+        &lt;div class="col col4">Age&lt;/div>
+        &lt;div class="col col5">Kids&lt;/div>
+    &lt;/div>
+    &lt;div ux-datagrid="items" data-addons="expandRows" data-options="{expandRows:[{template:'default', cls:'expandDefault'}]}">
+        &lt;script type="template/html" template-item="item">
+            &lt;div class="expandableRow-row" data-ng-click="datagrid.expandRows.toggle($index)">
+                &lt;div class="col col1">&lt;div>{{item.id}}&lt;/div>&lt;/div>
+                &lt;div class="col col2">&lt;div>{{item.firstName}}&lt;/div>&lt;/div>
+                &lt;div class="col col3">&lt;div>{{item.lastName}}&lt;/div>&lt;/div>
+                &lt;div class="col col4">&lt;div>{{item.age}}&lt;/div>&lt;/div>
+                &lt;div class="col col5">&lt;div>{{item.kids}}&lt;/div>&lt;/div>
+            &lt;/div>
+        &lt;/script>
+    &lt;/div>
+&lt;/div>
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+.expandableRow *[ux-datagrid] {
+    width: 100%;
+    height: 150px;
+    box-sizing: border-box;
+}
+
+.expandableRow-row {
+    background-color:#efefef;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.expandableRow-row:nth-child(odd) {
+    background-color:#dfdfdf;
+}
+.expandableRow-row {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse; /** THIS IS VERY IMPORTANT OR CHUNKS WITH BORDERS WILL OVERLAP EACH OTHER **/
+    height: 20px;
+}
+
+.expandableRow-row.expandableRow-header {
+    background-color: #000;
+    color: #FFF;
+}
+
+.expandableRow-row .col {
+    display: table-cell !important;
+    position: relative;
+    text-align: center;
+    border-right: 1px solid #999;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.expandableRow-row .col1 {
+    width: 20px;
+}
+
+.expandableRow-row .col2 {
+    text-transform: capitalize;/* uppercase the word */
+    text-align: left;
+    width: 20%;
+}
+
+.expandableRow-row .col3 {
+    text-transform: capitalize;/* uppercase the word */
+    text-align: left;
+}
+
+.expandableRow-row .col4 {
+    width: 40px;
+}
+
+.expandableRow-row .col5 {
+    width: 40px;
+}
+
+.expandableRow-row.expandDefault {
+    height: 50px;/* The height of the expanded row so it will change size */
+}
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+var name = 'expandableRow';
+function getName(len) {
+    var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';
+    while (str.length < len) {
+        str += alpha[Math.floor(Math.random() * alpha.length)];
+    }
+    return str;
+}
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, j, len = 10, items = [], item, childLen = 0;
+        while (i < len) {
+            item = {id: i, firstName:getName(10), lastName:getName(10), age: Math.floor(Math.random() * 50 + 18), kids: Math.floor(Math.random() * 10)};
+            items.push(item);
+            i += 1;
+        }
+        $scope.items = items;
+    });
+
+</code></pre>
+            <p>Clicking on the row will cause it to toggle expanded and collapsed</p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div class="expandableRow-row expandableRow-header">
+        <div class="col col1">ID</div>
+        <div class="col col2">First Name</div>
+        <div class="col col3">Last Name</div>
+        <div class="col col4">Age</div>
+        <div class="col col5">Kids</div>
+    </div>
+    <div ux-datagrid="items" data-addons="expandRows" data-options="{expandRows:[{template:'default', cls:'expandDefault'}]}">
+        <script type="template/html" template-item="item">
+            <div class="expandableRow-row" data-ng-click="datagrid.expandRows.toggle($index)">
+                <div class="col col1"><div>{{item.id}}</div></div>
+                <div class="col col2"><div>{{item.firstName}}</div></div>
+                <div class="col col3"><div>{{item.lastName}}</div></div>
+                <div class="col col4"><div>{{item.age}}</div></div>
+                <div class="col col5"><div>{{item.kids}}</div></div>
+            </div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>
+                                <link rel="stylesheet" type="text/css" href="examples/expandableRow/ex.css">
+                                <script src="examples/expandableRow/ex.js"></script>
 
     <!-- **************************** Spread Sheet ********************************** -->
     <a name="spreadSheet"></a>

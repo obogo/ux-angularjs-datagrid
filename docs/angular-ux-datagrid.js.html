@@ -415,7 +415,7 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.2.5
+ux-angularjs-datagrid v.1.2.6
 (c) 2015, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -519,7 +519,7 @@ on a per grid basis.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.2.5&quot;</span><span class="p">,</span>
+    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.2.6&quot;</span><span class="p">,</span>
 
 </pre></div>
         </td>
@@ -5094,10 +5094,13 @@ deactivates any scopes that were active before that are not still active.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-172" id="section-172">&#182;</a>
 </div>
-<p>this is where the chunks and rows get created is when they are requested if they don't exist.</p>
+<p>this is where the chunks and rows get created is when they are requested if they don't exist.
+we only want to render what is visible.
+however, we always want to render at least one row if possible. So if we can tell that there is one row available then render that
+otherwise it will not enter here if there are no rows to render and will throw an error because of an invalid range.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">offset</span> <span class="o">&gt;=</span> <span class="nx">loop</span><span class="p">.</span><span class="nx">visibleScrollStart</span> <span class="o">&amp;&amp;</span> <span class="nx">offset</span> <span class="o">&lt;=</span> <span class="nx">loop</span><span class="p">.</span><span class="nx">visibleScrollEnd</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">offset</span> <span class="o">&gt;=</span> <span class="nx">loop</span><span class="p">.</span><span class="nx">visibleScrollStart</span> <span class="o">&amp;&amp;</span> <span class="nx">offset</span> <span class="o">&lt;=</span> <span class="nx">loop</span><span class="p">.</span><span class="nx">visibleScrollEnd</span> <span class="o">||</span> <span class="nx">loop</span><span class="p">.</span><span class="nx">i</span> <span class="o">===</span> <span class="nx">loop</span><span class="p">.</span><span class="nx">startIndex</span> <span class="o">&amp;&amp;</span> <span class="nx">loop</span><span class="p">.</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">loop</span><span class="p">.</span><span class="nx">end</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">s</span> <span class="o">=</span> <span class="nx">compileRow</span><span class="p">(</span><span class="nx">loop</span><span class="p">.</span><span class="nx">i</span><span class="p">);</span>
 
 </pre></div>
@@ -5320,7 +5323,7 @@ hide scopes that are deactivated from angular's knowledge so digest loops are as
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span> <span class="o">=</span> <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span> <span class="o">&lt;</span> <span class="nx">activeIndex</span> <span class="o">&amp;&amp;</span> <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">?</span> <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span> <span class="o">:</span> <span class="nx">activeIndex</span><span class="p">;</span>
-        <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">=</span> <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">&gt;=</span> <span class="nx">activeIndex</span> <span class="o">&amp;&amp;</span> <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">?</span> <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">:</span> <span class="nx">activeIndex</span><span class="p">;</span>
+        <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">=</span> <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">&gt;</span> <span class="nx">activeIndex</span> <span class="o">&amp;&amp;</span> <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">?</span> <span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">:</span> <span class="nx">activeIndex</span><span class="p">;</span>
     <span class="p">}</span>
 
 </pre></div>

@@ -37,7 +37,7 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.2.5
+ux-angularjs-datagrid v.1.2.6
 (c) 2015, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -220,7 +220,7 @@ License: MIT.</p>
                     <span class="nx">elm</span><span class="p">[</span><span class="nx">state</span> <span class="o">===</span> <span class="nx">states</span><span class="p">.</span><span class="nx">opened</span> <span class="o">?</span> <span class="s2">&quot;addClass&quot;</span> <span class="o">:</span> <span class="s2">&quot;removeClass&quot;</span><span class="p">](</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">cls</span><span class="p">);</span>
                     <span class="nx">elm</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;animating&quot;</span><span class="p">);</span>
                 <span class="p">}</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">transition</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">transition</span><span class="p">)</span> <span class="p">{</span>
 
 </pre></div>
         </td>

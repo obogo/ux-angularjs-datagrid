@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.2.5
+* ux-angularjs-datagrid v.1.2.6
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -145,7 +145,7 @@ angular.module("ux").factory("expandRows", function() {
                     elm[state === states.opened ? "addClass" : "removeClass"](tpl.cls);
                     elm.addClass("animating");
                 }
-                if (tpl.transition === false) {
+                if (!tpl.transition) {
                     // we need to wait for the heights to update before updating positions.
                     var evt = {
                         target: elm[0],

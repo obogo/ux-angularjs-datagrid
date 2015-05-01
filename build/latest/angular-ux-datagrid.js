@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.2.5
+* ux-angularjs-datagrid v.1.2.6
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -53,7 +53,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.2.5",
+    version: "1.2.6",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1803,7 +1803,10 @@ function Datagrid(scope, element, attr, $compile) {
             prevS = scope.$$childHead ? scopes[loop.i - 1] : null;
             offset = inst.getRowOffset(loop.i);
             // this is where the chunks and rows get created is when they are requested if they don't exist.
-            if (offset >= loop.visibleScrollStart && offset <= loop.visibleScrollEnd) {
+            // we only want to render what is visible.
+            // however, we always want to render at least one row if possible. So if we can tell that there is one row available then render that
+            // otherwise it will not enter here if there are no rows to render and will throw an error because of an invalid range.
+            if (offset >= loop.visibleScrollStart && offset <= loop.visibleScrollEnd || loop.i === loop.startIndex && loop.i < loop.end) {
                 s = compileRow(loop.i);
                 // only compiles if it is not already compiled. Still returns the scope.
                 if (loop.started === undefined) {
@@ -1899,7 +1902,7 @@ function Datagrid(scope, element, attr, $compile) {
     function updateMinMax(activeIndex) {
         // values for later calculations to know the range.
         values.activeRange.min = values.activeRange.min < activeIndex && values.activeRange.min >= 0 ? values.activeRange.min : activeIndex;
-        values.activeRange.max = values.activeRange.max >= activeIndex && values.activeRange.max >= 0 ? values.activeRange.max : activeIndex;
+        values.activeRange.max = values.activeRange.max > activeIndex && values.activeRange.max >= 0 ? values.activeRange.max : activeIndex;
     }
     /**
      * ###<a name="beforeRenderAfterDataChange">beforeRenderAfterDataChange</a>###

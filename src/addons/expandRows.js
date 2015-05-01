@@ -149,7 +149,7 @@ angular.module('ux').factory('expandRows', function () {
                     elm[(state === states.opened ? "addClass" : "removeClass")](tpl.cls);
                     elm.addClass('animating');
                 }
-                if (tpl.transition === false) {
+                if (!tpl.transition) {
                     // we need to wait for the heights to update before updating positions.
                     var evt = {target: elm[0], index:index, state:state};
                     if (inst.options.chunks.detachDom) {

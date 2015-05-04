@@ -7,12 +7,12 @@
     "dependencies": {},
     "repository": {
         "type": "git",
-        "url": "https://github.com/webux/ux-angularjs-datagrid"
+        "url": "https://github.com/obogo/ux-angularjs-datagrid"
     },
     "bugs": {
-        "url": "https://github.com/webux/ux-angularjs-datagrid/issues"
+        "url": "https://github.com/obogo/ux-angularjs-datagrid/issues"
     },
-    "homepage": "http://webux.github.io/ux-angularjs-datagrid/",
+    "homepage": "http://obogo.github.io/ux-angularjs-datagrid/",
     "keywords": [
         "angular",
         "datagrid",

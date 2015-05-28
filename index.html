@@ -392,7 +392,7 @@ $scope.items = [
             <p>Given that data, we want to have different rows for each type. So we will setup our addon to override the names so it will use those type values.</p>
 <pre><code class="javascript railscasts">
 angular.module('ux').factory('whichTemplate', function () {
-    return function (inst) {
+    return ['inst', function (inst) {
         // now we override it with our method so we decide what template gets displayed for each row.
         inst.templateModel.getTemplate = function (item) {
             // item would be the item in your array of data provided to the datagrid.
@@ -401,7 +401,7 @@ angular.module('ux').factory('whichTemplate', function () {
             // now we get the template from the name.
             return inst.templateModel.getTemplateByName(name);
         };
-    };
+    }];
 });
 </code></pre>
 
@@ -497,7 +497,7 @@ angular.module(name, ['ux'])
         $scope.items = items;
     });
 angular.module('ux').factory('whichTemplate', function () {
-     return function (inst) {
+     return ['inst', function (inst) {
         // now we override it with our method so we decide what template gets displayed for each row.
         inst.templateModel.getTemplate = function (item) {
             // item would be the item in your array of data provided to the datagrid.
@@ -506,7 +506,7 @@ angular.module('ux').factory('whichTemplate', function () {
             // now we get the template from the name.
             return inst.templateModel.getTemplateByName(name);
         };
-    };
+    }];
 });
 
 </code></pre>
@@ -599,7 +599,7 @@ angular.module(name, ['ux'])
         $scope.items = items;
     });
 angular.module('ux').factory('whichTemplate', function () {
-     return function (inst) {
+     return ['inst', function (inst) {
         // now we override it with our method so we decide what template gets displayed for each row.
         inst.templateModel.getTemplate = function (item) {
             // item would be the item in your array of data provided to the datagrid.
@@ -608,7 +608,7 @@ angular.module('ux').factory('whichTemplate', function () {
             // now we get the template from the name.
             return inst.templateModel.getTemplateByName(name);
         };
-    };
+    }];
 });
 
 </code></pre>
@@ -926,7 +926,7 @@ var name = 'columnsGrouped';
         $scope.items = items;
     });
 angular.module('ux').factory('whichTemplate', function () {
-     return function (inst) {
+     return ['inst', function (inst) {
         // now we override it with our method so we decide what template gets displayed for each row.
         inst.templateModel.getTemplate = function (item) {
             // item would be the item in your array of data provided to the datagrid.
@@ -935,7 +935,7 @@ angular.module('ux').factory('whichTemplate', function () {
             // now we get the template from the name.
             return inst.templateModel.getTemplateByName(name);
         };
-    };
+    }];
 });
 
 </code></pre>
@@ -1440,7 +1440,7 @@ var name = 'collapsibleGroups';
         $scope.items = items;
     });
 angular.module('ux').factory('whichTemplate', function () {
-     return function (inst) {
+     return ['inst', function (inst) {
         // now we override it with our method so we decide what template gets displayed for each row.
         inst.templateModel.getTemplate = function (item) {
             // item would be the item in your array of data provided to the datagrid.
@@ -1449,7 +1449,7 @@ angular.module('ux').factory('whichTemplate', function () {
             // now we get the template from the name.
             return inst.templateModel.getTemplateByName(name);
         };
-    };
+    }];
 });
 
 </code></pre>
@@ -1632,7 +1632,7 @@ var name = 'expandableGroups';
         $scope.items = items;
     });
 angular.module('ux').factory('whichTemplate', function () {
-     return function (inst) {
+     return ['inst', function (inst) {
         // now we override it with our method so we decide what template gets displayed for each row.
         inst.templateModel.getTemplate = function (item) {
             // item would be the item in your array of data provided to the datagrid.
@@ -1641,7 +1641,7 @@ angular.module('ux').factory('whichTemplate', function () {
             // now we get the template from the name.
             return inst.templateModel.getTemplateByName(name);
         };
-    };
+    }];
 });
 
 </code></pre>
@@ -2037,7 +2037,7 @@ angular.module(name, ['ux'])
         $scope.items = items;
     });
 angular.module('ux').factory('whichTemplate', function () {
-     return function (inst) {
+     return ['inst', function (inst) {
         // now we override it with our method so we decide what template gets displayed for each row.
         inst.templateModel.getTemplate = function (item) {
             // item would be the item in your array of data provided to the datagrid.
@@ -2046,7 +2046,7 @@ angular.module('ux').factory('whichTemplate', function () {
             // now we get the template from the name.
             return inst.templateModel.getTemplateByName(name);
         };
-    };
+    }];
 });
 
 </code></pre>

@@ -24,7 +24,7 @@
         });
     angular.module('ux').factory('whichTemplate', function () {
 
-        return function (inst) {
+        return ['inst', function (inst) {
             // now we override it with our method so we decide what template gets displayed for each row.
             inst.templateModel.getTemplate = function (item) {
                 // item would be the item in your array of data provided to the datagrid.
@@ -33,7 +33,7 @@
                 // now we get the template from the name.
                 return inst.templateModel.getTemplateByName(name);
             };
-        };
+        }];
     });
     angular.bootstrap(document.querySelector("*[ng-app='" + name + "']"), [name]);//ignore
 }());//ignore

@@ -3,6 +3,7 @@ exports.datagrid.events.EXPAND_ALL_GROUPS = "datagrid:expandAllGroups";
 exports.datagrid.events.COLLAPSE_GROUP = "datagrid:collapseGroup";
 exports.datagrid.events.EXPAND_GROUP = "datagrid:expandGroup";
 exports.datagrid.events.TOGGLE_GROUP = "datagrid:toggleGroup";
+exports.datagrid.events.EXPAND_GROUP_CHANGE = "datagrid:expandGroupChange";
 /**
  * ##<a name="expandableGroups">expandableGroups</a>##
  * The expandable groups works on the concept of remvoing items from the array that are collapsed.
@@ -43,6 +44,7 @@ angular.module('ux').factory('expandableGroups', function () {
            if (normalized.length && !resultData.length && window.console && window.console.warn) {
                console.warn("ExpandableGroups does not work with async loaded groups. It cannot keep the indexes in sync. Try this example http://jsfiddle.net/wesjones/3Wg79/");
            }
+           inst.dispatch(exports.datagrid.events.EXPAND_GROUP_CHANGE);
        }
 
        /**
@@ -158,6 +160,21 @@ angular.module('ux').factory('expandableGroups', function () {
        result.isExpanded = function (rowIndex) {
            var groupIndex = convertIndex(rowIndex);
            return !!expanded[groupIndex];
+       };
+
+       /**
+        * ###<a name="getExpanded">getExpanded</a>###
+        * @returns {{expanded:Array.<Object>, collapsed:Array.<Object>}}
+        */
+       result.getItems = function() {
+           var found = {expanded:[], collapsed:[]};
+           for(var i = 0, len = resultData.length; i < len; i += 1) {
+               var item = inst.getRowItem(i);
+              if (isGroup(item)) {
+                  found[result.isExpanded(i) ? 'expanded' : 'collapsed'].push(item);
+              }
+           }
+           return found;
        };
 
        // Add listeners.

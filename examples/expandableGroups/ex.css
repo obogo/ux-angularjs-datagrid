@@ -34,6 +34,7 @@
 .expandableGroups-row.expandableGroups-header {
     background-color: #000;
     color: #FFF;
+    cursor: pointer;
 }
 
 .expandableGroups-row .col {

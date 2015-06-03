@@ -36,6 +36,19 @@
                 i += 1;
             }
             $scope.items = items;
+
+
+            // (optional) get the count of expanded groups.
+            // this is not needed for minimal example.
+            $scope.expanded = 0;
+            $scope.collapsed = items.length;
+            function getCounts() {
+                var grid = ux.datagrid.getGrid($scope);
+                var groupedAndCollapsed = grid.expandableGroups.getItems();
+                $scope.expanded = groupedAndCollapsed.expanded.length;
+                $scope.collapsed = groupedAndCollapsed.collapsed.length;
+            }
+            $scope.$on(ux.datagrid.events.EXPAND_GROUP_CHANGE, getCounts);
         });
     angular.module('ux').factory('whichTemplate', function () {
 

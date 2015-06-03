@@ -1501,6 +1501,7 @@ angular.module('ux').factory('whichTemplate', function () {
     </ul>
 <pre ng-show="tab=='html'"><code class="html railscasts">
 &lt;div ng-controller="ctrl">
+    &lt;div>&lt;span class="label black">Expanded: {{expanded}}&lt;/span> &lt;span class="label">Collapsed: {{collapsed}}&lt;/span>&lt;/div>
     &lt;div class="expandableGroups-row expandableGroups-header">
         &lt;div class="col col1">ID&lt;/div>
         &lt;div class="col col2">First Name&lt;/div>
@@ -1563,6 +1564,7 @@ angular.module('ux').factory('whichTemplate', function () {
 .expandableGroups-row.expandableGroups-header {
     background-color: #000;
     color: #FFF;
+    cursor: pointer;
 }
 
 .expandableGroups-row .col {
@@ -1630,6 +1632,17 @@ var name = 'expandableGroups';
             i += 1;
         }
         $scope.items = items;
+          // (optional) get the count of expanded groups.
+        // this is not needed for minimal example.
+        $scope.expanded = 0;
+        $scope.collapsed = items.length;
+        function getCounts() {
+            var grid = ux.datagrid.getGrid($scope);
+            var groupedAndCollapsed = grid.expandableGroups.getItems();
+            $scope.expanded = groupedAndCollapsed.expanded.length;
+            $scope.collapsed = groupedAndCollapsed.collapsed.length;
+        }
+        $scope.$on(ux.datagrid.events.EXPAND_GROUP_CHANGE, getCounts);
     });
 angular.module('ux').factory('whichTemplate', function () {
      return ['inst', function (inst) {
@@ -1648,6 +1661,7 @@ angular.module('ux').factory('whichTemplate', function () {
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
 <!-- html:start -->
 <div ng-controller="ctrl">
+    <div><span class="label black">Expanded: {{expanded}}</span> <span class="label">Collapsed: {{collapsed}}</span></div>
     <div class="expandableGroups-row expandableGroups-header">
         <div class="col col1">ID</div>
         <div class="col col2">First Name</div>

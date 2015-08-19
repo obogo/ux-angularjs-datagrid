@@ -60,9 +60,14 @@ angular.module("ux").factory("infiniteScroll", function() {
                 // get the row id of the focused element.
                 var rowIndex = inst.getRowIndexFromElement(document.activeElement);
                 var rowEl = inst.getRowElm(rowIndex);
+                var activeElement = document.activeElement;
+                //for selected options, activeElement needs to be the selected element
+                if(activeElement && activeElement.nodeName === "SELECT" && activeElement.options.length){
+                    activeElement = activeElement.options[activeElement.selectedIndex];
+                }
                 focusAfterSelector = {
                     rowIndex: rowIndex,
-                    selector: ux.selector.quickSelector(document.activeElement, rowEl[0], inst.options.gridFocusManager && inst.options.gridFocusManager.filterClasses || [])
+                    selector: ux.selector.quickSelector(activeElement, rowEl[0], inst.options.gridFocusManager && inst.options.gridFocusManager.filterClasses || [])
                 };
                 // drop the visible off selector if it exists.
                 focusAfterSelector.selector = focusAfterSelector.selector.replace(/:visible$/, "");

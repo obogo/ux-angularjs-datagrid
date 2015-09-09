@@ -101,6 +101,9 @@ module.exports = function (grunt) {
                     ],
                     'build/latest/other/ux-doubleScroll.js': [
                         'src/other/doubleScroll.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-dragRows.js': [
+                        'src/addons/dragRows.js'
                     ]
                 }
             },
@@ -177,6 +180,9 @@ module.exports = function (grunt) {
                     ],
                     'build/latest/other/ux-doubleScroll.min.js': [
                         'src/other/doubleScroll.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-dragRows.min.js': [
+                        'src/addons/dragRows.js'
                     ]
                 }
             }

@@ -9,7 +9,7 @@ angular.module('ux').factory('iScrollAddon', function () {
             return;
         }
         if (!IScroll) {
-            throw new Error("IScroll (https://github.com/cubiq/iscroll) is required to use the iScrollAddon.");
+            inst.throwError("IScroll (https://github.com/cubiq/iscroll) is required to use the iScrollAddon.");
         }
         var result = exports.logWrapper('iScrollAddon', {}, 'purple', inst.dispatch),
             scrolling = false,

@@ -118,7 +118,7 @@ angular.module('ux').factory('gridFocusManager', function () {
         /**
          * ###<a name="query">query</a>###
          * Similar to jquery find.
-         * @param {JQLite|DOMElement} el
+         * @param {JQLite|HTMLElement} el
          * @param {String} selector
          * @returns {JQLite}
          */
@@ -341,15 +341,30 @@ angular.module('ux').factory('gridFocusManager', function () {
             }
             var resultEl,
                 currentIndex = inst.getRowIndexFromElement(focusedEl),
-                rowEl = inst.getRowElm(currentIndex),
                 nextIndex = currentIndex + dir, selector;
             if (nextIndex < 0 || nextIndex >= inst.rowsLength) {
                 return focusedEl;
             }
-            selector = ux.selector.quickSelector(focusedEl[0], rowEl[0], filterClasses);
+            selector = getSelector(focusedEl, currentIndex);
             result.log("\tselector: %s", selector);
             resultEl = findNextRowWithSelection(nextIndex, dir, selector);
             return resultEl && resultEl.length ? resultEl : focusedEl;// if the result cannot be found. return the current one.
+        }
+
+        /**
+         * ###<a name="getSelector">getSelector</a>###
+         * @param {HTMLElement} el
+         * @param {Number=} currentIndex
+         * @returns {*}
+         */
+        function getSelector(el, currentIndex) {
+            el = el[0] || el;
+            if (el) {
+                currentIndex = currentIndex || inst.getRowIndexFromElement(el);
+                var rowEl = inst.getRowElm(currentIndex);
+                return ux.selector.quickSelector(el, rowEl[0], filterClasses);
+            }
+            return '';
         }
 
         /**
@@ -420,6 +435,89 @@ angular.module('ux').factory('gridFocusManager', function () {
             inst.flow.add(method, [document.activeElement], 0);
         }
 
+        function focusToPrevElementOfSame(evt, checkFn) {
+            if (inst.element[0].contains(document.activeElement)) {
+                throttleNextPrev(function(activeElement) {
+                    var found = false;
+                    if (checkFn) {
+                        focusToSiblingRowBackupPlan(activeElement, checkFn, -1);
+                        found = true;
+                    } else {
+                        found = focusToSiblingRowBackupPlan(activeElement, checkFn, -1);
+                    }
+                    if (!found) {
+                        inst.scope.$emit(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME_FAILURE);
+                    }
+                });
+            }
+        }
+
+        function focusToNextElementOfSame(evt, checkFn) {
+            if (inst.element[0].contains(document.activeElement)) {
+                throttleNextPrev(function(activeElement) {
+                    var found = false;
+                    if (checkFn) {
+                        focusToSiblingRowBackupPlan(activeElement, checkFn, 1);
+                        found = true;
+                    } else {
+                        found = focusToNextRowElement(activeElement);
+                    }
+                    if(!found) {
+                        inst.scope.$emit(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME_FAILURE);
+                    }
+                });
+            }
+        }
+
+        function focusToSiblingRowBackupPlan(activeElement, checkFn, delta) {
+            // if it failed. Then use the checkFn to look further if it exists.
+            var toIndex = inst.getRowIndexFromElement(activeElement) + delta;
+            var list = inst.getData();
+            var selector = getSelector(activeElement);
+            var focusToIndex;
+            var i;
+            var unwatch;
+            function onAfterRender() {
+                unwatch();
+                var row = inst.getRowElm(focusToIndex);
+                var fel = query(row, selector);
+                if (fel) {
+                    performFocus(fel);
+                } else {
+                    if (delta < 0) {
+                        inst.scope.$emit(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME_FAILURE);
+                    } else {
+                        inst.scope.$emit(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME_FAILURE);
+                    }
+                }
+            }
+            function check(i) {
+                if (checkFn(list[i])) {
+                    focusToIndex = i;
+                    unwatch = inst.scope.$on(exports.datagrid.events.ON_AFTER_RENDER, onAfterRender);
+                    if (!inst.scrollModel.scrollIntoView(i, true)){
+                        onAfterRender();
+                    }
+                    return true;
+                }
+                return false;
+            }
+            if (delta < 0) {
+                for (i = toIndex; i > 0; i -= 1) {
+                    if (check(i)) {
+                        return true;
+                    }
+                }
+            } else {
+                for (i = toIndex; i < inst.rowsLength; i += 1) {
+                    if (check(i)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         // it has to match a pattern for each row. These are too unique.
         ux.selector.config.allowId = false;
         ux.selector.config.allowAttributes = false;
@@ -441,24 +539,8 @@ angular.module('ux').factory('gridFocusManager', function () {
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, removeListeners));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RENDER, removeListeners));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_RENDER, addListeners));
-        unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME, function () {
-            if (inst.element[0].contains(document.activeElement)) {
-                throttleNextPrev(function(activeElement) {
-                    if(!focusToPrevRowElement(activeElement)) {
-                        inst.scope.$emit(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME_FAILURE);
-                    }
-                });
-            }
-        }));
-        unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME, function () {
-            if (inst.element[0].contains(document.activeElement)) {
-                throttleNextPrev(function(activeElement) {
-                    if(!focusToNextRowElement(activeElement)) {
-                        inst.scope.$emit(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME_FAILURE);
-                    }
-                });
-            }
-        }));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME, focusToPrevElementOfSame));
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME, focusToNextElementOfSame));
         unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER, onResize));
 
         inst.gridFocusManager = result;

@@ -375,15 +375,17 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         compileRowSiblings(index);
         if (offset < inst.values.scroll) { // it is above the view.
             inst.scrollModel.scrollTo(offset, immediately);
-            return;
+            return true;
         }
         inst.updateViewportHeight();// always update the height before calculating. onResize is not reliable
         viewHeight = inst.getViewportHeight();
         rowHeight = inst.templateModel.getTemplateHeight(inst.getData()[index]);
         if (offset >= inst.values.scroll + viewHeight - rowHeight) { // it is below the view.
             inst.scrollModel.scrollTo(offset - viewHeight + rowHeight, immediately);
+            return true;
         }
         // otherwise it is in view so do nothing.
+        return false;
     };
 
     function compileRowSiblings(index) {

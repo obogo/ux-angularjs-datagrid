@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.2.7
+* ux-angularjs-datagrid v.1.3.0
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -53,7 +53,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.2.7",
+    version: "1.3.0",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -158,6 +158,11 @@ exports.datagrid = {
             scope = scope.$$nextSibling;
         }
         return null;
+    },
+    throwError: function(msg) {
+        if (window.console && console.warn) {
+            console.warn(msg);
+        }
     },
     /**
      * ###<a name="options">options</a>###
@@ -997,10 +1002,10 @@ exports.datagrid.Flow = Flow;
  * Datagrid uses script templates inside of the DOM to create your elements. Addons are added to the `addon`
  * attribute.
  * @param {Scope} scope
- * @param {DOMElement} element
+ * @param {HTMLElement} element
  * @param {Object} attr
  * @param {Function} $compile
- * @returns {{}}
+ * @returns {Datagrid}
  * @constructor
  */
 function Datagrid(scope, element, attr, $compile) {
@@ -1059,7 +1064,7 @@ function Datagrid(scope, element, attr, $compile) {
     // <a name="logEvents"></a>listing the log events so they can be ignored if needed.
     var logEvents = [ exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR ];
     // <a name="inst"></a>the instance of the datagrid that will be referenced by all addons.
-    var inst = {}, eventLogger = {}, startupComplete = false, gcIntv;
+    var inst = this, eventLogger = {}, startupComplete = false, gcIntv;
     // wrap the instance for logging.
     exports.logWrapper("datagrid event", inst, "grey", dispatch);
     /**
@@ -1104,6 +1109,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.isActive = isActive;
         inst.isCompiled = isCompiled;
         inst.swapItem = swapItem;
+        inst.moveItem = moveItem;
         inst.getScope = getScope;
         inst.getRowItem = getRowItem;
         inst.getRowElm = getRowElm;
@@ -1124,9 +1130,10 @@ function Datagrid(scope, element, attr, $compile) {
             async: Object.prototype.hasOwnProperty.apply(options, [ "async" ]) ? !!options.async : true,
             debug: Object.prototype.hasOwnProperty.apply(options, [ "debug" ]) ? options.debug : 0
         }, inst.dispatch);
-        // this needs to be set immediatly so that it will be available to other views.
+        // this needs to be set immediately so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
         inst.gc = forceGarbageCollection;
+        inst.throwError = exports.datagrid.throwError;
         flow.add(init);
         // initialize core.
         flow.run();
@@ -1350,6 +1357,10 @@ function Datagrid(scope, element, attr, $compile) {
             }
         }
     }
+    function moveItem(fromIndex, toIndex) {
+        inst.normalizeModel.move(fromIndex, toIndex);
+        changeData(inst.getOriginalData(), inst.getOriginalData());
+    }
     /**
      * ###<a name="getScope">getScope</a>###
      * Return the scope of the row at that index.
@@ -1372,7 +1383,7 @@ function Datagrid(scope, element, attr, $compile) {
      * ###<a name="getRowElm">getRowElm</a>###
      * Return the DOM element at that row index.
      * @param {Number} index
-     * @returns {element|*}
+     * @returns {JQLite|*}
      */
     function getRowElm(index) {
         return angular.element(inst.chunkModel.getRow(index));
@@ -1415,7 +1426,7 @@ function Datagrid(scope, element, attr, $compile) {
             el = el.scope ? el : angular.element(el);
             var s = el.scope();
             if (s === inst.scope) {
-                throw new Error("Unable to get row scope... something went wrong.");
+                inst.throwError("Unable to get row scope... something went wrong.");
             }
             // make sure we get the right scope to grab the index from. We need to get it from a row.
             while (s && s.$parent && s.$parent !== inst.scope) {
@@ -1504,7 +1515,7 @@ function Datagrid(scope, element, attr, $compile) {
     function compileRow(index, el) {
         var s = scopes[index], prev, tpl;
         if (s && !s.$parent) {
-            throw new Error("Scope without a parent");
+            s.$parent = scope;
         }
         if (!s) {
             s = scope.$new();
@@ -1591,6 +1602,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Function} fn
      */
     function applyEventCounts(s, listenerCounts, fn) {
+        //TODO: angular 1.3+ is doing counts differently. Some counts are getting removed.
         while (s) {
             for (var eventName in listenerCounts) {
                 if (Object.prototype.hasOwnProperty.apply(listenerCounts, [ eventName ])) {
@@ -1661,10 +1673,10 @@ function Datagrid(scope, element, attr, $compile) {
             s.$emit(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);
             s.$$$watchers = s.$$watchers;
             s.$$watchers = [];
-            s.$$$listenerCount = s.$$listenerCount;
-            s.$$listenerCount = angular.copy(s.$$$listenerCount);
-            subtractEvents(s, s.$$$listenerCount);
+            s.$$$listenerCount = angular.extend({}, s.$$listenerCount);
+            subtractEvents(s, s.$$listenerCount);
             if (index >= 0) {
+                s.$parent = null;
                 s.$$nextSibling = null;
                 s.$$prevSibling = null;
             }
@@ -1685,6 +1697,7 @@ function Datagrid(scope, element, attr, $compile) {
     function activateScope(s, index) {
         if (s && s.$$$watchers) {
             // do not activate one that is already active.
+            s.$parent = s.$$parent;
             s.$$watchers = s.$$$watchers;
             delete s.$$$watchers;
             addEvents(s, s.$$$listenerCount);
@@ -1692,8 +1705,8 @@ function Datagrid(scope, element, attr, $compile) {
             if (index >= 0) {
                 s.$$nextSibling = scopes[index + 1];
                 s.$$prevSibling = scopes[index - 1];
-                s.$parent = scope;
             }
+            s.$parent = scope;
             s.$emit(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);
             return true;
         }
@@ -1835,7 +1848,7 @@ function Datagrid(scope, element, attr, $compile) {
         }
         loop.ended = loop.i - 1;
         if (inst.rowsLength && values.activeRange.min < 0 && values.activeRange.max < 0) {
-            throw new Error(exports.errors.E1002);
+            inst.throwError(exports.errors.E1002);
         }
         inst.log("	startIndex %s endIndex %s", loop.startIndex, loop.i);
         deactivateList(lastActive);
@@ -1982,7 +1995,7 @@ function Datagrid(scope, element, attr, $compile) {
                 //                flow.add(destroyOldContent);
                 flow.add(inst.dispatch, [ exports.datagrid.events.ON_AFTER_RENDER ]);
             } else {
-                throw new Error(exports.errors.E1001);
+                inst.throwError(exports.errors.E1001);
             }
         } else {
             inst.log("	not ready to render.");
@@ -3505,6 +3518,37 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
         }
         return -1;
     };
+    function applyAction(list, index, item, action) {
+        if (action === "replace") {
+            list[index] = item;
+        } else if (action === "insert") {
+            list.splice(index, 0, item);
+        } else if (action === "remove") {
+            list.splice(index, 1);
+        }
+    }
+    function modifyItem(item, index, action) {
+        // first get the original item index.
+        var indexes = inst.getOriginalIndexOfItem(normalizedData[index]), origItem, list = originalData, lastIndex;
+        while (indexes.length) {
+            lastIndex = indexes.shift();
+            origItem = list[lastIndex];
+            if (!indexes.length) {
+                if (inst.grouped && list[0] && list[0].hasOwnProperty(inst.grouped)) {
+                    list = list[0][inst.grouped];
+                    indexes.push(list.length);
+                    lastIndex = list.length;
+                }
+                applyAction(list, lastIndex, item, action);
+                // original data
+                break;
+            }
+            if (inst.grouped) {
+                list = origItem[inst.grouped];
+            }
+        }
+        applyAction(normalizedData, index, item, action);
+    }
     /**
      * ###<a name="replace">replace</a>###
      * Replace at the index, the newItem.
@@ -3512,20 +3556,23 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
      * @param index
      */
     result.replace = function(item, index) {
-        // first get the original item index.
-        var indexes = inst.getOriginalIndexOfItem(normalizedData[index]), origItem, list = originalData, lastIndex;
-        while (indexes.length) {
-            lastIndex = indexes.shift();
-            origItem = list[lastIndex];
-            if (!indexes.length) {
-                list[lastIndex] = item;
-                break;
-            }
-            if (inst.grouped) {
-                list = origItem[inst.grouped];
-            }
+        modifyItem(item, index, "replace");
+    };
+    result.insert = function(item, index) {
+        modifyItem(item, index, "insert");
+    };
+    result.remove = function(index) {
+        modifyItem(null, index, "remove");
+    };
+    result.move = function(fromIndex, toIndex) {
+        var item = inst.getRowItem(fromIndex);
+        if (fromIndex > toIndex) {
+            result.remove(fromIndex);
+            result.insert(item, toIndex);
+        } else if (fromIndex < toIndex) {
+            result.insert(item, toIndex);
+            result.remove(fromIndex);
         }
-        normalizedData[index] = item;
     };
     /**
      * ###<a name="destroy">destroy</a>###
@@ -3883,7 +3930,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         if (offset < inst.values.scroll) {
             // it is above the view.
             inst.scrollModel.scrollTo(offset, immediately);
-            return;
+            return true;
         }
         inst.updateViewportHeight();
         // always update the height before calculating. onResize is not reliable
@@ -3892,7 +3939,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         if (offset >= inst.values.scroll + viewHeight - rowHeight) {
             // it is below the view.
             inst.scrollModel.scrollTo(offset - viewHeight + rowHeight, immediately);
+            return true;
         }
+        // otherwise it is in view so do nothing.
+        return false;
     };
     function compileRowSiblings(index) {
         if (inst.data[index - 1] && !inst.isCompiled(index - 1)) {
@@ -4005,7 +4055,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             result.log("createTemplates");
             var i, scriptTemplates = inst.element[0].getElementsByTagName("script"), len = scriptTemplates.length;
             if (!len && !templates.length) {
-                throw new Error(exports.errors.E1102);
+                inst.throwError(exports.errors.E1102);
             }
             for (i = 0; i < len; i += 1) {
                 createTemplateFromScriptTemplate(scriptTemplates[i]);
@@ -4048,9 +4098,9 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
                 if (inst.element.css("display") === "none") {
                     result.warn("Datagrid was intialized with a display:'none' value. Templates are unable to calculate heights. Grid will not render correctly.");
                 } else if (!inst.element[0].offsetHeight) {
-                    throw new Error(exports.errors.E1000);
+                    inst.throwError(exports.errors.E1000);
                 } else {
-                    throw new Error(exports.errors.E1101);
+                    inst.throwError(exports.errors.E1101);
                 }
             }
             templates[templateData.name] = templateData;

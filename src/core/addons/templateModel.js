@@ -36,7 +36,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             result.log('createTemplates');
             var i, scriptTemplates = inst.element[0].getElementsByTagName('script'), len = scriptTemplates.length;
             if (!len && !templates.length) {
-                throw new Error(exports.errors.E1102);
+                inst.throwError(exports.errors.E1102);
             }
             for (i = 0; i < len; i += 1) {
                 createTemplateFromScriptTemplate(scriptTemplates[i]);
@@ -86,9 +86,9 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
                 if (inst.element.css('display') === 'none') {
                     result.warn("Datagrid was intialized with a display:'none' value. Templates are unable to calculate heights. Grid will not render correctly.");
                 } else if (!inst.element[0].offsetHeight) {
-                    throw new Error(exports.errors.E1000);
+                    inst.throwError(exports.errors.E1000);
                 } else {
-                    throw new Error(exports.errors.E1101);
+                    inst.throwError(exports.errors.E1101);
                 }
             }
             templates[templateData.name] = templateData;

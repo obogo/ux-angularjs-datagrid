@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.2.7
+* ux-angularjs-datagrid v.1.3.0
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -64,7 +64,7 @@ angular.module("ux").factory("expandRows", function() {
         function setup(item) {
             item.template = item.template || inst.templateModel.defaultName;
             if (!item.cls && !item.style && !item.swap) {
-                throw new Error("expandRows will not work without an cls|style|swap property");
+                inst.throwError("expandRows will not work without an cls|style|swap property");
             }
             cache[item.template] = item;
         }
@@ -163,7 +163,7 @@ angular.module("ux").factory("expandRows", function() {
                     opening = false;
                 }
             } else {
-                throw new Error("unable to toggle template. cls for template '" + template.name + "' was not set.");
+                inst.throwError("unable to toggle template. cls for template '" + template.name + "' was not set.");
             }
         }
         function makeReverseStyle(elm, style) {
@@ -203,7 +203,7 @@ angular.module("ux").factory("expandRows", function() {
                     height: parseInt(elm[0].offsetHeight || 0, 10)
                 };
                 if (isNaN(opened[index].height)) {
-                    throw new Error("Invalid Height");
+                    inst.throwError("Invalid Height");
                 }
             } else {
                 delete opened[index];

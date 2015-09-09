@@ -132,6 +132,11 @@ exports.datagrid = {
         }
         return null;
     },
+    throwError: function(msg) {
+        if (window.console && console.warn) {
+            console.warn(msg);
+        }
+    },
     /**
      * ###<a name="options">options</a>###
      */

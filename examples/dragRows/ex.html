@@ -1,0 +1,55 @@
+<!-- **************************** Drag Rows ********************************** -->
+    <a name="dragRows"></a>
+    <div class="panel-ex dragRows" ng-app="dragRows">
+        <div class="panel-ex-head">Drag and Drop</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>Drag and drop rows in the <span class="label">ux-datagrid</span>.</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+##html##
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+##css##
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+##js##
+</code></pre>
+
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div class="dragRows-row dragRows-header">
+        <div class="col col1">ID</div>
+        <div class="col col2">First Name</div>
+        <div class="col col3">Last Name</div>
+        <div class="col col4">Age</div>
+        <div class="col col5">Kids</div>
+    </div>
+    <div ux-datagrid="items" grouped="'children'" addons="whichTemplate, dragRows">
+        <script type="template/html" template-name="row" template-item="item">
+            <div class="dragRows-row" ng-mousedown="startDrag($event, $index)">
+                <div class="col col1">{{item.id}}</div>
+                <div class="col col2">{{item.firstName}}</div>
+                <div class="col col3">{{item.lastName}}</div>
+                <div class="col col4">{{item.age}}</div>
+                <div class="col col5">{{item.kids}}</div>
+            </div>
+        </script>
+        <script type="template/html" template-name="group" template-item="group">
+            <div class="dragRows-group dragRows-row">
+                <div class="col col1">ID</div>
+                <div class="col col2">First Name</div>
+                <div class="col col3">Last Name</div>
+                <div class="col col4">Age</div>
+                <div class="col col5">Kids</div>
+            </div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>

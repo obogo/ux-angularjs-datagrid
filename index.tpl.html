@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="bower_components/github-fork-ribbon-css/gh-fork-ribbon.css"/>
     <!--<link rel="stylesheet" href="//code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css"/>-->
     <link rel="stylesheet" href="css/ionicons.min.css"/>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/highlight.min.js"></script>
+    <script src="bower_components/stuff/highlight.min.js"></script>
+    <!--<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/highlight.min.js"></script>-->
     <script>hljs.initHighlightingOnLoad();</script>
     <link rel="stylesheet" href="css/style.css"/>
     <script>
@@ -62,6 +63,7 @@ bower install "ux-datagrid"
             <li><a href="#columnsGrouped">Columns and Groups (Like Tables of Tables)</a></li>
             <li><a href="#resizeColumns">Resize Columned Data (Like Tables)</a></li>
             <li><a href="#infiniteScroll">Infinite Scroll</a></li>
+            <li><a href="#dragRows">Drag and Drop</a></li>
             <li><a href="#collapsibleGroups">Collapsible Groups (starts expanded)</a></li>
             <li><a href="#expandableGroups">Expandable Groups (starts collapsed)</a></li>
             <li><a href="#expandableRow">Expandable Rows</a></li>
@@ -82,19 +84,21 @@ bower install "ux-datagrid"
 
 <!--// Include the base scripts //-->
 <link rel="stylesheet" type="text/css" href="css/default.css">
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>
+<script src="bower_components/angular/angular.min.js"></script>
+<!--<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.min.js"></script>-->
 <!--<script src="bower_components/angular/angular.min.js"></script>-->
 <!--<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.min.js"></script>-->
-<script src="bower_components/ux-datagrid/build/latest/angular-ux-datagrid.js"></script>
-<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-infiniteScroll.js"></script>
-<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-collapsibleGroups.js"></script>
-<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-expandableGroups.js"></script>
-<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-gridLogger.js"></script>
-<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBar.js"></script>
-<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-scrollBounce.js"></script>
-<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-sortModel.js"></script>
-<script src="bower_components/ux-datagrid/build/latest/addons/ux-datagrid-expandRows.js"></script>
-<script src="bower_components/ux-datagrid/build/latest/addons/desktop/ux-datagrid-focusManager.js"></script>
+<script src="bower_components/angularjs-ux-datagrid/build/latest/angular-ux-datagrid.js"></script>
+<script src="bower_components/angularjs-ux-datagrid/build/latest/addons/ux-datagrid-infiniteScroll.js"></script>
+<script src="bower_components/angularjs-ux-datagrid/build/latest/addons/ux-datagrid-collapsibleGroups.js"></script>
+<script src="bower_components/angularjs-ux-datagrid/build/latest/addons/ux-datagrid-expandableGroups.js"></script>
+<script src="bower_components/angularjs-ux-datagrid/build/latest/addons/ux-datagrid-gridLogger.js"></script>
+<script src="bower_components/angularjs-ux-datagrid/build/latest/addons/ux-datagrid-scrollBar.js"></script>
+<script src="bower_components/angularjs-ux-datagrid/build/latest/addons/ux-datagrid-scrollBounce.js"></script>
+<script src="bower_components/angularjs-ux-datagrid/build/latest/addons/ux-datagrid-sortModel.js"></script>
+<script src="bower_components/angularjs-ux-datagrid/build/latest/addons/ux-datagrid-expandRows.js"></script>
+<script src="bower_components/angularjs-ux-datagrid/build/latest/addons/ux-datagrid-dragRows.js"></script>
+<script src="bower_components/angularjs-ux-datagrid/build/latest/addons/desktop/ux-datagrid-focusManager.js"></script>
 
 <script src="vendor/hb/hb.js"></script>
 <script src="vendor/go-resize-columns/go-resize-columns.js"></script>
@@ -370,6 +374,8 @@ angular.module('ux').factory('whichTemplate', function () {
 
     ##infiniteScroll##
 
+    ##dragRows##
+
     ##collapsibleGroups##
 
     ##expandableGroups##
@@ -395,6 +401,7 @@ angular.module('ux').factory('whichTemplate', function () {
         <a href="https://github.com/webux/ux-angularjs-datagrid" fm-parent="14" fm-id="53" tabindex="-1">View on GitHub</a>
     </div>
 </div>
-<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+<link href="bower_components/stuff/font-awesome.min.css" rel="stylesheet">
+<!--<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">-->
 </body>
 </html>

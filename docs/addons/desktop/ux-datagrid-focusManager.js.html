@@ -136,7 +136,7 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.3.0
+ux-angularjs-datagrid v.1.3.2
 (c) 2015, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -889,7 +889,10 @@ it gets to the maxParent.</p>
   Those get picked up in the selectors and then when it tries to find them in the next row they do not
   match because they are not focused or selected yet. You can easily get around this by applying <a href="#filterClasses">filterClasses</a>.
   <a href="#filterClasses">filterClasses</a> are defined in the options of the datagrid.</em>
-  <code>data-options="{gridFocusManger: {filterClasses: ['focused','selected']}}"</code></p>
+  <code>data-options="{gridFocusManger: {filterClasses: ['focused','selected']}, filterNextPattern:{available:true}}"</code>
+  The filterNextPattern is used to speed up the lookup to the next item in focus. So it can quickly find which item to
+  scroll to before having to make sure the item is compiled and has a selector. It takes a pattern to match on.
+  See <a href='https://github.com/obogo/hummingbird/blob/master/src/utils/validators/isMatch.js'>https://github.com/obogo/hummingbird/blob/master/src/utils/validators/isMatch.js</a> for options with this pattern.</p>
 </blockquote>
   </div>
   <div class="body">
@@ -945,7 +948,7 @@ it gets to the maxParent.</p>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">el</span>
       <span class="dox_type">JQLite</span>
-      <span class="dox_type">DOMElement</span>
+      <span class="dox_type">HTMLElement</span>
     </div>
   </div>
 </div>
@@ -1150,7 +1153,7 @@ it gets to the maxParent.</p>
     <div class="dox_tag_title">Params</div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">el</span>
-      <span class="dox_type">DOMElement</span>
+      <span class="dox_type">HTMLElement</span>
     </div>
   </div>
 </div>
@@ -1447,7 +1450,7 @@ you can filter these out from causing selections to not be made.</p>
       <span class="dox_tag_name">rowElm
 </span>
       <span class="dox_type">JQLite</span>
-      <span class="dox_type">DOMElement</span>
+      <span class="dox_type">HTMLElement</span>
     </div>
   </div>
 </div>
@@ -1488,7 +1491,7 @@ you can filter these out from causing selections to not be made.</p>
       <span class="dox_tag_name">rowElm
 </span>
       <span class="dox_type">JQLite</span>
-      <span class="dox_type">DOMElement</span>
+      <span class="dox_type">HTMLElement</span>
     </div>
   </div>
 </div>
@@ -1653,7 +1656,7 @@ you can filter these out from causing selections to not be made.</p>
 </div>
 
 
-<p>Compare to JQLite/DOMElements objects to see if they reference the same DOMElement.</p>
+<p>Compare to JQLite/HTMLElements objects to see if they reference the same HTMLElement.</p>
   </div>
   <div class="body">
   </div>
@@ -1662,12 +1665,12 @@ you can filter these out from causing selections to not be made.</p>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">el</span>
       <span class="dox_type">JQLite</span>
-      <span class="dox_type">DOMElement</span>
+      <span class="dox_type">HTMLElement</span>
     </div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">el2</span>
       <span class="dox_type">JQLite</span>
-      <span class="dox_type">DOMElement</span>
+      <span class="dox_type">HTMLElement</span>
     </div>
   </div>
 </div>
@@ -1699,7 +1702,7 @@ you can filter these out from causing selections to not be made.</p>
     <div class="dox_tag_title">Params</div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">focusedEl</span>
-      <span class="dox_type">DOMElement</span>
+      <span class="dox_type">HTMLElement</span>
     </div>
   </div>
 </div>
@@ -1732,7 +1735,7 @@ you can filter these out from causing selections to not be made.</p>
     <div class="dox_tag_title">Params</div>
     <div class="dox_tag_detail">
       <span class="dox_tag_name">focusedEl</span>
-      <span class="dox_type">DOMElement</span>
+      <span class="dox_type">HTMLElement</span>
     </div>
   </div>
 </div>
@@ -2004,7 +2007,43 @@ However, possible bug here if a selector similar to this one doesn't exist for a
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">findNextRowWithSelection</span><span class="p">(</span><span class="nx">nextIndex</span><span class="p">,</span> <span class="nx">dir</span><span class="p">,</span> <span class="nx">selector</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;  findNextRowWithSelection&quot;</span><span class="p">);</span>
-            <span class="kd">var</span> <span class="nx">nextEl</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">nextIndex</span><span class="p">),</span> <span class="nx">focusEl</span> <span class="o">=</span> <span class="nx">query</span><span class="p">(</span><span class="nx">nextEl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">selector</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">gridFocusManager</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">gridFocusManager</span><span class="p">.</span><span class="nx">filterNextPattern</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-56" id="section-56">&#182;</a>
+</div>
+<p>make it look just through the objects to jump to that item.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="k">while</span> <span class="p">(</span><span class="nx">nextIndex</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">nextIndex</span> <span class="o">&lt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">rowsLength</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">isMatch</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">nextIndex</span><span class="p">],</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">gridFocusManager</span><span class="p">.</span><span class="nx">filterNextPattern</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nx">nextIndex</span> <span class="o">+=</span> <span class="nx">dir</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="kd">var</span> <span class="nx">nextEl</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">nextIndex</span><span class="p">),</span> <span class="nx">focusEl</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">nextEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">classList</span><span class="p">.</span><span class="nx">contains</span><span class="p">(</span><span class="s2">&quot;uncompiled&quot;</span><span class="p">))</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-57" id="section-57">&#182;</a>
+</div>
+<p>we must remove the hidden value on the uncompiled or it will not pass visibility.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="nx">nextEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">classList</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="s2">&quot;uncompiled&quot;</span><span class="p">);</span>
+                <span class="nx">focusEl</span> <span class="o">=</span> <span class="nx">query</span><span class="p">(</span><span class="nx">nextEl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">selector</span><span class="p">);</span>
+                <span class="nx">nextEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">classList</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">&quot;uncompiled&quot;</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">focusEl</span> <span class="o">=</span> <span class="nx">query</span><span class="p">(</span><span class="nx">nextEl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">selector</span><span class="p">);</span>
+            <span class="p">}</span>
             <span class="kd">var</span> <span class="nx">content</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getContent</span><span class="p">();</span>
             <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">dir</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">nextIndex</span> <span class="o">&lt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">rowsLength</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">||</span> <span class="nx">dir</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">nextIndex</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span> <span class="p">{</span>
                 <span class="nx">nextIndex</span> <span class="o">+=</span> <span class="nx">dir</span><span class="p">;</span>
@@ -2077,7 +2116,7 @@ However, possible bug here if a selector similar to this one doesn't exist for a
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-56" id="section-56">&#182;</a>
+  <a class="pilcrow" href="#section-58" id="section-58">&#182;</a>
 </div>
 <p>if it failed. Then use the checkFn to look further if it exists.</p>
         </td>
@@ -2135,7 +2174,7 @@ However, possible bug here if a selector similar to this one doesn't exist for a
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-57" id="section-57">&#182;</a>
+  <a class="pilcrow" href="#section-59" id="section-59">&#182;</a>
 </div>
 <p>it has to match a pattern for each row. These are too unique.</p>
         </td>

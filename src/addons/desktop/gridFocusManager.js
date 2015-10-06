@@ -11,8 +11,10 @@ exports.datagrid.events.ON_SCROLL_TO_BOTTOM_ENTER = "ux-datagrid:onScrollToBotto
  * > Those get picked up in the selectors and then when it tries to find them in the next row they do not
  * > match because they are not focused or selected yet. You can easily get around this by applying [filterClasses](#filterClasses).
  * > [filterClasses](#filterClasses) are defined in the options of the datagrid._
- * > `data-options="{gridFocusManger: {filterClasses: ['focused','selected']}}"`
- *
+ * > `data-options="{gridFocusManger: {filterClasses: ['focused','selected']}, filterNextPattern:{available:true}}"`
+ * The filterNextPattern is used to speed up the lookup to the next item in focus. So it can quickly find which item to
+ * scroll to before having to make sure the item is compiled and has a selector. It takes a pattern to match on.
+ * See https://github.com/obogo/hummingbird/blob/master/src/utils/validators/isMatch.js for options with this pattern.
  */
 angular.module('ux').factory('gridFocusManager', function () {
     return ['inst', function (inst) {
@@ -27,7 +29,7 @@ angular.module('ux').factory('gridFocusManager', function () {
         /**
          * ###<a name="wrap">wrap</a>###
          * if an element is not a JQLite element then make it one.
-         * @param {JQLite|DOMElement} el
+         * @param {JQLite|HTMLElement} el
          * @returns {JQLite}
          */
         function wrap(el) {
@@ -91,7 +93,7 @@ angular.module('ux').factory('gridFocusManager', function () {
         /**
          * ###<a name="filterVisible">filterVisible</a>###
          * Filter the elements in the selection to only get those that are visible.
-         * @param {DOMElement} el
+         * @param {HTMLElement} el
          * @returns {*}
          */
         function filterVisible(el) {
@@ -192,7 +194,7 @@ angular.module('ux').factory('gridFocusManager', function () {
         /**
          * ###<a name="addListenersToRow">addListenersToRow</a>###
          * Apply event listeners to the row.
-         * @param {JQLite|DOMElement} rowElm
+         * @param {JQLite|HTMLElement} rowElm
          */
         function addListenersToRow(rowElm) {
             var focusable = getFocusableElements(angular.element(rowElm));
@@ -208,7 +210,7 @@ angular.module('ux').factory('gridFocusManager', function () {
         /**
          * ###<a name="removeListenersToRow">removeListenersToRow</a>###
          * Remove event listeners from that row.
-         * @param {JQLite|DOMElement} rowElm
+         * @param {JQLite|HTMLElement} rowElm
          */
         function removeListenersToRow(rowElm) {
             var focusable = getFocusableElements(angular.element(rowElm));
@@ -274,9 +276,9 @@ angular.module('ux').factory('gridFocusManager', function () {
 
         /**
          * ###<a name="isSame">isSame</a>###
-         * Compare to JQLite/DOMElements objects to see if they reference the same DOMElement.
-         * @param {JQLite|DOMElement} el
-         * @param {JQLite|DOMElement} el2
+         * Compare to JQLite/HTMLElements objects to see if they reference the same HTMLElement.
+         * @param {JQLite|HTMLElement} el
+         * @param {JQLite|HTMLElement} el2
          * @returns {boolean}
          */
         function isSame(el, el2) {
@@ -286,7 +288,7 @@ angular.module('ux').factory('gridFocusManager', function () {
         /**
          * ###<a name="hasPrevRowFocusElement">hasPrevRowFocusElement</a>###
          * check to see if the previous row has the same selector which is derived from the focusedEl
-         * @param {DOMElement} focusedEl
+         * @param {HTMLElement} focusedEl
          * @returns {boolean}
          */
         function hasPrevRowFocusElement(focusedEl) {
@@ -297,7 +299,7 @@ angular.module('ux').factory('gridFocusManager', function () {
         /**
          * ###<a name="hasNextRowFocusElement">hasNextRowFocusElement</a>###
          * check to see if the next row has the same selector which is derived from the focusedEl
-         * @param {DOMElement} focusedEl
+         * @param {HTMLElement} focusedEl
          * @returns {boolean}
          */
         function hasNextRowFocusElement(focusedEl) {
@@ -399,7 +401,22 @@ angular.module('ux').factory('gridFocusManager', function () {
          */
         function findNextRowWithSelection(nextIndex, dir, selector) {
             result.log("\tfindNextRowWithSelection");
-            var nextEl = inst.getRowElm(nextIndex), focusEl = query(nextEl[0], selector);
+            if (inst.options.gridFocusManager && inst.options.gridFocusManager.filterNextPattern) {
+                // make it look just through the objects to jump to that item.
+                while (nextIndex > 0 && nextIndex < inst.rowsLength - 1 && !exports.datagrid.util.isMatch(inst.data[nextIndex], inst.options.gridFocusManager.filterNextPattern)) {
+                    nextIndex += dir;
+                }
+            }
+            var nextEl = inst.getRowElm(nextIndex),
+                focusEl;
+            if (nextEl[0].classList.contains('uncompiled')) {
+                // we must remove the hidden value on the uncompiled or it will not pass visibility.
+                nextEl[0].classList.remove('uncompiled');
+                focusEl = query(nextEl[0], selector);
+                nextEl[0].classList.add('uncompiled');
+            } else {
+                focusEl = query(nextEl[0], selector);
+            }
             var content = inst.getContent();
             while (!focusEl[0] && ((dir > 0 && nextIndex < inst.rowsLength - 1) || (dir < 0 && nextIndex > 0))) {
                 nextIndex += dir;

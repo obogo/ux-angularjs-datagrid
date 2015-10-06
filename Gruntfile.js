@@ -20,6 +20,21 @@ module.exports = function (grunt) {
                 }
             }
         },
+        compile: {
+            catcher: {
+                banner: "<%= banner %>",
+                wrap: 'dgutil',
+                build: 'util',
+                filename: 'hb',
+                scripts: {
+                    //inspect: ['src'],
+                    //includes: ['catcher'],
+                    import: ['isMatch'],
+                    //src: [''],
+                    export: ['isMatch']
+                }
+            }
+        },
         // automatically adds injections to angular for you.
 //        ngmin: {
 //            app: {
@@ -41,6 +56,7 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'build/latest/angular-ux-<%= pkg.filename %>.js': [
+                        'util/hb.js',
                         'src/errors/dev-errors.js',
                         'src/ux-datagrid-config.js',
                         'src/lib/*.js',
@@ -111,7 +127,7 @@ module.exports = function (grunt) {
                 options: {
                     report: 'gzip',
                     mangle: true,
-                    compress: true,
+                    compress: {},
                     preserveComments: 'none',
                     sourceMap: true,
                     sourceMapIncludeSources: true,
@@ -120,6 +136,7 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'build/latest/angular-ux-<%= pkg.filename %>.min.js': [
+                        'util/hb.js',
                         'src/errors/prod-errors.js',
                         'src/ux-datagrid-config.js',
                         'src/lib/*.js',
@@ -252,12 +269,13 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-replace');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
+    grunt.loadNpmTasks('hbjs');
 
     // Default task(s).
 //    grunt.registerTask('default', ['jshint', 'uglify', 'compress']);
-    grunt.registerTask('default', ['jshint', 'uglify', 'replace']);
+    grunt.registerTask('default', ['jshint', 'compile', 'uglify', 'replace']);
     grunt.registerTask('integrate', ['jasmine']);
     grunt.registerTask('test', ['jasmine']);
-    grunt.registerTask('release', ['jshint', 'uglify', 'replace', 'jasmine']);
+    grunt.registerTask('release', ['jshint', 'compile', 'uglify', 'replace', 'jasmine']);
 
 };

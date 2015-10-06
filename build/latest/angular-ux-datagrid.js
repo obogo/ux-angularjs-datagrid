@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.3.0
+* ux-angularjs-datagrid v.1.3.1
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -12,6 +12,137 @@ if (typeof define === "function" && define.amd) {
 } else {
   global.ux = exports;
 }
+
+/*!
+* ux-angularjs-datagrid v.1.3.1
+* (c) 2015, Obogo
+* https://github.com/obogo/ux-angularjs-datagrid
+* License: MIT.
+*/
+(function(exports, global) {
+    global["dgutil"] = exports;
+    var $$ = exports.$$ || function(name) {
+        if (!$$[name]) {
+            $$[name] = {};
+        }
+        return $$[name];
+    };
+    var cache = $$("c");
+    var internals = $$("i");
+    var pending = $$("p");
+    exports.$$ = $$;
+    var toArray = function(args) {
+        return Array.prototype.slice.call(args);
+    };
+    var _ = function(name) {
+        var args = toArray(arguments);
+        var val = args[1];
+        if (typeof val === "function") {
+            this.c[name] = val();
+        } else {
+            cache[name] = args[2];
+            cache[name].$inject = val;
+            cache[name].$internal = this.i;
+        }
+    };
+    var define = function() {
+        _.apply({
+            i: false,
+            c: exports
+        }, toArray(arguments));
+    };
+    var internal = function() {
+        _.apply({
+            i: true,
+            c: internals
+        }, toArray(arguments));
+    };
+    var resolve = function(name, fn) {
+        pending[name] = true;
+        var injections = fn.$inject;
+        var args = [];
+        var injectionName;
+        for (var i in injections) {
+            if (injections.hasOwnProperty(i)) {
+                injectionName = injections[i];
+                if (cache[injectionName]) {
+                    if (pending.hasOwnProperty(injectionName)) {
+                        throw new Error('Cyclical reference: "' + name + '" referencing "' + injectionName + '"');
+                    }
+                    resolve(injectionName, cache[injectionName]);
+                    delete cache[injectionName];
+                }
+            }
+        }
+        if (!exports[name] && !internals[name]) {
+            for (var n in injections) {
+                injectionName = injections[n];
+                args.push(exports.hasOwnProperty(injectionName) && exports[injectionName] || internals.hasOwnProperty(injectionName) && internals[injectionName]);
+            }
+            if (fn.$internal) {
+                internals[name] = fn.apply(null, args) || name;
+            } else {
+                exports[name] = fn.apply(null, args) || name;
+            }
+        }
+        Object.defineProperty(exports, "$$", {
+            enumerable: false,
+            writable: false
+        });
+        delete pending[name];
+    };
+    //! node_modules/hbjs/src/utils/validators/isMatch.js
+    define("isMatch", [ "isRegExp" ], function(isRegExp) {
+        var primitive = [ "string", "number", "boolean" ];
+        function isMatch(item, filterObj) {
+            var itemType;
+            if (item === filterObj) {
+                return true;
+            } else if (typeof filterObj === "object") {
+                itemType = typeof item;
+                if (primitive.indexOf(itemType) !== -1 && isRegExp(filterObj) && !filterObj.test(item + "")) {
+                    return false;
+                }
+                if (item instanceof Array && filterObj[0] !== undefined) {
+                    for (var i = 0; i < item.length; i += 1) {
+                        if (isMatch(item[i], filterObj[0])) {
+                            return true;
+                        }
+                    }
+                    return false;
+                } else {
+                    for (var j in filterObj) {
+                        if (filterObj.hasOwnProperty(j)) {
+                            if (!item.hasOwnProperty(j)) {
+                                return false;
+                            }
+                            if (!isMatch(item[j], filterObj[j])) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            } else if (typeof filterObj === "function") {
+                return !!filterObj(item);
+            }
+            return false;
+        }
+        return isMatch;
+    });
+    //! node_modules/hbjs/src/utils/validators/isRegExp.js
+    internal("isRegExp", function() {
+        var isRegExp = function(value) {
+            return Object.prototype.toString.call(value) === "[object RegExp]";
+        };
+        return isRegExp;
+    });
+    for (var name in cache) {
+        resolve(name, cache[name]);
+    }
+})(this["dgutil"] || {}, function() {
+    return this;
+}());
 
 exports.errors = {
     E1000: "Datagrid cannot have a height of 0",
@@ -53,7 +184,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.3.0",
+    version: "1.3.1",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -252,8 +383,11 @@ exports.datagrid = {
      * to add all of these addons before optional addons are added. You can add core addons to the datagrid by adding these directly to this array, however it is not
      * recommended.
      */
-    coreAddons: []
+    coreAddons: [],
+    util: this.dgutil
 };
+
+delete this.dgutil;
 
 /**
  * ###addons###

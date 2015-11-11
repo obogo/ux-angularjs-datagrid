@@ -13,7 +13,10 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         waitingOnReset,
         time,
         lastPercent,
-        unwatchers = [];
+        unwatchers = [],
+        forceScroll = false,
+        scrollIndex = 0,
+        scrollIndexPadding = 0;
 
     function digest(index) {
         var s = inst.getScope(index);
@@ -70,8 +73,9 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     }
 
     function render(complete, force) {
-        var now = Date.now();
+        var now = Date.now(), dynamicHeights;
         if (time > now && hasIndexesLeft()) {
+            dynamicHeights = inst.templateModel.hasVariableRowHeights();
             upIndex = force ? upIndex : findUncompiledIndex(upIndex, -1);
             if (upIndex >= 0) {
                 digest(upIndex);
@@ -83,6 +87,9 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
                 if (force) downIndex += 1;
             }
             render(complete, force);// making this async was counter effective on performance.
+            if (dynamicHeights) {
+                forceScrollToIndex();
+            }
         } else {
             complete();
         }
@@ -129,8 +136,21 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         resetInterval(upIndex, downIndex, inst.options.creepStartDelay, forceCompileRowRender);
     }
 
+    function forceScrollToIndex() {
+        forceScroll = true;
+        var scroll = inst.getRowOffset(scrollIndex) + scrollIndexPadding;
+        inst.scrollModel.scrollTo(scroll, true);
+        forceScroll = false;
+    }
+
     function onBeforeRender(event) {
-        stop();
+        if (!forceScroll) {
+            if (inst.templateModel.hasVariableRowHeights()) {
+                scrollIndex = inst.getOffsetIndex(inst.values.scroll);
+                scrollIndexPadding = inst.values.scroll - inst.getRowOffset(scrollIndex);
+            }
+            stop();
+        }
     }
 
     function onAfterRender(event, loopData, forceCompileRowRender) {

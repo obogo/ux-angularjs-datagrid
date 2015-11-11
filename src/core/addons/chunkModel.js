@@ -220,6 +220,9 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * @returns {*}
      */
     function getExistingRow(rowIndex) {
+        if (!_list) {
+            return undefined;
+        }
         var indexes = getRowIndexes(rowIndex, _list);
         return getDomRowByIndexes(indexes);
     }
@@ -281,7 +284,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      */
     function unrendered(el, ca) {
         var children, i = 0, iLen;
-        el.html(ca.getChildrenStr());
+        el.html(ca.getChildrenStr(false, _chunkSize));
         children = el.children();
         ca.rendered = el;
         if (ca.hasChildChunks()) {// assign the dom element.
@@ -451,6 +454,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     result.updateRow = updateRow;
     result.updateList = updateList;
     result.updateAllChunkHeights = updateAllChunkHeights;
+    result.getRowIndexFromIndexes = getRowIndexFromIndexes;
     result.destroy = destroy;
 
     inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, disableNonVisibleChunks);
@@ -462,6 +466,29 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     return result;
 };
 exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.chunkModel);
+
+/**
+ * @param {Array.<Number>|String} indexes
+ * @param {Number} chunkSize
+ * @returns {number}
+ */
+function getRowIndexFromIndexes(indexes, chunkSize) {
+    var rowIndex = 0;
+    if (typeof indexes === 'string') {
+        indexes = indexes.split('.');
+    }
+    // don't multiply the last one, because it is a row and not a chunk
+    for(var i = 0; i < indexes.length; i += 1) {
+        indexes[i] = parseInt(indexes[i], 10);
+        if (i < indexes.length - 1) {
+            rowIndex += indexes[i] * chunkSize;
+        } else {
+            rowIndex += indexes[i];
+        }
+    }
+    return rowIndex;
+}
+
 
 /**
  * ####ChunkArray####
@@ -517,18 +544,20 @@ ChunkArray.prototype.each = function (method, args) {
     }
 };
 /**
- * #####ChunkArray.prototype.getChildStr#####
+ * #####ChunkArray.prototype.getChildrenStr#####
  * Get the HTML string representation of the children in this array.
  * If deep then return this and all children down.
  * @param deep
+ * @param chunkSize
  * @returns {string}
  */
-ChunkArray.prototype.getChildrenStr = function (deep) {
-    var i = 0, len = this.length, str = '', ca = this;
+ChunkArray.prototype.getChildrenStr = function (deep, chunkSize) {
+    var i = 0, len = this.length, str = '', ca = this, rowIndex, tpl, xml, style;
     while (i < len) {
         if (ca[i] instanceof ChunkArray) {
-            str += ca[i].getStub(deep ? ca[i].getChildrenStr(deep) : '');
+            str += ca[i].getStub(deep ? ca[i].getChildrenStr(deep) : '', chunkSize);
         } else {
+            rowIndex = getRowIndexFromIndexes(ca._id + '.' + i, chunkSize);
             str += this.templateModel.getTemplate(ca[i]).template;
         }
         i += 1;

@@ -23,6 +23,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         lastDeltaY,
         lastDeltaX,
         speed = 0,
+        speedX = 0,
         startTime,
         distance,
         scrollingIntv,
@@ -142,7 +143,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
 
     result.onTouchMove = function (event) {
-        result.killEvent(event);
+        if (inst.options.scrollModel && inst.options.scrollModel.preventTouchMove) {
+            result.killEvent(event);
+        }
         var y = getTouches(event)[0].clientY,
             x = getTouches(event)[0].clientX,
             deltaY = offsetY - y, deltaX = offsetX - x;
@@ -150,9 +153,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             result.setScroll(result.capScrollValue(startScroll + deltaY));
             speed = deltaY - lastDeltaY;
             lastDeltaY = deltaY;
+        }
+        if (deltaX !== lastDeltaX) {
+            result.setScroll(result.capScrollValue(startScroll + deltaY));
+            speedX = deltaX - lastDeltaX;
             lastDeltaX = deltaX;
         }
-        inst.dispatch(exports.datagrid.events.ON_TOUCH_MOVE, speed, deltaY, lastDeltaY);
+        inst.dispatch(exports.datagrid.events.ON_TOUCH_MOVE, speed, deltaY, lastDeltaY, speedX, deltaX, lastDeltaX);
     };
 
     result.onTouchEnd = function onTouchEnd(event) {

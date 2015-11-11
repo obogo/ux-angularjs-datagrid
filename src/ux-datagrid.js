@@ -82,6 +82,14 @@ function Datagrid(scope, element, attr, $compile) {
         flow.unique(updateRowWatchers);
     }
 
+    function flowPauseFn() {
+        return !!scope.$$phase;
+    }
+
+    function flowAsync(fn) {
+        scope.$$postDigest(fn);
+    }
+
     /**
      * ###<a name="setupExports">setupExports</a>###
      * Build out the public API variables for the datagrid.
@@ -132,7 +140,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.updateViewportHeight = updateViewportHeight;
         inst.calculateViewportHeight = calculateViewportHeight;
         inst.options = options = exports.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
-        inst.flow = flow = new Flow({async: Object.prototype.hasOwnProperty.apply(options, ['async']) ? !!options.async : true, debug: Object.prototype.hasOwnProperty.apply(options, ['debug']) ? options.debug : 0}, inst.dispatch);
+        inst.flow = flow = new Flow({async: Object.prototype.hasOwnProperty.apply(options, ['async']) ? !!options.async : true, debug: Object.prototype.hasOwnProperty.apply(options, ['debug']) ? options.debug : 0}, inst.dispatch, flowPauseFn, flowAsync);
         // this needs to be set immediately so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
         inst.gc = forceGarbageCollection;
@@ -492,7 +500,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @returns {Number}
      */
     function getRowHeight(index) {
-        return inst.templateModel.getTemplateHeight(inst.data[index]);
+        return inst.templateModel.getRowHeight(index);
     }
 
     /**
@@ -564,6 +572,9 @@ function Datagrid(scope, element, attr, $compile) {
             el = el || getRowElm(index);
             el.removeClass(options.uncompiledClass);
             $compile(el)(s);
+            if (inst.templateModel.hasVariableRowHeights()) {
+                inst.chunkModel.updateAllChunkHeights(index);
+            }
             inst.dispatch(exports.datagrid.events.ON_ROW_COMPILE, s, el);
             deactivateScope(s, index);
         }
@@ -836,7 +847,7 @@ function Datagrid(scope, element, attr, $compile) {
         var height = 0, i = 0, contentHeight;
         while (i < inst.rowsLength) {
             rowOffsets[i] = height;
-            height += inst.templateModel.getTemplateHeight(inst.data[i]);
+            height += inst.getRowHeight(i);
             i += 1;
         }
         options.rowHeight = inst.rowsLength ? inst.templateModel.getTemplateHeight('default') : 0;
@@ -904,6 +915,9 @@ function Datagrid(scope, element, attr, $compile) {
         updateLinks(); // update the $$childHead and $$nextSibling values to keep digest loops at a minimum count.
         // this dispatch needs to be after the digest so that it doesn't cause {} to show up in the render.
         // the creep render cannot be synchronous. It needs to wait till done to render.
+        if (inst.templateModel.hasVariableRowHeights()) {
+            updateHeightValues();
+        }
         flow.add(onAfterUpdateWatchers, [loop], 0);
         if (digestLater) {
             flow.add(function () {
@@ -987,7 +1001,7 @@ function Datagrid(scope, element, attr, $compile) {
         if (values.dirty && values.activeRange.max >= 0) {
             values.dirty = false;
             tplHeight = inst.templateModel.calculateRowHeight(getRowElm(values.activeRange.min)[0]);
-            if (flow.async && inst.getData().length && tplHeight !== (oldHeight = inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min]))) {
+            if (flow.async && inst.getData().length && tplHeight !== (oldHeight = inst.templateModel.getRowHeight(values.activeRange.min))) {
                 if (window.console && console.warn) {
                     console.warn('Template height change from ' + oldHeight + ' to ' + tplHeight + '. This can cause gaps in the datagrid.');
                 }
@@ -1208,7 +1222,8 @@ function Datagrid(scope, element, attr, $compile) {
 
     function changeData(newVal, oldVal) {
         inst.log("\tchangeData");
-        dispatch(exports.datagrid.events.ON_BEFORE_RESET);
+        inst.templateModel.clearAllRowHeights();
+        dispatch(exports.datagrid.events.ON_BEFORE_RESET, inst);
         inst.data = inst.setData(newVal, inst.grouped) || [];
         dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal);
         reset();
@@ -1239,7 +1254,7 @@ function Datagrid(scope, element, attr, $compile) {
             buildRows(inst.data, true);
         }
         flow.add(inst.info, ["reset complete"]);
-        flow.add(dispatch, [exports.datagrid.events.ON_AFTER_RESET]);// removed delay here because it causes the blink in the datagrid update.
+        flow.add(dispatch, [exports.datagrid.events.ON_AFTER_RESET, inst]);// removed delay here because it causes the blink in the datagrid update.
     }
 
     /**
@@ -1259,6 +1274,10 @@ function Datagrid(scope, element, attr, $compile) {
             s.$digest();
             deactivateScope(s);
             s.$digested = true;
+            if (inst.templateModel.hasVariableRowHeights()) {
+                inst.chunkModel.updateAllChunkHeights(index);
+                updateHeightValues();
+            }
         }
     }
 

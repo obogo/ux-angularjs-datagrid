@@ -520,7 +520,7 @@ angular.module('ux').factory('gridFocusManager', function () {
                 return false;
             }
             if (delta < 0) {
-                for (i = toIndex; i > 0; i -= 1) {
+                for (i = toIndex; i >= 0; i -= 1) {
                     if (check(i)) {
                         return true;
                     }

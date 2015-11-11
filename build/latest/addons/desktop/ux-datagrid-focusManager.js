@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.3.2
+* ux-angularjs-datagrid v.1.4.0
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -921,7 +921,7 @@ angular.module("ux").factory("gridFocusManager", function() {
                 return false;
             }
             if (delta < 0) {
-                for (i = toIndex; i > 0; i -= 1) {
+                for (i = toIndex; i >= 0; i -= 1) {
                     if (check(i)) {
                         return true;
                     }

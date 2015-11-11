@@ -18,7 +18,12 @@ describe("sortModel", function () {
                     options: {
                         sorts: {id:'none', name: 'asc'}
                     },
-                    flow: {info: function () {}},
+                    flow: {
+                        info: function () {},
+                        add: function (fn) {
+                            fn();
+                        }
+                    },
                     dispatch: function () {
                         return scope.$emit.apply(scope, arguments);
                     }

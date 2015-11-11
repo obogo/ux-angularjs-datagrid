@@ -1,4 +1,4 @@
-function Flow(inst, dispatch) {
+function Flow(inst, dispatch, pauseFn, async) {
     var running = false,
         intv,
         current = null,
@@ -107,6 +107,10 @@ function Flow(inst, dispatch) {
     }
 
     function next() {
+        if (pauseFn && pauseFn()) {
+            async(next);
+            return;
+        }
         if (!current && list.length) {
             current = list[0];
             if (inst.async && current.delay !== undefined) {

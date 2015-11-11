@@ -8,7 +8,7 @@
         .controller('ctrl', function ($scope) {
             var i = 0, len = 100, items = [], types = ['row', 'alt1', 'alt2'];
             while (i < len) {
-                items.push({id: i, type: types[Math.floor(Math.random()*types.length)]});
+                items.push({id: i, type: types[Math.floor(Math.random() * types.length)]});
                 i += 1;
             }
             $scope.items = items;
@@ -26,5 +26,11 @@
             };
         }];
     });
-    angular.bootstrap(document.querySelector("*[ng-app='" + name + "']"), [name]);//ignore
+    var el = document.querySelector("*[ng-app='" + name + "']"), strapped = false;//ignore
+    window.addEventListener('scroll', function () {//ignore
+        if (!strapped && hb.isElementInViewport(el)) {//ignore
+            strapped = true;
+            angular.bootstrap(el, [name]);//ignore
+        }//ignore
+    });//ignore
 }());//ignore

@@ -26,7 +26,7 @@ module.exports = function (grunt) {
                 filename: 'hb',
                 build: 'vendor/hb',
                 scripts: {
-                    import: ['cssRules', 'throttle']
+                    import: ['cssRules', 'throttle', 'isElementInViewport']
                 }
             }
         },

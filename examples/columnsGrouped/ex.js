@@ -50,5 +50,11 @@
             };
         }];
     });
-    angular.bootstrap(document.querySelector("*[ng-app='" + name + "']"), [name]);//ignore
+    var el = document.querySelector("*[ng-app='" + name + "']"), strapped = false;//ignore
+    window.addEventListener('scroll', function () {//ignore
+        if (!strapped && hb.isElementInViewport(el)) {//ignore
+            strapped = true;
+            angular.bootstrap(el, [name]);//ignore
+        }//ignore
+    });//ignore
 }());//ignore

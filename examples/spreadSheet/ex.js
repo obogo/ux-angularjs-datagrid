@@ -10,14 +10,20 @@
             // we are going to create some grouped data. Array of items with .children arrays of items.
             // top level items become the group headers, the children items become the rows.
             var i, j, len = 10, items = [], row, columns = ['A', 'B', 'C', 'D'], jlen = columns.length;
-            for(i = 0; i < len; i += 1) {
+            for (i = 0; i < len; i += 1) {
                 row = {};
-                for(j = 0; j < jlen; j += 1) {
+                for (j = 0; j < jlen; j += 1) {
                     row[columns[j]] = '';
                 }
                 items.push(row);
             }
             $scope.items = items;
         });
-    angular.bootstrap(document.querySelector("*[ng-app='" + name + "']"), [name]);//ignore
+    var el = document.querySelector("*[ng-app='" + name + "']"), strapped = false;//ignore
+    window.addEventListener('scroll', function () {//ignore
+        if (!strapped && hb.isElementInViewport(el)) {//ignore
+            strapped = true;
+            angular.bootstrap(el, [name]);//ignore
+        }//ignore
+    });//ignore
 }());//ignore

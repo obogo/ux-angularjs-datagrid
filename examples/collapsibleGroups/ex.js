@@ -19,7 +19,7 @@
             // top level items become the group headers, the children items become the rows.
             var i = 0, j, len = 10, items = [], item, childLen = 0;
             while (i < len) {
-                item = {id: i, title:"Family " + i, children: []};
+                item = {id: i, title: "Family " + i, children: []};
                 items.push(item);
                 childLen = Math.random() * 10;
                 j = 0;
@@ -50,5 +50,11 @@
             };
         }];
     });
-    angular.bootstrap(document.querySelector("*[ng-app='" + name + "']"), [name]);//ignore
+    var el = document.querySelector("*[ng-app='" + name + "']"), strapped = false;//ignore
+    window.addEventListener('scroll', function () {//ignore
+        if (!strapped && hb.isElementInViewport(el)) {//ignore
+            strapped = true;
+            angular.bootstrap(el, [name]);//ignore
+        }//ignore
+    });//ignore
 }());//ignore

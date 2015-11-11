@@ -13,7 +13,7 @@
     angular.module(name, ['ux'])
         .controller('tabs', function ($scope) {//ignore
             $scope.tab = 'html';//ignore
-            $scope.startDrag = function(evt, index) {
+            $scope.startDrag = function (evt, index) {
                 var grid = ux.datagrid.getGrid($scope);
                 grid.dragRows.start(evt, index);
             };
@@ -54,5 +54,11 @@
             };
         }];
     });
-    angular.bootstrap(document.querySelector("*[ng-app='" + name + "']"), [name]);//ignore
+    var el = document.querySelector("*[ng-app='" + name + "']"), strapped = false;//ignore
+    window.addEventListener('scroll', function () {//ignore
+        if (!strapped && hb.isElementInViewport(el)) {//ignore
+            strapped = true;
+            angular.bootstrap(el, [name]);//ignore
+        }//ignore
+    });//ignore
 }());//ignore

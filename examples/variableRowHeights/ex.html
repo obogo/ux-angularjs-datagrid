@@ -1,0 +1,36 @@
+<!-- **************************** Variable Row Heights Datagrid ********************************** -->
+    <a name="variableRowHeights"></a>
+    <div class="panel-ex variableRowHeights" ng-app="variableRowHeights">
+        <div class="panel-ex-head">Variable Row Heights</div>
+
+        <div class="panel-ex-body" ng-controller="tabs">
+            <p>You have to set each row manually. See the js tab.</p>
+    <ul class="nav nav-tabs" role="tablist">
+        <li ng-class="{active:tab=='html'}"><a href="" role="tab" ng-click="tab='html'">HTML</a></li>
+        <li ng-class="{active:tab=='css'}"><a href="" role="tab" ng-click="tab='css'">CSS</a></li>
+        <li ng-class="{active:tab=='js'}"><a href="" role="tab" ng-click="tab='js'">JavaScript</a></li>
+    </ul>
+<pre ng-show="tab=='html'"><code class="html railscasts">
+##html##
+</code></pre>
+<pre ng-show="tab=='css'"><code class="css railscasts">
+##css##
+</code></pre>
+<pre ng-show="tab=='js'"><code class="javascript railscasts">
+##js##
+</code></pre>
+            <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
+<!-- html:start -->
+<div ng-controller="ctrl">
+    <div ux-datagrid="items" data-addons="scrollBar" options="{templateModel:{variableRowHeights:true}}">
+        <script type="template/html" template-item="item">
+            <div class="variableRowHeights-row">
+                <div class="col col1"><div>{{item.id}}</div></div>
+                <div class="col col2">{{item.desc}}</div>
+            </div>
+        </script>
+    </div>
+</div>
+<!-- html:end -->
+        </div>
+    </div>

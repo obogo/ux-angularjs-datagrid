@@ -6,7 +6,7 @@
             $scope.tab = 'html';//ignore
         })//ignore
         .controller('ctrl', function ($scope) {
-            $scope.add = function(len) {
+            $scope.add = function (len) {
                 var i = 0, items = $scope.items || [];
                 while (i < len) {
                     items.push({id: items.length});
@@ -16,5 +16,11 @@
             };
             $scope.add(100);
         });
-    angular.bootstrap(document.querySelector("*[ng-app='" + name + "']"), [name]);//ignore
+    var el = document.querySelector("*[ng-app='" + name + "']"), strapped = false;//ignore
+    window.addEventListener('scroll', function () {//ignore
+        if (!strapped && hb.isElementInViewport(el)) {//ignore
+            strapped = true;
+            angular.bootstrap(el, [name]);//ignore
+        }//ignore
+    });//ignore
 }());//ignore

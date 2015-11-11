@@ -56,7 +56,7 @@
         if (!exports[name] && !internals[name]) {
             for (var n in injections) {
                 injectionName = injections[n];
-                args.push(exports[injectionName] || internals[injectionName]);
+                args.push(exports.hasOwnProperty(injectionName) && exports[injectionName] || internals.hasOwnProperty(injectionName) && internals[injectionName]);
             }
             if (fn.$internal) {
                 internals[name] = fn.apply(null, args) || name;
@@ -154,6 +154,25 @@
             };
         };
         return throttle;
+    });
+    //! node_modules/hbjs/src/utils/browser/isElementInViewport.js
+    define("isElementInViewport", [], function() {
+        function intersectRect(r1, r2) {
+            return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
+        }
+        function inRange(val, min, max) {
+            return val >= min && val <= max;
+        }
+        function isElementInViewport(el) {
+            var r, html;
+            if (!el || 1 !== el.nodeType) {
+                return false;
+            }
+            html = document.documentElement;
+            r = el.getBoundingClientRect();
+            return !!r && r.bottom >= 0 && r.right >= 0 && r.top <= html.clientHeight && r.left <= html.clientWidth;
+        }
+        return isElementInViewport;
     });
     for (var name in cache) {
         resolve(name, cache[name]);

@@ -284,23 +284,26 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             var i = inst.values.activeRange.min, len = inst.values.activeRange.max - i, row, tpl, rowHeight,
                 heightCache = {};
             while (i < len && !rowHeightsDirty) {
-                if (!overrideRowHeights.hasOwnProperty(i)) {
-                    result.getRowHeight(i);
-                    //tpl = result.getTemplate(inst.getData()[i]);
-                    //if (!heightCache[tpl.name]) {
-                    //    row = inst.getRowElm(i);
-                    //    rowHeight = result.calculateRowHeight(row[0]);
-                    //    if (rowHeight !== tpl.height) {
-                    //        tpl.height = rowHeight;
-                    //        rowHeightsDirty = true;
-                    //    }
-                    //}
+                if (!overrideRowHeights.hasOwnProperty(i)) {// variable heights calculation is more expensive.
+                    if (result.hasVariableRowHeights()) {
+                        result.getRowHeight(i);// will exit if a row becomes dirty.
+                    } else {// much faster. exits after it finds the template.
+                        tpl = result.getTemplate(inst.getData()[i]);
+                        if (!heightCache[tpl.name]) {
+                            row = inst.getRowElm(i);
+                            rowHeight = result.calculateRowHeight(row[0]);
+                            if (rowHeight !== tpl.height) {
+                                tpl.height = rowHeight;
+                                rowHeightsDirty = true;
+                            }
+                        }
+                    }
                 }
                 i += 1;
             }
             if (rowHeightsDirty) {
-                clearDirtyHeights();
                 inst.updateHeights();
+                clearDirtyHeights();
             }
         }
 

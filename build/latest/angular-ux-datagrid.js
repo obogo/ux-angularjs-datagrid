@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.1
+* ux-angularjs-datagrid v.1.4.2
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.4.1
+* ux-angularjs-datagrid v.1.4.2
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -184,7 +184,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.4.1",
+    version: "1.4.2",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -4488,13 +4488,27 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             var i = inst.values.activeRange.min, len = inst.values.activeRange.max - i, row, tpl, rowHeight, heightCache = {};
             while (i < len && !rowHeightsDirty) {
                 if (!overrideRowHeights.hasOwnProperty(i)) {
-                    result.getRowHeight(i);
+                    // variable heights calculation is more expensive.
+                    if (result.hasVariableRowHeights()) {
+                        result.getRowHeight(i);
+                    } else {
+                        // much faster. exits after it finds the template.
+                        tpl = result.getTemplate(inst.getData()[i]);
+                        if (!heightCache[tpl.name]) {
+                            row = inst.getRowElm(i);
+                            rowHeight = result.calculateRowHeight(row[0]);
+                            if (rowHeight !== tpl.height) {
+                                tpl.height = rowHeight;
+                                rowHeightsDirty = true;
+                            }
+                        }
+                    }
                 }
                 i += 1;
             }
             if (rowHeightsDirty) {
-                clearDirtyHeights();
                 inst.updateHeights();
+                clearDirtyHeights();
             }
         }
         function clearTemplate(item) {

@@ -415,7 +415,7 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.4.1
+ux-angularjs-datagrid v.1.4.2
 (c) 2015, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -444,7 +444,7 @@ License: MIT.</p>
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.4.1
+ux-angularjs-datagrid v.1.4.2
 (c) 2015, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -687,7 +687,7 @@ on a per grid basis.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.4.1&quot;</span><span class="p">,</span>
+    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.4.2&quot;</span><span class="p">,</span>
 
 </pre></div>
         </td>
@@ -10468,13 +10468,49 @@ poor datagrid performance.</p>
             <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">min</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">activeRange</span><span class="p">.</span><span class="nx">max</span> <span class="o">-</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">row</span><span class="p">,</span> <span class="nx">tpl</span><span class="p">,</span> <span class="nx">rowHeight</span><span class="p">,</span> <span class="nx">heightCache</span> <span class="o">=</span> <span class="p">{};</span>
             <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">rowHeightsDirty</span><span class="p">)</span> <span class="p">{</span>
                 <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">overrideRowHeights</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span> <span class="p">{</span>
-                    <span class="nx">result</span><span class="p">.</span><span class="nx">getRowHeight</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-337" id="section-337">&#182;</a>
+</div>
+<p>variable heights calculation is more expensive.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">hasVariableRowHeights</span><span class="p">())</span> <span class="p">{</span>
+                        <span class="nx">result</span><span class="p">.</span><span class="nx">getRowHeight</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-338" id="section-338">&#182;</a>
+</div>
+<p>much faster. exits after it finds the template.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                        <span class="nx">tpl</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">()[</span><span class="nx">i</span><span class="p">]);</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">heightCache</span><span class="p">[</span><span class="nx">tpl</span><span class="p">.</span><span class="nx">name</span><span class="p">])</span> <span class="p">{</span>
+                            <span class="nx">row</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+                            <span class="nx">rowHeight</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">calculateRowHeight</span><span class="p">(</span><span class="nx">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nx">rowHeight</span> <span class="o">!==</span> <span class="nx">tpl</span><span class="p">.</span><span class="nx">height</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">tpl</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">rowHeight</span><span class="p">;</span>
+                                <span class="nx">rowHeightsDirty</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
                 <span class="p">}</span>
                 <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
             <span class="p">}</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">rowHeightsDirty</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">clearDirtyHeights</span><span class="p">();</span>
                 <span class="nx">inst</span><span class="p">.</span><span class="nx">updateHeights</span><span class="p">();</span>
+                <span class="nx">clearDirtyHeights</span><span class="p">();</span>
             <span class="p">}</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">clearTemplate</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>

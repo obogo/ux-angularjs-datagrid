@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ux-datagrid-dragRows.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../doc-style.css" />
+  <script src="../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../", thisFile = "Users/wes/PhpstormProjects/wes/webux/ux-datagrid//addons/ux-datagrid-dragRows.js", defaultSidebar = true;
+  </script>
+  <script src="../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>ux-datagrid-dragRows.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<div class="dox">
+  <div class="summary"><p>!
+ux-angularjs-datagrid v.1.4.1
+(c) 2015, Obogo
+<a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
+License: MIT.</p>
+  </div>
+  <div class="body">
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">global</span><span class="p">)</span> <span class="p">{</span>
+<span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">define</span> <span class="o">===</span> <span class="s2">&quot;function&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">define</span><span class="p">.</span><span class="nx">amd</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">define</span><span class="p">(</span><span class="nx">exports</span><span class="p">);</span>
+<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">module</span> <span class="o">!==</span> <span class="s2">&quot;undefined&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">;</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+  <span class="nx">global</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">DRAG_START</span> <span class="o">=</span> <span class="s2">&quot;datagrid:dragStart&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">DRAG_STOP</span> <span class="o">=</span> <span class="s2">&quot;datagrid:dragStop&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">DRAG_DROP</span> <span class="o">=</span> <span class="s2">&quot;datagrid:dragDrop&quot;</span><span class="p">;</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">dragRows</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">dragClass</span><span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="nx">templateId</span><span class="o">:</span> <span class="s2">&quot;&quot;</span>
+<span class="p">};</span>
+
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;dragRows&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>TODO: need to have option to provide template or it will clone the row instead.
+TODO: need to make scroll when close to top or bottom. The further away from the drag origin the faster the scroll.</p>
+
+<div class="dox">
+  <div class="summary"><p>return [ "inst",    </p>
+  </div>
+  <div class="body">
+  </div>
+  <div class="details">
+    <div class="dox_tag_title">Params</div>
+    <div class="dox_tag_detail">
+      <span class="dox_tag_name">inst</span>
+      <span class="dox_type">Datagrid</span>
+    </div>
+  </div>
+</div>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;dragRows&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;#00CCFF&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">dragData</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">offsetTop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">dragPixelCushion</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">lastY</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">clone</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">indicator</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">rowOverlay</span><span class="p">;</span>
+        <span class="kd">function</span> <span class="nx">init</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">addListeners</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">isDragging</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="o">!!</span><span class="nx">dragData</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">disableSelection</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">webkitUserSelect</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span><span class="p">;</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">khtmlUserSelect</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span><span class="p">;</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">mozUserSelect</span> <span class="o">=</span> <span class="s2">&quot;-moz-none&quot;</span><span class="p">;</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">mozUserSelect</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span><span class="p">;</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">msUserSelect</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span><span class="p">;</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">userSelect</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">enableSelection</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">webkitUserSelect</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">khtmlUserSelect</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">mozUserSelect</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">mozUserSelect</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">msUserSelect</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+            <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">userSelect</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">calculatePos</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">-</span> <span class="nx">offsetTop</span> <span class="o">+</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">scrollTop</span> <span class="o">-</span> <span class="nx">dragData</span><span class="p">.</span><span class="nx">height</span> <span class="o">*</span> <span class="p">.</span><span class="mi">5</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">setIndicatorPos</span><span class="p">(</span><span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">findIndexFrom</span><span class="p">(</span><span class="nx">y</span><span class="p">);</span>
+            <span class="nx">indicator</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span><span class="p">;</span>
+            <span class="nx">dragData</span><span class="p">.</span><span class="nx">targetIndex</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">index</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">createIndicator</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">indicator</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">&quot;div&quot;</span><span class="p">);</span>
+            <span class="nx">indicator</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="s2">&quot;0px&quot;</span><span class="p">;</span>
+            <span class="nx">indicator</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="s2">&quot;0px&quot;</span><span class="p">;</span>
+            <span class="nx">indicator</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="s2">&quot;absolute&quot;</span><span class="p">;</span>
+            <span class="nx">indicator</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">webkitTransform</span> <span class="o">=</span> <span class="s2">&quot;translateY(-50%);&quot;</span><span class="p">;</span>
+            <span class="nx">indicator</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">mozTransform</span> <span class="o">=</span> <span class="s2">&quot;translateY(-50%);&quot;</span><span class="p">;</span>
+            <span class="nx">indicator</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">msTransform</span> <span class="o">=</span> <span class="s2">&quot;translateY(-50%);&quot;</span><span class="p">;</span>
+            <span class="nx">indicator</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">transform</span> <span class="o">=</span> <span class="s2">&quot;translateY(-50%);&quot;</span><span class="p">;</span>
+            <span class="nx">indicator</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">&quot;ux-datagrid-dragRow-indicator&quot;</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">createRowOverlay</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">rowOverlay</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">&quot;div&quot;</span><span class="p">);</span>
+            <span class="nx">rowOverlay</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="s2">&quot;absolute&quot;</span><span class="p">;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>TODO: needs to have row same dimensions, and same position.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">rowOverlay</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="s2">&quot;0px&quot;</span><span class="p">;</span>
+            <span class="nx">rowOverlay</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="s2">&quot;0px&quot;</span><span class="p">;</span>
+            <span class="nx">rowOverlay</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">&quot;ux-datagrid-row-overlay&quot;</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">start</span><span class="p">(</span><span class="nx">evt</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">offsetTop</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">offsetTop</span><span class="p">;</span>
+            <span class="nx">disableSelection</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+            <span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowElm</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">div</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">&quot;div&quot;</span><span class="p">);</span>
+            <span class="nx">div</span><span class="p">.</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">outerHTML</span><span class="p">;</span>
+            <span class="nx">clone</span> <span class="o">=</span> <span class="nx">div</span><span class="p">.</span><span class="nx">children</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+            <span class="nx">createIndicator</span><span class="p">();</span>
+            <span class="nx">div</span><span class="p">.</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+            <span class="nx">dragData</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="nx">index</span><span class="o">:</span> <span class="nx">index</span><span class="p">,</span>
+                <span class="nx">el</span><span class="o">:</span> <span class="nx">el</span><span class="p">,</span>
+                <span class="nx">data</span><span class="o">:</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowItem</span><span class="p">(</span><span class="nx">index</span><span class="p">),</span>
+                <span class="nx">height</span><span class="o">:</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowHeight</span><span class="p">(</span><span class="nx">index</span><span class="p">),</span>
+                <span class="nx">cloneEl</span><span class="o">:</span> <span class="nx">clone</span>
+            <span class="p">};</span>
+            <span class="nx">clone</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="s2">&quot;absolute&quot;</span><span class="p">;</span>
+            <span class="nx">clone</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="nx">calculatePos</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span><span class="p">;</span>
+            <span class="nx">clone</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="s2">&quot;0px&quot;</span><span class="p">;</span>
+            <span class="nx">clone</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">&quot;ux-datagrid-dragRow-dragging&quot;</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">indicator</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">clone</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">DRAG_START</span><span class="p">,</span> <span class="nx">dragData</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;mousemove&quot;</span><span class="p">,</span> <span class="nx">onMove</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;mouseup&quot;</span><span class="p">,</span> <span class="nx">onDrop</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">onMove</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">y</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">evt</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">&gt;</span> <span class="nx">lastY</span> <span class="o">+</span> <span class="nx">dragPixelCushion</span> <span class="o">||</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">&lt;</span> <span class="nx">lastY</span> <span class="o">-</span> <span class="nx">dragPixelCushion</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">y</span> <span class="o">=</span> <span class="nx">calculatePos</span><span class="p">(</span><span class="nx">evt</span><span class="p">);</span>
+                <span class="nx">dragData</span><span class="p">.</span><span class="nx">cloneEl</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="nx">calculatePos</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span><span class="p">;</span>
+                <span class="nx">dragData</span><span class="p">.</span><span class="nx">cloneEl</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="s2">&quot;0px&quot;</span><span class="p">;</span>
+                <span class="nx">lastY</span> <span class="o">=</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">pageY</span><span class="p">;</span>
+                <span class="nx">setIndicatorPos</span><span class="p">(</span><span class="nx">y</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">stop</span><span class="p">()</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">unwatch</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">dragData</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">off</span><span class="p">(</span><span class="s2">&quot;mousemove&quot;</span><span class="p">,</span> <span class="nx">onMove</span><span class="p">);</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">off</span><span class="p">(</span><span class="s2">&quot;mouseup&quot;</span><span class="p">,</span> <span class="nx">onDrop</span><span class="p">);</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">DRAG_STOP</span><span class="p">,</span> <span class="nx">dragData</span><span class="p">);</span>
+                <span class="nx">dragData</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+                <span class="nx">enableSelection</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>listen for grid render to complete and then remove the clone.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="nx">unwatch</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_RENDER</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="nx">unwatch</span><span class="p">();</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">removeChild</span><span class="p">(</span><span class="nx">clone</span><span class="p">);</span>
+                    <span class="nx">inst</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">removeChild</span><span class="p">(</span><span class="nx">indicator</span><span class="p">);</span>
+                    <span class="nx">clone</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+                    <span class="nx">indicator</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+                <span class="p">});</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">getIndexAt</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">findIndexFrom</span><span class="p">(</span><span class="nx">calculatePos</span><span class="p">(</span><span class="nx">evt</span><span class="p">)).</span><span class="nx">index</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">findIndexFrom</span><span class="p">(</span><span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="c1">//inst.getOffsetIndex(y),</span>
+            <span class="nx">len</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">rowsLength</span><span class="p">,</span> <span class="nx">totalHeight</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">rowHeight</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">for</span> <span class="p">(</span><span class="nx">i</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">rowHeight</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getRowHeight</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+                <span class="nx">totalHeight</span> <span class="o">+=</span> <span class="nx">rowHeight</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">totalHeight</span> <span class="o">-</span> <span class="nx">rowHeight</span> <span class="o">*</span> <span class="p">.</span><span class="mi">5</span> <span class="o">&gt;</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="p">{</span>
+                        <span class="nx">index</span><span class="o">:</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="nx">y</span><span class="o">:</span> <span class="nx">totalHeight</span>
+                    <span class="p">};</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">onDrop</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>figure out the index here. Then we can insert it by changing the row data.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">DRAG_DROP</span><span class="p">,</span> <span class="nx">dragData</span><span class="p">);</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+</div>
+<p>put the one that is farthest down in first.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">moveItem</span><span class="p">(</span><span class="nx">dragData</span><span class="p">.</span><span class="nx">index</span><span class="p">,</span> <span class="nx">dragData</span><span class="p">.</span><span class="nx">targetIndex</span><span class="p">);</span>
+            <span class="nx">stop</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="kd">function</span> <span class="nx">addListeners</span><span class="p">()</span> <span class="p">{}</span>
+        <span class="kd">function</span> <span class="nx">removeListeners</span><span class="p">()</span> <span class="p">{}</span>
+        <span class="kd">function</span> <span class="nx">destroy</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">removeListeners</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">isDragging</span> <span class="o">=</span> <span class="nx">isDragging</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">start</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">stop</span> <span class="o">=</span> <span class="nx">stop</span><span class="p">;</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">destroy</span> <span class="o">=</span> <span class="nx">destroy</span><span class="p">;</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_READY</span><span class="p">,</span> <span class="nx">init</span><span class="p">));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_DATA_CHANGE</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">stop</span><span class="p">();</span>
+        <span class="p">}));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">dragRows</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">inst</span><span class="p">;</span>
+    <span class="p">}</span> <span class="p">];</span>
+<span class="p">});</span>
+<span class="p">}(</span><span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ux</span> <span class="o">||</span> <span class="p">{},</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="k">this</span><span class="p">;}()));</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

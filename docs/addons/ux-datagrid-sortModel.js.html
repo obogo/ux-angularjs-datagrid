@@ -172,7 +172,7 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.3.2
+ux-angularjs-datagrid v.1.4.1
 (c) 2015, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -1983,7 +1983,6 @@ If the states already exist apply those states on the render.</p>
             <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">creepRenderModel</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">inst</span><span class="p">.</span><span class="nx">creepRenderModel</span><span class="p">.</span><span class="nx">stop</span><span class="p">();</span>
             <span class="p">}</span>
-            <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">toggle</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
 
 </pre></div>
         </td>
@@ -1993,6 +1992,21 @@ If the states already exist apply those states on the render.</p>
 <div class="pilwrap">
   <a class="pilcrow" href="#section-54" id="section-54">&#182;</a>
 </div>
+<p>wait till next frame so it doesn't run during a digest.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">toggle</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+            <span class="p">});</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-55" id="section-55">&#182;</a>
+</div>
 
 <div class="highlight"><pre><code>       <span class="n">result</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
 </code></pre></div>
@@ -2000,8 +2014,11 @@ If the states already exist apply those states on the render.</p>
 
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-            <span class="nx">result</span><span class="p">.</span><span class="nx">applySorts</span><span class="p">(</span><span class="nx">original</span><span class="p">);</span>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_TOGGLE_SORT</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+            <span class="nx">inst</span><span class="p">.</span><span class="nx">flow</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">result</span><span class="p">.</span><span class="nx">applySorts</span><span class="p">(</span><span class="nx">original</span><span class="p">);</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_TOGGLE_SORT</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$apply</span><span class="p">();</span>
+            <span class="p">});</span>
         <span class="p">};</span>
 
 </pre></div>

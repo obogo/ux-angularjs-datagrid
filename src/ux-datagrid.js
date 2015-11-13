@@ -14,7 +14,7 @@
  * @returns {Datagrid}
  * @constructor
  */
-function Datagrid(scope, element, attr, $compile) {
+function Datagrid(scope, element, attr, $compile, $timeout) {
     // **<a name="flow">flow</a>** flow management for methods of the datagrid. Keeping functions firing in the correct order especially if async methods are executed.
     var flow;
     // **<a name="waitCount">waitCount</a>** waiting to render. If it fails too many times it will die.
@@ -86,10 +86,6 @@ function Datagrid(scope, element, attr, $compile) {
         return !!scope.$$phase;
     }
 
-    function flowAsync(fn) {
-        scope.$$postDigest(fn);
-    }
-
     /**
      * ###<a name="setupExports">setupExports</a>###
      * Build out the public API variables for the datagrid.
@@ -140,7 +136,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.updateViewportHeight = updateViewportHeight;
         inst.calculateViewportHeight = calculateViewportHeight;
         inst.options = options = exports.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
-        inst.flow = flow = new Flow({async: Object.prototype.hasOwnProperty.apply(options, ['async']) ? !!options.async : true, debug: Object.prototype.hasOwnProperty.apply(options, ['debug']) ? options.debug : 0}, inst.dispatch, flowPauseFn, flowAsync);
+        inst.flow = flow = new Flow({async: Object.prototype.hasOwnProperty.apply(options, ['async']) ? !!options.async : true, debug: Object.prototype.hasOwnProperty.apply(options, ['debug']) ? options.debug : 0}, inst.dispatch, flowPauseFn, $timeout);
         // this needs to be set immediately so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
         inst.gc = forceGarbageCollection;
@@ -1462,13 +1458,13 @@ function Datagrid(scope, element, attr, $compile) {
  * ###<a name="uxDatagrid">uxDatagrid</a>###
  * define the directive, setup addons, apply core addons then optional addons.
  */
-module.directive('uxDatagrid', ['$compile', 'gridAddons', function ($compile, gridAddons) {
+module.directive('uxDatagrid', ['$compile', 'gridAddons', '$timeout', function ($compile, gridAddons, $timeout) {
     return {
         restrict: 'AE',
         scope: true,
         link: {
             pre: function (scope, element, attr) {
-                var inst = new Datagrid(scope, element, attr, $compile);
+                var inst = new Datagrid(scope, element, attr, $compile, $timeout);
                 each(exports.datagrid.coreAddons, function (method) {
                     method.apply(inst, [inst]);
                 });

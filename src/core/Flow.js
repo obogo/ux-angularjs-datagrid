@@ -1,4 +1,4 @@
-function Flow(inst, dispatch, pauseFn, async) {
+function Flow(inst, dispatch, pauseFn, $timeout) {
     var running = false,
         intv,
         current = null,
@@ -59,13 +59,16 @@ function Flow(inst, dispatch, pauseFn, async) {
     }
 
     function timeout(method, time) {
-        var intv, item = createItem(method, [], time), startTime = Date.now(),
+        var intv, item = createItem(method, []), startTime = Date.now(),
             timeoutCall = function () {
                 inst.log("exec timeout method %c%s %sms", consoleMethodStyle, item.label, Date.now() - startTime);
-                method();
+                list.push(item);// add after timeout time.
+                if (running) {
+                    next();
+                }
             };
         inst.log("wait for timeout method %c%s", consoleMethodStyle, item.label);
-        intv = setTimeout(timeoutCall, time);
+        intv = setTimeout(timeoutCall, time);// use regular timeout because we are just waiting to put it in the queue.
         timeouts[intv] = function () {
             clearTimeout(intv);
             delete timeouts[intv];
@@ -107,16 +110,11 @@ function Flow(inst, dispatch, pauseFn, async) {
     }
 
     function next() {
-        if (pauseFn && pauseFn()) {
-            async(next);
-            return;
-        }
         if (!current && list.length) {
             current = list[0];
             if (inst.async && current.delay !== undefined) {
                 inst.log("\tdelay for %c%s %sms", consoleMethodStyle, current.label, current.delay);
-                clearTimeout(intv);
-                intv = setTimeout(exec, current.delay);
+                $timeout(exec, current.delay, false);
             } else {
                 exec();
             }
@@ -124,6 +122,10 @@ function Flow(inst, dispatch, pauseFn, async) {
     }
 
     function exec() {
+        if (pauseFn && pauseFn()) {
+            $timeout(exec, 0, false);
+            return;
+        }
         inst.log("start method %c%s", consoleMethodStyle, current.label);
         var methodHasDoneArg = hasDoneArg(current.method);
         if (methodHasDoneArg) current.args.push(done);
@@ -151,7 +153,6 @@ function Flow(inst, dispatch, pauseFn, async) {
     }
 
     function destroy() {
-        clearTimeout(intv);
         list.length = 0;
         inst = null;
     }

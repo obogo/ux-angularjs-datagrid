@@ -19,10 +19,14 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         scrollIndexPadding = 0;
 
     function digest(index) {
+        if (inst.scope.$root.$$phase) {
+            return false;
+        }
         var s = inst.getScope(index);
         if (!s || !s.$digested) {// just skip if already digested.
             inst.forceRenderScope(index);
         }
+        return true;
     }
 
     function calculatePercent() {
@@ -78,13 +82,19 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
             dynamicHeights = inst.templateModel.hasVariableRowHeights();
             upIndex = force ? upIndex : findUncompiledIndex(upIndex, -1);
             if (upIndex >= 0) {
-                digest(upIndex);
-                if (force) upIndex -= 1;
+                if (digest(upIndex)) {
+                    if (force) {
+                        upIndex -= 1;
+                    }
+                }
             }
             downIndex = force ? downIndex : findUncompiledIndex(downIndex, 1);
             if (downIndex !== inst.rowsLength) {
-                digest(downIndex);
-                if (force) downIndex += 1;
+                if (digest(downIndex)) {
+                    if (force) {
+                        downIndex += 1;
+                    }
+                }
             }
             render(complete, force);// making this async was counter effective on performance.
             if (dynamicHeights) {

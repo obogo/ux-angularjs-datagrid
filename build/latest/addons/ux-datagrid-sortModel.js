@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.2
+* ux-angularjs-datagrid v.1.4.3
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -638,16 +638,9 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
             if (inst.creepRenderModel) {
                 inst.creepRenderModel.stop();
             }
-            // wait till next frame so it doesn't run during a digest.
-            inst.flow.add(function() {
-                sortStatesModel.toggle(name);
-            });
-            //            result.clear();
-            inst.flow.add(function() {
-                result.applySorts(original);
-                inst.dispatch(exports.datagrid.events.ON_AFTER_TOGGLE_SORT, name);
-                inst.scope.$apply();
-            });
+            sortStatesModel.toggle(name);
+            result.applySorts(original);
+            inst.dispatch(exports.datagrid.events.ON_AFTER_TOGGLE_SORT, name);
         };
         /**
          * ##<a name="toggleSort">toggleSort</a>###

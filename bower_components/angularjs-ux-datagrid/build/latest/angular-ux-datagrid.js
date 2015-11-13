@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.2
+* ux-angularjs-datagrid v.1.4.3
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.4.2
+* ux-angularjs-datagrid v.1.4.3
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -184,7 +184,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.4.2",
+    version: "1.4.3",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -989,7 +989,7 @@ exports.logWrapper = function LogWrapper(name, instance, theme, dispatch) {
     return instance;
 };
 
-function Flow(inst, dispatch, pauseFn, async) {
+function Flow(inst, dispatch, pauseFn, $timeout) {
     var running = false, intv, current = null, list = [], history = [], historyLimit = 10, uniqueMethods = {}, execStartTime, execEndTime, timeouts = {}, consoleMethodStyle = "color:#666666;";
     function getMethodName(method) {
         // TODO: there might be a faster way to get the function name.
@@ -1039,12 +1039,17 @@ function Flow(inst, dispatch, pauseFn, async) {
         });
     }
     function timeout(method, time) {
-        var intv, item = createItem(method, [], time), startTime = Date.now(), timeoutCall = function() {
+        var intv, item = createItem(method, []), startTime = Date.now(), timeoutCall = function() {
             inst.log("exec timeout method %c%s %sms", consoleMethodStyle, item.label, Date.now() - startTime);
-            method();
+            list.push(item);
+            // add after timeout time.
+            if (running) {
+                next();
+            }
         };
         inst.log("wait for timeout method %c%s", consoleMethodStyle, item.label);
         intv = setTimeout(timeoutCall, time);
+        // use regular timeout because we are just waiting to put it in the queue.
         timeouts[intv] = function() {
             clearTimeout(intv);
             delete timeouts[intv];
@@ -1080,22 +1085,21 @@ function Flow(inst, dispatch, pauseFn, async) {
         }
     }
     function next() {
-        if (pauseFn && pauseFn()) {
-            async(next);
-            return;
-        }
         if (!current && list.length) {
             current = list[0];
             if (inst.async && current.delay !== undefined) {
                 inst.log("	delay for %c%s %sms", consoleMethodStyle, current.label, current.delay);
-                clearTimeout(intv);
-                intv = setTimeout(exec, current.delay);
+                $timeout(exec, current.delay, false);
             } else {
                 exec();
             }
         }
     }
     function exec() {
+        if (pauseFn && pauseFn()) {
+            $timeout(exec, 0, false);
+            return;
+        }
         inst.log("start method %c%s", consoleMethodStyle, current.label);
         var methodHasDoneArg = hasDoneArg(current.method);
         if (methodHasDoneArg) current.args.push(done);
@@ -1119,7 +1123,6 @@ function Flow(inst, dispatch, pauseFn, async) {
         return list.length;
     }
     function destroy() {
-        clearTimeout(intv);
         list.length = 0;
         inst = null;
     }
@@ -1156,7 +1159,7 @@ exports.datagrid.Flow = Flow;
  * @returns {Datagrid}
  * @constructor
  */
-function Datagrid(scope, element, attr, $compile) {
+function Datagrid(scope, element, attr, $compile, $timeout) {
     // **<a name="flow">flow</a>** flow management for methods of the datagrid. Keeping functions firing in the correct order especially if async methods are executed.
     var flow;
     // **<a name="waitCount">waitCount</a>** waiting to render. If it fails too many times it will die.
@@ -1227,9 +1230,6 @@ function Datagrid(scope, element, attr, $compile) {
     function flowPauseFn() {
         return !!scope.$$phase;
     }
-    function flowAsync(fn) {
-        scope.$$postDigest(fn);
-    }
     /**
      * ###<a name="setupExports">setupExports</a>###
      * Build out the public API variables for the datagrid.
@@ -1283,7 +1283,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.flow = flow = new Flow({
             async: Object.prototype.hasOwnProperty.apply(options, [ "async" ]) ? !!options.async : true,
             debug: Object.prototype.hasOwnProperty.apply(options, [ "debug" ]) ? options.debug : 0
-        }, inst.dispatch, flowPauseFn, flowAsync);
+        }, inst.dispatch, flowPauseFn, $timeout);
         // this needs to be set immediately so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
         inst.gc = forceGarbageCollection;
@@ -2540,13 +2540,13 @@ function Datagrid(scope, element, attr, $compile) {
  * ###<a name="uxDatagrid">uxDatagrid</a>###
  * define the directive, setup addons, apply core addons then optional addons.
  */
-module.directive("uxDatagrid", [ "$compile", "gridAddons", function($compile, gridAddons) {
+module.directive("uxDatagrid", [ "$compile", "gridAddons", "$timeout", function($compile, gridAddons, $timeout) {
     return {
         restrict: "AE",
         scope: true,
         link: {
             pre: function(scope, element, attr) {
-                var inst = new Datagrid(scope, element, attr, $compile);
+                var inst = new Datagrid(scope, element, attr, $compile, $timeout);
                 each(exports.datagrid.coreAddons, function(method) {
                     method.apply(inst, [ inst ]);
                 });
@@ -3435,11 +3435,15 @@ exports.datagrid.events.DISABLE_CREEP = "datagrid:disableCreep";
 exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     var intv = 0, creepCount = 0, model = exports.logWrapper("creepModel", {}, "blue", inst.dispatch), upIndex = 0, downIndex = 0, waitHandle, waitingOnReset, time, lastPercent, unwatchers = [], forceScroll = false, scrollIndex = 0, scrollIndexPadding = 0;
     function digest(index) {
+        if (inst.scope.$root.$$phase) {
+            return false;
+        }
         var s = inst.getScope(index);
         if (!s || !s.$digested) {
             // just skip if already digested.
             inst.forceRenderScope(index);
         }
+        return true;
     }
     function calculatePercent() {
         var result = {
@@ -3494,13 +3498,19 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
             dynamicHeights = inst.templateModel.hasVariableRowHeights();
             upIndex = force ? upIndex : findUncompiledIndex(upIndex, -1);
             if (upIndex >= 0) {
-                digest(upIndex);
-                if (force) upIndex -= 1;
+                if (digest(upIndex)) {
+                    if (force) {
+                        upIndex -= 1;
+                    }
+                }
             }
             downIndex = force ? downIndex : findUncompiledIndex(downIndex, 1);
             if (downIndex !== inst.rowsLength) {
-                digest(downIndex);
-                if (force) downIndex += 1;
+                if (digest(downIndex)) {
+                    if (force) {
+                        downIndex += 1;
+                    }
+                }
             }
             render(complete, force);
             // making this async was counter effective on performance.

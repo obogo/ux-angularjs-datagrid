@@ -3611,6 +3611,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.DISABLE_CREEP, model.disable));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.STOP_CREEP, stop));
+    inst.dispatch(exports.datagrid.events.ON_TOUCH_DOWN, event);
     inst.creepRenderModel = model;
     // do not add listeners if it is not enabled.
     if (inst.options.creepRender && inst.options.creepRender.enable) {

@@ -83,7 +83,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     }
 
     function flowPauseFn() {
-        return !!scope.$$phase;
+        return !!(scope && scope.$$phase);
     }
 
     /**

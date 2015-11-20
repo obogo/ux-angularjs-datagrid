@@ -8,6 +8,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
     var result = exports.logWrapper('scrollModel', {}, 'orange', inst.dispatch),
         setup = false,
+        enable = true,
         unwatchSetup,
         waitForStopIntv,
         hasScrollListener = false,
@@ -126,7 +127,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         if (event.stopImmediatePropagation) event.stopImmediatePropagation();
     };
 
+    result.enable = function(value) {
+        enable = !!value;
+    };
+
     result.onTouchStart = function onTouchStart(event) {
+        if (!enable) {
+            return;
+        }
         clearTimeout(scrollingIntv);
         inst.values.touchDown = true;
         offsetY = startOffsetY = getTouches(event)[0].clientY || 0;
@@ -143,6 +151,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
 
     result.onTouchMove = function (event) {
+        if (!enable) {
+            return;
+        }
         if (inst.options.scrollModel && inst.options.scrollModel.preventTouchMove) {
             result.killEvent(event);
         }
@@ -163,6 +174,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
 
     result.onTouchEnd = function onTouchEnd(event) {
+        if (!enable) {
+            return;
+        }
         if (!inst.values.touchDown) {
             return;// don't allow it to double fire if touchcancel and touchend both fire.
         }

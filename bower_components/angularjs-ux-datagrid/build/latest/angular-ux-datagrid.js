@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.3
+* ux-angularjs-datagrid v.1.4.4
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.4.3
+* ux-angularjs-datagrid v.1.4.4
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -184,7 +184,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.4.3",
+    version: "1.4.4",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1228,7 +1228,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         flow.unique(updateRowWatchers);
     }
     function flowPauseFn() {
-        return !!scope.$$phase;
+        return !!(scope && scope.$$phase);
     }
     /**
      * ###<a name="setupExports">setupExports</a>###
@@ -3611,6 +3611,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.DISABLE_CREEP, model.disable));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.STOP_CREEP, stop));
+    inst.dispatch(exports.datagrid.events.ON_TOUCH_DOWN, event);
     inst.creepRenderModel = model;
     // do not add listeners if it is not enabled.
     if (inst.options.creepRender && inst.options.creepRender.enable) {
@@ -3824,7 +3825,7 @@ exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
 exports.datagrid.events.ON_TOUCH_MOVE = "datagrid:touchMove";
 
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
-    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, unwatchSetup, waitForStopIntv, hasScrollListener = false, lastScroll, bottomOffset = 0, lastRenderTime, // start easing
+    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, enable = true, unwatchSetup, waitForStopIntv, hasScrollListener = false, lastScroll, bottomOffset = 0, lastRenderTime, // start easing
     startOffsetY, startOffsetX, offsetY, offsetX, startScroll, lastDeltaY, lastDeltaX, speed = 0, speedX = 0, startTime, distance, scrollingIntv, // end easing
     listenerData = [ {
         event: "touchstart",
@@ -3926,7 +3927,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         if (event.stopPropagation) event.stopPropagation();
         if (event.stopImmediatePropagation) event.stopImmediatePropagation();
     };
+    result.enable = function(value) {
+        enable = !!value;
+    };
     result.onTouchStart = function onTouchStart(event) {
+        if (!enable) {
+            return;
+        }
         clearTimeout(scrollingIntv);
         inst.values.touchDown = true;
         offsetY = startOffsetY = getTouches(event)[0].clientY || 0;
@@ -3942,6 +3949,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         inst.dispatch(exports.datagrid.events.ON_TOUCH_DOWN, event);
     };
     result.onTouchMove = function(event) {
+        if (!enable) {
+            return;
+        }
         if (inst.options.scrollModel && inst.options.scrollModel.preventTouchMove) {
             result.killEvent(event);
         }
@@ -3959,6 +3969,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         inst.dispatch(exports.datagrid.events.ON_TOUCH_MOVE, speed, deltaY, lastDeltaY, speedX, deltaX, lastDeltaX);
     };
     result.onTouchEnd = function onTouchEnd(event) {
+        if (!enable) {
+            return;
+        }
         if (!inst.values.touchDown) {
             return;
         }

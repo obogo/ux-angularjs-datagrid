@@ -181,6 +181,9 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * @returns {Array}
      */
     function getRowIndexes(rowIndex, chunkList, indexes) {
+        if (!chunkList) {
+            return [];
+        }
         var i = 0, len = chunkList.length, chunk;
         indexes = indexes || [];
         while (i < len) {

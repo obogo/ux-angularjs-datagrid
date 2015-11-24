@@ -63,8 +63,8 @@ angular.module('ux').factory('gridFocusManager', function () {
          * @param {Function} method
          */
         function applyToListeners(method) {
-            if (!inst.values.activeRange.max || inst.values.activeRange.max < 0) {
-                return;// if max is 0. there is no point.
+            if (isNaN(inst.values.activeRange.max) || inst.values.activeRange.max < 0) {
+                return;// prevent undefined or negative numbers. Can be index 0.
             }
             result.log("\tapplyTo: %s - %s", inst.values.activeRange.min, inst.values.activeRange.max);
             var i = inst.values.activeRange.min, row;
@@ -230,6 +230,8 @@ angular.module('ux').factory('gridFocusManager', function () {
          */
         function onKeyDown(event) {
             var target = angular.element(event.currentTarget), atTop = false, atBottom = false;
+            var index;
+            var item;
             result.log('FM: onKeyDown');
             if (event.keyCode === keys.ENTER && event.currentTarget.nodeName.match(/A/)) {
                 // on anchors we allow enter to execute it. So ignore it.
@@ -238,12 +240,16 @@ angular.module('ux').factory('gridFocusManager', function () {
             if ((event.shiftKey && event.keyCode === keys.ENTER) || event.keyCode === keys.UP) {
                 atTop = !focusToPrevRowElement(target);
                 if (atTop) {
-                    inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_TOP_ENTER);
+                    index = inst.getRowIndexFromElement(target);
+                    item = inst.getRowItem(index);
+                    inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_TOP_ENTER, index, item);
                 }
             } else if (event.keyCode === keys.ENTER || event.keyCode === keys.DOWN) {
                 atBottom = !focusToNextRowElement(target);
                 if (atBottom) {
-                    inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_BOTTOM_ENTER);
+                    index = inst.getRowIndexFromElement(target);
+                    item = inst.getRowItem(index);
+                    inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_BOTTOM_ENTER, index, item);
                 }
             }
         }

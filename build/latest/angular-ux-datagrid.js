@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.4
+* ux-angularjs-datagrid v.1.4.5
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.4.4
+* ux-angularjs-datagrid v.1.4.5
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -184,7 +184,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.4.4",
+    version: "1.4.5",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1096,6 +1096,9 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
         }
     }
     function exec() {
+        if (!inst) {
+            return;
+        }
         if (pauseFn && pauseFn()) {
             $timeout(exec, 0, false);
             return;
@@ -1126,7 +1129,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
         list.length = 0;
         inst = null;
     }
-    inst = exports.logWrapper("Flow", inst || {}, "grey", dispatch);
+    exports.logWrapper("Flow", inst, "grey", dispatch);
     //    inst.async = Object.prototype.hasOwnProperty.apply(inst, ['async']) ? inst.async : true;
     inst.debug = Object.prototype.hasOwnProperty.apply(inst, [ "debug" ]) ? inst.debug : 0;
     inst.insert = insert;
@@ -2730,6 +2733,9 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * @returns {Array}
      */
     function getRowIndexes(rowIndex, chunkList, indexes) {
+        if (!chunkList) {
+            return [];
+        }
         var i = 0, len = chunkList.length, chunk;
         indexes = indexes || [];
         while (i < len) {

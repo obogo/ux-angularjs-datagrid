@@ -122,6 +122,9 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     }
 
     function exec() {
+        if (!inst) {
+            return;// datagrid was destroyed. ignore async calls.
+        }
         if (pauseFn && pauseFn()) {
             $timeout(exec, 0, false);
             return;
@@ -157,7 +160,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
         inst = null;
     }
 
-    inst = exports.logWrapper('Flow', inst || {}, 'grey', dispatch);
+    exports.logWrapper('Flow', inst, 'grey', dispatch);
 //    inst.async = Object.prototype.hasOwnProperty.apply(inst, ['async']) ? inst.async : true;
     inst.debug = Object.prototype.hasOwnProperty.apply(inst, ['debug']) ? inst.debug : 0;
     inst.insert = insert;

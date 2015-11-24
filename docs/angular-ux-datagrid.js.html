@@ -415,7 +415,7 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.4.4
+ux-angularjs-datagrid v.1.4.5
 (c) 2015, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -444,7 +444,7 @@ License: MIT.</p>
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.4.4
+ux-angularjs-datagrid v.1.4.5
 (c) 2015, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -687,7 +687,7 @@ on a per grid basis.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.4.4&quot;</span><span class="p">,</span>
+    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.4.5&quot;</span><span class="p">,</span>
 
 </pre></div>
         </td>
@@ -2764,6 +2764,9 @@ return</span>
         <span class="p">}</span>
     <span class="p">}</span>
     <span class="kd">function</span> <span class="nx">exec</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">pauseFn</span> <span class="o">&amp;&amp;</span> <span class="nx">pauseFn</span><span class="p">())</span> <span class="p">{</span>
             <span class="nx">$timeout</span><span class="p">(</span><span class="nx">exec</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
             <span class="k">return</span><span class="p">;</span>
@@ -2794,7 +2797,7 @@ return</span>
         <span class="nx">list</span><span class="p">.</span><span class="nx">length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
         <span class="nx">inst</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
     <span class="p">}</span>
-    <span class="nx">inst</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;Flow&quot;</span><span class="p">,</span> <span class="nx">inst</span> <span class="o">||</span> <span class="p">{},</span> <span class="s2">&quot;grey&quot;</span><span class="p">,</span> <span class="nx">dispatch</span><span class="p">);</span>
+    <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;Flow&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">,</span> <span class="s2">&quot;grey&quot;</span><span class="p">,</span> <span class="nx">dispatch</span><span class="p">);</span>
 
 </pre></div>
         </td>
@@ -7252,6 +7255,9 @@ The dom gets created when the rows are accessed.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="kd">function</span> <span class="nx">getRowIndexes</span><span class="p">(</span><span class="nx">rowIndex</span><span class="p">,</span> <span class="nx">chunkList</span><span class="p">,</span> <span class="nx">indexes</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">chunkList</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">[];</span>
+        <span class="p">}</span>
         <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">chunkList</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="nx">chunk</span><span class="p">;</span>
         <span class="nx">indexes</span> <span class="o">=</span> <span class="nx">indexes</span> <span class="o">||</span> <span class="p">[];</span>
         <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">)</span> <span class="p">{</span>

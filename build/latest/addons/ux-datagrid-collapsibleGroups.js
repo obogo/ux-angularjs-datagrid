@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.5
+* ux-angularjs-datagrid v.1.4.6
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -21,7 +21,7 @@ exports.datagrid.events.TOGGLE_GROUP = "datagrid:toggleGroup";
 
 angular.module("ux").factory("collapsibleGroups", function() {
     return [ "inst", function(inst) {
-        var result = exports.logWrapper("collapsibleGroups", {}, "orange", inst.dispatch), lastIndex = 0, regroup = [], collapsed = {}, superGetTemplateHeight = inst.templateModel.getTemplateHeight, states = {
+        var result = exports.logWrapper("collapsibleGroups", {}, "orange", inst), lastIndex = 0, regroup = [], collapsed = {}, superGetTemplateHeight = inst.templateModel.getTemplateHeight, states = {
             COLLAPSE: "collapse",
             EXPAND: "expand"
         };
@@ -112,7 +112,7 @@ angular.module("ux").factory("collapsibleGroups", function() {
             var item, i, prev;
             regroup.length = 0;
             for (i in collapsed) {
-                if (Object.prototype.hasOwnProperty.apply(collapsed, [ i ])) {
+                if (exports.util.apply(Object.prototype.hasOwnProperty, collapsed, [ i ])) {
                     item = collapsed[i];
                     prev = inst.getRowItem(i - 1);
                     if (prev && prev[inst.grouped]) {

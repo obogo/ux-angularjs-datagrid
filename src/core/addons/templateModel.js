@@ -26,7 +26,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
 
     inst.templateModel = function () {
 
-        var templates = [], totalHeight, defaultName = 'default', result = exports.logWrapper('templateModel', {}, 'teal', inst.dispatch),
+        var templates = [], totalHeight, defaultName = 'default', result = exports.logWrapper('templateModel', {}, 'teal', inst),
             forcedTemplates = [], templatesKey, rowHeightsDirty = false, overrideRowHeights, options = extend({}, inst.options.templateModel);
 
         function getTemplatesKey() {
@@ -153,7 +153,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         function dynamicHeights() {
             var i, h;
             for (i in templates) {
-                if (Object.prototype.hasOwnProperty.apply(templates, [i])) {
+                if (exports.util.apply(Object.prototype.hasOwnProperty, templates, [i])) {
                     h = h || templates[i].height;
                     if (h !== templates[i].height) {
                         return true;
@@ -197,20 +197,25 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
 
         function setTemplateName(item, templateName) {
             var key = getTemplatesKey();
-            if (!Object.prototype.hasOwnProperty.apply(item, [key]) && forcedTemplates.indexOf(item) === -1) {
+            if (!exports.util.apply(Object.prototype.hasOwnProperty, item, [key]) && forcedTemplates.indexOf(item) === -1) {
                 forcedTemplates.push(item);
             }
             item[key] = templateName;
         }
 
         function setTemplate(itemOrIndex, newTemplateName, classes) {
-            result.log('setTemplate %s %s', itemOrIndex, newTemplateName);
-            var item = typeof itemOrIndex === "number" ? inst.data[itemOrIndex] : itemOrIndex;
+            result.info('setTemplate %s %s', itemOrIndex, newTemplateName);
+            var item;
+            if (typeof itemOrIndex === "number") {
+                item = inst.data[itemOrIndex];
+                clearRowHeight(itemOrIndex);
+            } else {
+                item = itemOrIndex;
+            }
             var oldTemplate = result.getTemplate(item).name;
             result.setTemplateName(item, newTemplateName);
-            setTimeout(function () {
-                inst.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName, classes);
-            });
+            // needs to wait until after the digest.
+            inst.flow.add(inst.dispatch, [exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName, classes], 0);
         }
 
         // if no value. calculate it.

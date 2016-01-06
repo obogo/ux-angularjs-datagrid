@@ -54,7 +54,7 @@ function dispatcher(target, scope, map) {
     function onOnce(event, callback) {
         function fn() {
             off(event, fn);
-            callback.apply(scope || target, arguments);
+            exports.util.apply(callback, scope || target, arguments);
         }
         return on(event, fn);
     }
@@ -77,7 +77,7 @@ function dispatcher(target, scope, map) {
      * @returns {*}
      */
     function fire(callback, args) {
-        return callback && callback.apply(target, args);
+        return callback && exports.util.apply(callback, target, args);
     }
 
     /**

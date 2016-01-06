@@ -11,7 +11,7 @@ angular.module('ux').factory('iScrollAddon', function () {
         if (!IScroll) {
             inst.throwError("IScroll (https://github.com/cubiq/iscroll) is required to use the iScrollAddon.");
         }
-        var result = exports.logWrapper('iScrollAddon', {}, 'purple', inst.dispatch),
+        var result = exports.logWrapper('iScrollAddon', {}, 'purple', inst),
             scrolling = false,
             intv,
             myScroll,

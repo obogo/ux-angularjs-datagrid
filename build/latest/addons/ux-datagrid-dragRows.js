@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.5
+* ux-angularjs-datagrid v.1.4.6
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -32,7 +32,7 @@ angular.module("ux").factory("dragRows", function() {
          * @returns {*}
          */
     function(inst) {
-        var result = exports.logWrapper("dragRows", {}, "#00CCFF", inst.dispatch);
+        var result = exports.logWrapper("dragRows", {}, "#00CCFF", inst);
         var dragData;
         var offsetTop = 0;
         var dragPixelCushion = 4;

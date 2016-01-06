@@ -228,7 +228,5 @@ exports.datagrid = {
      * to add all of these addons before optional addons are added. You can add core addons to the datagrid by adding these directly to this array, however it is not
      * recommended.
      */
-    coreAddons: [],
-    util: this.dgutil
+    coreAddons: []
 };
-delete this.dgutil;

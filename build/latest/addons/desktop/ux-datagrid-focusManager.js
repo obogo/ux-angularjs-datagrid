@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.5
+* ux-angularjs-datagrid v.1.4.6
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -329,7 +329,7 @@ exports.selector = function() {
     function getList(obj) {
         var ary = [], i;
         for (i in obj) {
-            if (Object.prototype.hasOwnProperty.apply(obj, [ i ])) {
+            if (exports.util.apply(Object.prototype.hasOwnProperty, obj, [ i ])) {
                 ary.push(obj[i]);
             }
         }
@@ -453,7 +453,7 @@ angular.module("ux").factory("gridFocusManager", function() {
         /**
          * We want to add and remove listeners only on the dom that is currently under watch.
          */
-        var result = exports.logWrapper("gridFocusManager", {}, "redOrange", inst.dispatch), unwatchers = [], keys = {
+        var result = exports.logWrapper("gridFocusManager", {}, "redOrange", inst), unwatchers = [], keys = {
             ENTER: 13,
             UP: 38,
             DOWN: 40
@@ -792,8 +792,8 @@ angular.module("ux").factory("gridFocusManager", function() {
             result.log("	performFocus %o", focusEl[0]);
             var success = false;
             // we now need to scroll the row into view if it is not.
-            inst.scrollModel.scrollIntoView(inst.getRowIndexFromElement(focusEl), true);
             if (focusEl[0]) {
+                inst.scrollModel.scrollIntoView(inst.getRowIndexFromElement(focusEl), true);
                 if (focusEl[0].select) {
                     focusEl[0].select();
                 }
@@ -816,7 +816,7 @@ angular.module("ux").factory("gridFocusManager", function() {
             result.log("	findNextRowWithSelection");
             if (inst.options.gridFocusManager && inst.options.gridFocusManager.filterNextPattern) {
                 // make it look just through the objects to jump to that item.
-                while (nextIndex > 0 && nextIndex < inst.rowsLength - 1 && !exports.datagrid.util.isMatch(inst.data[nextIndex], inst.options.gridFocusManager.filterNextPattern)) {
+                while (nextIndex > 0 && nextIndex < inst.rowsLength - 1 && !exports.util.isMatch(inst.data[nextIndex], inst.options.gridFocusManager.filterNextPattern)) {
                     nextIndex += dir;
                 }
             }

@@ -6,7 +6,7 @@
  * @returns {Array}
  */
 function filter(list, method, data) {
-    var i = 0, len, result = [], extraArgs, response;
+    var i = 0, len, result = [], extraArgs, response, apl = exports.util.apply;
     if (arguments.length > 2) {
         extraArgs = exports.util.array.toArray(arguments);
         extraArgs.splice(0, 2);
@@ -14,7 +14,7 @@ function filter(list, method, data) {
     if (list && list.length) {
         len = list.length;
         while (i < len) {
-            response = method.apply(null, [list[i], i, list].concat(extraArgs));
+            response = apl(method, null, [list[i], i, list].concat(extraArgs));
             if (response) {
                 result.push(list[i]);
             }
@@ -22,8 +22,8 @@ function filter(list, method, data) {
         }
     } else {
         for (i in list) {
-            if (Object.prototype.hasOwnProperty.apply(list, [i])) {
-                response = method.apply(null, [list[i], i, list].concat(extraArgs));
+            if (apl(Object.prototype.hasOwnProperty, list, [i])) {
+                response = apl(method, null, [list[i], i, list].concat(extraArgs));
                 if (response) {
                     result.push(list[i]);
                 }

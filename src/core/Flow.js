@@ -1,6 +1,5 @@
 function Flow(inst, dispatch, pauseFn, $timeout) {
     var running = false,
-        intv,
         current = null,
         list = [],
         history = [],
@@ -9,6 +8,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
         execStartTime,
         execEndTime,
         timeouts = {},
+        nextPromise,
         consoleMethodStyle = "color:#666666;";
 
     function getMethodName(method) {
@@ -28,13 +28,24 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     function clearSimilarItemsFromList(item) {
         var i = 0, len = list.length;
         while (i < len) {
-            if (list[i].label === item.label && list[i] !== current) {
-                inst.log("clear duplicate item %c%s", consoleMethodStyle, item.label);
+            if (list[i].label === item.label) {
+                if (list[i] === current && nextPromise) {
+                    $timeout.cancel(nextPromise);
+                    nextPromise = null;
+                    current = null;
+                    inst.warn("REMOVE ACTIVE FLOW ITEM %c%s", consoleMethodStyle, item.label);
+                } else {
+                    inst.info("remove Flow item %c%s", consoleMethodStyle, item.label);
+                }
                 list.splice(i, 1);
                 i -= 1;
                 len -= 1;
             }
             i += 1;
+        }
+        if (!current) {
+            // it was cleared. So we now call next.
+            next();
         }
     }
 
@@ -58,16 +69,17 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
         clearSimilarItemsFromList({label: getMethodName(method)});
     }
 
+    // timeouts that do not block the flow.
     function timeout(method, time) {
         var intv, item = createItem(method, []), startTime = Date.now(),
             timeoutCall = function () {
-                inst.log("exec timeout method %c%s %sms", consoleMethodStyle, item.label, Date.now() - startTime);
+                inst.log("exec timeout method %c%s %sms (len:%s)", consoleMethodStyle, item.label, Date.now() - startTime, list.length);
                 list.push(item);// add after timeout time.
                 if (running) {
                     next();
                 }
             };
-        inst.log("wait for timeout method %c%s", consoleMethodStyle, item.label);
+        inst.log("wait for timeout method %c%s (len:%s)", consoleMethodStyle, item.label, list.length);
         intv = setTimeout(timeoutCall, time);// use regular timeout because we are just waiting to put it in the queue.
         timeouts[intv] = function () {
             clearTimeout(intv);
@@ -92,12 +104,10 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
 
     function done() {
         execEndTime = Date.now();
-        inst.log("finish %c%s took %dms", consoleMethodStyle, current.label, execEndTime - execStartTime);
+        inst.log("finish %c%s took %dms (len:%s)", consoleMethodStyle, current.label, execEndTime - execStartTime, list.length);
         current = null;
         addToHistory(list.shift());
-        if (list.length) {
-            next();
-        }
+        next();
         return execEndTime - execStartTime;
     }
 
@@ -110,11 +120,12 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     }
 
     function next() {
+        inst.log("next %s", list.length);
         if (!current && list.length) {
             current = list[0];
             if (inst.async && current.delay !== undefined) {
-                inst.log("\tdelay for %c%s %sms", consoleMethodStyle, current.label, current.delay);
-                $timeout(exec, current.delay, false);
+                inst.log("\tdelay for %c%s %sms (len:%s)", consoleMethodStyle, current.label, current.delay, list.length);
+                nextPromise = $timeout(exec, current.delay, false);
             } else {
                 exec();
             }
@@ -125,16 +136,29 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
         if (!inst) {
             return;// datagrid was destroyed. ignore async calls.
         }
+        if (nextPromise) {
+            $timeout.cancel(nextPromise);
+        }
         if (pauseFn && pauseFn()) {
-            $timeout(exec, 0, false);
+            inst.warn("\twait for pauseFn");
+            nextPromise = $timeout(exec, 0, false);
             return;
         }
-        inst.log("start method %c%s", consoleMethodStyle, current.label);
         var methodHasDoneArg = hasDoneArg(current.method);
-        if (methodHasDoneArg) current.args.push(done);
-        execStartTime = Date.now();
-        current.method.apply(null, current.args);
-        if (!methodHasDoneArg) done();
+        inst.log("start method %c%s (len:%s)" + (methodHasDoneArg && " - (has done arg)" || ''), consoleMethodStyle, current.label, list.length);
+        if (methodHasDoneArg) {
+            current.args.push(done);
+        }
+        try {
+            execStartTime = Date.now();
+            exports.util.apply(current.method, null, current.args);
+        } catch (e) {
+            inst.warn(e.message + "\n" + (e.stack || e.stacktrace || e.backtrace));
+        } finally {
+            if (!methodHasDoneArg) {
+                done();
+            }
+        }
     }
 
     function run() {
@@ -144,7 +168,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
 
     function clear() {
         var len = current ? 1 : 0, item;
-        inst.log("clear");
+        inst.info("clear");
         while (list.length > len) {
             item = list.splice(len, 1)[0];
             inst.log("\tremove %s from flow", item.label);
@@ -155,14 +179,24 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
         return list.length;
     }
 
+    function count(name) {
+        var c = 0;
+        for(var i = 0; i < list.length; i += 1) {
+            if (list[i].label === name) {
+                c += 1;
+            }
+        }
+        return c;
+    }
+
     function destroy() {
         list.length = 0;
         inst = null;
     }
 
-    exports.logWrapper('Flow', inst, 'grey', dispatch);
-//    inst.async = Object.prototype.hasOwnProperty.apply(inst, ['async']) ? inst.async : true;
-    inst.debug = Object.prototype.hasOwnProperty.apply(inst, ['debug']) ? inst.debug : 0;
+    exports.logWrapper('Flow', inst, 'grey', inst);
+//    inst.async = exports.util.apply(Object.prototype.hasOwnProperty, inst, ['async']) ? inst.async : true;
+    inst.debug = exports.util.apply(Object.prototype.hasOwnProperty, inst, ['debug']) ? inst.debug : 0;
     inst.insert = insert;
     inst.add = add;
     inst.unique = unique;
@@ -172,6 +206,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     inst.run = run;
     inst.clear = clear;
     inst.length = length;
+    inst.count = count;
     inst.destroy = destroy;
 
     return inst;

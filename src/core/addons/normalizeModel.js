@@ -1,7 +1,7 @@
 /*global ux */
 exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
 //TODO: this needs to be put on exp.normalizedModel
-    var originalData, normalizedData, result = exports.logWrapper('normalizeModel', {}, 'grey', inst.dispatch);
+    var originalData, normalizedData, result = exports.logWrapper('normalizeModel', {}, 'grey', inst);
 
     /**
      * ###<a name="normalize">normalize</a>###

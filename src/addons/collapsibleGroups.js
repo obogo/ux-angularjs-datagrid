@@ -3,7 +3,7 @@ exports.datagrid.events.EXPAND_GROUP = "datagrid:expandGroup";
 exports.datagrid.events.TOGGLE_GROUP = "datagrid:toggleGroup";
 angular.module('ux').factory('collapsibleGroups', function () {
    return ['inst', function (inst) {
-       var result = exports.logWrapper('collapsibleGroups', {}, 'orange', inst.dispatch),
+       var result = exports.logWrapper('collapsibleGroups', {}, 'orange', inst),
            lastIndex = 0,
            regroup = [],
            collapsed = {}, superGetTemplateHeight = inst.templateModel.getTemplateHeight,
@@ -110,7 +110,7 @@ angular.module('ux').factory('collapsibleGroups', function () {
            var item, i, prev;
            regroup.length = 0;
            for (i in collapsed) {
-               if (Object.prototype.hasOwnProperty.apply(collapsed, [i])) {
+               if (exports.util.apply(Object.prototype.hasOwnProperty, collapsed, [i])) {
                    item = collapsed[i];
                    prev = inst.getRowItem(i - 1);
                    if (prev && prev[inst.grouped]) {

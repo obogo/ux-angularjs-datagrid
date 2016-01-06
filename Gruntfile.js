@@ -23,15 +23,15 @@ module.exports = function (grunt) {
         compile: {
             catcher: {
                 banner: "<%= banner %>",
-                wrap: 'dgutil',
-                build: 'util',
+                wrap: 'util',
+                build: 'util/hb/build',
                 filename: 'hb',
                 scripts: {
-                    //inspect: ['src'],
-                    //includes: ['catcher'],
-                    import: ['isMatch'],
+                    inspect: ['util/hb/src/**/*.js'],
+                    includes: ['util/hb/src/api.js'],
+                    //import: ['api'],
                     //src: [''],
-                    export: ['isMatch']
+                    //export: ['isMatch']
                 }
             }
         },
@@ -56,7 +56,7 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'build/latest/angular-ux-<%= pkg.filename %>.js': [
-                        'util/hb.js',
+                        'util/hb/build/util/hb.js',
                         'src/errors/dev-errors.js',
                         'src/ux-datagrid-config.js',
                         'src/lib/*.js',
@@ -136,7 +136,7 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'build/latest/angular-ux-<%= pkg.filename %>.min.js': [
-                        'util/hb.js',
+                        'util/hb/build/util/hb.js',
                         'src/errors/prod-errors.js',
                         'src/ux-datagrid-config.js',
                         'src/lib/*.js',
@@ -222,6 +222,24 @@ module.exports = function (grunt) {
                         dest: 'build/latest/'
                     }
                 ]
+            },
+            hb: {
+                options: {
+                    patterns: [
+                        {
+                            match: /(\s{4}return\s)this;/,
+                            replacement: '$1exports;'
+                        }
+                    ]
+                },
+                files: [
+                    {
+                        expand: true,
+                        flatten: true,
+                        src: 'util/hb/build/hb.js',
+                        dest: 'util/hb/build/util'
+                    }
+                ]
             }
         },
 //        copy: {
@@ -254,8 +272,14 @@ module.exports = function (grunt) {
             }
         },
         jasmine: {
-            tests: {
+            min: {
                 src: ['vendor/angular.js', 'vendor/angular-mocks.js', 'build/latest/angular-ux-datagrid.min.js', 'build/latest/addons/**/*.min.js', 'build/latest/other/**/*.min.js'],
+                options: {
+                    specs: 'test/unit/tests/**/*.js'
+                }
+            },
+            dev: {
+                src: ['vendor/angular.js', 'vendor/angular-mocks.js', 'build/latest/angular-ux-datagrid.js', '!build/latest/addons/**/*.min.js', 'build/latest/addons/**/*.js', '!build/latest/other/**/*.min.js', 'build/latest/other/**/*.js'],
                 options: {
                     specs: 'test/unit/tests/**/*.js'
                 }
@@ -273,9 +297,11 @@ module.exports = function (grunt) {
 
     // Default task(s).
 //    grunt.registerTask('default', ['jshint', 'uglify', 'compress']);
-    grunt.registerTask('default', ['jshint', 'compile', 'uglify', 'replace']);
+    grunt.registerTask('hb', ['compile', 'replace:hb']);
+    grunt.registerTask('default', ['jshint', 'hb', 'uglify', 'replace:build']);
     grunt.registerTask('integrate', ['jasmine']);
-    grunt.registerTask('test', ['default', 'jasmine']);
-    grunt.registerTask('release', ['jshint', 'compile', 'uglify', 'replace', 'jasmine']);
+    grunt.registerTask('test', ['default', 'jasmine:min']);
+    grunt.registerTask('test-dev', ['default', 'jasmine:dev']);
+    grunt.registerTask('release', ['jshint', 'hb', 'uglify', 'replace:build', 'jasmine:min']);
 
 };

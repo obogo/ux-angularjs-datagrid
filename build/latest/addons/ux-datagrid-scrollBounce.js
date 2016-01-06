@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.5
+* ux-angularjs-datagrid v.1.4.6
 * (c) 2015, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -19,7 +19,7 @@ if (typeof define === "function" && define.amd) {
  */
 angular.module("ux").factory("scrollBounce", function() {
     return [ "inst", function(inst) {
-        var result = exports.logWrapper("scrollBounce", {}, "red", inst.dispatch), intv, endScroll, transitioning = false, lastSpeed = 0, _elementStyle = document.createElement("div").style, _vendor = function() {
+        var result = exports.logWrapper("scrollBounce", {}, "red", inst), intv, endScroll, transitioning = false, lastSpeed = 0, _elementStyle = document.createElement("div").style, _vendor = function() {
             var vendors = [ "t", "webkitT", "MozT", "msT", "OT" ], transform, i = 0, l = vendors.length;
             for (;i < l; i++) {
                 transform = vendors[i] + "ransform";

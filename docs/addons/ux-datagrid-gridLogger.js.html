@@ -37,7 +37,7 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.4.5
+ux-angularjs-datagrid v.1.4.6
 (c) 2015, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -108,11 +108,11 @@ License: MIT.</p>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">hasPermissionToLog</span><span class="p">(</span><span class="nx">lvl</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">debug</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">debug</span><span class="p">.</span><span class="nx">all</span> <span class="o">&lt;</span> <span class="nx">lvl</span> <span class="o">||</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">debug</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">debug</span><span class="p">.</span><span class="nx">all</span> <span class="o">&amp;&amp;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">debug</span><span class="p">.</span><span class="nx">all</span> <span class="o">&gt;</span> <span class="nx">lvl</span> <span class="o">||</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">debug</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
                     <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
-                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">lvl</span> <span class="o">&lt;=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">debug</span><span class="p">.</span><span class="nx">all</span><span class="p">)</span> <span class="p">{</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">lvl</span> <span class="o">&gt;=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">debug</span><span class="p">.</span><span class="nx">all</span><span class="p">)</span> <span class="p">{</span>
                     <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
-                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">debug</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nx">lvl</span><span class="p">)</span> <span class="p">{</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">debug</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="nx">lvl</span><span class="p">)</span> <span class="p">{</span>
                     <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
                 <span class="p">}</span>
             <span class="p">}</span>

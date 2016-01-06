@@ -12,7 +12,7 @@ exports.datagrid.events.EXPAND_GROUP_CHANGE = "datagrid:expandGroupChange";
  */
 angular.module('ux').factory('expandableGroups', function () {
    return ['inst', function (inst) {
-       var result = exports.logWrapper('expandableGroups', {}, 'orange', inst.dispatch),
+       var result = exports.logWrapper('expandableGroups', {}, 'orange', inst),
            options = inst.expandableGroups || {},
            expanded = {},
            resultData = [],
@@ -70,7 +70,7 @@ angular.module('ux').factory('expandableGroups', function () {
         * @returns {Array}
         */
        inst.setData = function (data, grouped) {
-           instSetData.apply(inst, arguments);
+           exports.util.apply(instSetData, inst, arguments);
            generateData();
            return resultData;
        };

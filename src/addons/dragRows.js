@@ -14,7 +14,7 @@ angular.module('ux').factory('dragRows', function () {
          * @returns {*}
          */
         function (inst) {
-            var result = exports.logWrapper('dragRows', {}, '#00CCFF', inst.dispatch);
+            var result = exports.logWrapper('dragRows', {}, '#00CCFF', inst);
 
             var dragData;
             var offsetTop = 0;

@@ -1,7 +1,7 @@
 angular.module('ux').factory('scrollBar', function () {
     return ['inst', function (inst) {
 
-        var result = exports.logWrapper('scrollBar', {}, 'red', inst.dispatch),
+        var result = exports.logWrapper('scrollBar', {}, 'red', inst),
             scrollBarElm = document.createElement('div'),
             data = {},
             parent = inst.element[0].parentNode,

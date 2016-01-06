@@ -6,7 +6,7 @@ exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
 exports.datagrid.events.ON_TOUCH_MOVE = "datagrid:touchMove";
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
-    var result = exports.logWrapper('scrollModel', {}, 'orange', inst.dispatch),
+    var result = exports.logWrapper('scrollModel', {}, 'orange', inst),
         setup = false,
         enable = true,
         unwatchSetup,

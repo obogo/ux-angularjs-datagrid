@@ -14,7 +14,7 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
      **************************************************************************************/
     exports.datagrid.sortStatesModel = (function () {
         var api = exports.logWrapper('columnSortStatesModel', {}, 'blue', function () {
-                $rootScope.$emit.apply($rootScope, arguments);
+                exports.util.apply($rootScope.$emit, $rootScope, arguments);
             }),
             sortOptions = {
                 ASC: 'asc',
@@ -161,7 +161,7 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
             api.log("setPathState %s to %s", currentPathState, pathState);
             api.setIgnoreParamsInPath(true);
             for (columnName in pathState) {
-                if (Object.prototype.hasOwnProperty.apply(pathState, [columnName]) && pathState[columnName] !== currentPathState[columnName] && !isPrivate(columnName)) {
+                if (exports.util.apply(Object.prototype.hasOwnProperty, pathState, [columnName]) && pathState[columnName] !== currentPathState[columnName] && !isPrivate(columnName)) {
                     api.setState(columnName, pathState[columnName], currentPathState);
                 }
             }
@@ -391,7 +391,7 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
             pathState = pathState || api.getPathState(api.getPath());
             pathState.$order.length = 0;
             for (i in pathState) {
-                if (Object.prototype.hasOwnProperty.apply(pathState, [i]) && !api.isPrivate(i) && pathState[i] !== sortOptions.NONE) {
+                if (exports.util.apply(Object.prototype.hasOwnProperty, pathState, [i]) && !api.isPrivate(i) && pathState[i] !== sortOptions.NONE) {
                     pathState[i] = sortOptions.NONE;
                 }
             }
@@ -452,7 +452,7 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
 
     return ['inst', function sortModel(inst) {
         // cache is the stored sort values. It needs to be cleared if the data changes.
-        var result = exports.logWrapper('sortModel', {}, 'blue', inst.dispatch), sorts = {}, original, cache = {},
+        var result = exports.logWrapper('sortModel', {}, 'blue', inst), sorts = {}, original, cache = {},
             options = inst.options.sortModel || {}, lastSortResult;
 
         /**

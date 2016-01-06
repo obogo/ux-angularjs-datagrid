@@ -23,7 +23,7 @@ angular.module('ux').factory('gridFocusManager', function () {
          * We want to add and remove listeners only on the dom that is currently under watch.
          */
 
-        var result = exports.logWrapper('gridFocusManager', {}, 'redOrange', inst.dispatch),
+        var result = exports.logWrapper('gridFocusManager', {}, 'redOrange', inst),
             unwatchers = [], keys = {ENTER: 13, UP: 38, DOWN: 40}, throttleIntv = 0;
 
         /**
@@ -384,8 +384,8 @@ angular.module('ux').factory('gridFocusManager', function () {
             result.log("\tperformFocus %o", focusEl[0]);
             var success = false;
             // we now need to scroll the row into view if it is not.
-            inst.scrollModel.scrollIntoView(inst.getRowIndexFromElement(focusEl), true);
             if (focusEl[0]) {
+                inst.scrollModel.scrollIntoView(inst.getRowIndexFromElement(focusEl), true);
                 if (focusEl[0].select) {
                     focusEl[0].select();
                 }
@@ -409,7 +409,7 @@ angular.module('ux').factory('gridFocusManager', function () {
             result.log("\tfindNextRowWithSelection");
             if (inst.options.gridFocusManager && inst.options.gridFocusManager.filterNextPattern) {
                 // make it look just through the objects to jump to that item.
-                while (nextIndex > 0 && nextIndex < inst.rowsLength - 1 && !exports.datagrid.util.isMatch(inst.data[nextIndex], inst.options.gridFocusManager.filterNextPattern)) {
+                while (nextIndex > 0 && nextIndex < inst.rowsLength - 1 && !exports.util.isMatch(inst.data[nextIndex], inst.options.gridFocusManager.filterNextPattern)) {
                     nextIndex += dir;
                 }
             }

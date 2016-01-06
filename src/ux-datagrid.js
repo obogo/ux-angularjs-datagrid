@@ -70,7 +70,23 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     var inst = this, eventLogger = {}, startupComplete = false, gcIntv;
 
     // wrap the instance for logging.
-    exports.logWrapper('datagrid event', inst, 'grey', dispatch);
+    exports.logWrapper('datagrid event', inst, 'grey', inst);
+
+    // for debugging and watching the angular phase start and end.
+    // cannot use for flowPauseFn it causes lots of errors because datagrid will not flow at all
+    // during a phase with this setting a flag to use.
+    //function beforePhase() {
+    //    inst.info("NG-$digest START");
+    //    $timeout(afterPhase, 0, false);
+    //}
+    //
+    //function afterPhase() {
+    //    if (inst) {// it may be destroyed after a phase. so only log if it is there.
+    //        inst.info("NG-$digest END");
+    //    }
+    //}
+    //
+    //scope.$watch(beforePhase);
 
     /**
      * ###<a name="init">init</a>###
@@ -136,7 +152,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         inst.updateViewportHeight = updateViewportHeight;
         inst.calculateViewportHeight = calculateViewportHeight;
         inst.options = options = exports.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
-        inst.flow = flow = new Flow({async: Object.prototype.hasOwnProperty.apply(options, ['async']) ? !!options.async : true, debug: Object.prototype.hasOwnProperty.apply(options, ['debug']) ? options.debug : 0}, inst.dispatch, flowPauseFn, $timeout);
+        inst.flow = flow = new Flow({async: exports.util.apply(Object.prototype.hasOwnProperty, options, ['async']) ? !!options.async : true, debug: exports.util.apply(Object.prototype.hasOwnProperty, options, ['debug']) ? options.debug : 0}, inst.dispatch, flowPauseFn, $timeout);
         // this needs to be set immediately so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
         inst.gc = forceGarbageCollection;
@@ -358,7 +374,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     function swapItem(oldItem, newItem, keepTemplate) {
         //TODO: needs unit test.
         var index = getRowIndex(oldItem), oldTpl, newTpl;
-        if (Object.prototype.hasOwnProperty.apply(inst.data, [index])) {
+        if (exports.util.apply(Object.prototype.hasOwnProperty, inst.data, [index])) {
             oldTpl = inst.templateModel.getTemplate(oldItem);
             if (keepTemplate) {
                 newTpl = oldTpl;
@@ -448,7 +464,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @returns {*}
      */
     function getRowIndexFromElement(el) {
-        if (element[0].contains(el[0] || el)) {
+        if (el && element[0].contains(el[0] || el)) {
             el = el.scope ? el : angular.element(el);
             var s = el.scope();
             if (s === inst.scope) {
@@ -558,6 +574,10 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             s.$parent = scope;
         }
         if (!s) {
+            // fixes a bug expanding the last row and trying to scroll to it.
+            if (!scope.$$childTail && scope.$$childHead && scopes[index - 1]) {
+                scope.$$childTail = scopes[index - 1];
+            }
             s = scope.$new();
             tpl = inst.templateModel.getTemplate(inst.data[index]);
             link(index, s);
@@ -615,14 +635,15 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     }
 
     function isDigesting(s) {
-        var ds = s;
-        while (ds) {
-            if (ds.$$phase) {
-                return true;
-            }
-            ds = ds.$parent;
-        }
-        return false;
+        return !!(s && s.$$phase);
+        //var ds = s;
+        //while (ds) {
+        //    if (ds.$$phase) {
+        //        return true;
+        //    }
+        //    ds = ds.$parent;
+        //}
+        //return false;
     }
 
     /**
@@ -652,7 +673,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
 //TODO: angular 1.3+ is doing counts differently. Some counts are getting removed.
         while (s) {
             for (var eventName in listenerCounts) {
-                if (Object.prototype.hasOwnProperty.apply(listenerCounts, [eventName])) {
+                if (exports.util.apply(Object.prototype.hasOwnProperty, listenerCounts, [eventName])) {
                     fn(s, listenerCounts, eventName);
                 }
             }
@@ -1217,6 +1238,9 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     }
 
     function changeData(newVal, oldVal) {
+        if (inst.flow.count('changeData') > 1) {// the first one is this call.
+            return;// we don't want to reset if we are just going to do it again.
+        }
         inst.log("\tchangeData");
         inst.templateModel.clearAllRowHeights();
         dispatch(exports.datagrid.events.ON_BEFORE_RESET, inst);
@@ -1332,24 +1356,14 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     }
 
     /**
-     * ###<a name="isLogEvent">isLogEvent</a>###
-     * used to compare events to detect log events.
-     * @param {String} evt
-     * @returns {boolean}
-     */
-    function isLogEvent(evt) {
-        return logEvents.indexOf(evt) !== -1;
-    }
-
-    /**
      * ###<a name="dispatch">dispatch</a>###
      * handle dispatching of events from the datagrid.
      * @param {String} event
      * @returns {Object}
      */
     function dispatch(event) {
-        if (!isLogEvent(event) && options.debug) eventLogger.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
-        return scope.$emit.apply(scope, arguments);
+        if (options.debug) eventLogger.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
+        return exports.util.apply(scope.$emit, scope, arguments);
     }
 
     function forceGarbageCollection() {
@@ -1446,8 +1460,8 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         $compile = null;
     }
 
-    exports.logWrapper('datagrid', inst, 'green', dispatch);
-    exports.logWrapper('events', eventLogger, 'light', dispatch);
+    exports.logWrapper('datagrid', inst, 'green', inst);
+    exports.logWrapper('events', eventLogger, 'light', inst);
     scope.datagrid = inst;
     setupExports();
 
@@ -1466,7 +1480,7 @@ module.directive('uxDatagrid', ['$compile', 'gridAddons', '$timeout', function (
             pre: function (scope, element, attr) {
                 var inst = new Datagrid(scope, element, attr, $compile, $timeout);
                 each(exports.datagrid.coreAddons, function (method) {
-                    method.apply(inst, [inst]);
+                    exports.util.apply(method, inst, [inst]);
                 });
                 gridAddons(inst, attr.addons);
 //                scope.$parent[inst.name] = inst;

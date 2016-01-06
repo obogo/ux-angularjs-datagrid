@@ -9,7 +9,7 @@ angular.module('ux').service('scrollHistoryModel', ['$location', '$rootScope', f
     var cache = {};// cache is persistent until application reloads.
     exports.datagrid.scrollHistory = (function scrollHistory() {
         var result = exports.logWrapper('scrollHistoryModel', {}, 'orange', function () {
-            $rootScope.$emit.apply($rootScope, arguments);
+            exports.util.apply($rootScope.$emit, $rootScope, arguments);
         });
 
         /**
@@ -90,7 +90,7 @@ angular.module('ux').service('scrollHistoryModel', ['$location', '$rootScope', f
 angular.module('ux').factory('scrollHistory', function () {
 
     return ['inst', 'scrollHistoryModel', function (inst, scrollHistoryModel) {
-        var result = exports.logWrapper('scrollHistory', {}, 'blue', inst.dispatch), ready,
+        var result = exports.logWrapper('scrollHistory', {}, 'blue', inst), ready,
             path = inst.options.scrollHistory && inst.options.scrollHistory.path || '', scrollPos,
             waitingForAfterDataChange = false, unwatchers = [];
         if (inst.options.scrollHistory && inst.options.scrollHistory.ignoreParams) {

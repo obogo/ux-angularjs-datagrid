@@ -70,7 +70,7 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.4.5
+ux-angularjs-datagrid v.1.4.6
 (c) 2015, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -130,7 +130,7 @@ that same path, it will pull from the history that matches that path.</p>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">scrollHistory</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">scrollHistory</span><span class="p">()</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;scrollHistoryModel&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;orange&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-            <span class="nx">$rootScope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">$rootScope</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+            <span class="nx">exports</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">$rootScope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">,</span> <span class="nx">$rootScope</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
         <span class="p">});</span>
 
 </pre></div>

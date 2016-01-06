@@ -15,7 +15,7 @@
 //      }
 //      ux.each(myList, myMethod, arg1, arg2, arg3);
 function each(list, method, data) {
-    var i = 0, len, result, extraArgs;
+    var i = 0, len, result, extraArgs, apl = exports.util.apply;
     if (arguments.length > 2) {
         extraArgs = exports.util.array.toArray(arguments);
         extraArgs.splice(0, 2);
@@ -23,15 +23,15 @@ function each(list, method, data) {
     if (list && list.length) {
         len = list.length;
         while (i < len) {
-            result = method.apply(null, [list[i], i, list].concat(extraArgs));
+            result = apl(method, null, [list[i], i, list].concat(extraArgs));
             if (result !== undefined) {
                 return result;
             }
             i += 1;
         }
-    } else if(list && Object.prototype.hasOwnProperty.apply(list, ['0'])) {
-        while (Object.prototype.hasOwnProperty.apply(list, [i])) {
-            result = method.apply(null, [list[i], i, list].concat(extraArgs));
+    } else if(list && apl(Object.prototype.hasOwnProperty, list, ['0'])) {
+        while (apl(Object.prototype.hasOwnProperty, list, [i])) {
+            result = apl(method, null, [list[i], i, list].concat(extraArgs));
             if (result !== undefined) {
                 return result;
             }
@@ -39,8 +39,8 @@ function each(list, method, data) {
         }
     } else if(!(list instanceof Array)) {
         for (i in list) {
-            if (Object.prototype.hasOwnProperty.apply(list, [i])) {
-                result = method.apply(null, [list[i], i, list].concat(extraArgs));
+            if (apl(Object.prototype.hasOwnProperty, list, [i])) {
+                result = apl(method, null, [list[i], i, list].concat(extraArgs));
                 if (result !== undefined) {
                     return result;
                 }

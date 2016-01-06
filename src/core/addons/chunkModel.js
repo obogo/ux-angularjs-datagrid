@@ -13,7 +13,7 @@
  */
 exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
 
-    var _list, _rows, _chunkSize, _el, result = exports.logWrapper('chunkModel', {}, 'purple', inst.dispatch),
+    var _list, _rows, _chunkSize, _el, result = exports.logWrapper('chunkModel', {}, 'purple', inst),
         _templateStartCache, _templateEndCache, _cachedDomRows = [];
 
     /**
@@ -542,7 +542,7 @@ ChunkArray.prototype.rangeOverlap = function (min, max, cushion) {
 ChunkArray.prototype.each = function (method, args) {
     var i = 0, len = this.length;
     while (i < len) {
-        method.apply(this[i], args);
+        exports.util.apply(method, this[i], args);
         i += 1;
     }
 };

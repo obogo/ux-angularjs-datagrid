@@ -137,7 +137,7 @@
 <div class="dox">
   <div class="summary"><p>!
 ux-angularjs-datagrid v.1.4.6
-(c) 2015, Obogo
+(c) 2016, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
   </div>
@@ -919,7 +919,7 @@ it gets to the maxParent.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;gridFocusManager&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;redOrange&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">keys</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;gridFocusManager&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;redOrange&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">),</span> <span class="nx">unwatchers</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">keys</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nx">ENTER</span><span class="o">:</span> <span class="mi">13</span><span class="p">,</span>
             <span class="nx">UP</span><span class="o">:</span> <span class="mi">38</span><span class="p">,</span>
             <span class="nx">DOWN</span><span class="o">:</span> <span class="mi">40</span>
@@ -1458,7 +1458,21 @@ you can filter these out from causing selections to not be made.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">addListenersToRow</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">getFocusableElements</span><span class="p">(</span><span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">));</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">focusable</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">focusable</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">focusable</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">matchAll</span><span class="p">(</span><span class="nx">focusable</span><span class="p">,</span> <span class="p">{</span>
+                <span class="nx">nodeName</span><span class="o">:</span> <span class="s2">&quot;INPUT&quot;</span>
+            <span class="p">})).</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-40" id="section-40">&#182;</a>
+</div>
+<p>only add keydown to input fields</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
                 <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;    addListenersToRow&quot;</span><span class="p">);</span>
                 <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">focusable</span><span class="p">);</span>
                 <span class="nx">focusable</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="s2">&quot;keydown&quot;</span><span class="p">,</span> <span class="nx">onKeyDown</span><span class="p">);</span>
@@ -1499,7 +1513,21 @@ you can filter these out from causing selections to not be made.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">removeListenersToRow</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">getFocusableElements</span><span class="p">(</span><span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">rowElm</span><span class="p">));</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">focusable</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">focusable</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">focusable</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">matchAll</span><span class="p">(</span><span class="nx">focusable</span><span class="p">,</span> <span class="p">{</span>
+                <span class="nx">nodeName</span><span class="o">:</span> <span class="s2">&quot;INPUT&quot;</span>
+            <span class="p">})).</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-42" id="section-42">&#182;</a>
+</div>
+<p>only add keydown to input fields</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
                 <span class="nx">result</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;    removeListenersToRow&quot;</span><span class="p">);</span>
                 <span class="nx">focusable</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">element</span><span class="p">(</span><span class="nx">focusable</span><span class="p">);</span>
                 <span class="nx">focusable</span><span class="p">.</span><span class="nx">unbind</span><span class="p">(</span><span class="s2">&quot;keydown&quot;</span><span class="p">,</span> <span class="nx">onKeyDown</span><span class="p">);</span>
@@ -1550,7 +1578,7 @@ you can filter these out from causing selections to not be made.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-42" id="section-42">&#182;</a>
+  <a class="pilcrow" href="#section-44" id="section-44">&#182;</a>
 </div>
 <p>on anchors we allow enter to execute it. So ignore it.</p>
         </td>
@@ -1858,7 +1886,7 @@ to increment.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-51" id="section-51">&#182;</a>
+  <a class="pilcrow" href="#section-53" id="section-53">&#182;</a>
 </div>
 <p>dir should be 1 or -1</p>
         </td>
@@ -1957,13 +1985,13 @@ to increment.</p>
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-54" id="section-54">&#182;</a>
+  <a class="pilcrow" href="#section-56" id="section-56">&#182;</a>
 </div>
 <p>we now need to scroll the row into view if it is not.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-            <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollIntoView</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getRowIndexFromElement</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">),</span> <span class="kc">true</span><span class="p">);</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">{</span>
+                <span class="nx">inst</span><span class="p">.</span><span class="nx">scrollModel</span><span class="p">.</span><span class="nx">scrollIntoView</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">getRowIndexFromElement</span><span class="p">(</span><span class="nx">focusEl</span><span class="p">),</span> <span class="kc">true</span><span class="p">);</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">select</span><span class="p">)</span> <span class="p">{</span>
                     <span class="nx">focusEl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">select</span><span class="p">();</span>
                 <span class="p">}</span>
@@ -2021,12 +2049,12 @@ However, possible bug here if a selector similar to this one doesn't exist for a
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-56" id="section-56">&#182;</a>
+  <a class="pilcrow" href="#section-58" id="section-58">&#182;</a>
 </div>
 <p>make it look just through the objects to jump to that item.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-                <span class="k">while</span> <span class="p">(</span><span class="nx">nextIndex</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">nextIndex</span> <span class="o">&lt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">rowsLength</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">isMatch</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">nextIndex</span><span class="p">],</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">gridFocusManager</span><span class="p">.</span><span class="nx">filterNextPattern</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">while</span> <span class="p">(</span><span class="nx">nextIndex</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">nextIndex</span> <span class="o">&lt;</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">rowsLength</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">exports</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">isMatch</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">data</span><span class="p">[</span><span class="nx">nextIndex</span><span class="p">],</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">gridFocusManager</span><span class="p">.</span><span class="nx">filterNextPattern</span><span class="p">))</span> <span class="p">{</span>
                     <span class="nx">nextIndex</span> <span class="o">+=</span> <span class="nx">dir</span><span class="p">;</span>
                 <span class="p">}</span>
             <span class="p">}</span>
@@ -2039,7 +2067,7 @@ However, possible bug here if a selector similar to this one doesn't exist for a
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-57" id="section-57">&#182;</a>
+  <a class="pilcrow" href="#section-59" id="section-59">&#182;</a>
 </div>
 <p>we must remove the hidden value on the uncompiled or it will not pass visibility.</p>
         </td>
@@ -2122,7 +2150,7 @@ However, possible bug here if a selector similar to this one doesn't exist for a
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-58" id="section-58">&#182;</a>
+  <a class="pilcrow" href="#section-60" id="section-60">&#182;</a>
 </div>
 <p>if it failed. Then use the checkFn to look further if it exists.</p>
         </td>
@@ -2180,7 +2208,7 @@ However, possible bug here if a selector similar to this one doesn't exist for a
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-59" id="section-59">&#182;</a>
+  <a class="pilcrow" href="#section-61" id="section-61">&#182;</a>
 </div>
 <p>it has to match a pattern for each row. These are too unique.</p>
         </td>

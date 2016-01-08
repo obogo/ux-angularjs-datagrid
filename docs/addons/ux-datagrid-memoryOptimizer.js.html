@@ -50,7 +50,7 @@
 <div class="dox">
   <div class="summary"><p>!
 ux-angularjs-datagrid v.1.4.6
-(c) 2015, Obogo
+(c) 2016, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
   </div>
@@ -72,7 +72,7 @@ License: MIT.</p>
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;memoryOptimizer&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">return</span> <span class="p">[</span> <span class="s2">&quot;inst&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">memoryOptimizer</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">memoryOptimizer</span> <span class="o">||</span> <span class="p">{};</span>
-        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;memoryOptimizer&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;redOrange&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">intv</span><span class="p">,</span> <span class="nx">defaultOptions</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;memoryOptimizer&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;redOrange&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">),</span> <span class="nx">intv</span><span class="p">,</span> <span class="nx">defaultOptions</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nx">range</span><span class="o">:</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">creepLimit</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">||</span> <span class="mi">200</span>
         <span class="p">},</span> <span class="nx">options</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">memoryOptimizer</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">defaultOptions</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">memoryOptimizer</span><span class="p">);</span>
 
@@ -130,10 +130,11 @@ in the active range and remove their dom and destroy their scopes.</p>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="kd">function</span> <span class="nx">optimizeRows</span><span class="p">()</span> <span class="p">{</span>
             <span class="nx">clearPending</span><span class="p">();</span>
-            <span class="nx">intv</span> <span class="o">=</span> <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">_optimizeRows</span><span class="p">,</span> <span class="mi">1</span><span class="nx">e3</span><span class="p">);</span>
+            <span class="nx">intv</span> <span class="o">=</span> <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">_optimizeRows</span><span class="p">,</span> <span class="mi">3</span><span class="nx">e3</span><span class="p">);</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">clearPending</span><span class="p">()</span> <span class="p">{</span>
             <span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">intv</span><span class="p">);</span>
+            <span class="nx">intv</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
         <span class="p">}</span>
         <span class="kd">function</span> <span class="nx">_optimizeRows</span><span class="p">()</span> <span class="p">{</span>
 
@@ -258,6 +259,19 @@ in the active range and remove their dom and destroy their scopes.</p>
             <span class="k">return</span> <span class="nx">index</span> <span class="o">&gt;=</span> <span class="nx">min</span> <span class="o">&amp;&amp;</span> <span class="nx">index</span> <span class="o">&lt;</span> <span class="nx">max</span><span class="p">;</span>
         <span class="p">}</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_BEFORE_DATA_CHANGE</span><span class="p">,</span> <span class="nx">clearPending</span><span class="p">));</span>
+        <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_RENDER_PROGRESS</span><span class="p">,</span> <span class="nx">optimizeRows</span><span class="p">));</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-8" id="section-8">&#182;</a>
+</div>
+<p>creep render.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">unwatchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">inst</span><span class="p">.</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$on</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_UPDATE_WATCHERS</span><span class="p">,</span> <span class="nx">optimizeRows</span><span class="p">));</span>
         <span class="nx">disableCreep</span><span class="p">();</span>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">memoryOptimizer</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>

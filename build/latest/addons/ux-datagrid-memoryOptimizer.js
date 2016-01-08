@@ -1,6 +1,6 @@
 /*!
 * ux-angularjs-datagrid v.1.4.6
-* (c) 2015, Obogo
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -40,10 +40,11 @@ angular.module("ux").factory("memoryOptimizer", function() {
         */
         function optimizeRows() {
             clearPending();
-            inst.flow.add(_optimizeRows, [], 1e3);
+            intv = setTimeout(_optimizeRows, 3e3);
         }
         function clearPending() {
-            inst.flow.remove(_optimizeRows);
+            clearTimeout(intv);
+            intv = 0;
         }
         function _optimizeRows() {
             // first we need to destroy each scope that is not active.

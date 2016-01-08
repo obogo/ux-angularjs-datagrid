@@ -463,7 +463,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, disableNonVisibleChunks);
 
     // apply event dispatching.
-    dispatcher(result);
+    exports.util.dispatcher(result);
 
     inst.chunkModel = result;
     return result;

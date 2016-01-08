@@ -1,6 +1,6 @@
 /*!
 * ux-angularjs-datagrid v.1.4.6
-* (c) 2015, Obogo
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -15,7 +15,7 @@ if (typeof define === "function" && define.amd) {
 
 /*!
 * ux-angularjs-datagrid v.1.4.6
-* (c) 2015, Obogo
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -23,7 +23,7 @@ if (typeof define === "function" && define.amd) {
     global["util"] = exports;
     var define, internal, finalize = function() {};
     (function() {
-        var get, defined, pending, initDefinition, $cachelyToken = "~", $depsRequiredByDefinitionToken = ".";
+        var get, defined, pending, definitions, initDefinition, $cachelyToken = "~", $depsRequiredByDefinitionToken = ".";
         get = Function[$cachelyToken] = Function[$cachelyToken] || function(name) {
             if (!get[name]) {
                 get[name] = {};
@@ -65,7 +65,7 @@ if (typeof define === "function" && define.amd) {
                     }
                 }
             }
-            if (!defined[name]) {
+            if (!defined.hasOwnProperty(name)) {
                 for (i = 0; i < len; i++) {
                     dependencyName = deps[i];
                     args.push(defined.hasOwnProperty(dependencyName) && defined[dependencyName]);
@@ -82,51 +82,34 @@ if (typeof define === "function" && define.amd) {
         return define;
     })();
     //! ################# YOUR CODE STARTS HERE #################### //
-    //! node_modules/hbjs/src/utils/validators/isMatch.js
-    define("isMatch", [ "isRegExp", "isDate" ], function(isRegExp, isDate) {
-        var primitive = [ "string", "number", "boolean" ];
-        function isMatch(item, filterObj) {
-            var itemType;
-            if (item === filterObj) {
-                return true;
-            } else if (typeof filterObj === "object") {
-                itemType = typeof item;
-                if (primitive.indexOf(itemType) !== -1) {
-                    if (isRegExp(filterObj) && !filterObj.test(item + "")) {
-                        return false;
-                    } else if (isDate(filterObj)) {
-                        if (isDate(item) && filterObj.getTime() === item.getTime()) {
-                            return true;
-                        }
-                        return false;
-                    }
-                }
-                if (item instanceof Array && filterObj[0] !== undefined) {
-                    for (var i = 0; i < item.length; i += 1) {
-                        if (isMatch(item[i], filterObj[0])) {
-                            return true;
-                        }
-                    }
-                    return false;
-                } else {
-                    for (var j in filterObj) {
-                        if (filterObj.hasOwnProperty(j)) {
-                            if (!item.hasOwnProperty(j)) {
-                                return false;
-                            }
-                            if (!isMatch(item[j], filterObj[j])) {
-                                return false;
-                            }
-                        }
-                    }
-                }
-                return true;
-            } else if (typeof filterObj === "function") {
-                return !!filterObj(item);
+    //! node_modules/hbjs/src/utils/formatters/toArray.js
+    define("toArray", [ "isArguments", "isArray", "isUndefined" ], function(isArguments, isArray, isUndefined) {
+        var toArray = function(value) {
+            if (isArguments(value)) {
+                return Array.prototype.slice.call(value, 0) || [];
             }
-            return false;
-        }
-        return isMatch;
+            try {
+                if (isArray(value)) {
+                    return value;
+                }
+                if (!isUndefined(value)) {
+                    return [].concat(value);
+                }
+            } catch (e) {}
+            return [];
+        };
+        return toArray;
+    });
+    //! util/hb/src/api.js
+    define("dg.api", [ "isMatch", "apply", "toArray", "sort", "dispatcher", "matchAll" ], function(isMatch, apply, toArray, sort, dispatcher, matchAll) {
+        exports.isMatch = isMatch;
+        exports.apply = apply;
+        exports.dispatcher = dispatcher;
+        exports.matchAll = matchAll;
+        exports.array = {
+            toArray: toArray,
+            sort: sort
+        };
     });
     //! node_modules/hbjs/src/utils/validators/isRegExp.js
     define("isRegExp", function() {
@@ -181,23 +164,51 @@ if (typeof define === "function" && define.amd) {
         };
         return isFunction;
     });
-    //! node_modules/hbjs/src/utils/formatters/toArray.js
-    define("toArray", [ "isArguments", "isArray", "isUndefined" ], function(isArguments, isArray, isUndefined) {
-        var toArray = function(value) {
-            if (isArguments(value)) {
-                return Array.prototype.slice.call(value, 0) || [];
+    //! node_modules/hbjs/src/utils/validators/isMatch.js
+    define("isMatch", [ "isRegExp", "isDate" ], function(isRegExp, isDate) {
+        var primitive = [ "string", "number", "boolean" ];
+        function isMatch(item, filterObj) {
+            var itemType;
+            if (item === filterObj) {
+                return true;
+            } else if (typeof filterObj === "object") {
+                itemType = typeof item;
+                if (primitive.indexOf(itemType) !== -1) {
+                    if (isRegExp(filterObj) && !filterObj.test(item + "")) {
+                        return false;
+                    } else if (isDate(filterObj)) {
+                        if (isDate(item) && filterObj.getTime() === item.getTime()) {
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+                if (item instanceof Array && filterObj[0] !== undefined) {
+                    for (var i = 0; i < item.length; i += 1) {
+                        if (isMatch(item[i], filterObj[0])) {
+                            return true;
+                        }
+                    }
+                    return false;
+                } else {
+                    for (var j in filterObj) {
+                        if (filterObj.hasOwnProperty(j)) {
+                            if (item[j] === undefined && !item.hasOwnProperty(j)) {
+                                return false;
+                            }
+                            if (!isMatch(item[j], filterObj[j])) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            } else if (typeof filterObj === "function") {
+                return !!filterObj(item);
             }
-            try {
-                if (isArray(value)) {
-                    return value;
-                }
-                if (!isUndefined(value)) {
-                    return [].concat(value);
-                }
-            } catch (e) {}
-            return [];
-        };
-        return toArray;
+            return false;
+        }
+        return isMatch;
     });
     //! node_modules/hbjs/src/utils/validators/isArguments.js
     define("isArguments", [ "toString" ], function(toString) {
@@ -267,14 +278,136 @@ if (typeof define === "function" && define.amd) {
             return result;
         };
     });
-    //! util/hb/src/api.js
-    define("api", [ "isMatch", "apply", "toArray", "sort" ], function(isMatch, apply, toArray, sort) {
-        exports.isMatch = isMatch;
-        exports.apply = apply;
-        exports.array = {
-            toArray: toArray,
-            sort: sort
+    //! node_modules/hbjs/src/utils/async/dispatcher.js
+    define("dispatcher", [ "apply", "isFunction" ], function(apply, isFunction) {
+        function Event(type) {
+            this.type = type;
+            this.defaultPrevented = false;
+            this.propagationStopped = false;
+            this.immediatePropagationStopped = false;
+        }
+        Event.prototype.preventDefault = function() {
+            this.defaultPrevented = true;
         };
+        Event.prototype.stopPropagation = function() {
+            this.propagationStopped = true;
+        };
+        Event.prototype.stopImmediatePropagation = function() {
+            this.immediatePropagationStopped = true;
+        };
+        Event.prototype.toString = function() {
+            return this.type;
+        };
+        function validateEvent(e) {
+            if (!e) {
+                throw Error("event cannot be undefined");
+            }
+        }
+        var dispatcher = function(target, scope, map) {
+            if (target && target.on && target.on.dispatcher) {
+                return target;
+            }
+            target = target || {};
+            var listeners = {};
+            function off(event, callback) {
+                validateEvent(event);
+                var index, list;
+                list = listeners[event];
+                if (list) {
+                    if (callback) {
+                        index = list.indexOf(callback);
+                        if (index !== -1) {
+                            list.splice(index, 1);
+                        }
+                    } else {
+                        list.length = 0;
+                    }
+                }
+            }
+            function on(event, callback) {
+                if (isFunction(callback)) {
+                    validateEvent(event);
+                    listeners[event] = listeners[event] || [];
+                    listeners[event].push(callback);
+                    return function() {
+                        off(event, callback);
+                    };
+                }
+            }
+            on.dispatcher = true;
+            function once(event, callback) {
+                if (isFunction(callback)) {
+                    validateEvent(event);
+                    function fn() {
+                        off(event, fn);
+                        apply(callback, scope || target, arguments);
+                    }
+                    return on(event, fn);
+                }
+            }
+            function getListeners(event, strict) {
+                validateEvent(event);
+                var list, a = "*";
+                if (event || strict) {
+                    list = [];
+                    if (listeners[a]) {
+                        list = listeners[a].concat(list);
+                    }
+                    if (listeners[event]) {
+                        list = listeners[event].concat(list);
+                    }
+                    return list;
+                }
+                return listeners;
+            }
+            function removeAllListeners() {
+                listeners = {};
+            }
+            function fire(callback, args) {
+                return callback && apply(callback, target, args);
+            }
+            function dispatch(event) {
+                validateEvent(event);
+                var list = getListeners(event, true), len = list.length, i, event = typeof event === "object" ? event : new Event(event);
+                if (len) {
+                    arguments[0] = event;
+                    for (i = 0; i < len; i += 1) {
+                        if (!event.immediatePropagationStopped) {
+                            fire(list[i], arguments);
+                        }
+                    }
+                }
+                return event;
+            }
+            if (scope && map) {
+                target.on = scope[map.on] && scope[map.on].bind(scope);
+                target.off = scope[map.off] && scope[map.off].bind(scope);
+                target.once = scope[map.once] && scope[map.once].bind(scope);
+                target.dispatch = target.fire = scope[map.dispatch].bind(scope);
+            } else {
+                target.on = on;
+                target.off = off;
+                target.once = once;
+                target.dispatch = target.fire = dispatch;
+            }
+            target.getListeners = getListeners;
+            target.removeAllListeners = removeAllListeners;
+            return target;
+        };
+        return dispatcher;
+    });
+    //! node_modules/hbjs/src/utils/iterators/matchAll.js
+    define("matchAll", [ "isMatch" ], function(isMatch) {
+        function matchAll(ary, filterObj) {
+            var result = [];
+            for (var i = 0; i < ary.length; i += 1) {
+                if (isMatch(ary[i], filterObj)) {
+                    result.push(ary[i]);
+                }
+            }
+            return result;
+        }
+        return matchAll;
     });
     //! #################  YOUR CODE ENDS HERE  #################### //
     finalize();
@@ -870,112 +1003,6 @@ function filter(list, method, data) {
 exports.filter = filter;
 
 /**
- * ##dispatcher##
- * Behavior modifier for event dispatching.
- * @param {Object} target - the object to apply the methods to.
- * @param {Object} scope - the object that the methods will be applied from
- * @param {object} map - custom names of what methods to map from scope. such as _$emit_ and _$broadcast_.
- */
-function dispatcher(target, scope, map) {
-    var listeners = {};
-    /**
-     * ###off###
-     * removeEventListener from this object instance. given the event listened for and the callback reference.
-     * @param event
-     * @param callback
-     */
-    function off(event, callback) {
-        var index, list;
-        list = listeners[event];
-        if (list) {
-            if (callback) {
-                index = list.indexOf(callback);
-                if (index !== -1) {
-                    list.splice(index, 1);
-                }
-            } else {
-                list.length = 0;
-            }
-        }
-    }
-    /**
-     * ###on###
-     * addEventListener to this object instance.
-     * @param {String} event
-     * @param {Function} callback
-     * @returns {Function} - removeListener or unwatch function.
-     */
-    function on(event, callback) {
-        listeners[event] = listeners[event] || [];
-        listeners[event].push(callback);
-        return function() {
-            off(event, callback);
-        };
-    }
-    /**
-     * ###onOnce###
-     * addEventListener that gets remove with the first call.
-     * @param event
-     * @param callback
-     * @returns {Function} - removeListener or unwatch function.
-     */
-    function onOnce(event, callback) {
-        function fn() {
-            off(event, fn);
-            exports.util.apply(callback, scope || target, arguments);
-        }
-        return on(event, fn);
-    }
-    /**
-     * ###getListeners###
-     * get the listeners from the dispatcher.
-     * @param {String} event
-     * @returns {*}
-     */
-    function getListeners(event) {
-        return listeners[event];
-    }
-    /**
-     * ###fire###
-     * fire the callback with arguments.
-     * @param {Function} callback
-     * @param {Array} args
-     * @returns {*}
-     */
-    function fire(callback, args) {
-        return callback && exports.util.apply(callback, target, args);
-    }
-    /**
-     * ###dispatch###
-     * fire the event and any arguments that are passed.
-     * @param {String} event
-     */
-    function dispatch(event) {
-        if (listeners[event]) {
-            var i = 0, list = listeners[event], len = list.length;
-            while (i < len) {
-                fire(list[i], arguments);
-                i += 1;
-            }
-        }
-    }
-    if (scope && map) {
-        target.on = scope[map.on] && scope[map.on].bind(scope);
-        target.off = scope[map.off] && scope[map.off].bind(scope);
-        target.onOnce = scope[map.onOnce] && scope[map.onOnce].bind(scope);
-        target.dispatch = scope[map.dispatch].bind(scope);
-    } else {
-        target.on = on;
-        target.off = off;
-        target.onOnce = onOnce;
-        target.dispatch = dispatch;
-    }
-    target.getListeners = getListeners;
-}
-
-exports.dispatcher = dispatcher;
-
-/**
  * ###<a name="extend">extend</a>###
  * Perform a deep extend.
  * @param {Object} destination
@@ -1350,11 +1377,23 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     //}
     //
     //scope.$watch(beforePhase);
+    function prevent(event) {
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+    }
     /**
      * ###<a name="init">init</a>###
      * Initialize the datagrid. Add unique methods to the flow control.
      */
     function init() {
+        // any event in the grid. Should not bubble up out of it.
+        element.on("touchstart", prevent);
+        element.on("touchmove", prevent);
+        element.on("touchend", prevent);
+        element.on("touchcancel", prevent);
+        element.on("mousedown", prevent);
+        element.on("mouseup", prevent);
+        element.on("click", prevent);
         flow.unique(reset);
         flow.unique(render);
         flow.unique(updateRowWatchers);
@@ -2268,7 +2307,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * digest <a href="#activeRange">activeRange</a> of rows.
      */
     function render() {
-        inst.log("render");
+        inst.info("render");
         if (readyToRender()) {
             waitCount = 0;
             inst.log("	render %s", state);
@@ -2573,7 +2612,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                         a = .5;
                     }
                 }
-            }, 1e3);
+            }, 5e3);
         }
     }
     /**
@@ -2607,6 +2646,13 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * needs to put all watcher back before destroying or it will not destroy child scopes, or remove watchers.
      */
     function destroy() {
+        element.off("touchstart", prevent);
+        element.off("touchmove", prevent);
+        element.off("touchend", prevent);
+        element.off("touchcancel", prevent);
+        element.off("mousedown", prevent);
+        element.off("mouseup", prevent);
+        element.off("click", prevent);
         inst.shuttingDown = true;
         getContent()[0].style.display = "none";
         scope.datagrid = null;
@@ -3119,7 +3165,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     result.destroy = destroy;
     inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, disableNonVisibleChunks);
     // apply event dispatching.
-    dispatcher(result);
+    exports.util.dispatcher(result);
     inst.chunkModel = result;
     return result;
 };
@@ -4214,12 +4260,16 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.scrollTo = function scrollTo(value, immediately) {
         value = result.capScrollValue(value);
-        inst.scrollModel.setScroll(value);
-        if (immediately) {
-            inst.scrollModel.onScrollingStop();
-        } else {
-            inst.scrollModel.waitForStop();
+        if (value !== lastScroll) {
+            inst.scrollModel.setScroll(value);
+            if (immediately) {
+                inst.scrollModel.onScrollingStop();
+            } else {
+                inst.scrollModel.waitForStop();
+            }
+            return true;
         }
+        return false;
     };
     result.clearOnScrollingStop = function clearOnScrollingStop() {
         result.onScrollingStop();
@@ -4290,12 +4340,11 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.scrollIntoView = function scrollIntoView(itemOrIndex, immediately) {
         result.log("scrollIntoView");
-        var index = typeof itemOrIndex === "number" ? itemOrIndex : inst.getNormalizedIndex(itemOrIndex), offset = inst.getRowOffset(index), rowHeight, viewHeight;
+        var index = typeof itemOrIndex === "number" ? itemOrIndex : inst.getNormalizedIndex(itemOrIndex), offset = inst.getRowOffset(index), rowHeight, viewHeight, value;
         compileRowSiblings(index);
         if (offset < inst.values.scroll) {
             // it is above the view.
-            inst.scrollModel.scrollTo(offset, immediately);
-            return true;
+            return inst.scrollModel.scrollTo(offset, immediately);
         }
         inst.updateViewportHeight();
         // always update the height before calculating. onResize is not reliable
@@ -4303,8 +4352,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         rowHeight = inst.templateModel.getTemplateHeight(inst.getData()[index]);
         if (offset >= inst.values.scroll + viewHeight - rowHeight) {
             // it is below the view.
-            inst.scrollModel.scrollTo(offset - viewHeight + rowHeight, immediately);
-            return true;
+            return inst.scrollModel.scrollTo(offset - viewHeight + rowHeight, immediately);
         }
         // otherwise it is in view so do nothing.
         return false;

@@ -18,7 +18,7 @@ describe("scrollBounce", function () {
                 return content;
             }
         };
-        ux.dispatcher(inst.scope);
+        ux.util.dispatcher(inst.scope);
         inst.scope.$on = inst.scope.on;
         injector.get('scrollBounce')[1](inst);
     });

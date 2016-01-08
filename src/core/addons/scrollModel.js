@@ -308,12 +308,16 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.scrollTo = function scrollTo(value, immediately) {
         value = result.capScrollValue(value);
-        inst.scrollModel.setScroll(value);
-        if (immediately) {
-            inst.scrollModel.onScrollingStop();
-        } else {
-            inst.scrollModel.waitForStop();
+        if (value !== lastScroll) {
+            inst.scrollModel.setScroll(value);
+            if (immediately) {
+                inst.scrollModel.onScrollingStop();
+            } else {
+                inst.scrollModel.waitForStop();
+            }
+            return true;
         }
+        return false;
     };
 
     result.clearOnScrollingStop = function clearOnScrollingStop() {
@@ -392,18 +396,17 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.scrollIntoView = function scrollIntoView(itemOrIndex, immediately) {
         result.log('scrollIntoView');
         var index = typeof itemOrIndex === 'number' ? itemOrIndex : inst.getNormalizedIndex(itemOrIndex),
-            offset = inst.getRowOffset(index), rowHeight, viewHeight;
+            offset = inst.getRowOffset(index), rowHeight, viewHeight,
+            value;
         compileRowSiblings(index);
         if (offset < inst.values.scroll) { // it is above the view.
-            inst.scrollModel.scrollTo(offset, immediately);
-            return true;
+            return inst.scrollModel.scrollTo(offset, immediately);
         }
         inst.updateViewportHeight();// always update the height before calculating. onResize is not reliable
         viewHeight = inst.getViewportHeight();
         rowHeight = inst.templateModel.getTemplateHeight(inst.getData()[index]);
         if (offset >= inst.values.scroll + viewHeight - rowHeight) { // it is below the view.
-            inst.scrollModel.scrollTo(offset - viewHeight + rowHeight, immediately);
-            return true;
+            return inst.scrollModel.scrollTo(offset - viewHeight + rowHeight, immediately);
         }
         // otherwise it is in view so do nothing.
         return false;

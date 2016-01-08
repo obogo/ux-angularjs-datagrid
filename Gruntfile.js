@@ -27,11 +27,8 @@ module.exports = function (grunt) {
                 build: 'util/hb/build',
                 filename: 'hb',
                 scripts: {
-                    inspect: ['util/hb/src/**/*.js'],
-                    includes: ['util/hb/src/api.js'],
-                    //import: ['api'],
-                    //src: [''],
-                    //export: ['isMatch']
+                    import: ['dg.api'],
+                    src: ['util/hb/src/**/*.js']
                 }
             }
         },
@@ -226,6 +223,10 @@ module.exports = function (grunt) {
             hb: {
                 options: {
                     patterns: [
+                        //{
+                        //    match: /("|')(~)\1/,
+                        //    replacement: '$1dg$1'
+                        //},
                         {
                             match: /(\s{4}return\s)this;/,
                             replacement: '$1exports;'

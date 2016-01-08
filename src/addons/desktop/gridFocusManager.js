@@ -198,7 +198,7 @@ angular.module('ux').factory('gridFocusManager', function () {
          */
         function addListenersToRow(rowElm) {
             var focusable = getFocusableElements(angular.element(rowElm));
-            if (focusable.length) {
+            if (focusable.length && (focusable = exports.util.matchAll(focusable, {nodeName:"INPUT"})).length) {// only add keydown to input fields
                 result.log("\t\taddListenersToRow");
                 focusable = angular.element(focusable);
                 focusable.bind('keydown', onKeyDown);
@@ -214,7 +214,7 @@ angular.module('ux').factory('gridFocusManager', function () {
          */
         function removeListenersToRow(rowElm) {
             var focusable = getFocusableElements(angular.element(rowElm));
-            if (focusable.length) {
+            if (focusable.length && (focusable = exports.util.matchAll(focusable, {nodeName:"INPUT"})).length) {// only add keydown to input fields
                 result.log("\t\tremoveListenersToRow");
                 focusable = angular.element(focusable);
                 focusable.unbind('keydown', onKeyDown);

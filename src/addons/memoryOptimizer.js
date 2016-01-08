@@ -29,11 +29,12 @@ angular.module('ux').factory('memoryOptimizer', function () {
         */
        function optimizeRows() {
            clearPending();
-           inst.flow.add(_optimizeRows, [], 1000);
+           intv = setTimeout(_optimizeRows, 3000);
        }
 
        function clearPending() {
-           inst.flow.remove(_optimizeRows);
+           clearTimeout(intv);
+           intv = 0;
        }
 
        function _optimizeRows() {

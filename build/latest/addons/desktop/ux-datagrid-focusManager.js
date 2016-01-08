@@ -1,6 +1,6 @@
 /*!
 * ux-angularjs-datagrid v.1.4.6
-* (c) 2015, Obogo
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -619,7 +619,10 @@ angular.module("ux").factory("gridFocusManager", function() {
          */
         function addListenersToRow(rowElm) {
             var focusable = getFocusableElements(angular.element(rowElm));
-            if (focusable.length) {
+            if (focusable.length && (focusable = exports.util.matchAll(focusable, {
+                nodeName: "INPUT"
+            })).length) {
+                // only add keydown to input fields
                 result.log("		addListenersToRow");
                 focusable = angular.element(focusable);
                 focusable.bind("keydown", onKeyDown);
@@ -634,7 +637,10 @@ angular.module("ux").factory("gridFocusManager", function() {
          */
         function removeListenersToRow(rowElm) {
             var focusable = getFocusableElements(angular.element(rowElm));
-            if (focusable.length) {
+            if (focusable.length && (focusable = exports.util.matchAll(focusable, {
+                nodeName: "INPUT"
+            })).length) {
+                // only add keydown to input fields
                 result.log("		removeListenersToRow");
                 focusable = angular.element(focusable);
                 focusable.unbind("keydown", onKeyDown);

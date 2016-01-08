@@ -1,6 +1,6 @@
 /*!
 * ux-angularjs-datagrid v.1.4.6
-* (c) 2015, Obogo
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -24,7 +24,7 @@ angular.module("ux").factory("gridLogger", function() {
         light: [ "color:#DDDDDD", "color:#BBBBBB", "color:#999999;font-style:italic;font-weight:bold;", "color:#FF0000;font-weight:bold;" ],
         grey: [ "color:#999999", "color:#666666", "color:#333333;font-style:italic;font-weight:bold;", "color:#FF0000;font-weight:bold;" ],
         red: [ "color:#CD9B9B", "color:#CD5C5C", "color:#CC3232;font-style:italic;font-weight:bold;", "color:#FF0000;font-weight:bold;" ],
-        green: [ "color:#9CBA7F", "color:#78AB46", "color:#45B000;font-style:italic;font-weight:bold;", "color:#FF0000;font-weight:bold;" ],
+        green: [ "color:#ACCA8F", "color:#78AB46", "color:#45B000;font-style:italic;font-weight:bold;", "color:#FF0000;font-weight:bold;" ],
         teal: [ "color:#B4CDCD;", "color:#79CDCD;", "color:#37B6CE;font-style:italic;font-weight:bold;", "color:#FF0000;font-weight:bold;" ],
         blue: [ "color:#B9D3EE;", "color:#75A1D0;", "color:#0276FD;font-style:italic;font-weight:bold;", "color:#FF0000;font-weight:bold;" ],
         purple: [ "color:#BDA0CB", "color:#9B30FF", "color:#7D26CD;font-style:italic;font-weight:bold;", "color:#FF0000;font-weight:bold;" ],

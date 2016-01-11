@@ -88,25 +88,11 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     //
     //scope.$watch(beforePhase);
 
-    function prevent(event) {
-        event.stopImmediatePropagation();
-        event.stopPropagation();
-    }
-
     /**
      * ###<a name="init">init</a>###
      * Initialize the datagrid. Add unique methods to the flow control.
      */
     function init() {
-        // any event in the grid. Should not bubble up out of it.
-        element.on('touchstart', prevent);
-        element.on('touchmove', prevent);
-        element.on('touchend', prevent);
-        element.on('touchcancel', prevent);
-        element.on('mousedown', prevent);
-        element.on('mouseup', prevent);
-        element.on('click', prevent);
-
         flow.unique(reset);
         flow.unique(render);
         flow.unique(updateRowWatchers);
@@ -1429,13 +1415,6 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * needs to put all watcher back before destroying or it will not destroy child scopes, or remove watchers.
      */
     function destroy() {
-        element.off('touchstart', prevent);
-        element.off('touchmove', prevent);
-        element.off('touchend', prevent);
-        element.off('touchcancel', prevent);
-        element.off('mousedown', prevent);
-        element.off('mouseup', prevent);
-        element.off('click', prevent);
         inst.shuttingDown = true;
         getContent()[0].style.display = 'none';
         scope.datagrid = null; // we have a circular reference. break it on destroy.

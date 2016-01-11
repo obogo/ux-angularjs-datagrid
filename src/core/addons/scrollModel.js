@@ -396,8 +396,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.scrollIntoView = function scrollIntoView(itemOrIndex, immediately) {
         result.log('scrollIntoView');
         var index = typeof itemOrIndex === 'number' ? itemOrIndex : inst.getNormalizedIndex(itemOrIndex),
-            offset = inst.getRowOffset(index), rowHeight, viewHeight,
-            value;
+            offset = inst.getRowOffset(index), rowHeight, viewHeight;
         compileRowSiblings(index);
         if (offset < inst.values.scroll) { // it is above the view.
             return inst.scrollModel.scrollTo(offset, immediately);

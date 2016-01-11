@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.6
+* ux-angularjs-datagrid v.1.4.7
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.4.6
+* ux-angularjs-datagrid v.1.4.7
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -455,7 +455,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.4.6",
+    version: "1.4.7",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1377,23 +1377,11 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     //}
     //
     //scope.$watch(beforePhase);
-    function prevent(event) {
-        event.stopImmediatePropagation();
-        event.stopPropagation();
-    }
     /**
      * ###<a name="init">init</a>###
      * Initialize the datagrid. Add unique methods to the flow control.
      */
     function init() {
-        // any event in the grid. Should not bubble up out of it.
-        element.on("touchstart", prevent);
-        element.on("touchmove", prevent);
-        element.on("touchend", prevent);
-        element.on("touchcancel", prevent);
-        element.on("mousedown", prevent);
-        element.on("mouseup", prevent);
-        element.on("click", prevent);
         flow.unique(reset);
         flow.unique(render);
         flow.unique(updateRowWatchers);
@@ -2646,13 +2634,6 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * needs to put all watcher back before destroying or it will not destroy child scopes, or remove watchers.
      */
     function destroy() {
-        element.off("touchstart", prevent);
-        element.off("touchmove", prevent);
-        element.off("touchend", prevent);
-        element.off("touchcancel", prevent);
-        element.off("mousedown", prevent);
-        element.off("mouseup", prevent);
-        element.off("click", prevent);
         inst.shuttingDown = true;
         getContent()[0].style.display = "none";
         scope.datagrid = null;

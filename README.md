@@ -16,9 +16,9 @@ Most lists work with recycled or just-in-time created rows for long lists in ang
 
 Of course since this is angular there is then the issue with a **digest being too expensive. This is not a problem** because all rows are disabled from the digest when out of view and enabled when in view. So they don't lose their scopes or have to create new ones constantly, but only once. Then **they are just enabled or disabled as they come into view**.
 
-- [Demos](https://rawgithub.com/obogo/ux-angularjs-datagrid/master/samples/index.html)
+- [DEMO](https://rawgithub.com/obogo/ux-angularjs-datagrid/master/docs/angular-ux-datagrid.js.html)
+- [Old Demos](https://rawgithub.com/obogo/ux-angularjs-datagrid/master/samples/index.html)
 - [Unit Tests](https://rawgithub.com/obogo/ux-angularjs-datagrid/master/test/index.html)
-- [Docs - in Progress](https://rawgithub.com/obogo/ux-angularjs-datagrid/master/docs/angular-ux-datagrid.js.html)
 
 ### More Examples ###
 - [Simple Fiddle Example](http://jsfiddle.net/wesjones/uftsG/)

@@ -1359,7 +1359,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     // <a name="logEvents"></a>listing the log events so they can be ignored if needed.
     var logEvents = [ exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR ];
     // <a name="inst"></a>the instance of the datagrid that will be referenced by all addons.
-    var inst = this, eventLogger = {}, startupComplete = false, gcIntv;
+    var inst = this, eventLogger = {}, startupComplete = false, gcIntv, $compileCache = {};
     // wrap the instance for logging.
     exports.logWrapper("datagrid event", inst, "grey", inst);
     // for debugging and watching the angular phase start and end.
@@ -1826,7 +1826,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @returns {*}
      */
     function compileRow(index, el) {
-        var s = scopes[index], prev, tpl;
+        var s = scopes[index], tplName, tpl, $c;
         if (s && !s.$parent) {
             s.$parent = scope;
         }
@@ -1836,6 +1836,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 scope.$$childTail = scopes[index - 1];
             }
             s = scope.$new();
+            tplName = inst.templateModel.getTemplateName(inst.data[index]);
             tpl = inst.templateModel.getTemplate(inst.data[index]);
             link(index, s);
             s.$status = options.compiledClass;
@@ -1845,7 +1846,18 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             scopes[index] = s;
             el = el || getRowElm(index);
             el.removeClass(options.uncompiledClass);
-            $compile(el)(s);
+            // by keeping the $compile(el) cached this seems to be faster than $compile(el)(s) every time.
+            $c = $compileCache[tplName] || ($compileCache[tplName] = $compile(el));
+            // since compile is cached we now use the clone method to replace our dom element with the cloned one.
+            $c(s, function(clone) {
+                var indexes = inst.chunkModel.getRowIndexes(index);
+                // gets the nested indexes for the row
+                indexes.pop();
+                // pop off the index for the row, we want it's parent.
+                var parent = inst.chunkModel.getItemByIndexes(indexes).dom;
+                // get the parent by indexes.
+                parent.replaceChild(clone[0], el[0]);
+            });
             if (inst.templateModel.hasVariableRowHeights()) {
                 inst.chunkModel.updateAllChunkHeights(index);
             }
@@ -4321,7 +4333,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.scrollIntoView = function scrollIntoView(itemOrIndex, immediately) {
         result.log("scrollIntoView");
-        var index = typeof itemOrIndex === "number" ? itemOrIndex : inst.getNormalizedIndex(itemOrIndex), offset = inst.getRowOffset(index), rowHeight, viewHeight, value;
+        var index = typeof itemOrIndex === "number" ? itemOrIndex : inst.getNormalizedIndex(itemOrIndex), offset = inst.getRowOffset(index), rowHeight, viewHeight;
         compileRowSiblings(index);
         if (offset < inst.values.scroll) {
             // it is above the view.
@@ -4540,7 +4552,12 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         };
         //TODO: need to make this method so it can be overwritten to look up templates a different way.
         function getTemplateName(el) {
-            return el.attr ? el.attr("template") : el.getAttribute("template");
+            if (el.attr || el.getAttribute) {
+                return el.attr ? el.attr("template") : el.getAttribute("template");
+            } else if (!(el instanceof HTMLElement)) {
+                // el is a data not an element.
+                return el[getTemplatesKey()] || el._template;
+            }
         }
         function getTemplateByName(name) {
             if (templates[name]) {

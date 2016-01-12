@@ -140,7 +140,11 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         //TODO: need to make this method so it can be overwritten to look up templates a different way.
 
         function getTemplateName(el) {
-            return el.attr ? el.attr('template') : el.getAttribute('template');
+            if (el.attr || el.getAttribute) {
+                return el.attr ? el.attr('template') : el.getAttribute('template');
+            } else if (!(el instanceof HTMLElement)) {// el is a data not an element.
+                return el[getTemplatesKey()] || el._template;
+            }
         }
 
         function getTemplateByName(name) {

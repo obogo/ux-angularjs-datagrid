@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.7
+* ux-angularjs-datagrid v.1.4.8
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.4.7
+* ux-angularjs-datagrid v.1.4.8
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -455,7 +455,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.4.7",
+    version: "1.4.8",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1856,6 +1856,16 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 // pop off the index for the row, we want it's parent.
                 var parent = inst.chunkModel.getItemByIndexes(indexes).dom;
                 // get the parent by indexes.
+                var attrs = el[0].attributes, len = attrs.length;
+                // we need to copy over the row-id and any other custom properties on this row.
+                // use for loop instead of each to avoid closure function overhead. Needs to be as fast as possible.
+                for (var i = 0; i < len; i += 1) {
+                    var attr = attrs[i];
+                    // copy the attr from el to clone
+                    if (clone.attr(attr.name) !== attr.value) {
+                        clone.attr(attr.name, attr.value);
+                    }
+                }
                 parent.replaceChild(clone[0], el[0]);
             });
             if (inst.templateModel.hasVariableRowHeights()) {

@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.7
+* ux-angularjs-datagrid v.1.4.8
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -112,6 +112,7 @@ angular.module("ux").factory("expandRows", function() {
                 var intIndex = parseInt(index, 10);
                 if (!omitIndexes || inst.rowsLength > intIndex && omitIndexes.indexOf(intIndex) === -1) {
                     if (silent) {
+                        collapse(intIndex, true);
                         delete opened[index];
                     } else {
                         collapse(intIndex, immediate);

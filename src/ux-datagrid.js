@@ -595,6 +595,16 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 var indexes = inst.chunkModel.getRowIndexes(index);// gets the nested indexes for the row
                 indexes.pop();// pop off the index for the row, we want it's parent.
                 var parent = inst.chunkModel.getItemByIndexes(indexes).dom;// get the parent by indexes.
+                var attrs = el[0].attributes, len = attrs.length;
+                // we need to copy over the row-id and any other custom properties on this row.
+                // use for loop instead of each to avoid closure function overhead. Needs to be as fast as possible.
+                for(var i = 0; i < len; i += 1) {
+                    var attr = attrs[i];
+                    // copy the attr from el to clone
+                    if (clone.attr(attr.name) !== attr.value) {
+                        clone.attr(attr.name, attr.value);
+                    }
+                }
                 parent.replaceChild(clone[0], el[0]);
             });
             if (inst.templateModel.hasVariableRowHeights()) {

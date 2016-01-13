@@ -116,6 +116,7 @@ angular.module('ux').factory('expandRows', function () {
                 var intIndex = parseInt(index, 10);
                 if (!omitIndexes || (inst.rowsLength > intIndex && omitIndexes.indexOf(intIndex) === -1)) {
                     if (silent) {
+                        collapse(intIndex, true);
                         delete opened[index];
                     } else {
                         collapse(intIndex, immediate);

@@ -11,6 +11,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         enable = true,
         unwatchSetup,
         waitForStopIntv,
+        lastTouchUpdateTime = 0,
         hasScrollListener = false,
         lastScroll,
         bottomOffset = 0,
@@ -41,6 +42,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     function setupScrolling() {
         unwatchSetup();
+        inst.element.css('willChange', 'scroll-position');
         if (!inst.element.css('overflow') || inst.element.css('overflow') === 'visible') {
             inst.element.css({overflow: 'auto'});
         }
@@ -103,6 +105,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
     result.removeScrollListener = function removeScrollListener() {
         result.log('removeScrollListener');
+        hasScrollListener = false;
         inst.element[0].removeEventListener('scroll', onUpdateScrollHandler);
     };
 
@@ -131,6 +134,15 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         enable = !!value;
     };
 
+    function getScrollTop() {
+        return inst.values.scroll;//inst.element[0].scrollTop;
+    }
+
+    function setElementScroll(value) {
+        inst.element[0].scrollTop = value;
+        inst.values.scroll = value;
+    }
+
     result.onTouchStart = function onTouchStart(event) {
         if (!enable) {
             return;
@@ -157,16 +169,28 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         if (inst.options.scrollModel && inst.options.scrollModel.preventTouchMove) {
             result.killEvent(event);
         }
+        var now = Date.now();
+        if (now - lastTouchUpdateTime < 20) {
+            return;// don't let it update more than 60fps.
+        }
+        lastTouchUpdateTime = now;
         var y = getTouches(event)[0].clientY,
             x = getTouches(event)[0].clientX,
-            deltaY = offsetY - y, deltaX = offsetX - x;
-        if (deltaY !== lastDeltaY) {
-            result.setScroll(result.capScrollValue(startScroll + deltaY));
-            speed = deltaY - lastDeltaY;
+            deltaY = offsetY - y, deltaX = offsetX - x,
+            scroll;
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            return;// only allow vertical scrolling. Do not process scroll event because it is horizontal.
+        }
+        if (offsetY !== y) {
+            scroll = result.capScrollValue(getScrollTop() + deltaY);
+            result.setScroll(scroll);
+            speed = deltaY;
+            offsetY = y;
             lastDeltaY = deltaY;
         }
         if (deltaX !== lastDeltaX) {
-            result.setScroll(result.capScrollValue(startScroll + deltaY));
+            // horizontal scrolling is not complete. prevent until completed otherwise it is firing multiple setScroll values.
+            //result.setScroll(result.capScrollValue(startScroll + deltaY));
             speedX = deltaX - lastDeltaX;
             lastDeltaX = deltaX;
         }
@@ -190,12 +214,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
                 distance = speed * inst.options.scrollModel.speed;
                 result.scrollSlowDown(true);
             }
+        } else {
+            result.onUpdateScroll();
         }
-        var sTop = inst.element[0].scrollTop;
+        var sTop = getScrollTop();
         if (sTop < 0 || inst.getContentHeight() < inst.getViewportHeight()) {
-            inst.element[0].scrollTop = 0;
+            setElementScroll(0);
         } else if (sTop > inst.getContentHeight() - inst.getViewportHeight()) {
-            inst.element[0].scrollTop = inst.getContentHeight() - inst.getViewportHeight();
+            setElementScroll(inst.getContentHeight() - inst.getViewportHeight());
         }
     };
 
@@ -208,10 +234,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             t = 0;
         }
         if (t > 0) {
-            value = result.capScrollValue(inst.values.scroll + change);
+            value = result.capScrollValue(getScrollTop() + change);
             if (!wait) {
 //                result.log("\tscroll %s of %s", value, inst.element[0].scrollHeight);
-                inst.element[0].scrollTop = value;
+                setElementScroll(value);
             }
             scrollingIntv = setTimeout(result.scrollSlowDown, 20);
         }
@@ -250,7 +276,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
 
     result.getScroll = function getScroll(el) {
-        return (el || inst.element[0]).scrollTop;
+        if (el) {
+            return el.scrollTop;
+        }
+        return getScrollTop();
     };
 
     result.setScroll = function setScroll(value) {
@@ -262,9 +291,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
                 result.setScroll(value);
             });
         } else if (inst.getContentHeight() - inst.getViewportHeight() >= value) {
-            inst.element[0].scrollTop = value;
+            setElementScroll(value);
+            result.onUpdateScroll();
         }
-        inst.values.scroll = value;
     };
 
     function onUpdateScrollHandler(event) {
@@ -276,7 +305,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * @param event
      */
     result.onUpdateScroll = function onUpdateScroll(event) {
-        var val = inst.scrollModel.getScroll(event.target || event.srcElement);
+        var val = inst.scrollModel.getScroll(event && (event.target || event.srcElement));
         if (inst.values.scroll !== val) {
             inst.dispatch(exports.datagrid.events.ON_SCROLL_START, val);
             inst.values.speed = val - inst.values.scroll;
@@ -423,7 +452,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     function onAfterHeightsUpdated() {
         if (hasScrollListener) {
             result.log('onAfterHeightsUpdated force scroll to %s', inst.values.scroll);
-            inst.element[0].scrollTop = inst.values.scroll;
+            setElementScroll(inst.values.scroll);
         }
     }
 

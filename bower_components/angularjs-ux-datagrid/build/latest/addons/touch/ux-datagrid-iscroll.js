@@ -1,6 +1,6 @@
 /*!
-* ux-angularjs-datagrid v.1.4.4
-* (c) 2015, Obogo
+* ux-angularjs-datagrid v.1.4.9
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -26,7 +26,7 @@ angular.module("ux").factory("iScrollAddon", function() {
         if (!IScroll) {
             inst.throwError("IScroll (https://github.com/cubiq/iscroll) is required to use the iScrollAddon.");
         }
-        var result = exports.logWrapper("iScrollAddon", {}, "purple", inst.dispatch), scrolling = false, intv, myScroll, originalScrollModel = inst.scrollModel, unwatchRefreshRender, scrollToIntv, unwatchSetup, lastY = 0;
+        var result = exports.logWrapper("iScrollAddon", {}, "purple", inst), scrolling = false, intv, myScroll, originalScrollModel = inst.scrollModel, unwatchRefreshRender, scrollToIntv, unwatchSetup, lastY = 0;
         unwatchSetup = inst.scope.$on(exports.datagrid.events.ON_READY, function() {
             originalScrollModel.removeScrollListener();
             unwatchSetup();

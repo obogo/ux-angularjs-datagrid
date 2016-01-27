@@ -1,6 +1,6 @@
 /*!
-* ux-angularjs-datagrid v.1.4.4
-* (c) 2015, Obogo
+* ux-angularjs-datagrid v.1.4.9
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -14,85 +14,158 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.4.4
-* (c) 2015, Obogo
+* ux-angularjs-datagrid v.1.4.9
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
 (function(exports, global) {
-    global["dgutil"] = exports;
-    var $$ = exports.$$ || function(name) {
-        if (!$$[name]) {
-            $$[name] = {};
-        }
-        return $$[name];
-    };
-    var cache = $$("c");
-    var internals = $$("i");
-    var pending = $$("p");
-    exports.$$ = $$;
-    var toArray = function(args) {
-        return Array.prototype.slice.call(args);
-    };
-    var _ = function(name) {
-        var args = toArray(arguments);
-        var val = args[1];
-        if (typeof val === "function") {
-            this.c[name] = val();
-        } else {
-            cache[name] = args[2];
-            cache[name].$inject = val;
-            cache[name].$internal = this.i;
-        }
-    };
-    var define = function() {
-        _.apply({
-            i: false,
-            c: exports
-        }, toArray(arguments));
-    };
-    var internal = function() {
-        _.apply({
-            i: true,
-            c: internals
-        }, toArray(arguments));
-    };
-    var resolve = function(name, fn) {
-        pending[name] = true;
-        var injections = fn.$inject;
-        var args = [];
-        var injectionName;
-        for (var i in injections) {
-            if (injections.hasOwnProperty(i)) {
-                injectionName = injections[i];
-                if (cache[injectionName]) {
-                    if (pending.hasOwnProperty(injectionName)) {
-                        throw new Error('Cyclical reference: "' + name + '" referencing "' + injectionName + '"');
+    global["util"] = exports;
+    var define, internal, finalize = function() {};
+    (function() {
+        var get, defined, pending, definitions, initDefinition, $cachelyToken = "~", $depsRequiredByDefinitionToken = ".";
+        get = Function[$cachelyToken] = Function[$cachelyToken] || function(name) {
+            if (!get[name]) {
+                get[name] = {};
+            }
+            return get[name];
+        };
+        definitions = get("c");
+        defined = get("d");
+        pending = get("p");
+        initDefinition = function(name) {
+            var args = arguments;
+            var val = args[1];
+            if (typeof val === "function") {
+                defined[name] = val();
+            } else {
+                definitions[name] = args[2];
+                definitions[name][$depsRequiredByDefinitionToken] = val;
+            }
+        };
+        define = internal = function() {
+            initDefinition.apply(null, arguments);
+        };
+        resolve = function(name, fn) {
+            pending[name] = true;
+            var deps = fn[$depsRequiredByDefinitionToken];
+            var args = [];
+            var i, len;
+            var dependencyName;
+            if (deps) {
+                len = deps.length;
+                for (i = 0; i < len; i++) {
+                    dependencyName = deps[i];
+                    if (definitions[dependencyName]) {
+                        if (pending.hasOwnProperty(dependencyName)) {
+                            throw new Error('Cyclical reference: "' + name + '" referencing "' + dependencyName + '"');
+                        }
+                        resolve(dependencyName, definitions[dependencyName]);
+                        delete definitions[dependencyName];
                     }
-                    resolve(injectionName, cache[injectionName]);
-                    delete cache[injectionName];
                 }
             }
-        }
-        if (!exports[name] && !internals[name]) {
-            for (var n in injections) {
-                injectionName = injections[n];
-                args.push(exports.hasOwnProperty(injectionName) && exports[injectionName] || internals.hasOwnProperty(injectionName) && internals[injectionName]);
+            if (!defined.hasOwnProperty(name)) {
+                for (i = 0; i < len; i++) {
+                    dependencyName = deps[i];
+                    args.push(defined.hasOwnProperty(dependencyName) && defined[dependencyName]);
+                }
+                defined[name] = fn.apply(null, args);
             }
-            if (fn.$internal) {
-                internals[name] = fn.apply(null, args) || name;
-            } else {
-                exports[name] = fn.apply(null, args) || name;
+            delete pending[name];
+        };
+        finalize = function() {
+            for (var name in definitions) {
+                resolve(name, definitions[name]);
             }
-        }
-        Object.defineProperty(exports, "$$", {
-            enumerable: false,
-            writable: false
-        });
-        delete pending[name];
-    };
+        };
+        return define;
+    })();
+    //! ################# YOUR CODE STARTS HERE #################### //
+    //! node_modules/hbjs/src/utils/formatters/toArray.js
+    define("toArray", [ "isArguments", "isArray", "isUndefined" ], function(isArguments, isArray, isUndefined) {
+        var toArray = function(value) {
+            if (isArguments(value)) {
+                return Array.prototype.slice.call(value, 0) || [];
+            }
+            try {
+                if (isArray(value)) {
+                    return value;
+                }
+                if (!isUndefined(value)) {
+                    return [].concat(value);
+                }
+            } catch (e) {}
+            return [];
+        };
+        return toArray;
+    });
+    //! util/hb/src/api.js
+    define("dg.api", [ "isMatch", "apply", "toArray", "sort", "dispatcher", "matchAll" ], function(isMatch, apply, toArray, sort, dispatcher, matchAll) {
+        exports.isMatch = isMatch;
+        exports.apply = apply;
+        exports.dispatcher = dispatcher;
+        exports.matchAll = matchAll;
+        exports.array = {
+            toArray: toArray,
+            sort: sort
+        };
+    });
+    //! node_modules/hbjs/src/utils/validators/isRegExp.js
+    define("isRegExp", function() {
+        var isRegExp = function(value) {
+            return Object.prototype.toString.call(value) === "[object RegExp]";
+        };
+        return isRegExp;
+    });
+    //! node_modules/hbjs/src/utils/validators/isDate.js
+    define("isDate", function() {
+        var isDate = function(val) {
+            return val instanceof Date;
+        };
+        return isDate;
+    });
+    //! node_modules/hbjs/src/utils/data/apply.js
+    define("apply", [ "isFunction" ], function(isFunction) {
+        return function(func, scope, args) {
+            if (!isFunction(func)) {
+                return;
+            }
+            args = args || [];
+            switch (args.length) {
+              case 0:
+                return func.call(scope);
+
+              case 1:
+                return func.call(scope, args[0]);
+
+              case 2:
+                return func.call(scope, args[0], args[1]);
+
+              case 3:
+                return func.call(scope, args[0], args[1], args[2]);
+
+              case 4:
+                return func.call(scope, args[0], args[1], args[2], args[3]);
+
+              case 5:
+                return func.call(scope, args[0], args[1], args[2], args[3], args[4]);
+
+              case 6:
+                return func.call(scope, args[0], args[1], args[2], args[3], args[4], args[5]);
+            }
+            return func.apply(scope, args);
+        };
+    });
+    //! node_modules/hbjs/src/utils/validators/isFunction.js
+    define("isFunction", function() {
+        var isFunction = function(val) {
+            return typeof val === "function";
+        };
+        return isFunction;
+    });
     //! node_modules/hbjs/src/utils/validators/isMatch.js
-    define("isMatch", [ "isRegExp" ], function(isRegExp) {
+    define("isMatch", [ "isRegExp", "isDate" ], function(isRegExp, isDate) {
         var primitive = [ "string", "number", "boolean" ];
         function isMatch(item, filterObj) {
             var itemType;
@@ -100,8 +173,15 @@ if (typeof define === "function" && define.amd) {
                 return true;
             } else if (typeof filterObj === "object") {
                 itemType = typeof item;
-                if (primitive.indexOf(itemType) !== -1 && isRegExp(filterObj) && !filterObj.test(item + "")) {
-                    return false;
+                if (primitive.indexOf(itemType) !== -1) {
+                    if (isRegExp(filterObj) && !filterObj.test(item + "")) {
+                        return false;
+                    } else if (isDate(filterObj)) {
+                        if (isDate(item) && filterObj.getTime() === item.getTime()) {
+                            return true;
+                        }
+                        return false;
+                    }
                 }
                 if (item instanceof Array && filterObj[0] !== undefined) {
                     for (var i = 0; i < item.length; i += 1) {
@@ -113,7 +193,7 @@ if (typeof define === "function" && define.amd) {
                 } else {
                     for (var j in filterObj) {
                         if (filterObj.hasOwnProperty(j)) {
-                            if (!item.hasOwnProperty(j)) {
+                            if (item[j] === undefined && !item.hasOwnProperty(j)) {
                                 return false;
                             }
                             if (!isMatch(item[j], filterObj[j])) {
@@ -130,18 +210,209 @@ if (typeof define === "function" && define.amd) {
         }
         return isMatch;
     });
-    //! node_modules/hbjs/src/utils/validators/isRegExp.js
-    internal("isRegExp", function() {
-        var isRegExp = function(value) {
-            return Object.prototype.toString.call(value) === "[object RegExp]";
+    //! node_modules/hbjs/src/utils/validators/isArguments.js
+    define("isArguments", [ "toString" ], function(toString) {
+        var isArguments = function(value) {
+            var str = String(value);
+            var isArguments = str === "[object Arguments]";
+            if (!isArguments) {
+                isArguments = str !== "[object Array]" && value !== null && typeof value === "object" && typeof value.length === "number" && value.length >= 0 && (!value.callee || toString.call(value.callee) === "[object Function]");
+            }
+            return isArguments;
         };
-        return isRegExp;
+        return isArguments;
     });
-    for (var name in cache) {
-        resolve(name, cache[name]);
-    }
-})(this["dgutil"] || {}, function() {
-    return this;
+    //! node_modules/hbjs/src/utils/validators/isArray.js
+    define("isArray", function() {
+        Array.prototype.__isArray = true;
+        Object.defineProperty(Array.prototype, "__isArray", {
+            enumerable: false,
+            writable: true
+        });
+        var isArray = function(val) {
+            return val ? !!val.__isArray : false;
+        };
+        return isArray;
+    });
+    //! node_modules/hbjs/src/utils/validators/isUndefined.js
+    define("isUndefined", function() {
+        var isUndefined = function(val) {
+            return typeof val === "undefined";
+        };
+        return isUndefined;
+    });
+    //! node_modules/hbjs/src/utils/array/sort.js
+    define("sort", function() {
+        function partition(array, left, right, compareFunction) {
+            var cmp = array[right - 1], minEnd = left, maxEnd, dir = 0;
+            for (maxEnd = left; maxEnd < right - 1; maxEnd += 1) {
+                dir = compareFunction(array[maxEnd], cmp);
+                if (dir < 0) {
+                    if (maxEnd !== minEnd) {
+                        swap(array, maxEnd, minEnd);
+                    }
+                    minEnd += 1;
+                }
+            }
+            if (compareFunction(array[minEnd], cmp)) {
+                swap(array, minEnd, right - 1);
+            }
+            return minEnd;
+        }
+        function swap(array, i, j) {
+            var temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+            return array;
+        }
+        function quickSort(array, left, right, fn) {
+            if (left < right) {
+                var p = partition(array, left, right, fn);
+                quickSort(array, left, p, fn);
+                quickSort(array, p + 1, right, fn);
+            }
+            return array;
+        }
+        return function(array, compareFunction) {
+            var result = quickSort(array, 0, array.length, compareFunction);
+            return result;
+        };
+    });
+    //! node_modules/hbjs/src/utils/async/dispatcher.js
+    define("dispatcher", [ "apply", "isFunction" ], function(apply, isFunction) {
+        function Event(type) {
+            this.type = type;
+            this.defaultPrevented = false;
+            this.propagationStopped = false;
+            this.immediatePropagationStopped = false;
+        }
+        Event.prototype.preventDefault = function() {
+            this.defaultPrevented = true;
+        };
+        Event.prototype.stopPropagation = function() {
+            this.propagationStopped = true;
+        };
+        Event.prototype.stopImmediatePropagation = function() {
+            this.immediatePropagationStopped = true;
+        };
+        Event.prototype.toString = function() {
+            return this.type;
+        };
+        function validateEvent(e) {
+            if (!e) {
+                throw Error("event cannot be undefined");
+            }
+        }
+        var dispatcher = function(target, scope, map) {
+            if (target && target.on && target.on.dispatcher) {
+                return target;
+            }
+            target = target || {};
+            var listeners = {};
+            function off(event, callback) {
+                validateEvent(event);
+                var index, list;
+                list = listeners[event];
+                if (list) {
+                    if (callback) {
+                        index = list.indexOf(callback);
+                        if (index !== -1) {
+                            list.splice(index, 1);
+                        }
+                    } else {
+                        list.length = 0;
+                    }
+                }
+            }
+            function on(event, callback) {
+                if (isFunction(callback)) {
+                    validateEvent(event);
+                    listeners[event] = listeners[event] || [];
+                    listeners[event].push(callback);
+                    return function() {
+                        off(event, callback);
+                    };
+                }
+            }
+            on.dispatcher = true;
+            function once(event, callback) {
+                if (isFunction(callback)) {
+                    validateEvent(event);
+                    function fn() {
+                        off(event, fn);
+                        apply(callback, scope || target, arguments);
+                    }
+                    return on(event, fn);
+                }
+            }
+            function getListeners(event, strict) {
+                validateEvent(event);
+                var list, a = "*";
+                if (event || strict) {
+                    list = [];
+                    if (listeners[a]) {
+                        list = listeners[a].concat(list);
+                    }
+                    if (listeners[event]) {
+                        list = listeners[event].concat(list);
+                    }
+                    return list;
+                }
+                return listeners;
+            }
+            function removeAllListeners() {
+                listeners = {};
+            }
+            function fire(callback, args) {
+                return callback && apply(callback, target, args);
+            }
+            function dispatch(event) {
+                validateEvent(event);
+                var list = getListeners(event, true), len = list.length, i, event = typeof event === "object" ? event : new Event(event);
+                if (len) {
+                    arguments[0] = event;
+                    for (i = 0; i < len; i += 1) {
+                        if (!event.immediatePropagationStopped) {
+                            fire(list[i], arguments);
+                        }
+                    }
+                }
+                return event;
+            }
+            if (scope && map) {
+                target.on = scope[map.on] && scope[map.on].bind(scope);
+                target.off = scope[map.off] && scope[map.off].bind(scope);
+                target.once = scope[map.once] && scope[map.once].bind(scope);
+                target.dispatch = target.fire = scope[map.dispatch].bind(scope);
+            } else {
+                target.on = on;
+                target.off = off;
+                target.once = once;
+                target.dispatch = target.fire = dispatch;
+            }
+            target.getListeners = getListeners;
+            target.removeAllListeners = removeAllListeners;
+            return target;
+        };
+        return dispatcher;
+    });
+    //! node_modules/hbjs/src/utils/iterators/matchAll.js
+    define("matchAll", [ "isMatch" ], function(isMatch) {
+        function matchAll(ary, filterObj) {
+            var result = [];
+            for (var i = 0; i < ary.length; i += 1) {
+                if (isMatch(ary[i], filterObj)) {
+                    result.push(ary[i]);
+                }
+            }
+            return result;
+        }
+        return matchAll;
+    });
+    //! #################  YOUR CODE ENDS HERE  #################### //
+    finalize();
+})(this["util"] || {}, function() {
+    return exports;
 }());
 
 exports.errors = {
@@ -184,7 +455,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.4.4",
+    version: "1.4.9",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -385,11 +656,8 @@ exports.datagrid = {
      * to add all of these addons before optional addons are added. You can add core addons to the datagrid by adding these directly to this array, however it is not
      * recommended.
      */
-    coreAddons: [],
-    util: this.dgutil
+    coreAddons: []
 };
-
-delete this.dgutil;
 
 /**
  * ###addons###
@@ -660,7 +928,7 @@ exports.css = function CSS() {
 //      }
 //      ux.each(myList, myMethod, arg1, arg2, arg3);
 function each(list, method, data) {
-    var i = 0, len, result, extraArgs;
+    var i = 0, len, result, extraArgs, apl = exports.util.apply;
     if (arguments.length > 2) {
         extraArgs = exports.util.array.toArray(arguments);
         extraArgs.splice(0, 2);
@@ -668,15 +936,15 @@ function each(list, method, data) {
     if (list && list.length) {
         len = list.length;
         while (i < len) {
-            result = method.apply(null, [ list[i], i, list ].concat(extraArgs));
+            result = apl(method, null, [ list[i], i, list ].concat(extraArgs));
             if (result !== undefined) {
                 return result;
             }
             i += 1;
         }
-    } else if (list && Object.prototype.hasOwnProperty.apply(list, [ "0" ])) {
-        while (Object.prototype.hasOwnProperty.apply(list, [ i ])) {
-            result = method.apply(null, [ list[i], i, list ].concat(extraArgs));
+    } else if (list && apl(Object.prototype.hasOwnProperty, list, [ "0" ])) {
+        while (apl(Object.prototype.hasOwnProperty, list, [ i ])) {
+            result = apl(method, null, [ list[i], i, list ].concat(extraArgs));
             if (result !== undefined) {
                 return result;
             }
@@ -684,8 +952,8 @@ function each(list, method, data) {
         }
     } else if (!(list instanceof Array)) {
         for (i in list) {
-            if (Object.prototype.hasOwnProperty.apply(list, [ i ])) {
-                result = method.apply(null, [ list[i], i, list ].concat(extraArgs));
+            if (apl(Object.prototype.hasOwnProperty, list, [ i ])) {
+                result = apl(method, null, [ list[i], i, list ].concat(extraArgs));
                 if (result !== undefined) {
                     return result;
                 }
@@ -705,7 +973,7 @@ exports.each = each;
  * @returns {Array}
  */
 function filter(list, method, data) {
-    var i = 0, len, result = [], extraArgs, response;
+    var i = 0, len, result = [], extraArgs, response, apl = exports.util.apply;
     if (arguments.length > 2) {
         extraArgs = exports.util.array.toArray(arguments);
         extraArgs.splice(0, 2);
@@ -713,7 +981,7 @@ function filter(list, method, data) {
     if (list && list.length) {
         len = list.length;
         while (i < len) {
-            response = method.apply(null, [ list[i], i, list ].concat(extraArgs));
+            response = apl(method, null, [ list[i], i, list ].concat(extraArgs));
             if (response) {
                 result.push(list[i]);
             }
@@ -721,8 +989,8 @@ function filter(list, method, data) {
         }
     } else {
         for (i in list) {
-            if (Object.prototype.hasOwnProperty.apply(list, [ i ])) {
-                response = method.apply(null, [ list[i], i, list ].concat(extraArgs));
+            if (apl(Object.prototype.hasOwnProperty, list, [ i ])) {
+                response = apl(method, null, [ list[i], i, list ].concat(extraArgs));
                 if (response) {
                     result.push(list[i]);
                 }
@@ -733,112 +1001,6 @@ function filter(list, method, data) {
 }
 
 exports.filter = filter;
-
-/**
- * ##dispatcher##
- * Behavior modifier for event dispatching.
- * @param {Object} target - the object to apply the methods to.
- * @param {Object} scope - the object that the methods will be applied from
- * @param {object} map - custom names of what methods to map from scope. such as _$emit_ and _$broadcast_.
- */
-function dispatcher(target, scope, map) {
-    var listeners = {};
-    /**
-     * ###off###
-     * removeEventListener from this object instance. given the event listened for and the callback reference.
-     * @param event
-     * @param callback
-     */
-    function off(event, callback) {
-        var index, list;
-        list = listeners[event];
-        if (list) {
-            if (callback) {
-                index = list.indexOf(callback);
-                if (index !== -1) {
-                    list.splice(index, 1);
-                }
-            } else {
-                list.length = 0;
-            }
-        }
-    }
-    /**
-     * ###on###
-     * addEventListener to this object instance.
-     * @param {String} event
-     * @param {Function} callback
-     * @returns {Function} - removeListener or unwatch function.
-     */
-    function on(event, callback) {
-        listeners[event] = listeners[event] || [];
-        listeners[event].push(callback);
-        return function() {
-            off(event, callback);
-        };
-    }
-    /**
-     * ###onOnce###
-     * addEventListener that gets remove with the first call.
-     * @param event
-     * @param callback
-     * @returns {Function} - removeListener or unwatch function.
-     */
-    function onOnce(event, callback) {
-        function fn() {
-            off(event, fn);
-            callback.apply(scope || target, arguments);
-        }
-        return on(event, fn);
-    }
-    /**
-     * ###getListeners###
-     * get the listeners from the dispatcher.
-     * @param {String} event
-     * @returns {*}
-     */
-    function getListeners(event) {
-        return listeners[event];
-    }
-    /**
-     * ###fire###
-     * fire the callback with arguments.
-     * @param {Function} callback
-     * @param {Array} args
-     * @returns {*}
-     */
-    function fire(callback, args) {
-        return callback && callback.apply(target, args);
-    }
-    /**
-     * ###dispatch###
-     * fire the event and any arguments that are passed.
-     * @param {String} event
-     */
-    function dispatch(event) {
-        if (listeners[event]) {
-            var i = 0, list = listeners[event], len = list.length;
-            while (i < len) {
-                fire(list[i], arguments);
-                i += 1;
-            }
-        }
-    }
-    if (scope && map) {
-        target.on = scope[map.on] && scope[map.on].bind(scope);
-        target.off = scope[map.off] && scope[map.off].bind(scope);
-        target.onOnce = scope[map.onOnce] && scope[map.onOnce].bind(scope);
-        target.dispatch = scope[map.dispatch].bind(scope);
-    } else {
-        target.on = on;
-        target.off = off;
-        target.onOnce = onOnce;
-        target.dispatch = dispatch;
-    }
-    target.getListeners = getListeners;
-}
-
-exports.dispatcher = dispatcher;
 
 /**
  * ###<a name="extend">extend</a>###
@@ -882,115 +1044,60 @@ exports.extend = extend;
     };
 })();
 
-/**
- * **toArray** Convert arguments or objects to an array.
- * @param {Object|Arguments} obj
- * @returns {Array}
- */
-function toArray(obj) {
-    var result = [], i = 0, len = obj.length;
-    if (obj.length !== undefined) {
-        while (i < len) {
-            result.push(obj[i]);
-            i += 1;
-        }
-    } else {
-        for (i in obj) {
-            if (Object.prototype.hasOwnProperty.apply(obj, [ i ])) {
-                result.push(obj[i]);
-            }
-        }
-    }
-    return result;
-}
-
-/**
- * **sort** apply array sort with a custom compare function.
- * > The ECMAScript standard does not guarantee Array.sort is a stable sort.
- * > According to the ECMA spec, when two objects are determined to be equal in a custom sort,
- * > JavaScript is not required to leave those two objects in the same order.
- * > replace sort from ECMAScript with this bubble sort to make it accurate
- */
-// Using QuickSort instead of Bubble Sort method. Speed on large arrays is HUGE. Once over 1000 items, the bubble sort is very slow. QuickSort is faster than native sort.
-var sort = function() {
-    function partition(array, left, right, fn) {
-        var cmp = array[right - 1], minEnd = left, maxEnd, dir = 0;
-        for (maxEnd = left; maxEnd < right - 1; maxEnd += 1) {
-            dir = fn(array[maxEnd], cmp);
-            if (dir < 0) {
-                if (maxEnd !== minEnd) {
-                    swap(array, maxEnd, minEnd);
-                }
-                minEnd += 1;
-            }
-        }
-        if (fn(array[minEnd], cmp)) {
-            // 1 || -1
-            swap(array, minEnd, right - 1);
-        }
-        return minEnd;
-    }
-    function swap(array, i, j) {
-        var temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-        return array;
-    }
-    function quickSort(array, left, right, fn) {
-        if (left < right) {
-            var p = partition(array, left, right, fn);
-            quickSort(array, left, p, fn);
-            quickSort(array, p + 1, right, fn);
-        }
-        return array;
-    }
-    return function(array, fn) {
-        var result = quickSort(array, 0, array.length, fn);
-        return result;
-    };
-}();
-
-exports.util = exports.util || {};
-
-exports.util.array = exports.util.array || {};
-
-exports.util.array.toArray = toArray;
-
-exports.util.array.sort = sort;
-
-exports.logWrapper = function LogWrapper(name, instance, theme, dispatch) {
+exports.logWrapper = function LogWrapper(name, instance, theme, inst) {
+    var apl = exports.util.apply;
     theme = theme || "black";
-    dispatch = dispatch || instance.dispatch || function() {};
     instance.$logName = name;
     instance.log = instance.info = instance.warn = instance.error = function() {};
+    function dispatchFn(dispatch, args) {
+        if (typeof dispatch === "function") {
+            apl(dispatch, instance, args);
+        }
+    }
     instance.log = function log() {
         var args = [ exports.datagrid.events.LOG, name, theme ].concat(exports.util.array.toArray(arguments));
-        dispatch.apply(instance, args);
+        if (inst.logger) {
+            apl(inst.logger.log, inst.logger, args);
+        } else {
+            dispatchFn(inst, args);
+        }
     };
     instance.info = function info() {
         var args = [ exports.datagrid.events.INFO, name, theme ].concat(exports.util.array.toArray(arguments));
-        dispatch.apply(instance, args);
+        if (inst.logger) {
+            apl(inst.logger.info, inst.logger, args);
+        } else {
+            dispatchFn(inst, args);
+        }
     };
     instance.warn = function warn() {
         var args = [ exports.datagrid.events.WARN, name, theme ].concat(exports.util.array.toArray(arguments));
-        dispatch.apply(instance, args);
+        if (inst.logger) {
+            apl(inst.logger.warn, inst.logger, args);
+        } else {
+            dispatchFn(inst, args);
+        }
     };
     instance.error = function error() {
         var args = [ exports.datagrid.events.ERROR, name, theme ].concat(exports.util.array.toArray(arguments));
-        dispatch.apply(instance, args);
+        if (inst.logger) {
+            apl(inst.logger.error, inst.logger, args);
+        } else {
+            dispatchFn(inst, args);
+        }
     };
     instance.destroyLogger = function() {
-        if (instance.logger) {
-            instance.log("destroy");
-            instance.logger.destroy();
-            instance.logger = null;
+        if (inst.logger) {
+            inst.log("destroy");
+            inst.logger.destroy();
+            inst.logger = null;
         }
     };
     return instance;
 };
 
 function Flow(inst, dispatch, pauseFn, $timeout) {
-    var running = false, intv, current = null, list = [], history = [], historyLimit = 10, uniqueMethods = {}, execStartTime, execEndTime, timeouts = {}, consoleMethodStyle = "color:#666666;";
+    var running = false, current = null, list = [], history = [], historyLimit = 10, uniqueMethods = {}, execStartTime, execEndTime, timeouts = {}, nextPromise, consoleMethodStyle = "color:#666666;";
     function getMethodName(method) {
         // TODO: there might be a faster way to get the function name.
         return method.toString().split(/\b/)[2];
@@ -1010,13 +1117,24 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     function clearSimilarItemsFromList(item) {
         var i = 0, len = list.length;
         while (i < len) {
-            if (list[i].label === item.label && list[i] !== current) {
-                inst.log("clear duplicate item %c%s", consoleMethodStyle, item.label);
+            if (list[i].label === item.label) {
+                if (list[i] === current && nextPromise) {
+                    $timeout.cancel(nextPromise);
+                    nextPromise = null;
+                    current = null;
+                    inst.warn("REMOVE ACTIVE FLOW ITEM %c%s", consoleMethodStyle, item.label);
+                } else {
+                    inst.info("remove Flow item %c%s", consoleMethodStyle, item.label);
+                }
                 list.splice(i, 1);
                 i -= 1;
                 len -= 1;
             }
             i += 1;
+        }
+        if (!current) {
+            // it was cleared. So we now call next.
+            next();
         }
     }
     function add(method, args, delay) {
@@ -1038,16 +1156,17 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
             label: getMethodName(method)
         });
     }
+    // timeouts that do not block the flow.
     function timeout(method, time) {
         var intv, item = createItem(method, []), startTime = Date.now(), timeoutCall = function() {
-            inst.log("exec timeout method %c%s %sms", consoleMethodStyle, item.label, Date.now() - startTime);
+            inst.log("exec timeout method %c%s %sms (len:%s)", consoleMethodStyle, item.label, Date.now() - startTime, list.length);
             list.push(item);
             // add after timeout time.
             if (running) {
                 next();
             }
         };
-        inst.log("wait for timeout method %c%s", consoleMethodStyle, item.label);
+        inst.log("wait for timeout method %c%s (len:%s)", consoleMethodStyle, item.label, list.length);
         intv = setTimeout(timeoutCall, time);
         // use regular timeout because we are just waiting to put it in the queue.
         timeouts[intv] = function() {
@@ -1069,12 +1188,10 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     }
     function done() {
         execEndTime = Date.now();
-        inst.log("finish %c%s took %dms", consoleMethodStyle, current.label, execEndTime - execStartTime);
+        inst.log("finish %c%s took %dms (len:%s)", consoleMethodStyle, current.label, execEndTime - execStartTime, list.length);
         current = null;
         addToHistory(list.shift());
-        if (list.length) {
-            next();
-        }
+        next();
         return execEndTime - execStartTime;
     }
     // Keep a history of what methods were executed for debugging. Keep up to the limit.
@@ -1085,27 +1202,44 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
         }
     }
     function next() {
+        inst.log("next %s", list.length);
         if (!current && list.length) {
             current = list[0];
             if (inst.async && current.delay !== undefined) {
-                inst.log("	delay for %c%s %sms", consoleMethodStyle, current.label, current.delay);
-                $timeout(exec, current.delay, false);
+                inst.log("	delay for %c%s %sms (len:%s)", consoleMethodStyle, current.label, current.delay, list.length);
+                nextPromise = $timeout(exec, current.delay, false);
             } else {
                 exec();
             }
         }
     }
     function exec() {
-        if (pauseFn && pauseFn()) {
-            $timeout(exec, 0, false);
+        if (!inst) {
             return;
         }
-        inst.log("start method %c%s", consoleMethodStyle, current.label);
+        if (nextPromise) {
+            $timeout.cancel(nextPromise);
+        }
+        if (pauseFn && pauseFn()) {
+            inst.warn("	wait for pauseFn");
+            nextPromise = $timeout(exec, 0, false);
+            return;
+        }
         var methodHasDoneArg = hasDoneArg(current.method);
-        if (methodHasDoneArg) current.args.push(done);
-        execStartTime = Date.now();
-        current.method.apply(null, current.args);
-        if (!methodHasDoneArg) done();
+        inst.log("start method %c%s (len:%s)" + (methodHasDoneArg && " - (has done arg)" || ""), consoleMethodStyle, current.label, list.length);
+        if (methodHasDoneArg) {
+            current.args.push(done);
+        }
+        try {
+            execStartTime = Date.now();
+            exports.util.apply(current.method, null, current.args);
+        } catch (e) {
+            inst.warn(e.message + "\n" + (e.stack || e.stacktrace || e.backtrace));
+        } finally {
+            if (!methodHasDoneArg) {
+                done();
+            }
+        }
     }
     function run() {
         running = true;
@@ -1113,7 +1247,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     }
     function clear() {
         var len = current ? 1 : 0, item;
-        inst.log("clear");
+        inst.info("clear");
         while (list.length > len) {
             item = list.splice(len, 1)[0];
             inst.log("	remove %s from flow", item.label);
@@ -1122,13 +1256,22 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     function length() {
         return list.length;
     }
+    function count(name) {
+        var c = 0;
+        for (var i = 0; i < list.length; i += 1) {
+            if (list[i].label === name) {
+                c += 1;
+            }
+        }
+        return c;
+    }
     function destroy() {
         list.length = 0;
         inst = null;
     }
-    inst = exports.logWrapper("Flow", inst || {}, "grey", dispatch);
-    //    inst.async = Object.prototype.hasOwnProperty.apply(inst, ['async']) ? inst.async : true;
-    inst.debug = Object.prototype.hasOwnProperty.apply(inst, [ "debug" ]) ? inst.debug : 0;
+    exports.logWrapper("Flow", inst, "grey", inst);
+    //    inst.async = exports.util.apply(Object.prototype.hasOwnProperty, inst, ['async']) ? inst.async : true;
+    inst.debug = exports.util.apply(Object.prototype.hasOwnProperty, inst, [ "debug" ]) ? inst.debug : 0;
     inst.insert = insert;
     inst.add = add;
     inst.unique = unique;
@@ -1138,6 +1281,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     inst.run = run;
     inst.clear = clear;
     inst.length = length;
+    inst.count = count;
     inst.destroy = destroy;
     return inst;
 }
@@ -1215,9 +1359,24 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     // <a name="logEvents"></a>listing the log events so they can be ignored if needed.
     var logEvents = [ exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR ];
     // <a name="inst"></a>the instance of the datagrid that will be referenced by all addons.
-    var inst = this, eventLogger = {}, startupComplete = false, gcIntv;
+    var inst = this, eventLogger = {}, startupComplete = false, gcIntv, $compileCache = {};
     // wrap the instance for logging.
-    exports.logWrapper("datagrid event", inst, "grey", dispatch);
+    exports.logWrapper("datagrid event", inst, "grey", inst);
+    // for debugging and watching the angular phase start and end.
+    // cannot use for flowPauseFn it causes lots of errors because datagrid will not flow at all
+    // during a phase with this setting a flag to use.
+    //function beforePhase() {
+    //    inst.info("NG-$digest START");
+    //    $timeout(afterPhase, 0, false);
+    //}
+    //
+    //function afterPhase() {
+    //    if (inst) {// it may be destroyed after a phase. so only log if it is there.
+    //        inst.info("NG-$digest END");
+    //    }
+    //}
+    //
+    //scope.$watch(beforePhase);
     /**
      * ###<a name="init">init</a>###
      * Initialize the datagrid. Add unique methods to the flow control.
@@ -1281,8 +1440,8 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         inst.calculateViewportHeight = calculateViewportHeight;
         inst.options = options = exports.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
         inst.flow = flow = new Flow({
-            async: Object.prototype.hasOwnProperty.apply(options, [ "async" ]) ? !!options.async : true,
-            debug: Object.prototype.hasOwnProperty.apply(options, [ "debug" ]) ? options.debug : 0
+            async: exports.util.apply(Object.prototype.hasOwnProperty, options, [ "async" ]) ? !!options.async : true,
+            debug: exports.util.apply(Object.prototype.hasOwnProperty, options, [ "debug" ]) ? options.debug : 0
         }, inst.dispatch, flowPauseFn, $timeout);
         // this needs to be set immediately so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
@@ -1494,7 +1653,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     function swapItem(oldItem, newItem, keepTemplate) {
         //TODO: needs unit test.
         var index = getRowIndex(oldItem), oldTpl, newTpl;
-        if (Object.prototype.hasOwnProperty.apply(inst.data, [ index ])) {
+        if (exports.util.apply(Object.prototype.hasOwnProperty, inst.data, [ index ])) {
             oldTpl = inst.templateModel.getTemplate(oldItem);
             if (keepTemplate) {
                 newTpl = oldTpl;
@@ -1576,7 +1735,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @returns {*}
      */
     function getRowIndexFromElement(el) {
-        if (element[0].contains(el[0] || el)) {
+        if (el && element[0].contains(el[0] || el)) {
             el = el.scope ? el : angular.element(el);
             var s = el.scope();
             if (s === inst.scope) {
@@ -1667,12 +1826,17 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @returns {*}
      */
     function compileRow(index, el) {
-        var s = scopes[index], prev, tpl;
+        var s = scopes[index], tplName, tpl, $c;
         if (s && !s.$parent) {
             s.$parent = scope;
         }
         if (!s) {
+            // fixes a bug expanding the last row and trying to scroll to it.
+            if (!scope.$$childTail && scope.$$childHead && scopes[index - 1]) {
+                scope.$$childTail = scopes[index - 1];
+            }
             s = scope.$new();
+            tplName = inst.templateModel.getTemplateName(inst.data[index]);
             tpl = inst.templateModel.getTemplate(inst.data[index]);
             link(index, s);
             s.$status = options.compiledClass;
@@ -1682,7 +1846,28 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             scopes[index] = s;
             el = el || getRowElm(index);
             el.removeClass(options.uncompiledClass);
-            $compile(el)(s);
+            // by keeping the $compile(el) cached this seems to be faster than $compile(el)(s) every time.
+            $c = $compileCache[tplName] || ($compileCache[tplName] = $compile(el));
+            // since compile is cached we now use the clone method to replace our dom element with the cloned one.
+            $c(s, function(clone) {
+                var indexes = inst.chunkModel.getRowIndexes(index);
+                // gets the nested indexes for the row
+                indexes.pop();
+                // pop off the index for the row, we want it's parent.
+                var parent = inst.chunkModel.getItemByIndexes(indexes).dom;
+                // get the parent by indexes.
+                var attrs = el[0].attributes, len = attrs.length;
+                // we need to copy over the row-id and any other custom properties on this row.
+                // use for loop instead of each to avoid closure function overhead. Needs to be as fast as possible.
+                for (var i = 0; i < len; i += 1) {
+                    var attr = attrs[i];
+                    // copy the attr from el to clone
+                    if (clone.attr(attr.name) !== attr.value) {
+                        clone.attr(attr.name, attr.value);
+                    }
+                }
+                parent.replaceChild(clone[0], el[0]);
+            });
             if (inst.templateModel.hasVariableRowHeights()) {
                 inst.chunkModel.updateAllChunkHeights(index);
             }
@@ -1727,14 +1912,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         scope.$emit(exports.datagrid.events.ON_READY);
     }
     function isDigesting(s) {
-        var ds = s;
-        while (ds) {
-            if (ds.$$phase) {
-                return true;
-            }
-            ds = ds.$parent;
-        }
-        return false;
+        return !!(s && s.$$phase || s.$root.$$phase);
     }
     /**
      * ###<a name="safeDigest">safeDigest</a>###
@@ -1762,7 +1940,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         //TODO: angular 1.3+ is doing counts differently. Some counts are getting removed.
         while (s) {
             for (var eventName in listenerCounts) {
-                if (Object.prototype.hasOwnProperty.apply(listenerCounts, [ eventName ])) {
+                if (exports.util.apply(Object.prototype.hasOwnProperty, listenerCounts, [ eventName ])) {
                     fn(s, listenerCounts, eventName);
                 }
             }
@@ -2139,7 +2317,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * digest <a href="#activeRange">activeRange</a> of rows.
      */
     function render() {
-        inst.log("render");
+        inst.info("render");
         if (readyToRender()) {
             waitCount = 0;
             inst.log("	render %s", state);
@@ -2306,6 +2484,10 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         return false;
     }
     function changeData(newVal, oldVal) {
+        if (inst.flow.count("changeData") > 1) {
+            // the first one is this call.
+            return;
+        }
         inst.log("	changeData");
         inst.templateModel.clearAllRowHeights();
         dispatch(exports.datagrid.events.ON_BEFORE_RESET, inst);
@@ -2417,24 +2599,15 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         flow.add(inst.dispatch, [ exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED_RENDER ]);
     }
     /**
-     * ###<a name="isLogEvent">isLogEvent</a>###
-     * used to compare events to detect log events.
-     * @param {String} evt
-     * @returns {boolean}
-     */
-    function isLogEvent(evt) {
-        return logEvents.indexOf(evt) !== -1;
-    }
-    /**
      * ###<a name="dispatch">dispatch</a>###
      * handle dispatching of events from the datagrid.
      * @param {String} event
      * @returns {Object}
      */
     function dispatch(event) {
-        if (!isLogEvent(event) && options.debug) eventLogger.log("$emit %s", event);
+        if (options.debug) eventLogger.log("$emit %s", event);
         // THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
-        return scope.$emit.apply(scope, arguments);
+        return exports.util.apply(scope.$emit, scope, arguments);
     }
     function forceGarbageCollection() {
         // concept is to create a large object that will cause the browser to garbage collect before creating it.
@@ -2449,7 +2622,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                         a = .5;
                     }
                 }
-            }, 1e3);
+            }, 5e3);
         }
     }
     /**
@@ -2529,8 +2702,8 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         logEvents = null;
         $compile = null;
     }
-    exports.logWrapper("datagrid", inst, "green", dispatch);
-    exports.logWrapper("events", eventLogger, "light", dispatch);
+    exports.logWrapper("datagrid", inst, "green", inst);
+    exports.logWrapper("events", eventLogger, "light", inst);
     scope.datagrid = inst;
     setupExports();
     return inst;
@@ -2548,7 +2721,7 @@ module.directive("uxDatagrid", [ "$compile", "gridAddons", "$timeout", function(
             pre: function(scope, element, attr) {
                 var inst = new Datagrid(scope, element, attr, $compile, $timeout);
                 each(exports.datagrid.coreAddons, function(method) {
-                    method.apply(inst, [ inst ]);
+                    exports.util.apply(method, inst, [ inst ]);
                 });
                 gridAddons(inst, attr.addons);
             },
@@ -2573,7 +2746,7 @@ module.directive("uxDatagrid", [ "$compile", "gridAddons", "$timeout", function(
  * @returns {{}}
  */
 exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
-    var _list, _rows, _chunkSize, _el, result = exports.logWrapper("chunkModel", {}, "purple", inst.dispatch), _templateStartCache, _templateEndCache, _cachedDomRows = [];
+    var _list, _rows, _chunkSize, _el, result = exports.logWrapper("chunkModel", {}, "purple", inst), _templateStartCache, _templateEndCache, _cachedDomRows = [];
     /**
      * **getChunkList**
      * Return the list that was created.
@@ -2730,6 +2903,9 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
      * @returns {Array}
      */
     function getRowIndexes(rowIndex, chunkList, indexes) {
+        if (!chunkList) {
+            return [];
+        }
         var i = 0, len = chunkList.length, chunk;
         indexes = indexes || [];
         while (i < len) {
@@ -2992,7 +3168,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
     result.destroy = destroy;
     inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, disableNonVisibleChunks);
     // apply event dispatching.
-    dispatcher(result);
+    exports.util.dispatcher(result);
     inst.chunkModel = result;
     return result;
 };
@@ -3079,7 +3255,7 @@ ChunkArray.prototype.rangeOverlap = function(min, max, cushion) {
 ChunkArray.prototype.each = function(method, args) {
     var i = 0, len = this.length;
     while (i < len) {
-        method.apply(this[i], args);
+        exports.util.apply(method, this[i], args);
         i += 1;
     }
 };
@@ -3433,7 +3609,7 @@ exports.datagrid.events.ENABLE_CREEP = "datagrid:enableCreep";
 exports.datagrid.events.DISABLE_CREEP = "datagrid:disableCreep";
 
 exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
-    var intv = 0, creepCount = 0, model = exports.logWrapper("creepModel", {}, "blue", inst.dispatch), upIndex = 0, downIndex = 0, waitHandle, waitingOnReset, time, lastPercent, unwatchers = [], forceScroll = false, scrollIndex = 0, scrollIndexPadding = 0;
+    var intv = 0, creepCount = 0, model = exports.logWrapper("creepModel", {}, "blue", inst), upIndex = 0, downIndex = 0, waitHandle, waitingOnReset, time, lastPercent, unwatchers = [], forceScroll = false, scrollIndex = 0, scrollIndexPadding = 0;
     function digest(index) {
         if (inst.scope.$root.$$phase) {
             return false;
@@ -3476,10 +3652,10 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         if (inst.options.async) {
             clearTimeout(waitHandle);
             waitHandle = setTimeout(function() {
-                method.apply(null, args);
+                exports.util.apply(method, null, args);
             }, time);
         } else {
-            method.apply(this, args);
+            exports.util.apply(method, this, args);
         }
         return waitHandle;
     }
@@ -3611,7 +3787,6 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.DISABLE_CREEP, model.disable));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.STOP_CREEP, stop));
-    inst.dispatch(exports.datagrid.events.ON_TOUCH_DOWN, event);
     inst.creepRenderModel = model;
     // do not add listeners if it is not enabled.
     if (inst.options.creepRender && inst.options.creepRender.enable) {
@@ -3626,7 +3801,7 @@ exports.datagrid.coreAddons.push(exports.datagrid.coreAddons.creepRenderModel);
 /*global ux */
 exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
     //TODO: this needs to be put on exp.normalizedModel
-    var originalData, normalizedData, result = exports.logWrapper("normalizeModel", {}, "grey", inst.dispatch);
+    var originalData, normalizedData, result = exports.logWrapper("normalizeModel", {}, "grey", inst);
     /**
      * ###<a name="normalize">normalize</a>###
      * Convert a hierarchical data structure into a flattened array so that headers, rows, and however deep the data is
@@ -3825,7 +4000,7 @@ exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
 exports.datagrid.events.ON_TOUCH_MOVE = "datagrid:touchMove";
 
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
-    var result = exports.logWrapper("scrollModel", {}, "orange", inst.dispatch), setup = false, enable = true, unwatchSetup, waitForStopIntv, hasScrollListener = false, lastScroll, bottomOffset = 0, lastRenderTime, // start easing
+    var result = exports.logWrapper("scrollModel", {}, "orange", inst), setup = false, enable = true, unwatchSetup, waitForStopIntv, lastTouchUpdateTime = 0, hasScrollListener = false, lastScroll, bottomOffset = 0, lastRenderTime, // start easing
     startOffsetY, startOffsetX, offsetY, offsetX, startScroll, lastDeltaY, lastDeltaX, speed = 0, speedX = 0, startTime, distance, scrollingIntv, // end easing
     listenerData = [ {
         event: "touchstart",
@@ -3849,6 +4024,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     function setupScrolling() {
         unwatchSetup();
+        inst.element.css("willChange", "scroll-position");
         if (!inst.element.css("overflow") || inst.element.css("overflow") === "visible") {
             inst.element.css({
                 overflow: "auto"
@@ -3907,6 +4083,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
     result.removeScrollListener = function removeScrollListener() {
         result.log("removeScrollListener");
+        hasScrollListener = false;
         inst.element[0].removeEventListener("scroll", onUpdateScrollHandler);
     };
     result.removeTouchEvents = function removeTouchEvents() {
@@ -3930,6 +4107,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.enable = function(value) {
         enable = !!value;
     };
+    function getScrollTop() {
+        return inst.values.scroll;
+    }
+    function setElementScroll(value) {
+        inst.element[0].scrollTop = value;
+        inst.values.scroll = value;
+    }
     result.onTouchStart = function onTouchStart(event) {
         if (!enable) {
             return;
@@ -3955,14 +4139,25 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         if (inst.options.scrollModel && inst.options.scrollModel.preventTouchMove) {
             result.killEvent(event);
         }
-        var y = getTouches(event)[0].clientY, x = getTouches(event)[0].clientX, deltaY = offsetY - y, deltaX = offsetX - x;
-        if (deltaY !== lastDeltaY) {
-            result.setScroll(result.capScrollValue(startScroll + deltaY));
-            speed = deltaY - lastDeltaY;
+        var now = Date.now();
+        if (now - lastTouchUpdateTime < 20) {
+            return;
+        }
+        lastTouchUpdateTime = now;
+        var y = getTouches(event)[0].clientY, x = getTouches(event)[0].clientX, deltaY = offsetY - y, deltaX = offsetX - x, scroll;
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            return;
+        }
+        if (offsetY !== y) {
+            scroll = result.capScrollValue(getScrollTop() + deltaY);
+            result.setScroll(scroll);
+            speed = deltaY;
+            offsetY = y;
             lastDeltaY = deltaY;
         }
         if (deltaX !== lastDeltaX) {
-            result.setScroll(result.capScrollValue(startScroll + deltaY));
+            // horizontal scrolling is not complete. prevent until completed otherwise it is firing multiple setScroll values.
+            //result.setScroll(result.capScrollValue(startScroll + deltaY));
             speedX = deltaX - lastDeltaX;
             lastDeltaX = deltaX;
         }
@@ -3985,12 +4180,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
                 distance = speed * inst.options.scrollModel.speed;
                 result.scrollSlowDown(true);
             }
+        } else {
+            result.onUpdateScroll();
         }
-        var sTop = inst.element[0].scrollTop;
+        var sTop = getScrollTop();
         if (sTop < 0 || inst.getContentHeight() < inst.getViewportHeight()) {
-            inst.element[0].scrollTop = 0;
+            setElementScroll(0);
         } else if (sTop > inst.getContentHeight() - inst.getViewportHeight()) {
-            inst.element[0].scrollTop = inst.getContentHeight() - inst.getViewportHeight();
+            setElementScroll(inst.getContentHeight() - inst.getViewportHeight());
         }
     };
     result.scrollSlowDown = function(wait) {
@@ -4002,10 +4199,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             t = 0;
         }
         if (t > 0) {
-            value = result.capScrollValue(inst.values.scroll + change);
+            value = result.capScrollValue(getScrollTop() + change);
             if (!wait) {
                 //                result.log("\tscroll %s of %s", value, inst.element[0].scrollHeight);
-                inst.element[0].scrollTop = value;
+                setElementScroll(value);
             }
             scrollingIntv = setTimeout(result.scrollSlowDown, 20);
         }
@@ -4033,7 +4230,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         }
     };
     result.getScroll = function getScroll(el) {
-        return (el || inst.element[0]).scrollTop;
+        if (el) {
+            return el.scrollTop;
+        }
+        return getScrollTop();
     };
     result.setScroll = function setScroll(value) {
         var unwatch, chunkList = inst.chunkModel.getChunkList();
@@ -4044,9 +4244,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
                 result.setScroll(value);
             });
         } else if (inst.getContentHeight() - inst.getViewportHeight() >= value) {
-            inst.element[0].scrollTop = value;
+            setElementScroll(value);
+            result.onUpdateScroll();
         }
-        inst.values.scroll = value;
     };
     function onUpdateScrollHandler(event) {
         inst.scrollModel.onUpdateScroll(event);
@@ -4056,7 +4256,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * @param event
      */
     result.onUpdateScroll = function onUpdateScroll(event) {
-        var val = inst.scrollModel.getScroll(event.target || event.srcElement);
+        var val = inst.scrollModel.getScroll(event && (event.target || event.srcElement));
         if (inst.values.scroll !== val) {
             inst.dispatch(exports.datagrid.events.ON_SCROLL_START, val);
             inst.values.speed = val - inst.values.scroll;
@@ -4088,12 +4288,16 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.scrollTo = function scrollTo(value, immediately) {
         value = result.capScrollValue(value);
-        inst.scrollModel.setScroll(value);
-        if (immediately) {
-            inst.scrollModel.onScrollingStop();
-        } else {
-            inst.scrollModel.waitForStop();
+        if (value !== lastScroll) {
+            inst.scrollModel.setScroll(value);
+            if (immediately) {
+                inst.scrollModel.onScrollingStop();
+            } else {
+                inst.scrollModel.waitForStop();
+            }
+            return true;
         }
+        return false;
     };
     result.clearOnScrollingStop = function clearOnScrollingStop() {
         result.onScrollingStop();
@@ -4168,8 +4372,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         compileRowSiblings(index);
         if (offset < inst.values.scroll) {
             // it is above the view.
-            inst.scrollModel.scrollTo(offset, immediately);
-            return true;
+            return inst.scrollModel.scrollTo(offset, immediately);
         }
         inst.updateViewportHeight();
         // always update the height before calculating. onResize is not reliable
@@ -4177,8 +4380,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         rowHeight = inst.templateModel.getTemplateHeight(inst.getData()[index]);
         if (offset >= inst.values.scroll + viewHeight - rowHeight) {
             // it is below the view.
-            inst.scrollModel.scrollTo(offset - viewHeight + rowHeight, immediately);
-            return true;
+            return inst.scrollModel.scrollTo(offset - viewHeight + rowHeight, immediately);
         }
         // otherwise it is in view so do nothing.
         return false;
@@ -4194,7 +4396,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     function onAfterHeightsUpdated() {
         if (hasScrollListener) {
             result.log("onAfterHeightsUpdated force scroll to %s", inst.values.scroll);
-            inst.element[0].scrollTop = inst.values.scroll;
+            setElementScroll(inst.values.scroll);
         }
     }
     /**
@@ -4286,7 +4488,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         return str;
     }
     inst.templateModel = function() {
-        var templates = [], totalHeight, defaultName = "default", result = exports.logWrapper("templateModel", {}, "teal", inst.dispatch), forcedTemplates = [], templatesKey, rowHeightsDirty = false, overrideRowHeights, options = extend({}, inst.options.templateModel);
+        var templates = [], totalHeight, defaultName = "default", result = exports.logWrapper("templateModel", {}, "teal", inst), forcedTemplates = [], templatesKey, rowHeightsDirty = false, overrideRowHeights, options = extend({}, inst.options.templateModel);
         function getTemplatesKey() {
             if (!templatesKey) {
                 templatesKey = "$$template_" + inst.uid;
@@ -4385,7 +4587,12 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         };
         //TODO: need to make this method so it can be overwritten to look up templates a different way.
         function getTemplateName(el) {
-            return el.attr ? el.attr("template") : el.getAttribute("template");
+            if (el.attr || el.getAttribute) {
+                return el.attr ? el.attr("template") : el.getAttribute("template");
+            } else if (!(el instanceof HTMLElement)) {
+                // el is a data not an element.
+                return el[getTemplatesKey()] || el._template;
+            }
         }
         function getTemplateByName(name) {
             if (templates[name]) {
@@ -4396,7 +4603,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         function dynamicHeights() {
             var i, h;
             for (i in templates) {
-                if (Object.prototype.hasOwnProperty.apply(templates, [ i ])) {
+                if (exports.util.apply(Object.prototype.hasOwnProperty, templates, [ i ])) {
                     h = h || templates[i].height;
                     if (h !== templates[i].height) {
                         return true;
@@ -4435,19 +4642,24 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         }
         function setTemplateName(item, templateName) {
             var key = getTemplatesKey();
-            if (!Object.prototype.hasOwnProperty.apply(item, [ key ]) && forcedTemplates.indexOf(item) === -1) {
+            if (!exports.util.apply(Object.prototype.hasOwnProperty, item, [ key ]) && forcedTemplates.indexOf(item) === -1) {
                 forcedTemplates.push(item);
             }
             item[key] = templateName;
         }
         function setTemplate(itemOrIndex, newTemplateName, classes) {
-            result.log("setTemplate %s %s", itemOrIndex, newTemplateName);
-            var item = typeof itemOrIndex === "number" ? inst.data[itemOrIndex] : itemOrIndex;
+            result.info("setTemplate %s %s", itemOrIndex, newTemplateName);
+            var item;
+            if (typeof itemOrIndex === "number") {
+                item = inst.data[itemOrIndex];
+                clearRowHeight(itemOrIndex);
+            } else {
+                item = itemOrIndex;
+            }
             var oldTemplate = result.getTemplate(item).name;
             result.setTemplateName(item, newTemplateName);
-            setTimeout(function() {
-                inst.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName, classes);
-            });
+            // needs to wait until after the digest.
+            inst.flow.add(inst.dispatch, [ exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName, classes ], 0);
         }
         // if no value. calculate it.
         function forceRowHeight(index, value) {

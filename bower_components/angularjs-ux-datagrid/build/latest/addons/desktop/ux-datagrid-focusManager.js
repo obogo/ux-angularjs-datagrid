@@ -1,6 +1,6 @@
 /*!
-* ux-angularjs-datagrid v.1.4.4
-* (c) 2015, Obogo
+* ux-angularjs-datagrid v.1.4.9
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -329,7 +329,7 @@ exports.selector = function() {
     function getList(obj) {
         var ary = [], i;
         for (i in obj) {
-            if (Object.prototype.hasOwnProperty.apply(obj, [ i ])) {
+            if (exports.util.apply(Object.prototype.hasOwnProperty, obj, [ i ])) {
                 ary.push(obj[i]);
             }
         }
@@ -453,7 +453,7 @@ angular.module("ux").factory("gridFocusManager", function() {
         /**
          * We want to add and remove listeners only on the dom that is currently under watch.
          */
-        var result = exports.logWrapper("gridFocusManager", {}, "redOrange", inst.dispatch), unwatchers = [], keys = {
+        var result = exports.logWrapper("gridFocusManager", {}, "redOrange", inst), unwatchers = [], keys = {
             ENTER: 13,
             UP: 38,
             DOWN: 40
@@ -493,7 +493,7 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @param {Function} method
          */
         function applyToListeners(method) {
-            if (!inst.values.activeRange.max || inst.values.activeRange.max < 0) {
+            if (isNaN(inst.values.activeRange.max) || inst.values.activeRange.max < 0) {
                 return;
             }
             result.log("	applyTo: %s - %s", inst.values.activeRange.min, inst.values.activeRange.max);
@@ -619,7 +619,10 @@ angular.module("ux").factory("gridFocusManager", function() {
          */
         function addListenersToRow(rowElm) {
             var focusable = getFocusableElements(angular.element(rowElm));
-            if (focusable.length) {
+            if (focusable.length && (focusable = exports.util.matchAll(focusable, {
+                nodeName: "INPUT"
+            })).length) {
+                // only add keydown to input fields
                 result.log("		addListenersToRow");
                 focusable = angular.element(focusable);
                 focusable.bind("keydown", onKeyDown);
@@ -634,7 +637,10 @@ angular.module("ux").factory("gridFocusManager", function() {
          */
         function removeListenersToRow(rowElm) {
             var focusable = getFocusableElements(angular.element(rowElm));
-            if (focusable.length) {
+            if (focusable.length && (focusable = exports.util.matchAll(focusable, {
+                nodeName: "INPUT"
+            })).length) {
+                // only add keydown to input fields
                 result.log("		removeListenersToRow");
                 focusable = angular.element(focusable);
                 focusable.unbind("keydown", onKeyDown);
@@ -649,6 +655,8 @@ angular.module("ux").factory("gridFocusManager", function() {
          */
         function onKeyDown(event) {
             var target = angular.element(event.currentTarget), atTop = false, atBottom = false;
+            var index;
+            var item;
             result.log("FM: onKeyDown");
             if (event.keyCode === keys.ENTER && event.currentTarget.nodeName.match(/A/)) {
                 // on anchors we allow enter to execute it. So ignore it.
@@ -657,12 +665,16 @@ angular.module("ux").factory("gridFocusManager", function() {
             if (event.shiftKey && event.keyCode === keys.ENTER || event.keyCode === keys.UP) {
                 atTop = !focusToPrevRowElement(target);
                 if (atTop) {
-                    inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_TOP_ENTER);
+                    index = inst.getRowIndexFromElement(target);
+                    item = inst.getRowItem(index);
+                    inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_TOP_ENTER, index, item);
                 }
             } else if (event.keyCode === keys.ENTER || event.keyCode === keys.DOWN) {
                 atBottom = !focusToNextRowElement(target);
                 if (atBottom) {
-                    inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_BOTTOM_ENTER);
+                    index = inst.getRowIndexFromElement(target);
+                    item = inst.getRowItem(index);
+                    inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_BOTTOM_ENTER, index, item);
                 }
             }
         }
@@ -786,8 +798,8 @@ angular.module("ux").factory("gridFocusManager", function() {
             result.log("	performFocus %o", focusEl[0]);
             var success = false;
             // we now need to scroll the row into view if it is not.
-            inst.scrollModel.scrollIntoView(inst.getRowIndexFromElement(focusEl), true);
             if (focusEl[0]) {
+                inst.scrollModel.scrollIntoView(inst.getRowIndexFromElement(focusEl), true);
                 if (focusEl[0].select) {
                     focusEl[0].select();
                 }
@@ -810,7 +822,7 @@ angular.module("ux").factory("gridFocusManager", function() {
             result.log("	findNextRowWithSelection");
             if (inst.options.gridFocusManager && inst.options.gridFocusManager.filterNextPattern) {
                 // make it look just through the objects to jump to that item.
-                while (nextIndex > 0 && nextIndex < inst.rowsLength - 1 && !exports.datagrid.util.isMatch(inst.data[nextIndex], inst.options.gridFocusManager.filterNextPattern)) {
+                while (nextIndex > 0 && nextIndex < inst.rowsLength - 1 && !exports.util.isMatch(inst.data[nextIndex], inst.options.gridFocusManager.filterNextPattern)) {
                     nextIndex += dir;
                 }
             }

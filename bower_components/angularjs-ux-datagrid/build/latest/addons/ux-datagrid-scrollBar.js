@@ -1,6 +1,6 @@
 /*!
-* ux-angularjs-datagrid v.1.4.4
-* (c) 2015, Obogo
+* ux-angularjs-datagrid v.1.4.9
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -15,7 +15,7 @@ if (typeof define === "function" && define.amd) {
 
 angular.module("ux").factory("scrollBar", function() {
     return [ "inst", function(inst) {
-        var result = exports.logWrapper("scrollBar", {}, "red", inst.dispatch), scrollBarElm = document.createElement("div"), data = {}, parent = inst.element[0].parentNode, nextSibling = inst.element[0].nextSibling;
+        var result = exports.logWrapper("scrollBar", {}, "red", inst), scrollBarElm = document.createElement("div"), data = {}, parent = inst.element[0].parentNode, nextSibling = inst.element[0].nextSibling;
         scrollBarElm.style.display = "none";
         scrollBarElm.className = "datagrid-scrollbar";
         if (nextSibling) {

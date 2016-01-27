@@ -1,6 +1,6 @@
 /*!
-* ux-angularjs-datagrid v.1.4.4
-* (c) 2015, Obogo
+* ux-angularjs-datagrid v.1.4.9
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -33,7 +33,7 @@ exports.datagrid.events.EXPAND_GROUP_CHANGE = "datagrid:expandGroupChange";
  */
 angular.module("ux").factory("expandableGroups", function() {
     return [ "inst", function(inst) {
-        var result = exports.logWrapper("expandableGroups", {}, "orange", inst.dispatch), options = inst.expandableGroups || {}, expanded = {}, resultData = [], instSetData = inst.setData, getNormalized = inst.getData;
+        var result = exports.logWrapper("expandableGroups", {}, "orange", inst), options = inst.expandableGroups || {}, expanded = {}, resultData = [], instSetData = inst.setData, getNormalized = inst.getData;
         /**
         * ###<a name="generateData">generateData</a>###
         * Generate an array of only the items that should be shown. A normalized array.
@@ -79,7 +79,7 @@ angular.module("ux").factory("expandableGroups", function() {
         * @returns {Array}
         */
         inst.setData = function(data, grouped) {
-            instSetData.apply(inst, arguments);
+            exports.util.apply(instSetData, inst, arguments);
             generateData();
             return resultData;
         };

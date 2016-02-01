@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.9
+* ux-angularjs-datagrid v.1.4.10
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.4.9
+* ux-angularjs-datagrid v.1.4.10
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -455,7 +455,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.4.9",
+    version: "1.4.10",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1912,7 +1912,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         scope.$emit(exports.datagrid.events.ON_READY);
     }
     function isDigesting(s) {
-        return !!(s && s.$$phase || s.$root.$$phase);
+        return !!(s && (s.$$phase || s.$root.$$phase));
     }
     /**
      * ###<a name="safeDigest">safeDigest</a>###

@@ -654,7 +654,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     }
 
     function isDigesting(s) {
-        return !!(s && s.$$phase || s.$root.$$phase);
+        return !!(s && (s.$$phase || s.$root.$$phase));
         //var ds = s;
         //while (ds) {
         //    if (ds.$$phase) {

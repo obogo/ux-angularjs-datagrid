@@ -132,72 +132,25 @@ module.exports = function (grunt) {
                     footer: '<%= wrapEnd %>'
                 },
                 files: {
-                    'build/latest/angular-ux-<%= pkg.filename %>.min.js': [
-                        'util/hb/build/util/hb.js',
-                        'src/errors/prod-errors.js',
-                        'src/ux-datagrid-config.js',
-                        'src/lib/*.js',
-                        'src/core/logWrapper.js',
-                        'src/core/Flow.js',
-                        'src/ux-datagrid.js',
-                        'src/core/addons/*.js'
-                    ],
-                    'build/latest/addons/desktop/ux-<%= pkg.filename %>-focusManager.min.js': [
-                        'src/addons/libs/ux-visibility.js',
-                        'src/addons/libs/ux-selector.js',
-                        'src/addons/desktop/gridFocusManager.js'
-                    ],
-                    'build/latest/addons/desktop/ux-<%= pkg.filename %>-disableHoverWhileScrolling.min.js': [
-                        'src/addons/desktop/disableHoverWhileScrolling.js'
-                    ],
-                    'build/latest/addons/touch/ux-<%= pkg.filename %>-iscroll.min.js': [
-                        'src/addons/touch/iScrollAddon.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-collapsibleGroups.min.js': [
-                        'src/addons/collapsibleGroups.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-expandableGroups.min.js': [
-                        'src/addons/expandableGroups.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-expandRows.min.js': [
-                        'src/addons/expandRows.js'
-                    ],
-//                    'build/latest/addons/ux-<%= pkg.filename %>-findInList.min.js': [
-//                        'src/addons/findInList.js'
-//                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-gridLogger.min.js': [
-                        'src/addons/gridLogger.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-infiniteScroll.min.js': [
-                        'src/addons/infiniteScroll.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-scrollHistory.min.js': [
-                        'src/addons/scrollHistory.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-sortModel.min.js': [
-                        'src/addons/sortModel.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-statsModel.min.js': [
-                        'src/addons/statsModel.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-windowScroll.min.js': [
-                        'src/addons/windowScroll.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-memoryOptimizer.min.js': [
-                        'src/addons/memoryOptimizer.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-scrollBar.min.js': [
-                        'src/addons/scrollBar.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-scrollBounce.min.js': [
-                        'src/addons/scrollBounce.js'
-                    ],
-                    'build/latest/other/ux-doubleScroll.min.js': [
-                        'src/other/doubleScroll.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-dragRows.min.js': [
-                        'src/addons/dragRows.js'
-                    ]
+                    'build/latest/angular-ux-<%= pkg.filename %>.min.js': ['build/latest/angular-ux-<%= pkg.filename %>.js'],
+                    'build/latest/addons/desktop/ux-<%= pkg.filename %>-focusManager.min.js': ['build/latest/addons/desktop/ux-<%= pkg.filename %>-focusManager.js'],
+                    'build/latest/addons/desktop/ux-<%= pkg.filename %>-disableHoverWhileScrolling.min.js': ['build/latest/addons/desktop/ux-<%= pkg.filename %>-disableHoverWhileScrolling.js'],
+                    'build/latest/addons/touch/ux-<%= pkg.filename %>-iscroll.min.js': ['build/latest/addons/touch/ux-<%= pkg.filename %>-iscroll.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-collapsibleGroups.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-collapsibleGroups.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-expandableGroups.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-expandableGroups.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-expandRows.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-expandRows.js'],
+//                    'build/latest/addons/ux-<%= pkg.filename %>-findInList.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-findInList.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-gridLogger.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-gridLogger.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-infiniteScroll.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-infiniteScroll.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-scrollHistory.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-scrollHistory.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-sortModel.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-sortModel.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-statsModel.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-statsModel.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-windowScroll.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-windowScroll.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-memoryOptimizer.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-memoryOptimizer.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-scrollBar.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-scrollBar.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-scrollBounce.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-scrollBounce.js'],
+                    'build/latest/other/ux-doubleScroll.min.js': ['build/latest/other/ux-doubleScroll.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-dragRows.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-dragRows.js']
                 }
             }
         },

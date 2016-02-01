@@ -391,7 +391,7 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.4.9
+ux-angularjs-datagrid v.1.4.10
 (c) 2016, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -420,7 +420,7 @@ License: MIT.</p>
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.4.9
+ux-angularjs-datagrid v.1.4.10
 (c) 2016, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
@@ -1066,7 +1066,7 @@ on a per grid basis.</p>
 </div>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.4.9&quot;</span><span class="p">,</span>
+    <span class="nx">version</span><span class="o">:</span> <span class="s2">&quot;1.4.10&quot;</span><span class="p">,</span>
 
 </pre></div>
         </td>
@@ -4778,7 +4778,7 @@ use for loop instead of each to avoid closure function overhead. Needs to be as 
         <span class="nx">scope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_READY</span><span class="p">);</span>
     <span class="p">}</span>
     <span class="kd">function</span> <span class="nx">isDigesting</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">!!</span><span class="p">(</span><span class="nx">s</span> <span class="o">&amp;&amp;</span> <span class="nx">s</span><span class="p">.</span><span class="nx">$$phase</span> <span class="o">||</span> <span class="nx">s</span><span class="p">.</span><span class="nx">$root</span><span class="p">.</span><span class="nx">$$phase</span><span class="p">);</span>
+        <span class="k">return</span> <span class="o">!!</span><span class="p">(</span><span class="nx">s</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">$$phase</span> <span class="o">||</span> <span class="nx">s</span><span class="p">.</span><span class="nx">$root</span><span class="p">.</span><span class="nx">$$phase</span><span class="p">));</span>
     <span class="p">}</span>
 
 </pre></div>

@@ -1,4 +1,4 @@
-/*global each, charPack, Flow, exports, module */
+/*global each, charPack, Flow, exports, ngModule */
 
 /**
  * <a name="ux.datagrid"></a>
@@ -98,10 +98,6 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         flow.unique(updateRowWatchers);
     }
 
-    function flowPauseFn() {
-        return !!(scope && scope.$$phase);
-    }
-
     /**
      * ###<a name="setupExports">setupExports</a>###
      * Build out the public API variables for the datagrid.
@@ -152,7 +148,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         inst.updateViewportHeight = updateViewportHeight;
         inst.calculateViewportHeight = calculateViewportHeight;
         inst.options = options = exports.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
-        inst.flow = flow = new Flow({async: exports.util.apply(Object.prototype.hasOwnProperty, options, ['async']) ? !!options.async : true, debug: exports.util.apply(Object.prototype.hasOwnProperty, options, ['debug']) ? options.debug : 0}, inst.dispatch, flowPauseFn, $timeout);
+        inst.flow = flow = new Flow({async: exports.util.apply(Object.prototype.hasOwnProperty, options, ['async']) ? !!options.async : true, debug: exports.util.apply(Object.prototype.hasOwnProperty, options, ['debug']) ? options.debug : 0}, inst.dispatch, isDigesting, $timeout);
         // this needs to be set immediately so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
         inst.gc = forceGarbageCollection;
@@ -654,15 +650,16 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     }
 
     function isDigesting(s) {
-        return !!(s && (s.$$phase || s.$root.$$phase));
-        //var ds = s;
-        //while (ds) {
-        //    if (ds.$$phase) {
-        //        return true;
-        //    }
-        //    ds = ds.$parent;
-        //}
-        //return false;
+        //return !!(s && (s.$$phase || s.$root.$$phase));
+        // this must be checked this way. Otherwise isolated scopes can cause the value to be missleading.
+        var ds = s || scope;
+        while (ds) {
+            if (ds.$$phase) {
+                return true;
+            }
+            ds = ds.$parent;
+        }
+        return false;
     }
 
     /**
@@ -1491,7 +1488,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
  * ###<a name="uxDatagrid">uxDatagrid</a>###
  * define the directive, setup addons, apply core addons then optional addons.
  */
-module.directive('uxDatagrid', ['$compile', 'gridAddons', '$timeout', function ($compile, gridAddons, $timeout) {
+ngModule.directive('uxDatagrid', ['$compile', 'gridAddons', '$timeout', function ($compile, gridAddons, $timeout) {
     return {
         restrict: 'AE',
         scope: true,

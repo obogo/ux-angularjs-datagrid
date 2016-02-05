@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.10
+* ux-angularjs-datagrid v.1.4.11
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.4.10
+* ux-angularjs-datagrid v.1.4.11
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -431,12 +431,12 @@ exports.errors = {
  *
  * Create the default module of ux if it doesn't already exist.
  */
-var module, isIOS = !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g);
+var ngModule, isIOS = !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g);
 
 try {
-    module = angular.module("ux", [ "ng" ]);
+    ngModule = angular.module("ux", [ "ng" ]);
 } catch (e) {
-    module = angular.module("ux");
+    ngModule = angular.module("ux");
 }
 
 /**
@@ -455,7 +455,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.4.10",
+    version: "1.4.11",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -666,7 +666,7 @@ exports.datagrid = {
  * is the instance being passed to it. They can ask for additional ones as well and they will be injected
  * in from angular's injector.
  */
-module.factory("gridAddons", [ "$injector", function($injector) {
+ngModule.factory("gridAddons", [ "$injector", function($injector) {
     function applyAddons(addons, instance) {
         var i = 0, len = addons.length, result, addon;
         while (i < len) {
@@ -1288,7 +1288,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
 
 exports.datagrid.Flow = Flow;
 
-/*global each, charPack, Flow, exports, module */
+/*global each, charPack, Flow, exports, ngModule */
 /**
  * <a name="ux.datagrid"></a>
  * ##Datagrid Directive##
@@ -1386,9 +1386,6 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         flow.unique(render);
         flow.unique(updateRowWatchers);
     }
-    function flowPauseFn() {
-        return !!(scope && scope.$$phase);
-    }
     /**
      * ###<a name="setupExports">setupExports</a>###
      * Build out the public API variables for the datagrid.
@@ -1442,7 +1439,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         inst.flow = flow = new Flow({
             async: exports.util.apply(Object.prototype.hasOwnProperty, options, [ "async" ]) ? !!options.async : true,
             debug: exports.util.apply(Object.prototype.hasOwnProperty, options, [ "debug" ]) ? options.debug : 0
-        }, inst.dispatch, flowPauseFn, $timeout);
+        }, inst.dispatch, isDigesting, $timeout);
         // this needs to be set immediately so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
         inst.gc = forceGarbageCollection;
@@ -1912,7 +1909,16 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         scope.$emit(exports.datagrid.events.ON_READY);
     }
     function isDigesting(s) {
-        return !!(s && (s.$$phase || s.$root.$$phase));
+        //return !!(s && (s.$$phase || s.$root.$$phase));
+        // this must be checked this way. Otherwise isolated scopes can cause the value to be missleading.
+        var ds = s || scope;
+        while (ds) {
+            if (ds.$$phase) {
+                return true;
+            }
+            ds = ds.$parent;
+        }
+        return false;
     }
     /**
      * ###<a name="safeDigest">safeDigest</a>###
@@ -2713,7 +2719,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
  * ###<a name="uxDatagrid">uxDatagrid</a>###
  * define the directive, setup addons, apply core addons then optional addons.
  */
-module.directive("uxDatagrid", [ "$compile", "gridAddons", "$timeout", function($compile, gridAddons, $timeout) {
+ngModule.directive("uxDatagrid", [ "$compile", "gridAddons", "$timeout", function($compile, gridAddons, $timeout) {
     return {
         restrict: "AE",
         scope: true,

@@ -6,11 +6,11 @@
  *
  * Create the default module of ux if it doesn't already exist.
  */
-var module, isIOS = !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g);
+var ngModule, isIOS = !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g);
 try {
-    module = angular.module('ux', ['ng']);
+    ngModule = angular.module('ux', ['ng']);
 } catch (e) {
-    module = angular.module('ux');
+    ngModule = angular.module('ux');
 }
 /**
  * Create the datagrid namespace.

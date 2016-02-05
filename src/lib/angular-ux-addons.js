@@ -5,7 +5,7 @@
  * is the instance being passed to it. They can ask for additional ones as well and they will be injected
  * in from angular's injector.
  */
-module.factory('gridAddons', ['$injector', function ($injector) {
+ngModule.factory('gridAddons', ['$injector', function ($injector) {
 
     function applyAddons(addons, instance) {
         var i = 0, len = addons.length, result, addon;

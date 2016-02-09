@@ -492,9 +492,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.checkForEnds = function () {
         if (inst.values.scroll && inst.values.scroll >= bottomOffset) {
-            inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_BOTTOM, inst.values.speed);
+            inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_BOTTOM, inst.values.speed);
         } else if (inst.values.scroll <= 0) {
-            inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_TOP, inst.values.speed);
+            inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_TOP, inst.values.speed);
         }
     };
 
@@ -517,7 +517,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED, onAfterHeightsUpdated));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_RESET, onAfterReset));
-    inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
 
     result.destroy = destroy;
 

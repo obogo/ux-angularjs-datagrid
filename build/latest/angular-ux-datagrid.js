@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.11
+* ux-angularjs-datagrid v.1.4.12
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.4.11
+* ux-angularjs-datagrid v.1.4.12
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -455,7 +455,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.4.11",
+    version: "1.4.12",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -4438,9 +4438,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.checkForEnds = function() {
         if (inst.values.scroll && inst.values.scroll >= bottomOffset) {
-            inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_BOTTOM, inst.values.speed);
+            inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_BOTTOM, inst.values.speed);
         } else if (inst.values.scroll <= 0) {
-            inst.dispatch(ux.datagrid.events.ON_SCROLL_TO_TOP, inst.values.speed);
+            inst.dispatch(exports.datagrid.events.ON_SCROLL_TO_TOP, inst.values.speed);
         }
     };
     function destroy() {
@@ -4461,7 +4461,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED, onAfterHeightsUpdated));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_RESET, onBeforeReset));
     inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_RESET, onAfterReset));
-    inst.unwatchers.push(inst.scope.$on(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
+    inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE, result.calculateBottomOffset));
     result.destroy = destroy;
     inst.scrollModel = result;
     // all models should try not to pollute the main model to keep it clean.

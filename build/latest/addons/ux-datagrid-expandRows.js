@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.12
+* ux-angularjs-datagrid v.1.5.0
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -121,17 +121,19 @@ angular.module("ux").factory("expandRows", function() {
             });
         }
         function setState(index, state, immediate) {
-            var template = inst.templateModel.getTemplate(inst.data[index]), elm, tpl, swapTpl;
+            var template = inst.templateModel.getTemplate(inst.data[index]), elm, tpl, swapTpl, s, visible;
             if (cache[template.name]) {
                 elm = inst.getExistingRow(index);
-                if (!elm || !elm.scope()) {
+                s = inst.scopes[index];
+                visible = elm && elm.scope() || false;
+                if (!elm || !s) {
                     // we must be closing a row out of view. possibly destroyed.
                     delete opened[index];
                     return;
                 }
-                elm.scope().$state = state;
+                s.$state = state;
                 tpl = cache[template.name];
-                if (tpl.transition !== false) {
+                if (visible && tpl.transition !== false) {
                     elm[0].addEventListener(TRNEND_EV, onTransitionEnd);
                 }
                 if (tpl.style) {

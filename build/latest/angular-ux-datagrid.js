@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.0
+* ux-angularjs-datagrid v.1.5.1
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.5.0
+* ux-angularjs-datagrid v.1.5.1
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -455,7 +455,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.5.0",
+    version: "1.5.1",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1785,7 +1785,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * Return the total height of the content of the datagrid.
      */
     function getContentHeight() {
-        var list = inst.chunkModel.getChunkList();
+        var list = inst.chunkModel && inst.chunkModel.getChunkList() || [];
         return list && list.height || 0;
     }
     /**

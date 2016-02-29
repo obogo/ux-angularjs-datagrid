@@ -524,7 +524,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * Return the total height of the content of the datagrid.
      */
     function getContentHeight() {
-        var list = inst.chunkModel && inst.chunkModel.getChunkList() || [];
+        var list = inst && inst.chunkModel && inst.chunkModel.getChunkList() || [];
         return list && list.height || 0;
     }
 

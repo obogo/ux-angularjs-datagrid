@@ -8,6 +8,10 @@
 exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
     'use strict';
 
+    var tplNameRx = /\#{3}[\w\d\W]+\#{3}/gi;
+    var includeTplRx = /\#{3}include:([\w\d\W]+)\#{3}/gi;
+    var uncompiledRx = /uncompiled\s?/;
+
     function trim(str) {
         // remove newline / carriage return
         str = str.replace(/\n/g, "");
@@ -22,8 +26,8 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
 
     inst.templateModel = function () {
 
-        var templates = [], totalHeight, defaultName = 'default', result = exports.logWrapper('templateModel', {}, 'teal', inst.dispatch),
-            forcedTemplates = [], templatesKey;
+        var templates = [], totalHeight, defaultName = 'default', result = exports.logWrapper('templateModel', {}, 'teal', inst),
+            forcedTemplates = [], templatesKey, rowHeightsDirty = false, overrideRowHeights, options = extend({}, inst.options.templateModel);
 
         function getTemplatesKey() {
             if (!templatesKey) {
@@ -36,7 +40,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             result.log('createTemplates');
             var i, scriptTemplates = inst.element[0].getElementsByTagName('script'), len = scriptTemplates.length;
             if (!len && !templates.length) {
-                throw new Error(exports.errors.E1102);
+                inst.throwError(exports.errors.E1102);
             }
             for (i = 0; i < len; i += 1) {
                 createTemplateFromScriptTemplate(scriptTemplates[i]);
@@ -86,9 +90,9 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
                 if (inst.element.css('display') === 'none') {
                     result.warn("Datagrid was intialized with a display:'none' value. Templates are unable to calculate heights. Grid will not render correctly.");
                 } else if (!inst.element[0].offsetHeight) {
-                    throw new Error(exports.errors.E1000);
+                    inst.throwError(exports.errors.E1000);
                 } else {
-                    throw new Error(exports.errors.E1101);
+                    inst.throwError(exports.errors.E1101);
                 }
             }
             templates[templateData.name] = templateData;
@@ -105,8 +109,13 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
                 str = baseTemplate.originalTemplate;
                 str = str.replace(new RegExp('#{3}' + name + '#{3}', 'gi'), templateStr);
                 return str;
+            } else if (templateStr.indexOf('###include:') !== -1) {
+                return templateStr.replace(includeTplRx, function(m, tplName) {
+                    var tpl = result.getTemplateByName(tplName);
+                    return tpl && tpl.template.replace(uncompiledRx, '') || '';
+                });
             }
-            return templateStr.replace(/\#{3}[\w\d\W]+\#{3}/, '');
+            return templateStr.replace(tplNameRx, '');
         }
 
         function getScriptTemplateAttribute(scriptTemplate, attrStr) {
@@ -131,7 +140,11 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         //TODO: need to make this method so it can be overwritten to look up templates a different way.
 
         function getTemplateName(el) {
-            return el.attr ? el.attr('template') : el.getAttribute('template');
+            if (el.attr || el.getAttribute) {
+                return el.attr ? el.attr('template') : el.getAttribute('template');
+            } else if (!(el instanceof HTMLElement)) {// el is a data not an element.
+                return el[getTemplatesKey()] || el._template;
+            }
         }
 
         function getTemplateByName(name) {
@@ -144,7 +157,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         function dynamicHeights() {
             var i, h;
             for (i in templates) {
-                if (Object.prototype.hasOwnProperty.apply(templates, [i])) {
+                if (exports.util.apply(Object.prototype.hasOwnProperty, templates, [i])) {
                     h = h || templates[i].height;
                     if (h !== templates[i].height) {
                         return true;
@@ -180,7 +193,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
                 return 0;
             }
             while (i <= endRowIndex) {
-                height += result.getTemplateHeight(list[i]);
+                height += result.getRowHeight(i);
                 i += 1;
             }
             return height;
@@ -188,20 +201,79 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
 
         function setTemplateName(item, templateName) {
             var key = getTemplatesKey();
-            if (!Object.prototype.hasOwnProperty.apply(item, [key]) && forcedTemplates.indexOf(item) === -1) {
+            if (!exports.util.apply(Object.prototype.hasOwnProperty, item, [key]) && forcedTemplates.indexOf(item) === -1) {
                 forcedTemplates.push(item);
             }
             item[key] = templateName;
         }
 
         function setTemplate(itemOrIndex, newTemplateName, classes) {
-            result.log('setTemplate %s %s', itemOrIndex, newTemplateName);
-            var item = typeof itemOrIndex === "number" ? inst.data[itemOrIndex] : itemOrIndex;
+            result.info('setTemplate %s %s', itemOrIndex, newTemplateName);
+            var item;
+            if (typeof itemOrIndex === "number") {
+                item = inst.data[itemOrIndex];
+                clearRowHeight(itemOrIndex);
+            } else {
+                item = itemOrIndex;
+            }
             var oldTemplate = result.getTemplate(item).name;
             result.setTemplateName(item, newTemplateName);
-            setTimeout(function () {
-                inst.dispatch(exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName, classes);
-            });
+            // needs to wait until after the digest.
+            inst.flow.add(inst.dispatch, [exports.datagrid.events.ON_ROW_TEMPLATE_CHANGE, item, oldTemplate, newTemplateName, classes], 0);
+        }
+
+        // if no value. calculate it.
+        function forceRowHeight(index, value) {
+            overrideRowHeights[index] = value;
+            rowHeightsDirty = true;
+        }
+
+        function clearRowHeight(index) {
+            delete overrideRowHeights[index];
+            rowHeightsDirty = true;
+        }
+
+        function clearAllRowHeights() {
+            overrideRowHeights = {};
+            rowHeightsDirty = true;
+        }
+
+        function hasOverrideHeight(index) {
+            return !!overrideRowHeights[index];
+        }
+
+        function getRowHeight(index) {
+            var isOverride = overrideRowHeights.hasOwnProperty(index), el, actualHeight;
+            var tplHeight = result.getTemplateHeight(inst.data[index]);
+            if (options.variableRowHeights && !isOverride && inst.isCompiled(index)) { // dynamic heights will slow down the datagrid significantly.
+                el = inst.getExistingRow(index);
+                if (el && el.length) {
+                    actualHeight = el[0].offsetHeight;
+                    if (actualHeight !== overrideRowHeights[index] && actualHeight !== tplHeight) {
+                        el[0].style.height = actualHeight + 'px';
+                        overrideRowHeights[index] = actualHeight;
+                        isOverride = true;
+                        rowHeightsDirty = true;
+                        //console.log('row:%s height:%s', index, actualHeight);
+                    }
+                } else {
+                    return tplHeight;
+                }
+            }
+            //TODO: need to reset overrideRowHeights on resize event if dynamicHeights.
+            return isOverride ? overrideRowHeights[index] : tplHeight;
+        }
+
+        function hasVariableRowHeights() {
+            return !!options.variableRowHeights;
+        }
+
+        function hasDirtyHeights() {
+            return rowHeightsDirty;
+        }
+
+        function clearDirtyHeights() {
+            rowHeightsDirty = false;
         }
 
         /**
@@ -218,22 +290,29 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
 
         function updateTemplateHeights() {
             //TODO: needs unit tested.
-            var i = inst.values.activeRange.min, len = inst.values.activeRange.max - i, row, tpl, rowHeight, changed = false,
+            var i = inst.values.activeRange.min, len = inst.values.activeRange.max - i, row, tpl, rowHeight,
                 heightCache = {};
-            while (i < len) {
-                tpl = result.getTemplate(inst.getData()[i]);
-                if (!heightCache[tpl.name]) {
-                    row = inst.getRowElm(i);
-                    rowHeight = calculateRowHeight(row[0]);
-                    if (rowHeight !== tpl.height) {
-                        tpl.height = rowHeight;
-                        changed = true;
+            while (i < len && !rowHeightsDirty) {
+                if (!overrideRowHeights.hasOwnProperty(i)) {// variable heights calculation is more expensive.
+                    if (result.hasVariableRowHeights()) {
+                        result.getRowHeight(i);// will exit if a row becomes dirty.
+                    } else {// much faster. exits after it finds the template.
+                        tpl = result.getTemplate(inst.getData()[i]);
+                        if (!heightCache[tpl.name]) {
+                            row = inst.getRowElm(i);
+                            rowHeight = result.calculateRowHeight(row[0]);
+                            if (rowHeight !== tpl.height) {
+                                tpl.height = rowHeight;
+                                rowHeightsDirty = true;
+                            }
+                        }
                     }
                 }
                 i += 1;
             }
-            if (changed) {
+            if (rowHeightsDirty) {
                 inst.updateHeights();
+                clearDirtyHeights();
             }
         }
 
@@ -268,6 +347,14 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
         result.averageTemplateHeight = averageTemplateHeight;
         result.getHeight = getHeight;
         result.getTemplateHeight = getTemplateHeight;
+        result.getRowHeight = getRowHeight;
+        result.hasDirtyHeights = hasDirtyHeights;
+        result.clearDirtyHeights = clearDirtyHeights;
+        result.hasVariableRowHeights = hasVariableRowHeights;
+        result.hasOverrideHeight = hasOverrideHeight;
+        result.forceRowHeight = forceRowHeight;
+        result.clearRowHeight = clearRowHeight;
+        result.clearAllRowHeights = clearAllRowHeights;
         result.setTemplate = setTemplate;
         result.setTemplateName = setTemplateName;
         result.updateTemplateHeights = updateTemplateHeights;

@@ -37,8 +37,8 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.2.7
-(c) 2015, Obogo
+ux-angularjs-datagrid v.1.4.11
+(c) 2016, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
   </div>
@@ -80,7 +80,7 @@ License: MIT.</p>
     <span class="k">return</span> <span class="p">{</span>
         <span class="nx">link</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="nx">attr</span><span class="p">)</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;doubleScroll&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-                <span class="nx">scope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+                <span class="nx">exports</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">scope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">,</span> <span class="nx">scope</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
             <span class="p">}),</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">selector</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$eval</span><span class="p">(</span><span class="nx">attr</span><span class="p">.</span><span class="nx">uxDoubleScroll</span><span class="p">),</span> <span class="nx">target</span><span class="p">,</span> <span class="nx">targetOffset</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$eval</span><span class="p">(</span><span class="nx">attr</span><span class="p">.</span><span class="nx">targetOffset</span><span class="p">)</span> <span class="o">||</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">dynamicOffset</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$eval</span><span class="p">(</span><span class="nx">attr</span><span class="p">.</span><span class="nx">dynamicOffset</span><span class="p">),</span> <span class="nx">targetPadding</span> <span class="o">=</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">$eval</span><span class="p">(</span><span class="nx">attr</span><span class="p">.</span><span class="nx">targetPadding</span><span class="p">),</span> <span class="nx">grid</span><span class="p">,</span> <span class="c1">// reference to the datagrid instance</span>
             <span class="nx">myScroll</span><span class="p">,</span> <span class="c1">// iScroll for the doubleScroll.</span>
             <span class="nx">scrollModel</span><span class="p">,</span> <span class="c1">// the grid scrollModel.</span>

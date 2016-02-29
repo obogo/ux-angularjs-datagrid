@@ -8,7 +8,7 @@ angular.module('ux').directive('uxDoubleScroll', ['$window', function ($window) 
     return {
         link: function (scope, element, attr) {
             var result = exports.logWrapper('doubleScroll', {}, 'red', function () {
-                    scope.$emit.apply(scope, arguments);
+                    exports.util.apply(scope.$emit, scope, arguments);
                 }),
                 el = element[0],
                 selector = scope.$eval(attr.uxDoubleScroll),

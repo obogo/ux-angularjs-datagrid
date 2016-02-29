@@ -1,6 +1,6 @@
 /*!
-* ux-angularjs-datagrid v.1.2.7
-* (c) 2015, Obogo
+* ux-angularjs-datagrid v.1.5.1
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -35,7 +35,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
      **************************************************************************************/
     exports.datagrid.sortStatesModel = function() {
         var api = exports.logWrapper("columnSortStatesModel", {}, "blue", function() {
-            $rootScope.$emit.apply($rootScope, arguments);
+            exports.util.apply($rootScope.$emit, $rootScope, arguments);
         }), sortOptions = {
             ASC: "asc",
             DESC: "desc",
@@ -168,7 +168,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
             api.log("setPathState %s to %s", currentPathState, pathState);
             api.setIgnoreParamsInPath(true);
             for (columnName in pathState) {
-                if (Object.prototype.hasOwnProperty.apply(pathState, [ columnName ]) && pathState[columnName] !== currentPathState[columnName] && !isPrivate(columnName)) {
+                if (exports.util.apply(Object.prototype.hasOwnProperty, pathState, [ columnName ]) && pathState[columnName] !== currentPathState[columnName] && !isPrivate(columnName)) {
                     api.setState(columnName, pathState[columnName], currentPathState);
                 }
             }
@@ -387,7 +387,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
             pathState = pathState || api.getPathState(api.getPath());
             pathState.$order.length = 0;
             for (i in pathState) {
-                if (Object.prototype.hasOwnProperty.apply(pathState, [ i ]) && !api.isPrivate(i) && pathState[i] !== sortOptions.NONE) {
+                if (exports.util.apply(Object.prototype.hasOwnProperty, pathState, [ i ]) && !api.isPrivate(i) && pathState[i] !== sortOptions.NONE) {
                     pathState[i] = sortOptions.NONE;
                 }
             }
@@ -443,7 +443,7 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
 angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStatesModel) {
     return [ "inst", function sortModel(inst) {
         // cache is the stored sort values. It needs to be cleared if the data changes.
-        var result = exports.logWrapper("sortModel", {}, "blue", inst.dispatch), sorts = {}, original, cache = {}, options = inst.options.sortModel || {}, lastSortResult;
+        var result = exports.logWrapper("sortModel", {}, "blue", inst), sorts = {}, original, cache = {}, options = inst.options.sortModel || {}, lastSortResult;
         /**
          * ###<a name="addSortColumn">addSortColumn</a>###
          * add a column so that it's sort state can be toggled and used.
@@ -639,7 +639,6 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
                 inst.creepRenderModel.stop();
             }
             sortStatesModel.toggle(name);
-            //            result.clear();
             result.applySorts(original);
             inst.dispatch(exports.datagrid.events.ON_AFTER_TOGGLE_SORT, name);
         };

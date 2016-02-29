@@ -36,7 +36,12 @@ describe("creepRenderModel", function () {
                 isCompiled: function () {
                     return true;
                 },
-                dispatch: function () {}
+                dispatch: function () {},
+                templateModel: {
+                    hasVariableRowHeights: function() {
+                        return false;
+                    }
+                }
             };
             ux.datagrid.coreAddons.creepRenderModel(exp);
             exp.flow.run();

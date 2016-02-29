@@ -2,7 +2,7 @@ exports.datagrid.events.ON_MEMORY_OPTIMIZED = "datagrid:onMemoryOptimized";
 angular.module('ux').factory('memoryOptimizer', function () {
    return ['inst', function (inst) {
        inst.options.memoryOptimizer = inst.options.memoryOptimizer || {};
-       var result = exports.logWrapper('memoryOptimizer', {}, 'redOrange', inst.dispatch),
+       var result = exports.logWrapper('memoryOptimizer', {}, 'redOrange', inst),
            intv,
            defaultOptions = {
                range: inst.options.creepLimit * 2 || 200
@@ -29,11 +29,12 @@ angular.module('ux').factory('memoryOptimizer', function () {
         */
        function optimizeRows() {
            clearPending();
-           intv = setTimeout(_optimizeRows, 1000);
+           intv = setTimeout(_optimizeRows, 3000);
        }
 
        function clearPending() {
            clearTimeout(intv);
+           intv = 0;
        }
 
        function _optimizeRows() {
@@ -93,6 +94,7 @@ angular.module('ux').factory('memoryOptimizer', function () {
        }
 
        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, clearPending));
+       inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_RENDER_PROGRESS, optimizeRows));// creep render.
        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, optimizeRows));
 
        disableCreep();

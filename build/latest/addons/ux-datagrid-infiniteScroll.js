@@ -1,6 +1,6 @@
 /*!
-* ux-angularjs-datagrid v.1.2.7
-* (c) 2015, Obogo
+* ux-angularjs-datagrid v.1.5.1
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -61,10 +61,6 @@ angular.module("ux").factory("infiniteScroll", function() {
                 var rowIndex = inst.getRowIndexFromElement(document.activeElement);
                 var rowEl = inst.getRowElm(rowIndex);
                 var activeElement = document.activeElement;
-                //for selected options, activeElement needs to be the selected element
-                if(activeElement && activeElement.nodeName === "SELECT" && activeElement.options.length){
-                    activeElement = activeElement.options[activeElement.selectedIndex];
-                }
                 focusAfterSelector = {
                     rowIndex: rowIndex,
                     selector: ux.selector.quickSelector(activeElement, rowEl[0], inst.options.gridFocusManager && inst.options.gridFocusManager.filterClasses || [])

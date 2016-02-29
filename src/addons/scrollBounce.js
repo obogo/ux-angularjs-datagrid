@@ -5,7 +5,7 @@
 angular.module('ux').factory('scrollBounce', function () {
     return ['inst', function (inst) {
 
-        var result = exports.logWrapper('scrollBounce', {}, 'red', inst.dispatch),
+        var result = exports.logWrapper('scrollBounce', {}, 'red', inst),
             intv,
             endScroll,
             transitioning = false,

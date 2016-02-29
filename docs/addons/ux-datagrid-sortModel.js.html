@@ -172,8 +172,8 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.2.7
-(c) 2015, Obogo
+ux-angularjs-datagrid v.1.4.11
+(c) 2016, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
   </div>
@@ -238,7 +238,7 @@ It persists based on the path.</p>
         <td class="code highlight"><div class="highlight"><pre>
     <span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">sortStatesModel</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;columnSortStatesModel&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-            <span class="nx">$rootScope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">$rootScope</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+            <span class="nx">exports</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">$rootScope</span><span class="p">.</span><span class="nx">$emit</span><span class="p">,</span> <span class="nx">$rootScope</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
         <span class="p">}),</span> <span class="nx">sortOptions</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nx">ASC</span><span class="o">:</span> <span class="s2">&quot;asc&quot;</span><span class="p">,</span>
             <span class="nx">DESC</span><span class="o">:</span> <span class="s2">&quot;desc&quot;</span><span class="p">,</span>
@@ -656,7 +656,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
             <span class="nx">api</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;setPathState %s to %s&quot;</span><span class="p">,</span> <span class="nx">currentPathState</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">);</span>
             <span class="nx">api</span><span class="p">.</span><span class="nx">setIgnoreParamsInPath</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
             <span class="k">for</span> <span class="p">(</span><span class="nx">columnName</span> <span class="k">in</span> <span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">pathState</span><span class="p">,</span> <span class="p">[</span> <span class="nx">columnName</span> <span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">currentPathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">columnName</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">,</span> <span class="p">[</span> <span class="nx">columnName</span> <span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">currentPathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">columnName</span><span class="p">))</span> <span class="p">{</span>
                     <span class="nx">api</span><span class="p">.</span><span class="nx">setState</span><span class="p">(</span><span class="nx">columnName</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">columnName</span><span class="p">],</span> <span class="nx">currentPathState</span><span class="p">);</span>
                 <span class="p">}</span>
             <span class="p">}</span>
@@ -1290,7 +1290,7 @@ Any columnNames not passed are set to none if not allow multiples.</p>
             <span class="nx">pathState</span> <span class="o">=</span> <span class="nx">pathState</span> <span class="o">||</span> <span class="nx">api</span><span class="p">.</span><span class="nx">getPathState</span><span class="p">(</span><span class="nx">api</span><span class="p">.</span><span class="nx">getPath</span><span class="p">());</span>
             <span class="nx">pathState</span><span class="p">.</span><span class="nx">$order</span><span class="p">.</span><span class="nx">length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
             <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="k">in</span> <span class="nx">pathState</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">pathState</span><span class="p">,</span> <span class="p">[</span> <span class="nx">i</span> <span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">api</span><span class="p">.</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">,</span> <span class="nx">pathState</span><span class="p">,</span> <span class="p">[</span> <span class="nx">i</span> <span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">api</span><span class="p">.</span><span class="nx">isPrivate</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">pathState</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">)</span> <span class="p">{</span>
                     <span class="nx">pathState</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">sortOptions</span><span class="p">.</span><span class="nx">NONE</span><span class="p">;</span>
                 <span class="p">}</span>
             <span class="p">}</span>
@@ -1400,7 +1400,7 @@ It stores the sorted state on the sortStatesModel to keep around until cleared.<
 <p>cache is the stored sort values. It needs to be cleared if the data changes.</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
-        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;sortModel&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">sorts</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">original</span><span class="p">,</span> <span class="nx">cache</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">options</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sortModel</span> <span class="o">||</span> <span class="p">{},</span> <span class="nx">lastSortResult</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;sortModel&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">),</span> <span class="nx">sorts</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">original</span><span class="p">,</span> <span class="nx">cache</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">options</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">sortModel</span> <span class="o">||</span> <span class="p">{},</span> <span class="nx">lastSortResult</span><span class="p">;</span>
 
 </pre></div>
         </td>
@@ -1984,22 +1984,6 @@ If the states already exist apply those states on the render.</p>
                 <span class="nx">inst</span><span class="p">.</span><span class="nx">creepRenderModel</span><span class="p">.</span><span class="nx">stop</span><span class="p">();</span>
             <span class="p">}</span>
             <span class="nx">sortStatesModel</span><span class="p">.</span><span class="nx">toggle</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
-
-</pre></div>
-        </td>
-      </tr>
-      <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-54" id="section-54">&#182;</a>
-</div>
-
-<div class="highlight"><pre><code>       <span class="n">result</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
-</code></pre></div>
-
-
-        </td>
-        <td class="code highlight"><div class="highlight"><pre>
             <span class="nx">result</span><span class="p">.</span><span class="nx">applySorts</span><span class="p">(</span><span class="nx">original</span><span class="p">);</span>
             <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">exports</span><span class="p">.</span><span class="nx">datagrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">ON_AFTER_TOGGLE_SORT</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
         <span class="p">};</span>

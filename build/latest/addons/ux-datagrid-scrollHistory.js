@@ -1,6 +1,6 @@
 /*!
-* ux-angularjs-datagrid v.1.2.7
-* (c) 2015, Obogo
+* ux-angularjs-datagrid v.1.5.1
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -26,7 +26,7 @@ angular.module("ux").service("scrollHistoryModel", [ "$location", "$rootScope", 
     // cache is persistent until application reloads.
     exports.datagrid.scrollHistory = function scrollHistory() {
         var result = exports.logWrapper("scrollHistoryModel", {}, "orange", function() {
-            $rootScope.$emit.apply($rootScope, arguments);
+            exports.util.apply($rootScope.$emit, $rootScope, arguments);
         });
         /**
          * ###<a name="getPath">getPath</a>###
@@ -100,7 +100,7 @@ angular.module("ux").service("scrollHistoryModel", [ "$location", "$rootScope", 
  */
 angular.module("ux").factory("scrollHistory", function() {
     return [ "inst", "scrollHistoryModel", function(inst, scrollHistoryModel) {
-        var result = exports.logWrapper("scrollHistory", {}, "blue", inst.dispatch), ready, path = inst.options.scrollHistory && inst.options.scrollHistory.path || "", scrollPos, waitingForAfterDataChange = false, unwatchers = [];
+        var result = exports.logWrapper("scrollHistory", {}, "blue", inst), ready, path = inst.options.scrollHistory && inst.options.scrollHistory.path || "", scrollPos, waitingForAfterDataChange = false, unwatchers = [];
         if (inst.options.scrollHistory && inst.options.scrollHistory.ignoreParams) {
             path = scrollHistoryModel.getPath().split("?").shift();
         }

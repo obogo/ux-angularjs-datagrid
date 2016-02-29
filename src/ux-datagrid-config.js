@@ -6,11 +6,11 @@
  *
  * Create the default module of ux if it doesn't already exist.
  */
-var module, isIOS = !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g);
+var ngModule, isIOS = !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g);
 try {
-    module = angular.module('ux', ['ng']);
+    ngModule = angular.module('ux', ['ng']);
 } catch (e) {
-    module = angular.module('ux');
+    ngModule = angular.module('ux');
 }
 /**
  * Create the datagrid namespace.
@@ -132,6 +132,11 @@ exports.datagrid = {
         }
         return null;
     },
+    throwError: function(msg) {
+        if (window.console && console.warn) {
+            console.warn(msg);
+        }
+    },
     /**
      * ###<a name="options">options</a>###
      */
@@ -182,7 +187,9 @@ exports.datagrid = {
             // - **<a name="options.scrollModel.manual">scrollModel.manual</a>** if set to true then touch move events will be used to scroll and calculate coasting.
             manual: true,
             // - **<a name="options.scrollModel.simulateClick">scrollModel.simulateClick</a>** defaulted to true for android, and false for iOS.
-            simulateClick: false
+            simulateClick: false,
+            // - **<a name="options.scrollModel.preventTouchMove">scrollModel.preventTouchMove</a>** defaulted to false. prevent touchmove events from being thrown when enabled.
+            preventTouchMove: false
         },
         // - **<a name="options.compiledClass">compiledClass</a>** after a row has been compiled the uncompiled class is removed and compiled is added.
         compiledClass: 'compiled',

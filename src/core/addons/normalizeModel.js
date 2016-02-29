@@ -1,7 +1,7 @@
 /*global ux */
 exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
 //TODO: this needs to be put on exp.normalizedModel
-    var originalData, normalizedData, result = exports.logWrapper('normalizeModel', {}, 'grey', inst.dispatch);
+    var originalData, normalizedData, result = exports.logWrapper('normalizeModel', {}, 'grey', inst);
 
     /**
      * ###<a name="normalize">normalize</a>###
@@ -119,13 +119,17 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
         return -1;
     };
 
-    /**
-     * ###<a name="replace">replace</a>###
-     * Replace at the index, the newItem.
-     * @param item
-     * @param index
-     */
-    result.replace = function (item, index) {
+    function applyAction(list, index, item, action) {
+        if (action === 'replace') {
+            list[index] = item;
+        } else if (action === 'insert') {
+            list.splice(index, 0, item);
+        } else if (action === 'remove') {
+            list.splice(index, 1);
+        }
+    }
+
+    function modifyItem(item, index, action) {
         // first get the original item index.
         var indexes = inst.getOriginalIndexOfItem(normalizedData[index]),
             origItem,
@@ -135,14 +139,48 @@ exports.datagrid.coreAddons.normalizeModel = function normalizeModel(inst) {
             lastIndex = indexes.shift();
             origItem = list[lastIndex];
             if (!indexes.length) {
-                list[lastIndex] = item;
+                if (inst.grouped && list[0] && list[0].hasOwnProperty(inst.grouped)) {
+                    list = list[0][inst.grouped];
+                    indexes.push(list.length);
+                    lastIndex = list.length;
+                }
+                applyAction(list, lastIndex, item, action);// original data
                 break;
             }
             if (inst.grouped) {
                 list = origItem[inst.grouped];
             }
         }
-        normalizedData[index] = item;
+        applyAction(normalizedData, index, item, action);// normalized data
+    }
+
+    /**
+     * ###<a name="replace">replace</a>###
+     * Replace at the index, the newItem.
+     * @param item
+     * @param index
+     */
+    result.replace = function (item, index) {
+        modifyItem(item, index, 'replace');
+    };
+
+    result.insert = function(item, index) {
+        modifyItem(item, index, 'insert');
+    };
+
+    result.remove = function(index) {
+        modifyItem(null, index, 'remove');
+    };
+
+    result.move = function(fromIndex, toIndex) {
+        var item = inst.getRowItem(fromIndex);
+        if (fromIndex > toIndex) {
+            result.remove(fromIndex);
+            result.insert(item, toIndex);
+        } else if (fromIndex < toIndex) {
+            result.insert(item, toIndex);
+            result.remove(fromIndex);
+        }
     };
 
     /**

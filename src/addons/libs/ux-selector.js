@@ -2,7 +2,7 @@
 exports.selector = (function () {
 //TODO: Needs unit tests. This needs jquery to run unit tests for selections since it uses filters.
 
-    var omitAttrs, uniqueAttrs, classFilters, classFiltersFctn, api;
+    var omitAttrs, uniqueAttrs, classFilters, classFiltersFctn, api, ngRx = /^ng-\w+/;
 
     function query(selectorStr, el) {
         el = el || api.config.doc.body;
@@ -78,8 +78,9 @@ exports.selector = (function () {
         if (!el) {
             return '';
         }
-        if (el && el.length) {
-            throw new Error("selector can only build a selection to a single DOMElement. A list was passed.");
+        // we do not want jquery elements here. only HTMLElements
+        if (el && el.length && el.nodeType === undefined) {
+            exports.datagrid.throwError("selector can only build a selection to a single DOMElement. A list was passed.");
         }
         return true;
     }
@@ -89,7 +90,7 @@ exports.selector = (function () {
     }
 
     function matchesClass(item, matcher) {
-        if (typeof matcher === "string" && matcher === item) {
+        if (typeof matcher === "string" && (matcher === item || ngRx.test(item))) {
             return true;
         }
         if (typeof matcher === "object" && item.match(matcher)) {
@@ -268,7 +269,7 @@ exports.selector = (function () {
     function getList(obj) {
         var ary = [], i;
         for (i in obj) {
-            if (Object.prototype.hasOwnProperty.apply(obj, [i])) {
+            if (exports.util.apply(Object.prototype.hasOwnProperty, obj, [i])) {
                 ary.push(obj[i]);
             }
         }

@@ -1,6 +1,6 @@
 /*!
-* ux-angularjs-datagrid v.1.2.7
-* (c) 2015, Obogo
+* ux-angularjs-datagrid v.1.5.1
+* (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -24,7 +24,7 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
     return {
         link: function(scope, element, attr) {
             var result = exports.logWrapper("doubleScroll", {}, "red", function() {
-                scope.$emit.apply(scope, arguments);
+                exports.util.apply(scope.$emit, scope, arguments);
             }), el = element[0], selector = scope.$eval(attr.uxDoubleScroll), target, targetOffset = scope.$eval(attr.targetOffset) || 0, dynamicOffset = scope.$eval(attr.dynamicOffset), targetPadding = scope.$eval(attr.targetPadding), grid, // reference to the datagrid instance
             myScroll, // iScroll for the doubleScroll.
             scrollModel, // the grid scrollModel.

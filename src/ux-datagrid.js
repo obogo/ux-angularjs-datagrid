@@ -1,4 +1,4 @@
-/*global each, charPack, Flow, exports, module */
+/*global each, charPack, Flow, exports, ngModule */
 
 /**
  * <a name="ux.datagrid"></a>
@@ -8,13 +8,13 @@
  * Datagrid uses script templates inside of the DOM to create your elements. Addons are added to the `addon`
  * attribute.
  * @param {Scope} scope
- * @param {DOMElement} element
+ * @param {HTMLElement} element
  * @param {Object} attr
  * @param {Function} $compile
- * @returns {{}}
+ * @returns {Datagrid}
  * @constructor
  */
-function Datagrid(scope, element, attr, $compile) {
+function Datagrid(scope, element, attr, $compile, $timeout) {
     // **<a name="flow">flow</a>** flow management for methods of the datagrid. Keeping functions firing in the correct order especially if async methods are executed.
     var flow;
     // **<a name="waitCount">waitCount</a>** waiting to render. If it fails too many times it will die.
@@ -67,10 +67,26 @@ function Datagrid(scope, element, attr, $compile) {
     // <a name="logEvents"></a>listing the log events so they can be ignored if needed.
     var logEvents = [exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR];
     // <a name="inst"></a>the instance of the datagrid that will be referenced by all addons.
-    var inst = {}, eventLogger = {}, startupComplete = false, gcIntv;
+    var inst = this, eventLogger = {}, startupComplete = false, gcIntv, $compileCache = {};
 
     // wrap the instance for logging.
-    exports.logWrapper('datagrid event', inst, 'grey', dispatch);
+    exports.logWrapper('datagrid event', inst, 'grey', inst);
+
+    // for debugging and watching the angular phase start and end.
+    // cannot use for flowPauseFn it causes lots of errors because datagrid will not flow at all
+    // during a phase with this setting a flag to use.
+    //function beforePhase() {
+    //    inst.info("NG-$digest START");
+    //    $timeout(afterPhase, 0, false);
+    //}
+    //
+    //function afterPhase() {
+    //    if (inst) {// it may be destroyed after a phase. so only log if it is there.
+    //        inst.info("NG-$digest END");
+    //    }
+    //}
+    //
+    //scope.$watch(beforePhase);
 
     /**
      * ###<a name="init">init</a>###
@@ -115,6 +131,7 @@ function Datagrid(scope, element, attr, $compile) {
         inst.isActive = isActive;
         inst.isCompiled = isCompiled;
         inst.swapItem = swapItem;
+        inst.moveItem = moveItem;
         inst.getScope = getScope;
         inst.getRowItem = getRowItem;
         inst.getRowElm = getRowElm;
@@ -131,10 +148,11 @@ function Datagrid(scope, element, attr, $compile) {
         inst.updateViewportHeight = updateViewportHeight;
         inst.calculateViewportHeight = calculateViewportHeight;
         inst.options = options = exports.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
-        inst.flow = flow = new Flow({async: Object.prototype.hasOwnProperty.apply(options, ['async']) ? !!options.async : true, debug: Object.prototype.hasOwnProperty.apply(options, ['debug']) ? options.debug : 0}, inst.dispatch);
-        // this needs to be set immediatly so that it will be available to other views.
+        inst.flow = flow = new Flow({async: exports.util.apply(Object.prototype.hasOwnProperty, options, ['async']) ? !!options.async : true, debug: exports.util.apply(Object.prototype.hasOwnProperty, options, ['debug']) ? options.debug : 0}, inst.dispatch, isDigesting, $timeout);
+        // this needs to be set immediately so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
         inst.gc = forceGarbageCollection;
+        inst.throwError = exports.datagrid.throwError;
         flow.add(init);// initialize core.
         flow.run();// start the flow manager.
     }
@@ -352,7 +370,7 @@ function Datagrid(scope, element, attr, $compile) {
     function swapItem(oldItem, newItem, keepTemplate) {
         //TODO: needs unit test.
         var index = getRowIndex(oldItem), oldTpl, newTpl;
-        if (Object.prototype.hasOwnProperty.apply(inst.data, [index])) {
+        if (exports.util.apply(Object.prototype.hasOwnProperty, inst.data, [index])) {
             oldTpl = inst.templateModel.getTemplate(oldItem);
             if (keepTemplate) {
                 newTpl = oldTpl;
@@ -368,6 +386,11 @@ function Datagrid(scope, element, attr, $compile) {
                 safeDigest(scopes[index]);
             }
         }
+    }
+
+    function moveItem(fromIndex, toIndex) {
+        inst.normalizeModel.move(fromIndex, toIndex);
+        changeData(inst.getOriginalData(), inst.getOriginalData());
     }
 
     /**
@@ -394,7 +417,7 @@ function Datagrid(scope, element, attr, $compile) {
      * ###<a name="getRowElm">getRowElm</a>###
      * Return the DOM element at that row index.
      * @param {Number} index
-     * @returns {element|*}
+     * @returns {JQLite|*}
      */
     function getRowElm(index) {
         return angular.element(inst.chunkModel.getRow(index));
@@ -437,11 +460,11 @@ function Datagrid(scope, element, attr, $compile) {
      * @returns {*}
      */
     function getRowIndexFromElement(el) {
-        if (element[0].contains(el[0] || el)) {
+        if (el && element[0].contains(el[0] || el)) {
             el = el.scope ? el : angular.element(el);
             var s = el.scope();
             if (s === inst.scope) {
-                throw new Error("Unable to get row scope... something went wrong.");
+                inst.throwError("Unable to get row scope... something went wrong.");
                 // This is only likely to happen if we are running in options.chunks.detachDom mode. And only
                 // when jumping from one chunk to the next in detached mode.
                 // this means that the scope of the element isn't active. So it is picking up the parent.
@@ -485,7 +508,7 @@ function Datagrid(scope, element, attr, $compile) {
      * @returns {Number}
      */
     function getRowHeight(index) {
-        return inst.templateModel.getTemplateHeight(inst.data[index]);
+        return inst.templateModel.getRowHeight(index);
     }
 
     /**
@@ -501,7 +524,7 @@ function Datagrid(scope, element, attr, $compile) {
      * Return the total height of the content of the datagrid.
      */
     function getContentHeight() {
-        var list = inst.chunkModel.getChunkList();
+        var list = inst.chunkModel && inst.chunkModel.getChunkList() || [];
         return list && list.height || 0;
     }
 
@@ -511,7 +534,6 @@ function Datagrid(scope, element, attr, $compile) {
      * @param {Array} list
      */
     function createDom(list) {
-        //TODO: if there is any dom. It needs destroyed first.
         inst.log("OVERWRITE DOM!!!");
         var len = list.length;
         // this async is important because it allows the updateRowWatchers on first digest to escape the current digest.
@@ -542,25 +564,64 @@ function Datagrid(scope, element, attr, $compile) {
      * @returns {*}
      */
     function compileRow(index, el) {
-        var s = scopes[index], prev, tpl;
+        var s = scopes[index], currentRow;
         if (s && !s.$parent) {
-            throw new Error("Scope without a parent");
+            s.$parent = scope;
         }
         if (!s) {
+            // fixes a bug expanding the last row and trying to scroll to it.
+            if (!scope.$$childTail && scope.$$childHead && scopes[index - 1]) {
+                scope.$$childTail = scopes[index - 1];
+            }
             s = scope.$new();
-            tpl = inst.templateModel.getTemplate(inst.data[index]);
-            link(index, s);
-            s.$status = options.compiledClass;
-            s[tpl.item] = inst.data[index]; // set the data to the scope.
-            s.$index = index;
-            scopes[index] = s;
-            el = el || getRowElm(index);
-            el.removeClass(options.uncompiledClass);
-            $compile(el)(s);
-            inst.dispatch(exports.datagrid.events.ON_ROW_COMPILE, s, el);
-            deactivateScope(s, index);
+            processCompilation(s, index, el);
+        } else if (s && (currentRow = getExistingRow(index)).scope() !== s) {
+            // sometimes rows don't get their compiled scope reference. Make them link to the correct scope.
+            // TODO: need to figure out how they get here. It is unclear, but by recompiling the row to the same scope fixes it. This is somehow related to swaping the row template.
+            processCompilation(s, index, currentRow);
         }
         return s;
+    }
+
+    /**
+     * @param s
+     * @param index
+     * @param el
+     */
+    function processCompilation(s, index, el) {
+        var tplName, tpl, $c;
+        tplName = inst.templateModel.getTemplateName(inst.data[index]);
+        tpl = inst.templateModel.getTemplate(inst.data[index]);
+        link(index, s);// adds scope to scopes
+        s.$status = options.compiledClass;
+        s[tpl.item] = inst.data[index]; // set the data to the scope.
+        s.$index = index;
+        el = el || getRowElm(index);
+        el.removeClass(options.uncompiledClass);
+        // by keeping the $compile(el) cached this seems to be faster than $compile(el)(s) every time.
+        $c = $compileCache[tplName] || ($compileCache[tplName] = $compile(el));
+        // since compile is cached we now use the clone method to replace our dom element with the cloned one.
+        $c(s, function(clone) {
+            var indexes = inst.chunkModel.getRowIndexes(index);// gets the nested indexes for the row
+            indexes.pop();// pop off the index for the row, we want it's parent.
+            var parent = inst.chunkModel.getItemByIndexes(indexes).dom;// get the parent by indexes.
+            var attrs = el[0].attributes, len = attrs.length;
+            // we need to copy over the row-id and any other custom properties on this row.
+            // use for loop instead of each to avoid closure function overhead. Needs to be as fast as possible.
+            for(var i = 0; i < len; i += 1) {
+                var attr = attrs[i];
+                // copy the attr from el to clone
+                if (attr.name !== 'class' && clone.attr(attr.name) !== attr.value) {
+                    clone.attr(attr.name, attr.value);
+                }
+            }
+            parent.replaceChild(clone[0], el[0]);
+        });
+        if (inst.templateModel.hasVariableRowHeights()) {
+            inst.chunkModel.updateAllChunkHeights(index);
+        }
+        inst.dispatch(exports.datagrid.events.ON_ROW_COMPILE, s, el);
+        deactivateScope(s, index);
     }
 
     /**
@@ -601,7 +662,9 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function isDigesting(s) {
-        var ds = s;
+        //return !!(s && (s.$$phase || s.$root.$$phase));
+        // this must be checked this way. Otherwise isolated scopes can cause the value to be missleading.
+        var ds = s || scope;
         while (ds) {
             if (ds.$$phase) {
                 return true;
@@ -637,7 +700,7 @@ function Datagrid(scope, element, attr, $compile) {
     function applyEventCounts(s, listenerCounts, fn) {
         while (s) {
             for (var eventName in listenerCounts) {
-                if (Object.prototype.hasOwnProperty.apply(listenerCounts, [eventName])) {
+                if (exports.util.apply(Object.prototype.hasOwnProperty, listenerCounts, [eventName])) {
                     fn(s, listenerCounts, eventName);
                 }
             }
@@ -709,10 +772,18 @@ function Datagrid(scope, element, attr, $compile) {
             s.$emit(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);
             s.$$$watchers = s.$$watchers;
             s.$$watchers = [];
-            s.$$$listenerCount = s.$$listenerCount;
-            s.$$listenerCount = angular.copy(s.$$$listenerCount);
-            subtractEvents(s, s.$$$listenerCount);
+            s.$$$watchersCount = s.$$watchersCount;
+            s.$$watchersCount = 0;
+            s.$$$listenerCount = angular.extend({}, s.$$listenerCount);
+            subtractEvents(s, s.$$listenerCount);
             if (index >= 0) {
+                // detach itself from others.
+                if (s.$$prevSibling) {
+                    s.$$prevSibling.$$nextSibling = null;
+                } else if (s.$$nextSibling) {
+                    s.$$nextSibling.$$prevSibling = null;
+                }
+                s.$parent = scope;// always let the child stay linked to the parent.
                 s.$$nextSibling = null;
                 s.$$prevSibling = null;
             }
@@ -733,15 +804,27 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function activateScope(s, index) {
         if (s && s.$$$watchers) { // do not activate one that is already active.
+            s.$parent = s.$$parent;
             s.$$watchers = s.$$$watchers;
+            s.$$watchersCount = s.$$$watchersCount;
             delete s.$$$watchers;
             addEvents(s, s.$$$listenerCount);
             delete s.$$$listenerCount;
             if (index >= 0) {
                 s.$$nextSibling = scopes[index + 1];
                 s.$$prevSibling = scopes[index - 1];
-                s.$parent = scope;
+                if (s.$$prevSibling) {
+                    if (!s.$$prevSibling.$$$watchers) {
+                        s.$$prevSibling.$$nextSibling = s;
+                    } else {
+                        s.$$prevSibling = null;// if it isn't active. It shouln't be referenced.
+                    }
+                }
+                if (s.$$nextSibling && !s.$$nextSibling.$$$watchers) {
+                    s.$$nextSibling = null;
+                }
             }
+            s.$parent = scope;
             s.$emit(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);
             return true;
         }
@@ -823,11 +906,10 @@ function Datagrid(scope, element, attr, $compile) {
      * invalidate and update all height values of the chunks and rows.
      */
     function updateHeightValues() {
-        //TODO: this is going to be updated to use ChunkArray data to be faster.
         var height = 0, i = 0, contentHeight;
         while (i < inst.rowsLength) {
             rowOffsets[i] = height;
-            height += inst.templateModel.getTemplateHeight(inst.data[i]);
+            height += inst.getRowHeight(i);
             i += 1;
         }
         options.rowHeight = inst.rowsLength ? inst.templateModel.getTemplateHeight('default') : 0;
@@ -843,7 +925,7 @@ function Datagrid(scope, element, attr, $compile) {
      */
     function updateRowWatchers() {
         var loop = getStartingIndex(), offset, lastActive = [].concat(active),
-            lastActiveIndex, s, prevS, digestLater = false;
+            lastActiveIndex, s, prevS, digestLater = false, rowEl;
         if (loop.i < 0) {// then scroll is negative. ignore it.
             return;
         }
@@ -865,7 +947,8 @@ function Datagrid(scope, element, attr, $compile) {
                 }
                 updateMinMax(loop.i);
                 if (activateScope(s, loop.i)) {
-                    inst.getRowElm(loop.i).attr('status', 'active');
+                    rowEl = inst.getRowElm(loop.i);
+                    rowEl.attr('status', 'active');
                     lastActiveIndex = lastActive.indexOf(loop.i);
                     if (lastActiveIndex !== -1) {
                         lastActive.splice(lastActiveIndex, 1);
@@ -886,7 +969,7 @@ function Datagrid(scope, element, attr, $compile) {
         }
         loop.ended = loop.i - 1;
         if (inst.rowsLength && values.activeRange.min < 0 && values.activeRange.max < 0) {
-            throw new Error(exports.errors.E1002);
+            inst.throwError(exports.errors.E1002);
         }
         inst.log("\tstartIndex %s endIndex %s", loop.startIndex, loop.i);
         deactivateList(lastActive);
@@ -895,6 +978,9 @@ function Datagrid(scope, element, attr, $compile) {
         updateLinks(); // update the $$childHead and $$nextSibling values to keep digest loops at a minimum count.
         // this dispatch needs to be after the digest so that it doesn't cause {} to show up in the render.
         // the creep render cannot be synchronous. It needs to wait till done to render.
+        if (inst.templateModel.hasVariableRowHeights()) {
+            updateHeightValues();
+        }
         flow.add(onAfterUpdateWatchers, [loop], 0);
         if (digestLater) {
             flow.add(function () {
@@ -932,13 +1018,25 @@ function Datagrid(scope, element, attr, $compile) {
             var lastIndex = active[active.length - 1], i = 0, len = active.length, s;
             scope.$$childHead = scopes[active[0]];
             scope.$$childTail = scopes[lastIndex];
-            while (i < len) {
-                s = scopes[active[i]];
-                s.$$prevSibling = scopes[active[i - 1]];
-                s.$$nextSibling = scopes[active[i + 1]];
-                s.$parent = scope;
-                i += 1;
+            var ac = 1;
+            var aci = scope.$$childHead;
+            while(aci.$$nextSibling) {
+                if (active.indexOf(aci.$index) === -1) {
+                    // It should not get in here. But keep this condition just as a safety net.
+                    flow.warn("Datagrid: Scope did not get deactivated correctly, or sibling scopes are creating a circular scope reference.");
+                    deactivateScope(aci, aci.$index);
+                }
+                ac += 1;
+                aci = aci.$$nextSibling;
             }
+            //console.log('count %s', ac);
+            //while (i < len) {
+            //    s = scopes[active[i]];
+            //    s.$$prevSibling = scopes[active[i - 1]];
+            //    s.$$nextSibling = scopes[active[i + 1]];
+            //    s.$parent = scope;
+            //    i += 1;
+            //}
         }
     }
 
@@ -978,7 +1076,7 @@ function Datagrid(scope, element, attr, $compile) {
         if (values.dirty && values.activeRange.max >= 0) {
             values.dirty = false;
             tplHeight = inst.templateModel.calculateRowHeight(getRowElm(values.activeRange.min)[0]);
-            if (flow.async && inst.getData().length && tplHeight !== (oldHeight = inst.templateModel.getTemplateHeight(inst.getData()[values.activeRange.min]))) {
+            if (flow.async && inst.getData().length && tplHeight !== (oldHeight = inst.templateModel.getRowHeight(values.activeRange.min))) {
                 if (window.console && console.warn) {
                     console.warn('Template height change from ' + oldHeight + ' to ' + tplHeight + '. This can cause gaps in the datagrid.');
                 }
@@ -1024,7 +1122,7 @@ function Datagrid(scope, element, attr, $compile) {
      * digest <a href="#activeRange">activeRange</a> of rows.
      */
     function render() {
-        inst.log("render");
+        inst.info("render");
         if (readyToRender()) {
             waitCount = 0;
             inst.log("\trender %s", state);
@@ -1040,7 +1138,7 @@ function Datagrid(scope, element, attr, $compile) {
 //                flow.add(destroyOldContent);
                 flow.add(inst.dispatch, [exports.datagrid.events.ON_AFTER_RENDER]);
             } else {
-                throw new Error(exports.errors.E1001);
+                inst.throwError(exports.errors.E1001);
             }
         } else {
             inst.log("\tnot ready to render.");
@@ -1198,8 +1296,12 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     function changeData(newVal, oldVal) {
+        if (inst.flow.count('changeData') > 1) {// the first one is this call.
+            return;// we don't want to reset if we are just going to do it again.
+        }
         inst.log("\tchangeData");
-        dispatch(exports.datagrid.events.ON_BEFORE_RESET);
+        inst.templateModel.clearAllRowHeights();
+        dispatch(exports.datagrid.events.ON_BEFORE_RESET, inst);
         inst.data = inst.setData(newVal, inst.grouped) || [];
         dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal);
         reset();
@@ -1230,7 +1332,7 @@ function Datagrid(scope, element, attr, $compile) {
             buildRows(inst.data, true);
         }
         flow.add(inst.info, ["reset complete"]);
-        flow.add(dispatch, [exports.datagrid.events.ON_AFTER_RESET]);// removed delay here because it causes the blink in the datagrid update.
+        flow.add(dispatch, [exports.datagrid.events.ON_AFTER_RESET, inst]);// removed delay here because it causes the blink in the datagrid update.
     }
 
     /**
@@ -1246,10 +1348,14 @@ function Datagrid(scope, element, attr, $compile) {
             s = compileRow(index);
         }
         if (s && !scope.$$phase) {
-            activateScope(s);
+            activateScope(s, index);
             s.$digest();
-            deactivateScope(s);
+            deactivateScope(s, index);
             s.$digested = true;
+            if (inst.templateModel.hasVariableRowHeights()) {
+                inst.chunkModel.updateAllChunkHeights(index);
+                updateHeightValues();
+            }
         }
     }
 
@@ -1273,8 +1379,8 @@ function Datagrid(scope, element, attr, $compile) {
                 replaceEl.addClass(classes.shift());
             }
             el.parent()[0].replaceChild(replaceEl[0], el[0]);
-            activateScope(s);
-            link(index, s);
+            activateScope(s, index);
+            //link(index, s);
             el.remove();
             s.$destroy();
             scopes[index] = null;
@@ -1308,24 +1414,14 @@ function Datagrid(scope, element, attr, $compile) {
     }
 
     /**
-     * ###<a name="isLogEvent">isLogEvent</a>###
-     * used to compare events to detect log events.
-     * @param {String} evt
-     * @returns {boolean}
-     */
-    function isLogEvent(evt) {
-        return logEvents.indexOf(evt) !== -1;
-    }
-
-    /**
      * ###<a name="dispatch">dispatch</a>###
      * handle dispatching of events from the datagrid.
      * @param {String} event
      * @returns {Object}
      */
     function dispatch(event) {
-        if (!isLogEvent(event) && options.debug) eventLogger.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
-        return scope.$emit.apply(scope, arguments);
+        if (options.debug) eventLogger.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
+        return exports.util.apply(scope.$emit, scope, arguments);
     }
 
     function forceGarbageCollection() {
@@ -1341,7 +1437,7 @@ function Datagrid(scope, element, attr, $compile) {
                         a = 0.5;
                     }
                 }
-            }, 1000);
+            }, 5000);// wait long enough for creep render to finish as well.
         }
     }
 
@@ -1362,7 +1458,7 @@ function Datagrid(scope, element, attr, $compile) {
                     i += 1;
                     nextScope = scopes[i] || undefined;
                 }
-                activateScope(s);
+                activateScope(s, index);
                 lastScope = s;
                 s.$destroy();
             }
@@ -1422,8 +1518,8 @@ function Datagrid(scope, element, attr, $compile) {
         $compile = null;
     }
 
-    exports.logWrapper('datagrid', inst, 'green', dispatch);
-    exports.logWrapper('events', eventLogger, 'light', dispatch);
+    exports.logWrapper('datagrid', inst, 'green', inst);
+    exports.logWrapper('events', eventLogger, 'light', inst);
     scope.datagrid = inst;
     setupExports();
 
@@ -1434,15 +1530,15 @@ function Datagrid(scope, element, attr, $compile) {
  * ###<a name="uxDatagrid">uxDatagrid</a>###
  * define the directive, setup addons, apply core addons then optional addons.
  */
-module.directive('uxDatagrid', ['$compile', 'gridAddons', function ($compile, gridAddons) {
+ngModule.directive('uxDatagrid', ['$compile', 'gridAddons', '$timeout', function ($compile, gridAddons, $timeout) {
     return {
         restrict: 'AE',
         scope: true,
         link: {
             pre: function (scope, element, attr) {
-                var inst = new Datagrid(scope, element, attr, $compile);
+                var inst = new Datagrid(scope, element, attr, $compile, $timeout);
                 each(exports.datagrid.coreAddons, function (method) {
-                    method.apply(inst, [inst]);
+                    exports.util.apply(method, inst, [inst]);
                 });
                 gridAddons(inst, attr.addons);
 //                scope.$parent[inst.name] = inst;

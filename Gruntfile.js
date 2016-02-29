@@ -20,6 +20,18 @@ module.exports = function (grunt) {
                 }
             }
         },
+        compile: {
+            catcher: {
+                banner: "<%= banner %>",
+                wrap: 'util',
+                build: 'util/hb/build',
+                filename: 'hb',
+                scripts: {
+                    import: ['dg.api'],
+                    src: ['util/hb/src/**/*.js']
+                }
+            }
+        },
         // automatically adds injections to angular for you.
 //        ngmin: {
 //            app: {
@@ -41,6 +53,7 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'build/latest/angular-ux-<%= pkg.filename %>.js': [
+                        'util/hb/build/util/hb.js',
                         'src/errors/dev-errors.js',
                         'src/ux-datagrid-config.js',
                         'src/lib/*.js',
@@ -101,6 +114,9 @@ module.exports = function (grunt) {
                     ],
                     'build/latest/other/ux-doubleScroll.js': [
                         'src/other/doubleScroll.js'
+                    ],
+                    'build/latest/addons/ux-<%= pkg.filename %>-dragRows.js': [
+                        'src/addons/dragRows.js'
                     ]
                 }
             },
@@ -108,7 +124,7 @@ module.exports = function (grunt) {
                 options: {
                     report: 'gzip',
                     mangle: true,
-                    compress: true,
+                    compress: {},
                     preserveComments: 'none',
                     sourceMap: true,
                     sourceMapIncludeSources: true,
@@ -116,68 +132,25 @@ module.exports = function (grunt) {
                     footer: '<%= wrapEnd %>'
                 },
                 files: {
-                    'build/latest/angular-ux-<%= pkg.filename %>.min.js': [
-                        'src/errors/prod-errors.js',
-                        'src/ux-datagrid-config.js',
-                        'src/lib/*.js',
-                        'src/core/logWrapper.js',
-                        'src/core/Flow.js',
-                        'src/ux-datagrid.js',
-                        'src/core/addons/*.js'
-                    ],
-                    'build/latest/addons/desktop/ux-<%= pkg.filename %>-focusManager.min.js': [
-                        'src/addons/libs/ux-visibility.js',
-                        'src/addons/libs/ux-selector.js',
-                        'src/addons/desktop/gridFocusManager.js'
-                    ],
-                    'build/latest/addons/desktop/ux-<%= pkg.filename %>-disableHoverWhileScrolling.min.js': [
-                        'src/addons/desktop/disableHoverWhileScrolling.js'
-                    ],
-                    'build/latest/addons/touch/ux-<%= pkg.filename %>-iscroll.min.js': [
-                        'src/addons/touch/iScrollAddon.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-collapsibleGroups.min.js': [
-                        'src/addons/collapsibleGroups.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-expandableGroups.min.js': [
-                        'src/addons/expandableGroups.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-expandRows.min.js': [
-                        'src/addons/expandRows.js'
-                    ],
-//                    'build/latest/addons/ux-<%= pkg.filename %>-findInList.min.js': [
-//                        'src/addons/findInList.js'
-//                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-gridLogger.min.js': [
-                        'src/addons/gridLogger.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-infiniteScroll.min.js': [
-                        'src/addons/infiniteScroll.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-scrollHistory.min.js': [
-                        'src/addons/scrollHistory.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-sortModel.min.js': [
-                        'src/addons/sortModel.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-statsModel.min.js': [
-                        'src/addons/statsModel.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-windowScroll.min.js': [
-                        'src/addons/windowScroll.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-memoryOptimizer.min.js': [
-                        'src/addons/memoryOptimizer.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-scrollBar.min.js': [
-                        'src/addons/scrollBar.js'
-                    ],
-                    'build/latest/addons/ux-<%= pkg.filename %>-scrollBounce.min.js': [
-                        'src/addons/scrollBounce.js'
-                    ],
-                    'build/latest/other/ux-doubleScroll.min.js': [
-                        'src/other/doubleScroll.js'
-                    ]
+                    'build/latest/angular-ux-<%= pkg.filename %>.min.js': ['build/latest/angular-ux-<%= pkg.filename %>.js'],
+                    'build/latest/addons/desktop/ux-<%= pkg.filename %>-focusManager.min.js': ['build/latest/addons/desktop/ux-<%= pkg.filename %>-focusManager.js'],
+                    'build/latest/addons/desktop/ux-<%= pkg.filename %>-disableHoverWhileScrolling.min.js': ['build/latest/addons/desktop/ux-<%= pkg.filename %>-disableHoverWhileScrolling.js'],
+                    'build/latest/addons/touch/ux-<%= pkg.filename %>-iscroll.min.js': ['build/latest/addons/touch/ux-<%= pkg.filename %>-iscroll.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-collapsibleGroups.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-collapsibleGroups.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-expandableGroups.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-expandableGroups.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-expandRows.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-expandRows.js'],
+//                    'build/latest/addons/ux-<%= pkg.filename %>-findInList.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-findInList.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-gridLogger.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-gridLogger.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-infiniteScroll.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-infiniteScroll.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-scrollHistory.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-scrollHistory.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-sortModel.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-sortModel.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-statsModel.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-statsModel.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-windowScroll.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-windowScroll.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-memoryOptimizer.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-memoryOptimizer.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-scrollBar.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-scrollBar.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-scrollBounce.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-scrollBounce.js'],
+                    'build/latest/other/ux-doubleScroll.min.js': ['build/latest/other/ux-doubleScroll.js'],
+                    'build/latest/addons/ux-<%= pkg.filename %>-dragRows.min.js': ['build/latest/addons/ux-<%= pkg.filename %>-dragRows.js']
                 }
             }
         },
@@ -197,6 +170,28 @@ module.exports = function (grunt) {
                         flatten: true,
                         src: ['build/latest/*.js'],
                         dest: 'build/latest/'
+                    }
+                ]
+            },
+            hb: {
+                options: {
+                    patterns: [
+                        //{
+                        //    match: /("|')(~)\1/,
+                        //    replacement: '$1dg$1'
+                        //},
+                        {
+                            match: /(\s{4}return\s)this;/,
+                            replacement: '$1exports;'
+                        }
+                    ]
+                },
+                files: [
+                    {
+                        expand: true,
+                        flatten: true,
+                        src: 'util/hb/build/hb.js',
+                        dest: 'util/hb/build/util'
                     }
                 ]
             }
@@ -231,8 +226,14 @@ module.exports = function (grunt) {
             }
         },
         jasmine: {
-            tests: {
+            min: {
                 src: ['vendor/angular.js', 'vendor/angular-mocks.js', 'build/latest/angular-ux-datagrid.min.js', 'build/latest/addons/**/*.min.js', 'build/latest/other/**/*.min.js'],
+                options: {
+                    specs: 'test/unit/tests/**/*.js'
+                }
+            },
+            dev: {
+                src: ['vendor/angular.js', 'vendor/angular-mocks.js', 'build/latest/angular-ux-datagrid.js', '!build/latest/addons/**/*.min.js', 'build/latest/addons/**/*.js', '!build/latest/other/**/*.min.js', 'build/latest/other/**/*.js'],
                 options: {
                     specs: 'test/unit/tests/**/*.js'
                 }
@@ -246,12 +247,15 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-replace');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
+    grunt.loadNpmTasks('hbjs');
 
     // Default task(s).
 //    grunt.registerTask('default', ['jshint', 'uglify', 'compress']);
-    grunt.registerTask('default', ['jshint', 'uglify', 'replace']);
+    grunt.registerTask('hb', ['compile', 'replace:hb']);
+    grunt.registerTask('default', ['jshint', 'hb', 'uglify', 'replace:build']);
     grunt.registerTask('integrate', ['jasmine']);
-    grunt.registerTask('test', ['jasmine']);
-    grunt.registerTask('release', ['jshint', 'uglify', 'replace', 'jasmine']);
+    grunt.registerTask('test', ['default', 'jasmine:min']);
+    grunt.registerTask('test-dev', ['default', 'jasmine:dev']);
+    grunt.registerTask('release', ['jshint', 'hb', 'uglify', 'replace:build', 'jasmine:min']);
 
 };

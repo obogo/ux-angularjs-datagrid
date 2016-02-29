@@ -81,17 +81,25 @@ exports.css = (function CSS() {
 
         document.getElementsByTagName(cnst.head)[0].appendChild(styleSheetElement);
 
-        for (i = 0; i < document.styleSheets.length; i++) {
-            if (document.styleSheets[i].disabled) {
-                continue;
-            }
-            styleSheet = document.styleSheets[i];
-        }
+        var index = document.styleSheets.length -1 ;
+        styleSheet = document.styleSheets[index];
 
         return {
             name: name,
             styleSheet: styleSheet
         };
+    }
+
+    function removeStyleSheet(name) {
+        var sheetData = customStyleSheets[name];
+        var len = document.styleSheets.length;
+        for(var i = 0; i < len; i += 1) {
+            if (document.styleSheets[i] === sheetData.styleSheet) {
+                document.styleSheets.splice(i, 1);
+            }
+        }
+        delete customStyleSheets[name];
+        sheetData = null;
     }
 
     /**
@@ -218,6 +226,7 @@ exports.css = (function CSS() {
         createClass: createClass,
         getCSSValue: getCSSValue,
         setCSSValue: setCSSValue,
-        getSelector: getSelector
+        getSelector: getSelector,
+        removeStyleSheet: removeStyleSheet
     };
 }());

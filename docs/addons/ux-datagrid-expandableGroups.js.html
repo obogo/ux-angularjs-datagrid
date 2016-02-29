@@ -73,8 +73,8 @@
 </div>
 <div class="dox">
   <div class="summary"><p>!
-ux-angularjs-datagrid v.1.2.7
-(c) 2015, Obogo
+ux-angularjs-datagrid v.1.4.11
+(c) 2016, Obogo
 <a href='https://github.com/obogo/ux-angularjs-datagrid'>https://github.com/obogo/ux-angularjs-datagrid</a>
 License: MIT.</p>
   </div>
@@ -129,7 +129,7 @@ By default all of these are collapsed. Hence the name expandableGroups.</p>
         <td class="code highlight"><div class="highlight"><pre>
 <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s2">&quot;ux&quot;</span><span class="p">).</span><span class="nx">factory</span><span class="p">(</span><span class="s2">&quot;expandableGroups&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">return</span> <span class="p">[</span> <span class="s2">&quot;inst&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inst</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;expandableGroups&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;orange&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">),</span> <span class="nx">options</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">expandableGroups</span> <span class="o">||</span> <span class="p">{},</span> <span class="nx">expanded</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">resultData</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">instSetData</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">setData</span><span class="p">,</span> <span class="nx">getNormalized</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">exports</span><span class="p">.</span><span class="nx">logWrapper</span><span class="p">(</span><span class="s2">&quot;expandableGroups&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="s2">&quot;orange&quot;</span><span class="p">,</span> <span class="nx">inst</span><span class="p">),</span> <span class="nx">options</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">expandableGroups</span> <span class="o">||</span> <span class="p">{},</span> <span class="nx">expanded</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">resultData</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">instSetData</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">setData</span><span class="p">,</span> <span class="nx">getNormalized</span> <span class="o">=</span> <span class="nx">inst</span><span class="p">.</span><span class="nx">getData</span><span class="p">;</span>
 
 </pre></div>
         </td>
@@ -238,7 +238,7 @@ replace the return value with our overridden array that has collapsed rows remov
         </td>
         <td class="code highlight"><div class="highlight"><pre>
         <span class="nx">inst</span><span class="p">.</span><span class="nx">setData</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">grouped</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">instSetData</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">inst</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+            <span class="nx">exports</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">instSetData</span><span class="p">,</span> <span class="nx">inst</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
             <span class="nx">generateData</span><span class="p">();</span>
             <span class="k">return</span> <span class="nx">resultData</span><span class="p">;</span>
         <span class="p">};</span>

@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.1
+* ux-angularjs-datagrid v.1.5.2
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -204,8 +204,8 @@ exports.selector = function() {
         }
         return result;
     }
-    function filterNumbers(item) {
-        return typeof item !== "number";
+    function filterClasses(item) {
+        return typeof item !== "number" && (typeof item === "string" && item.indexOf("{") === -1);
     }
     function buildIgnoreFunction(ignoreClasses) {
         ignoreClasses = ignoreClasses || [];
@@ -228,7 +228,7 @@ exports.selector = function() {
         };
     }
     function getClasses(element, ignoreClass) {
-        var classes = ux.filter(element.classList, filterNumbers);
+        var classes = ux.filter(element.classList, filterClasses);
         classes = ux.filter(classes, classFiltersFctn);
         return ux.filter(classes, ignoreClass);
     }

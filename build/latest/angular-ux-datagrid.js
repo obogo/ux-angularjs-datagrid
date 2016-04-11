@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.1
+* ux-angularjs-datagrid v.1.5.2
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.5.1
+* ux-angularjs-datagrid v.1.5.2
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -455,7 +455,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.5.1",
+    version: "1.5.2",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1742,6 +1742,13 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             while (s && s.$parent && s.$parent !== inst.scope) {
                 s = s.$parent;
             }
+            if (s.$index === undefined) {
+                flow.warn("Unable to get Index from row scope. Row scope is not activated or not compiled to that row.");
+                while (el.length && !el[0].getAttribute("row-id") && el[0] !== element[0]) {
+                    el = el.parent();
+                }
+                return parseInt(el[0].getAttribute("row-id"), 10);
+            }
             return s.$index;
         }
         return -1;
@@ -1785,7 +1792,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * Return the total height of the content of the datagrid.
      */
     function getContentHeight() {
-        var list = inst.chunkModel && inst.chunkModel.getChunkList() || [];
+        var list = inst && inst.chunkModel && inst.chunkModel.getChunkList() || [];
         return list && list.height || 0;
     }
     /**
@@ -1800,19 +1807,6 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         inst.chunkModel.chunkDom(list, options.chunks.size, '<div class="' + options.chunks.chunkClass + '">', "</div>", content);
         inst.rowsLength = len;
         inst.log("created %s dom elements", len);
-    }
-    function link(index, s) {
-        s = s || getScope(index);
-        var prev = getScope(index - 1), next = getScope(index + 1);
-        if (prev) {
-            prev.$$nextSibling = s;
-        }
-        s.$$prevSibling = prev;
-        s.$$nextSibling = next;
-        if (s.$$nextSibling) {
-            s.$$nextSibling.$$prevSibling = s;
-        }
-        scopes[index] = s;
     }
     /**
      * ###<a name="compileRow">compileRow</a>###
@@ -1832,10 +1826,12 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 scope.$$childTail = scopes[index - 1];
             }
             s = scope.$new();
+            //s.$on('$destroy', function() {
+            //   console.log('DESTROY ' + s.$id + ' index:' + s.$index);
+            //});
             processCompilation(s, index, el);
         } else if (s && (currentRow = getExistingRow(index)).scope() !== s) {
-            // sometimes rows don't get their compiled scope reference. Make them link to the correct scope.
-            // TODO: need to figure out how they get here. It is unclear, but by recompiling the row to the same scope fixes it. This is somehow related to swaping the row template.
+            // after rows are destroyed (memory optimizer) then they need to be recompiled.
             processCompilation(s, index, currentRow);
         }
         return s;
@@ -1849,8 +1845,8 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         var tplName, tpl, $c;
         tplName = inst.templateModel.getTemplateName(inst.data[index]);
         tpl = inst.templateModel.getTemplate(inst.data[index]);
-        link(index, s);
-        // adds scope to scopes
+        s = s || getScope(index);
+        scopes[index] = s;
         s.$status = options.compiledClass;
         s[tpl.item] = inst.data[index];
         // set the data to the scope.
@@ -2003,6 +1999,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @param {String} eventName
      */
     function subtractEvent(s, listenerCounts, eventName) {
+        //console.log("%c%s.$$listenerCount[%s] %s + %s = %s", "color:#990000", s.$id, eventName, s.$$listenerCount[eventName], listenerCounts[eventName], s.$$listenerCount[eventName] + listenerCounts[eventName]);
         s.$$listenerCount[eventName] -= listenerCounts[eventName];
     }
     /**
@@ -2022,6 +2019,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         // if the scope is not created yet. just skip.
         if (s && !isActive(s)) {
             // do not deactivate one that is already deactivated.
+            //console.log("\t%cdeactivate %s index:%s", "color:#F60", s.$id, s.$index);
             s.$emit(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);
             s.$$$watchers = s.$$watchers;
             s.$$watchers = [];
@@ -2055,30 +2053,16 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @param {number} index
      * @returns {boolean}
      */
-    function activateScope(s, index) {
-        if (s && s.$$$watchers) {
+    function activateScope(s, index, link) {
+        if (s && s.$$$watchers !== undefined) {
             // do not activate one that is already active.
-            s.$parent = s.$$parent;
+            //console.log("\t%cactivate %s index:%s", "color:#090", s.$id, s.$index);
+            s.$parent = scope;
             s.$$watchers = s.$$$watchers;
             s.$$watchersCount = s.$$$watchersCount;
             delete s.$$$watchers;
             addEvents(s, s.$$$listenerCount);
             delete s.$$$listenerCount;
-            if (index >= 0) {
-                s.$$nextSibling = scopes[index + 1];
-                s.$$prevSibling = scopes[index - 1];
-                if (s.$$prevSibling) {
-                    if (!s.$$prevSibling.$$$watchers) {
-                        s.$$prevSibling.$$nextSibling = s;
-                    } else {
-                        s.$$prevSibling = null;
-                    }
-                }
-                if (s.$$nextSibling && !s.$$nextSibling.$$$watchers) {
-                    s.$$nextSibling = null;
-                }
-            }
-            s.$parent = scope;
             s.$emit(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);
             return true;
         }
@@ -2197,7 +2181,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                     loop.started = loop.i;
                 }
                 updateMinMax(loop.i);
-                if (activateScope(s, loop.i)) {
+                if (s.$$$watchers && activateScope(s, loop.i, true)) {
                     rowEl = inst.getRowElm(loop.i);
                     rowEl.attr("status", "active");
                     lastActiveIndex = lastActive.indexOf(loop.i);
@@ -2210,6 +2194,8 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                         digestLater = true;
                     }
                     s.$digested = true;
+                } else {
+                    active.push(loop.i);
                 }
             }
             loop.i += loop.inc;
@@ -2251,9 +2237,11 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         var lastActiveIndex, deactivated = [];
         while (lastActive.length) {
             lastActiveIndex = lastActive.pop();
-            deactivated.push(lastActiveIndex);
-            deactivateScope(scopes[lastActiveIndex], lastActiveIndex);
-            inst.getRowElm(lastActiveIndex).attr("status", "inactive");
+            if (active.indexOf(lastActiveIndex) === -1) {
+                deactivated.push(lastActiveIndex);
+                deactivateScope(scopes[lastActiveIndex], lastActiveIndex);
+                inst.getRowElm(lastActiveIndex).attr("status", "inactive");
+            }
         }
         inst.log("	deactivated %s", deactivated.join(", "));
     }
@@ -2265,19 +2253,16 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     function updateLinks() {
         if (active.length) {
             var lastIndex = active[active.length - 1], i = 0, len = active.length, s;
+            //console.log("activated " + active[0] + " to " + active[len - 1]);
+            for (i = 0; i < len; i += 1) {
+                s = scopes[active[i]];
+                s.$$prevSibling = scopes[active[i - 1]];
+                s.$$nextSibling = scopes[active[i + 1]];
+                // will be undefined if the scope is not active.
+                s.$parent = scope;
+            }
             scope.$$childHead = scopes[active[0]];
             scope.$$childTail = scopes[lastIndex];
-            var ac = 1;
-            var aci = scope.$$childHead;
-            while (aci.$$nextSibling) {
-                if (active.indexOf(aci.$index) === -1) {
-                    // It should not get in here. But keep this condition just as a safety net.
-                    flow.warn("Datagrid: Scope did not get deactivated correctly, or sibling scopes are creating a circular scope reference.");
-                    deactivateScope(aci, aci.$index);
-                }
-                ac += 1;
-                aci = aci.$$nextSibling;
-            }
         }
     }
     /**
@@ -2608,7 +2593,6 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             }
             el.parent()[0].replaceChild(replaceEl[0], el[0]);
             activateScope(s, index);
-            //link(index, s);
             el.remove();
             s.$destroy();
             scopes[index] = null;
@@ -2676,7 +2660,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         var lastScope, nextScope, i = 0;
         each(scopes, function(s, index) {
             // listeners should be destroyed with the angular destroy.
-            if (s) {
+            if (s && !s.$$destroyed) {
                 s.$$prevSibling = lastScope || undefined;
                 i = index;
                 while (!nextScope && i < inst.rowsLength) {
@@ -4070,6 +4054,11 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             inst.element.css({
                 overflow: "auto"
             });
+        } else if (exports.datagrid.isIOS) {
+            inst.element.css({
+                overflowY: "scroll",
+                webkitOverflowScrolling: "touch"
+            });
         }
         result.log("addScrollListener");
         addScrollListener();
@@ -4219,7 +4208,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             } else {
                 startTime = Date.now();
                 distance = speed * inst.options.scrollModel.speed;
-                result.scrollSlowDown(true);
+                result.scrollSlowDown(exports.datagrid.isIOS);
             }
         } else {
             result.onUpdateScroll();
@@ -4244,6 +4233,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             if (!wait) {
                 //                result.log("\tscroll %s of %s", value, inst.element[0].scrollHeight);
                 setElementScroll(value);
+                return;
             }
             scrollingIntv = setTimeout(result.scrollSlowDown, 20);
         }

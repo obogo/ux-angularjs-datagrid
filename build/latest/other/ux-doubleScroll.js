@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.1
+* ux-angularjs-datagrid v.1.5.2
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -25,7 +25,7 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
         link: function(scope, element, attr) {
             var result = exports.logWrapper("doubleScroll", {}, "red", function() {
                 exports.util.apply(scope.$emit, scope, arguments);
-            }), el = element[0], selector = scope.$eval(attr.uxDoubleScroll), target, targetOffset = scope.$eval(attr.targetOffset) || 0, dynamicOffset = scope.$eval(attr.dynamicOffset), targetPadding = scope.$eval(attr.targetPadding), grid, // reference to the datagrid instance
+            }), el = element[0], selector = scope.$eval(attr.uxDoubleScroll), target, targetOffset = scope.$eval(attr.targetOffset) || 0, targetReservedOffset = scope.$eval(attr.targetReservedOffset) || 0, dynamicOffset = scope.$eval(attr.dynamicOffset), targetPadding = scope.$eval(attr.targetPadding), grid, // reference to the datagrid instance
             myScroll, // iScroll for the doubleScroll.
             scrollModel, // the grid scrollModel.
             enabled, unwatchRender, unwatchOffset, lastOffsetTop = 0, lastOffsetHeight, intv, lastY = 0, momentum = 0, gridScrollIntv, useIScroll = detectIScroll();
@@ -279,7 +279,7 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                     i += 1;
                 }
                 if (dynamicOffset) {
-                    targetOffset = offsetTop;
+                    targetOffset = offsetTop + targetReservedOffset;
                 }
                 return offsetTop;
             }

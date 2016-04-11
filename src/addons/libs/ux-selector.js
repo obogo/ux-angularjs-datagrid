@@ -131,8 +131,8 @@ exports.selector = (function () {
         return result;
     }
 
-    function filterNumbers(item) {
-        return typeof item !== 'number';
+    function filterClasses(item) {
+        return typeof item !== 'number' && (typeof item === "string" && item.indexOf('{') === -1);
     }
 
     function buildIgnoreFunction(ignoreClasses) {
@@ -157,7 +157,7 @@ exports.selector = (function () {
     }
 
     function getClasses(element, ignoreClass) {
-        var classes = ux.filter(element.classList, filterNumbers);
+        var classes = ux.filter(element.classList, filterClasses);
         classes = ux.filter(classes, classFiltersFctn);
         return ux.filter(classes, ignoreClass);
     }

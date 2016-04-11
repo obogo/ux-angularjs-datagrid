@@ -45,6 +45,8 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         inst.element.css('willChange', 'scroll-position');
         if (!inst.element.css('overflow') || inst.element.css('overflow') === 'visible') {
             inst.element.css({overflow: 'auto'});
+        } else if (exports.datagrid.isIOS) {
+            inst.element.css({overflowY: 'scroll', webkitOverflowScrolling: 'touch'}); /* has to be scroll, not auto */
         }
         result.log('addScrollListener');
         addScrollListener();
@@ -212,7 +214,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             } else {
                 startTime = Date.now();
                 distance = speed * inst.options.scrollModel.speed;
-                result.scrollSlowDown(true);
+                result.scrollSlowDown(exports.datagrid.isIOS);
             }
         } else {
             result.onUpdateScroll();
@@ -238,6 +240,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             if (!wait) {
 //                result.log("\tscroll %s of %s", value, inst.element[0].scrollHeight);
                 setElementScroll(value);
+                return;
             }
             scrollingIntv = setTimeout(result.scrollSlowDown, 20);
         }

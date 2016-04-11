@@ -465,18 +465,17 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             var s = el.scope();
             if (s === inst.scope) {
                 inst.throwError("Unable to get row scope... something went wrong.");
-                // This is only likely to happen if we are running in options.chunks.detachDom mode. And only
-                // when jumping from one chunk to the next in detached mode.
-                // this means that the scope of the element isn't active. So it is picking up the parent.
-                // that's ok. We have a backup plan. It just isn't as fast.
-//                while (el.length && !el[0].getAttribute('row-id')) {
-//                    el = el.parent();// moving up dom parents in the browser is slow. So we avoid it if we can.
-//                }
-//                return parseInt(el[0].getAttribute('row-id'), 10);
             }
             // make sure we get the right scope to grab the index from. We need to get it from a row.
             while (s && s.$parent && s.$parent !== inst.scope) {
                 s = s.$parent;
+            }
+            if (s.$index === undefined) {
+                flow.warn("Unable to get Index from row scope. Row scope is not activated or not compiled to that row.");
+                while (el.length && !el[0].getAttribute('row-id') && el[0] !== element[0]) {
+                    el = el.parent();// moving up dom parents in the browser is slow. So we avoid it if we can.
+                }
+                return parseInt(el[0].getAttribute('row-id'), 10);
             }
             return s.$index;
         }
@@ -542,20 +541,6 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         inst.log("created %s dom elements", len);
     }
 
-    function link(index, s) {
-        s = s || getScope(index);
-        var prev = getScope(index - 1), next = getScope(index + 1);
-        if (prev) {
-            prev.$$nextSibling = s;
-        }
-        s.$$prevSibling = prev;
-        s.$$nextSibling = next;
-        if (s.$$nextSibling) {
-            s.$$nextSibling.$$prevSibling = s;
-        }
-        scopes[index] = s;
-    }
-
     /**
      * ###<a name="compileRow">compileRow</a>###
      * Compile a row at that index. This creates the scope for that row when compiled. It does not perform a digest.
@@ -574,10 +559,12 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 scope.$$childTail = scopes[index - 1];
             }
             s = scope.$new();
+            //s.$on('$destroy', function() {
+            //   console.log('DESTROY ' + s.$id + ' index:' + s.$index);
+            //});
             processCompilation(s, index, el);
         } else if (s && (currentRow = getExistingRow(index)).scope() !== s) {
-            // sometimes rows don't get their compiled scope reference. Make them link to the correct scope.
-            // TODO: need to figure out how they get here. It is unclear, but by recompiling the row to the same scope fixes it. This is somehow related to swaping the row template.
+            // after rows are destroyed (memory optimizer) then they need to be recompiled.
             processCompilation(s, index, currentRow);
         }
         return s;
@@ -592,7 +579,8 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         var tplName, tpl, $c;
         tplName = inst.templateModel.getTemplateName(inst.data[index]);
         tpl = inst.templateModel.getTemplate(inst.data[index]);
-        link(index, s);// adds scope to scopes
+        s = s || getScope(index);
+        scopes[index] = s;
         s.$status = options.compiledClass;
         s[tpl.item] = inst.data[index]; // set the data to the scope.
         s.$index = index;
@@ -750,6 +738,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @param {String} eventName
      */
     function subtractEvent(s, listenerCounts, eventName) {
+        //console.log("%c%s.$$listenerCount[%s] %s + %s = %s", "color:#990000", s.$id, eventName, s.$$listenerCount[eventName], listenerCounts[eventName], s.$$listenerCount[eventName] + listenerCounts[eventName]);
         s.$$listenerCount[eventName] -= listenerCounts[eventName];
     }
 
@@ -769,6 +758,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     function deactivateScope(s, index) {
         // if the scope is not created yet. just skip.
         if (s && !isActive(s)) { // do not deactivate one that is already deactivated.
+            //console.log("\t%cdeactivate %s index:%s", "color:#F60", s.$id, s.$index);
             s.$emit(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);
             s.$$$watchers = s.$$watchers;
             s.$$watchers = [];
@@ -802,29 +792,15 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @param {number} index
      * @returns {boolean}
      */
-    function activateScope(s, index) {
-        if (s && s.$$$watchers) { // do not activate one that is already active.
-            s.$parent = s.$$parent;
+    function activateScope(s, index, link) {
+        if (s && s.$$$watchers !== undefined) { // do not activate one that is already active.
+            //console.log("\t%cactivate %s index:%s", "color:#090", s.$id, s.$index);
+            s.$parent = scope;
             s.$$watchers = s.$$$watchers;
             s.$$watchersCount = s.$$$watchersCount;
             delete s.$$$watchers;
             addEvents(s, s.$$$listenerCount);
             delete s.$$$listenerCount;
-            if (index >= 0) {
-                s.$$nextSibling = scopes[index + 1];
-                s.$$prevSibling = scopes[index - 1];
-                if (s.$$prevSibling) {
-                    if (!s.$$prevSibling.$$$watchers) {
-                        s.$$prevSibling.$$nextSibling = s;
-                    } else {
-                        s.$$prevSibling = null;// if it isn't active. It shouln't be referenced.
-                    }
-                }
-                if (s.$$nextSibling && !s.$$nextSibling.$$$watchers) {
-                    s.$$nextSibling = null;
-                }
-            }
-            s.$parent = scope;
             s.$emit(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);
             return true;
         }
@@ -946,7 +922,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                     loop.started = loop.i;
                 }
                 updateMinMax(loop.i);
-                if (activateScope(s, loop.i)) {
+                if (s.$$$watchers && activateScope(s, loop.i, true)) {
                     rowEl = inst.getRowElm(loop.i);
                     rowEl.attr('status', 'active');
                     lastActiveIndex = lastActive.indexOf(loop.i);
@@ -959,6 +935,8 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                         digestLater = true;
                     }
                     s.$digested = true;
+                } else {
+                    active.push(loop.i);// it is already active. Just repopulate the active list.
                 }
             }
             loop.i += loop.inc;
@@ -1001,9 +979,11 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         var lastActiveIndex, deactivated = [];
         while (lastActive.length) {
             lastActiveIndex = lastActive.pop();
-            deactivated.push(lastActiveIndex);
-            deactivateScope(scopes[lastActiveIndex], lastActiveIndex);
-            inst.getRowElm(lastActiveIndex).attr('status', 'inactive');
+            if (active.indexOf(lastActiveIndex) === -1) {
+                deactivated.push(lastActiveIndex);
+                deactivateScope(scopes[lastActiveIndex], lastActiveIndex);
+                inst.getRowElm(lastActiveIndex).attr('status', 'inactive');
+            }
         }
         inst.log("\tdeactivated %s", deactivated.join(', '));
     }
@@ -1016,27 +996,15 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     function updateLinks() {
         if (active.length) {
             var lastIndex = active[active.length - 1], i = 0, len = active.length, s;
+            //console.log("activated " + active[0] + " to " + active[len - 1]);
+            for(i = 0; i < len; i += 1) {
+                s = scopes[active[i]];
+                s.$$prevSibling = scopes[active[i - 1]];
+                s.$$nextSibling = scopes[active[i + 1]];// will be undefined if the scope is not active.
+                s.$parent = scope;
+            }
             scope.$$childHead = scopes[active[0]];
             scope.$$childTail = scopes[lastIndex];
-            var ac = 1;
-            var aci = scope.$$childHead;
-            while(aci.$$nextSibling) {
-                if (active.indexOf(aci.$index) === -1) {
-                    // It should not get in here. But keep this condition just as a safety net.
-                    flow.warn("Datagrid: Scope did not get deactivated correctly, or sibling scopes are creating a circular scope reference.");
-                    deactivateScope(aci, aci.$index);
-                }
-                ac += 1;
-                aci = aci.$$nextSibling;
-            }
-            //console.log('count %s', ac);
-            //while (i < len) {
-            //    s = scopes[active[i]];
-            //    s.$$prevSibling = scopes[active[i - 1]];
-            //    s.$$nextSibling = scopes[active[i + 1]];
-            //    s.$parent = scope;
-            //    i += 1;
-            //}
         }
     }
 
@@ -1380,7 +1348,6 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             }
             el.parent()[0].replaceChild(replaceEl[0], el[0]);
             activateScope(s, index);
-            //link(index, s);
             el.remove();
             s.$destroy();
             scopes[index] = null;
@@ -1451,7 +1418,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         var lastScope, nextScope, i = 0;
         each(scopes, function (s, index) {
             // listeners should be destroyed with the angular destroy.
-            if (s) {
+            if (s && !s.$$destroyed) {
                 s.$$prevSibling = lastScope || undefined;
                 i = index;
                 while (!nextScope && i < inst.rowsLength) {

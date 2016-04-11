@@ -14,6 +14,7 @@ angular.module('ux').directive('uxDoubleScroll', ['$window', function ($window) 
                 selector = scope.$eval(attr.uxDoubleScroll),
                 target,
                 targetOffset = scope.$eval(attr.targetOffset) || 0,
+                targetReservedOffset = scope.$eval(attr.targetReservedOffset) || 0,
                 dynamicOffset = scope.$eval(attr.dynamicOffset),
                 targetPadding = scope.$eval(attr.targetPadding),
                 grid, // reference to the datagrid instance
@@ -292,7 +293,7 @@ angular.module('ux').directive('uxDoubleScroll', ['$window', function ($window) 
                     i += 1;
                 }
                 if (dynamicOffset) {
-                    targetOffset = offsetTop;
+                    targetOffset = offsetTop + targetReservedOffset;
                 }
                 return offsetTop;
             }

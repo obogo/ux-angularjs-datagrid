@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.4.12
+* ux-angularjs-datagrid v.1.5.2
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -80,8 +80,8 @@ angular.module("ux").factory("memoryOptimizer", function() {
                 if (inst.scopes[i]) {
                     var s = inst.scopes[i];
                     inst.activateScope(s);
-                    inst.$$prevSibling = null;
-                    inst.$$nextSibling = null;
+                    s.$$prevSibling = null;
+                    s.$$nextSibling = null;
                     s.$destroy();
                     inst.scopes[i] = undefined;
                 }

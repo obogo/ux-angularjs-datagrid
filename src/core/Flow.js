@@ -1,5 +1,7 @@
-function Flow(inst, dispatch, pauseFn, $timeout) {
-    var running = false,
+function Flow(inst, pauseFn, $timeout, dg) {
+    var initTime = Date.now(),
+        lifespan = 0,
+        running = false,
         current = null,
         list = [],
         history = [],
@@ -26,7 +28,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     }
 
     function clearSimilarItemsFromList(item) {
-        var i = 0, len = list.length;
+        var i = 1, len = list.length;// clearing should never remove the first one, because it is the current one.
         while (i < len) {
             if (list[i].label === item.label) {
                 if (list[i] === current && nextPromise) {
@@ -50,7 +52,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     }
 
     function add(method, args, delay) {
-        var item = createItem(method, args, delay), index = -1;
+        var item = createItem(method, args, delay);
         if (uniqueMethods[item.label]) {
             clearSimilarItemsFromList(item);
         }
@@ -121,6 +123,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
 
     function next() {
         inst.log("next %s", list.length);
+        inst.lifespan = lifespan = Date.now() - initTime;
         if (!current && list.length) {
             current = list[0];
             if (inst.async && current.delay !== undefined) {
@@ -182,7 +185,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     function count(name) {
         var c = 0;
         for(var i = 0; i < list.length; i += 1) {
-            if (list[i].label === name) {
+            if (name instanceof Array && name.indexOf(list[i].label) !== -1 || list[i].label === name) {
                 c += 1;
             }
         }
@@ -194,7 +197,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
         inst = null;
     }
 
-    exports.logWrapper('Flow', inst, 'grey', inst);
+    exports.logWrapper('Flow', inst, 'grey', dg || inst);// if no dg. It will not log.
 //    inst.async = exports.util.apply(Object.prototype.hasOwnProperty, inst, ['async']) ? inst.async : true;
     inst.debug = exports.util.apply(Object.prototype.hasOwnProperty, inst, ['debug']) ? inst.debug : 0;
     inst.insert = insert;

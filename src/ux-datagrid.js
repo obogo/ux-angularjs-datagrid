@@ -96,6 +96,8 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         flow.unique(reset);
         flow.unique(render);
         flow.unique(updateRowWatchers);
+        flow.unique(onDataChanged);
+        flow.unique(changeData);
     }
 
     /**
@@ -148,7 +150,14 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         inst.updateViewportHeight = updateViewportHeight;
         inst.calculateViewportHeight = calculateViewportHeight;
         inst.options = options = exports.extend({}, exports.datagrid.options, scope.$eval(attr.options) || {});
-        inst.flow = flow = new Flow({async: exports.util.apply(Object.prototype.hasOwnProperty, options, ['async']) ? !!options.async : true, debug: exports.util.apply(Object.prototype.hasOwnProperty, options, ['debug']) ? options.debug : 0}, inst.dispatch, isDigesting, $timeout);
+        inst.flow = flow = new Flow(
+            {
+                async: exports.util.apply(Object.prototype.hasOwnProperty, options, ['async']) ? !!options.async : true,
+                debug: exports.util.apply(Object.prototype.hasOwnProperty, options, ['debug']) ? options.debug : 0
+            },
+            isDigesting,
+            $timeout,
+            inst.options.debug && inst.options.debug.Flow ? inst : null);
         // this needs to be set immediately so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
         inst.gc = forceGarbageCollection;
@@ -311,12 +320,12 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     /**
      * ###<a name="onDataChangeFromWatcher">onDataChangeFromWatcher</a>###
      * when the watcher fires.
-     * @param {*} newValue
-     * @param {*} oldValue
-     * @param {Scope} scope
+     * @param {*} newVal
+     * @param {*} oldVal
      */
-    function onDataChangeFromWatcher(newValue, oldValue, scope) {
-        flow.add(onDataChanged, [newValue, oldValue]);
+    function onDataChangeFromWatcher(newVal, oldVal) {
+        inst.info("\tonDataChangeFromWatcher |" + flow.lifespan + "| new:" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
+        flow.add(onDataChanged, [newVal, oldVal, flow.lifespan]);
     }
 
     /**
@@ -759,7 +768,8 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         // if the scope is not created yet. just skip.
         if (s && !isActive(s)) { // do not deactivate one that is already deactivated.
             //console.log("\t%cdeactivate %s index:%s", "color:#F60", s.$id, s.$index);
-            s.$emit(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);
+            // s.$emit(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);// not sure why anyone would need to know outside of the grid about this.
+            s.$broadcast(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);// the row may want to set flags or remove listeners before the deactivate.
             s.$$$watchers = s.$$watchers;
             s.$$watchers = [];
             s.$$$watchersCount = s.$$watchersCount;
@@ -801,7 +811,9 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             delete s.$$$watchers;
             addEvents(s, s.$$$listenerCount);
             delete s.$$$listenerCount;
-            s.$emit(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);
+            // s.$emit(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);// does anyone need to know that this row is active?
+            // the row it'self may need to know to update values if they are not bound to functions.
+            s.$broadcast(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);
             return true;
         }
         return !!(s && !s.$$$watchers); // if it is active or not.
@@ -1226,9 +1238,12 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * ###<a name="onDataChanged">onDataChanged</a>###
      * when the data changes. It is compared by reference, not value for speed
      * (this is the default angular setting).
+     * @param {Array} newVal
+     * @param {Array} oldVal
+     * @returns {boolean}
      */
-    function onDataChanged(newVal, oldVal) {
-        inst.log("onDataChanged");
+    function onDataChanged(newVal, oldVal, lifespan) {
+        inst.info("\tonDataChanged |" + lifespan + "| new:" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
         inst.grouped = scope.$eval(attr.grouped);
         if (oldVal !== inst.getOriginalData()) {
             oldVal = inst.getOriginalData();
@@ -1239,7 +1254,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 newVal = evt.newValue;
             }
             values.dirty = true;
-            flow.add(changeData, [newVal, oldVal]);
+            flow.add(changeData, [newVal, oldVal, lifespan]);
             return true;
         } else if (isDataReallyChanged(newVal)) {
             // we just want to update the data values and scope values, because no templates changed.
@@ -1263,11 +1278,12 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         return false;
     }
 
-    function changeData(newVal, oldVal) {
-        if (inst.flow.count('changeData') > 1) {// the first one is this call.
+    function changeData(newVal, oldVal, lifespan) {
+        if (inst.flow.count(['changeData', 'onDataChanged']) > 1) {// the first one is this call.
+            inst.info("\tSKIPPED changeData |" + lifespan + "| another is pending.");
             return;// we don't want to reset if we are just going to do it again.
         }
-        inst.log("\tchangeData");
+        inst.info("\tchangeData |" + lifespan + "| :" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
         inst.templateModel.clearAllRowHeights();
         dispatch(exports.datagrid.events.ON_BEFORE_RESET, inst);
         inst.data = inst.setData(newVal, inst.grouped) || [];
@@ -1387,7 +1403,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @returns {Object}
      */
     function dispatch(event) {
-        if (options.debug) eventLogger.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
+        if (inst.options.debug) eventLogger.log('$emit %s', event);// THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
         return exports.util.apply(scope.$emit, scope, arguments);
     }
 

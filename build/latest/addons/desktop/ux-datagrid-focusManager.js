@@ -453,7 +453,7 @@ angular.module("ux").factory("gridFocusManager", function() {
         /**
          * We want to add and remove listeners only on the dom that is currently under watch.
          */
-        var result = exports.logWrapper("gridFocusManager", {}, "redOrange", inst), unwatchers = [], keys = {
+        var result = exports.logWrapper("gridFocusManager", {}, "redOrange", inst), eqrx = /:eq\((\d+)\)/, unwatchers = [], keys = {
             ENTER: 13,
             UP: 38,
             DOWN: 40
@@ -515,7 +515,7 @@ angular.module("ux").factory("gridFocusManager", function() {
                 // detachDom and memoryOptimizer can cause this to be null at times.
                 var focusable = [].slice.call(el[0].querySelectorAll("input,a,select"));
                 //            result.log("\tgetFocusableElements %s", focusable.length);
-                return ux.filter(focusable, filterVisible);
+                return focusable;
             }
             return [];
         }
@@ -755,12 +755,16 @@ angular.module("ux").factory("gridFocusManager", function() {
          * Do the heavy lifting for focusing from one row to the next and pulling the selector.
          * Since it is the same going to previous or next it is all one method and just needs to know which direction
          * to increment.
+         *
+         * options.multipleEnterFocusPerRow is required to focus to multiple input elements per row on enter key.
+         *
          * @param {JQLite} focusedEl
          * @param {Number} dir
          */
         function focusToRowElement(focusedEl, dir) {
             // dir should be 1 or -1
             result.log("	focusToRowElement");
+            var multiple, max;
             focusedEl = wrap(focusedEl);
             if (!inst.element[0].contains(focusedEl[0])) {
                 return;
@@ -770,6 +774,33 @@ angular.module("ux").factory("gridFocusManager", function() {
                 return focusedEl;
             }
             selector = getSelector(focusedEl, currentIndex);
+            if (inst.options.gridFocusManager && inst.options.gridFocusManager.multipleEnterFocusPerRow && (multiple = selector.match(eqrx))) {
+                max = query(inst.getRowElm(currentIndex), selector.replace(eqrx, "")).length - 1;
+                multiple[1] = parseInt(multiple[1]);
+                if (dir > 0) {
+                    if (multiple[1] < max) {
+                        selector = selector.replace(eqrx, ":eq(" + (multiple[1] + 1) + ")");
+                        nextIndex -= 1;
+                    } else if (multiple[1] >= max) {
+                        selector = selector.replace(eqrx, ":eq(0)");
+                    }
+                } else if (dir < 0) {
+                    if (multiple[1] > 0) {
+                        selector = selector.replace(eqrx, ":eq(" + (multiple[1] - 1) + ")");
+                        nextIndex += 1;
+                    } else if (multiple[1] <= 0) {
+                        var ci = currentIndex - 1;
+                        max = -1;
+                        // we need to find the max of the prev row.
+                        while (ci > 0 && max < 0) {
+                            max = query(inst.getRowElm(ci), selector.replace(eqrx, "")).length - 1;
+                            selector = selector.replace(eqrx, ":eq(" + max + ")");
+                            // we are going to the next index. reset to 0.
+                            ci -= 1;
+                        }
+                    }
+                }
+            }
             result.log("	selector: %s", selector);
             resultEl = findNextRowWithSelection(nextIndex, dir, selector);
             return resultEl && resultEl.length ? resultEl : focusedEl;

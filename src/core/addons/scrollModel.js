@@ -45,7 +45,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         inst.element.css('willChange', 'scroll-position');
         if (!inst.element.css('overflow') || inst.element.css('overflow') === 'visible') {
             inst.element.css({overflow: 'auto'});
-        } else if (exports.datagrid.isIOS) {
+        } else if (exports.datagrid.isIOS && inst.options.iosWebkitScrolling) {
             inst.element.css({overflowY: 'scroll', webkitOverflowScrolling: 'touch'}); /* has to be scroll, not auto */
         }
         result.log('addScrollListener');

@@ -219,8 +219,9 @@ exports.datagrid = {
         // - **<a name="options.readyToRenderRetryMax">readyToRenderRetryMax</a>** how many times the datagrid will try to get a height before it gives up.
         readyToRenderRetryMax: 10,
         // - **<a name="options.minHeight">minHeight</a>** if a height cannot be found, the datagrid will assume this minHeight. It will then resize to whatever height the element is resized to later.
-        minHeight: 100
-        //TODO: need to create global addons object.
+        minHeight: 100,
+        // - **<a name="options.iosWebkitScrolling">iosWebkitScrolling</a>** Smooth scrolling on ios device. Seems to sometimes be glitchy with ios devices.
+        iosWebkitScrolling: false,
     },
     /**
      * ###<a name="coreAddons">coreAddons</a>###

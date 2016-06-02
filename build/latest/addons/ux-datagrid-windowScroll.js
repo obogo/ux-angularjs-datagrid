@@ -36,12 +36,22 @@ angular.module("ux").factory("windowScroll", function() {
         window.addEventListener("scroll", inst.scrollModel.onUpdateScroll);
         function resetScroll() {
             // force browser to start at 0,0 on page reload.
-            var intv = setTimeout(function() {
-                window.scrollBy(1, 1);
-                window.scrollBy(-1, -1);
-            });
+            var intv, scroll;
+            if (inst.scrollHistory && (scroll = inst.scrollHistory.getCurrentScroll())) {
+                setTimeout(function() {
+                    window.scrollTo(0, scroll);
+                });
+            } else {
+                intv = setTimeout(function() {
+                    window.scrollBy(1, 1);
+                    window.scrollBy(-1, -1);
+                });
+            }
         }
         inst.scope.$on(ux.datagrid.events.ON_READY, resetScroll);
+        inst.scope.$on("$destroy", function() {
+            window.removeEventListener("scroll", inst.scrollModel.onUpdateScroll);
+        });
         return inst;
     } ];
 });

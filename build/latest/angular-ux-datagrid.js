@@ -1852,6 +1852,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         var tplName, tpl, $c;
         tplName = inst.templateModel.getTemplateName(inst.data[index]);
         tpl = inst.templateModel.getTemplate(inst.data[index]);
+        tplName = tplName || tpl.name;
         s = s || getScope(index);
         scopes[index] = s;
         s.$status = options.compiledClass;

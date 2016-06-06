@@ -204,7 +204,7 @@ bower install "ux-datagrid"
             &lt;div class="ex1-row">&lt;span>{{item.id}}&lt;/span>&lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .ex1 *[ux-datagrid] {
@@ -226,7 +226,16 @@ bower install "ux-datagrid"
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'ex1'; angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         var i = 0, len = 100, items = [];         while (i < len) {             items.push({id: i});             i += 1;         }         $scope.items = items;     });
+var name = 'ex1';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, len = 100, items = [];
+        while (i < len) {
+            items.push({id: i});
+            i += 1;
+        }
+        $scope.items = items;
+    });
 
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
@@ -263,7 +272,7 @@ var name = 'ex1'; angular.module(name, ['ux'])     .controller('ctrl', functio
             &lt;div class="cloak-row">&lt;span ng-cloak>{{item.id}}&lt;/span>&lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .cloak *[ux-datagrid] {
@@ -285,7 +294,17 @@ var name = 'ex1'; angular.module(name, ['ux'])     .controller('ctrl', functio
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'cloak'; angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         var i = 0, len = 1000, items = [];         while (i < len) {             items.push({id: i});             i += 1;         }         $scope.items = items;     });         strapped = true;
+var name = 'cloak';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, len = 1000, items = [];
+        while (i < len) {
+            items.push({id: i});
+            i += 1;
+        }
+        $scope.items = items;
+    });
+        strapped = true;
 
 </code></pre>
 <!-- html:start -->
@@ -456,7 +475,7 @@ angular.module('ux').factory('whichTemplate', function () {
             &lt;div class="ex2-row alt2">&lt;span>This {{item.id}} is ALT2&lt;/span>&lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .ex2 *[ux-datagrid] {
@@ -490,7 +509,29 @@ angular.module('ux').factory('whichTemplate', function () {
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'ex2'; angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         var i = 0, len = 100, items = [], types = ['row', 'alt1', 'alt2'];         while (i < len) {             items.push({id: i, type: types[Math.floor(Math.random() * types.length)]});             i += 1;         }         $scope.items = items;     }); angular.module('ux').factory('whichTemplate', function () {       return ['inst', function (inst) {         // now we override it with our method so we decide what template gets displayed for each row.         inst.templateModel.getTemplate = function (item) {             // item would be the item in your array of data provided to the datagrid.             // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.             var name = item.type || 'row';             // now we get the template from the name.             return inst.templateModel.getTemplateByName(name);         };     }]; });         strapped = true;
+var name = 'ex2';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, len = 100, items = [], types = ['row', 'alt1', 'alt2'];
+        while (i < len) {
+            items.push({id: i, type: types[Math.floor(Math.random() * types.length)]});
+            i += 1;
+        }
+        $scope.items = items;
+    });
+angular.module('ux').factory('whichTemplate', function () {
+     return ['inst', function (inst) {
+        // now we override it with our method so we decide what template gets displayed for each row.
+        inst.templateModel.getTemplate = function (item) {
+            // item would be the item in your array of data provided to the datagrid.
+            // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.
+            var name = item.type || 'row';
+            // now we get the template from the name.
+            return inst.templateModel.getTemplateByName(name);
+        };
+    }];
+});
+        strapped = true;
 
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
@@ -536,7 +577,7 @@ var name = 'ex2'; angular.module(name, ['ux'])     .controller('ctrl', functio
             &lt;div class="grouped-row alt1">&lt;span>Group: {{group.id}}&lt;/span>&lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .grouped *[ux-datagrid] {
@@ -562,7 +603,38 @@ var name = 'ex2'; angular.module(name, ['ux'])     .controller('ctrl', functio
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'grouped'; angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         // we are going to create some grouped data. Array of items with .children arrays of items.         // top level items become the group headers, the children items become the rows.         var i = 0, j, len = 10, items = [], item, childLen = 0;         while (i < len) {             item = {id: i, children: []};             items.push(item);             childLen = Math.random() * 10;             j = 0;             while (j < childLen) {                 item.children.push({id: i + '.' + j});                 j += 1;             }             i += 1;         }         $scope.items = items;     }); angular.module('ux').factory('whichTemplate', function () {       return ['inst', function (inst) {         // now we override it with our method so we decide what template gets displayed for each row.         inst.templateModel.getTemplate = function (item) {             // item would be the item in your array of data provided to the datagrid.             // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.             var name = item.children ? 'group' : 'row';             // now we get the template from the name.             return inst.templateModel.getTemplateByName(name);         };     }]; });         strapped = true;
+var name = 'grouped';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        // we are going to create some grouped data. Array of items with .children arrays of items.
+        // top level items become the group headers, the children items become the rows.
+        var i = 0, j, len = 10, items = [], item, childLen = 0;
+        while (i < len) {
+            item = {id: i, children: []};
+            items.push(item);
+            childLen = Math.random() * 10;
+            j = 0;
+            while (j < childLen) {
+                item.children.push({id: i + '.' + j});
+                j += 1;
+            }
+            i += 1;
+        }
+        $scope.items = items;
+    });
+angular.module('ux').factory('whichTemplate', function () {
+     return ['inst', function (inst) {
+        // now we override it with our method so we decide what template gets displayed for each row.
+        inst.templateModel.getTemplate = function (item) {
+            // item would be the item in your array of data provided to the datagrid.
+            // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.
+            var name = item.children ? 'group' : 'row';
+            // now we get the template from the name.
+            return inst.templateModel.getTemplateByName(name);
+        };
+    }];
+});
+        strapped = true;
 
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
@@ -615,7 +687,7 @@ var name = 'grouped'; angular.module(name, ['ux'])     .controller('ctrl', fun
             &lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .columns *[ux-datagrid] {
@@ -682,7 +754,31 @@ var name = 'grouped'; angular.module(name, ['ux'])     .controller('ctrl', fun
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'columns';   function getName(len) {     var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';     while (str.length < len) {         str += alpha[Math.floor(Math.random() * alpha.length)];     }     return str; }   angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         var i = 0, j, len = 10, items = [], item, childLen = 0;         while (i < len) {             item = {                 id: i,                 firstName: getName(10),                 lastName: getName(10),                 age: Math.floor(Math.random() * 50 + 18),                 kids: Math.floor(Math.random() * 10)             };             items.push(item);             i += 1;         }         $scope.items = items;     });         strapped = true;
+var name = 'columns';
+ function getName(len) {
+    var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';
+    while (str.length < len) {
+        str += alpha[Math.floor(Math.random() * alpha.length)];
+    }
+    return str;
+}
+ angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, j, len = 10, items = [], item, childLen = 0;
+        while (i < len) {
+            item = {
+                id: i,
+                firstName: getName(10),
+                lastName: getName(10),
+                age: Math.floor(Math.random() * 50 + 18),
+                kids: Math.floor(Math.random() * 10)
+            };
+            items.push(item);
+            i += 1;
+        }
+        $scope.items = items;
+    });
+        strapped = true;
 
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
@@ -754,7 +850,7 @@ var name = 'columns';   function getName(len) {     var alpha = 'abcdefghijklm
             &lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .columnsGrouped *[ux-datagrid] {
@@ -829,7 +925,51 @@ var name = 'columns';   function getName(len) {     var alpha = 'abcdefghijklm
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'columnsGrouped';   function getName(len) {     var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';     while (str.length < len) {         str += alpha[Math.floor(Math.random() * alpha.length)];     }     return str; }   angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         // we are going to create some grouped data. Array of items with .children arrays of items.         // top level items become the group headers, the children items become the rows.         var i = 0, j, len = 10, items = [], item, childLen = 0;         while (i < len) {             item = {id: i, children: []};             items.push(item);             childLen = Math.random() * 10;             j = 0;             while (j < childLen) {                 item.children.push({                     id: i + '.' + j,                     firstName: getName(10),                     lastName: getName(10),                     age: Math.floor(Math.random() * 50 + 18),                     kids: Math.floor(Math.random() * 10)                 });                 j += 1;             }             i += 1;         }         $scope.items = items;     }); angular.module('ux').factory('whichTemplate', function () {       return ['inst', function (inst) {         // now we override it with our method so we decide what template gets displayed for each row.         inst.templateModel.getTemplate = function (item) {             // item would be the item in your array of data provided to the datagrid.             // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.             var name = item.children ? 'group' : 'row';             // now we get the template from the name.             return inst.templateModel.getTemplateByName(name);         };     }]; });         strapped = true;
+var name = 'columnsGrouped';
+ function getName(len) {
+    var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';
+    while (str.length < len) {
+        str += alpha[Math.floor(Math.random() * alpha.length)];
+    }
+    return str;
+}
+ angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        // we are going to create some grouped data. Array of items with .children arrays of items.
+        // top level items become the group headers, the children items become the rows.
+        var i = 0, j, len = 10, items = [], item, childLen = 0;
+        while (i < len) {
+            item = {id: i, children: []};
+            items.push(item);
+            childLen = Math.random() * 10;
+            j = 0;
+            while (j < childLen) {
+                item.children.push({
+                    id: i + '.' + j,
+                    firstName: getName(10),
+                    lastName: getName(10),
+                    age: Math.floor(Math.random() * 50 + 18),
+                    kids: Math.floor(Math.random() * 10)
+                });
+                j += 1;
+            }
+            i += 1;
+        }
+        $scope.items = items;
+    });
+angular.module('ux').factory('whichTemplate', function () {
+     return ['inst', function (inst) {
+        // now we override it with our method so we decide what template gets displayed for each row.
+        inst.templateModel.getTemplate = function (item) {
+            // item would be the item in your array of data provided to the datagrid.
+            // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.
+            var name = item.children ? 'group' : 'row';
+            // now we get the template from the name.
+            return inst.templateModel.getTemplateByName(name);
+        };
+    }];
+});
+        strapped = true;
 
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
@@ -908,7 +1048,7 @@ var name = 'columnsGrouped';   function getName(len) {     var alpha = 'abcdef
             &lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .resize-columns *[ux-datagrid] {
@@ -1030,7 +1170,31 @@ var name = 'columnsGrouped';   function getName(len) {     var alpha = 'abcdef
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'resizeColumns';   function getName(len) {     var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';     while (str.length < len) {         str += alpha[Math.floor(Math.random() * alpha.length)];     }     return str; }   angular.module(name, ['ux', 'go'])     .controller('ctrl', function ($scope) {         var i = 0, j, len = 10, items = [], item, childLen = 0;         while (i < len) {             item = {                 id: i,                 firstName: getName(10),                 lastName: getName(10),                 age: Math.floor(Math.random() * 50 + 18),                 kids: Math.floor(Math.random() * 10)             };             items.push(item);             i += 1;         }         $scope.items = items;     });         strapped = true;
+var name = 'resizeColumns';
+ function getName(len) {
+    var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';
+    while (str.length < len) {
+        str += alpha[Math.floor(Math.random() * alpha.length)];
+    }
+    return str;
+}
+ angular.module(name, ['ux', 'go'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, j, len = 10, items = [], item, childLen = 0;
+        while (i < len) {
+            item = {
+                id: i,
+                firstName: getName(10),
+                lastName: getName(10),
+                age: Math.floor(Math.random() * 50 + 18),
+                kids: Math.floor(Math.random() * 10)
+            };
+            items.push(item);
+            i += 1;
+        }
+        $scope.items = items;
+    });
+        strapped = true;
 
 </code></pre>
             <p>There are 2 script files required for this to work. <a href="https://github.com/obogo/hummingbird">hummingbird</a> vendor/hb/hb.js his file is needed to modify the css classes. You can just take this file as is. It is generated from hummingbird. For more info check out https://github.com/obogo/hummingbird and see the Gruntfile.js for configuration.</p>
@@ -1088,7 +1252,7 @@ var name = 'resizeColumns';   function getName(len) {     var alpha = 'abcdefg
             &lt;div class="infiniteScrollEx-row loading-row">&lt;span>loading...&lt;/span>&lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .infiniteScrollEx *[ux-datagrid] {
@@ -1125,7 +1289,33 @@ var name = 'resizeColumns';   function getName(len) {     var alpha = 'abcdefg
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'infiniteScrollEx'; angular.module(name, ['ux'])     .controller('ctrl', function ($scope, $timeout) {         var datagrid;         $scope.add = function (len) {             var i = 0, items = $scope.items || [];             while (i < len) {                 items.push({id: items.length});                 i += 1;             }             $scope.items = items;         };         $scope.add(10);         // listen to the bottom scroll event.         $scope.$on(ux.datagrid.events.ON_SCROLL_TO_BOTTOM, function () {             if ($scope.items.length < datagrid.options.infiniteScroll.limit) {                 // we are doing a timeout here to simulate time that an ajax call may need to get the paginated data.                 $timeout(function () {                     $scope.add(10);                 }, 1000, true);             }         });         $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {             datagrid = inst;         });     });         strapped = true;
+var name = 'infiniteScrollEx';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope, $timeout) {
+        var datagrid;
+        $scope.add = function (len) {
+            var i = 0, items = $scope.items || [];
+            while (i < len) {
+                items.push({id: items.length});
+                i += 1;
+            }
+            $scope.items = items;
+        };
+        $scope.add(10);
+        // listen to the bottom scroll event.
+        $scope.$on(ux.datagrid.events.ON_SCROLL_TO_BOTTOM, function () {
+            if ($scope.items.length < datagrid.options.infiniteScroll.limit) {
+                // we are doing a timeout here to simulate time that an ajax call may need to get the paginated data.
+                $timeout(function () {
+                    $scope.add(10);
+                }, 1000, true);
+            }
+        });
+        $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (event, inst) {
+            datagrid = inst;
+        });
+    });
+        strapped = true;
 
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
@@ -1187,7 +1377,7 @@ var name = 'infiniteScrollEx'; angular.module(name, ['ux'])     .controller('c
             &lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .dragRows *[ux-datagrid] {
@@ -1288,7 +1478,55 @@ var name = 'infiniteScrollEx'; angular.module(name, ['ux'])     .controller('c
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'dragRows';   function getName(len) {     var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';     while (str.length < len) {         str += alpha[Math.floor(Math.random() * alpha.length)];     }     return str; }   angular.module(name, ['ux'])         $scope.startDrag = function (evt, index) {             var grid = ux.datagrid.getGrid($scope);             grid.dragRows.start(evt, index);         };     .controller('ctrl', function ($scope) {         // we are going to create some grouped data. Array of items with .children arrays of items.         // top level items become the group headers, the children items become the rows.         var i = 0, j, len = 10, items = [], item, childLen = 0;         while (i < len) {             item = {id: i, children: []};             items.push(item);             childLen = Math.random() * 10;             j = 0;             while (j < childLen) {                 item.children.push({                     id: i + '.' + j,                     firstName: getName(10),                     lastName: getName(10),                     age: Math.floor(Math.random() * 50 + 18),                     kids: Math.floor(Math.random() * 10)                 });                 j += 1;             }             i += 1;         }         $scope.items = items;     }); angular.module('ux').factory('whichTemplate', function () {       return ['inst', function (inst) {         // now we override it with our method so we decide what template gets displayed for each row.         inst.templateModel.getTemplate = function (item) {             // item would be the item in your array of data provided to the datagrid.             // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.             var name = item.children ? 'group' : 'row';             // now we get the template from the name.             return inst.templateModel.getTemplateByName(name);         };     }]; });         strapped = true;
+var name = 'dragRows';
+ function getName(len) {
+    var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';
+    while (str.length < len) {
+        str += alpha[Math.floor(Math.random() * alpha.length)];
+    }
+    return str;
+}
+ angular.module(name, ['ux'])
+        $scope.startDrag = function (evt, index) {
+            var grid = ux.datagrid.getGrid($scope);
+            grid.dragRows.start(evt, index);
+        };
+    .controller('ctrl', function ($scope) {
+        // we are going to create some grouped data. Array of items with .children arrays of items.
+        // top level items become the group headers, the children items become the rows.
+        var i = 0, j, len = 10, items = [], item, childLen = 0;
+        while (i < len) {
+            item = {id: i, children: []};
+            items.push(item);
+            childLen = Math.random() * 10;
+            j = 0;
+            while (j < childLen) {
+                item.children.push({
+                    id: i + '.' + j,
+                    firstName: getName(10),
+                    lastName: getName(10),
+                    age: Math.floor(Math.random() * 50 + 18),
+                    kids: Math.floor(Math.random() * 10)
+                });
+                j += 1;
+            }
+            i += 1;
+        }
+        $scope.items = items;
+    });
+angular.module('ux').factory('whichTemplate', function () {
+     return ['inst', function (inst) {
+        // now we override it with our method so we decide what template gets displayed for each row.
+        inst.templateModel.getTemplate = function (item) {
+            // item would be the item in your array of data provided to the datagrid.
+            // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.
+            var name = item.children ? 'group' : 'row';
+            // now we get the template from the name.
+            return inst.templateModel.getTemplateByName(name);
+        };
+    }];
+});
+        strapped = true;
 
 </code></pre>
 
@@ -1365,7 +1603,7 @@ var name = 'dragRows';   function getName(len) {     var alpha = 'abcdefghijkl
             &lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .collapsibleGroups *[ux-datagrid] {
@@ -1440,7 +1678,51 @@ var name = 'dragRows';   function getName(len) {     var alpha = 'abcdefghijkl
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'collapsibleGroups';   function getName(len) {     var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';     while (str.length < len) {         str += alpha[Math.floor(Math.random() * alpha.length)];     }     return str; }   angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         // we are going to create some grouped data. Array of items with .children arrays of items.         // top level items become the group headers, the children items become the rows.         var i = 0, j, len = 10, items = [], item, childLen = 0;         while (i < len) {             item = {id: i, title: "Family " + i, children: []};             items.push(item);             childLen = Math.random() * 10;             j = 0;             while (j < childLen) {                 item.children.push({                     id: i + '.' + j,                     firstName: getName(10),                     lastName: getName(10),                     age: Math.floor(Math.random() * 50 + 18),                     kids: Math.floor(Math.random() * 10)                 });                 j += 1;             }             i += 1;         }         $scope.items = items;     }); angular.module('ux').factory('whichTemplate', function () {       return ['inst', function (inst) {         // now we override it with our method so we decide what template gets displayed for each row.         inst.templateModel.getTemplate = function (item) {             // item would be the item in your array of data provided to the datagrid.             // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.             var name = item.children ? 'group' : 'row';             // now we get the template from the name.             return inst.templateModel.getTemplateByName(name);         };     }]; });         strapped = true;
+var name = 'collapsibleGroups';
+ function getName(len) {
+    var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';
+    while (str.length < len) {
+        str += alpha[Math.floor(Math.random() * alpha.length)];
+    }
+    return str;
+}
+ angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        // we are going to create some grouped data. Array of items with .children arrays of items.
+        // top level items become the group headers, the children items become the rows.
+        var i = 0, j, len = 10, items = [], item, childLen = 0;
+        while (i < len) {
+            item = {id: i, title: "Family " + i, children: []};
+            items.push(item);
+            childLen = Math.random() * 10;
+            j = 0;
+            while (j < childLen) {
+                item.children.push({
+                    id: i + '.' + j,
+                    firstName: getName(10),
+                    lastName: getName(10),
+                    age: Math.floor(Math.random() * 50 + 18),
+                    kids: Math.floor(Math.random() * 10)
+                });
+                j += 1;
+            }
+            i += 1;
+        }
+        $scope.items = items;
+    });
+angular.module('ux').factory('whichTemplate', function () {
+     return ['inst', function (inst) {
+        // now we override it with our method so we decide what template gets displayed for each row.
+        inst.templateModel.getTemplate = function (item) {
+            // item would be the item in your array of data provided to the datagrid.
+            // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.
+            var name = item.children ? 'group' : 'row';
+            // now we get the template from the name.
+            return inst.templateModel.getTemplateByName(name);
+        };
+    }];
+});
+        strapped = true;
 
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
@@ -1515,7 +1797,7 @@ var name = 'collapsibleGroups';   function getName(len) {     var alpha = 'abc
             &lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .expandableGroups *[ux-datagrid] {
@@ -1591,7 +1873,62 @@ var name = 'collapsibleGroups';   function getName(len) {     var alpha = 'abc
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'expandableGroups';   function getName(len) {     var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';     while (str.length < len) {         str += alpha[Math.floor(Math.random() * alpha.length)];     }     return str; }   angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         // we are going to create some grouped data. Array of items with .children arrays of items.         // top level items become the group headers, the children items become the rows.         var i = 0, j, len = 10, items = [], item, childLen = 0;         while (i < len) {             item = {id: i, title: "Family " + i, children: []};             items.push(item);             childLen = Math.random() * 10;             j = 0;             while (j < childLen) {                 item.children.push({                     id: i + '.' + j,                     firstName: getName(10),                     lastName: getName(10),                     age: Math.floor(Math.random() * 50 + 18),                     kids: Math.floor(Math.random() * 10)                 });                 j += 1;             }             i += 1;         }         $scope.items = items;         // (optional) get the count of expanded groups.         // this is not needed for minimal example.         $scope.expanded = 0;         $scope.collapsed = items.length;         function getCounts() {             var grid = ux.datagrid.getGrid($scope);             var groupedAndCollapsed = grid.expandableGroups.getItems();             $scope.expanded = groupedAndCollapsed.expanded.length;             $scope.collapsed = groupedAndCollapsed.collapsed.length;         }           $scope.$on(ux.datagrid.events.EXPAND_GROUP_CHANGE, getCounts);     }); angular.module('ux').factory('whichTemplate', function () {       return ['inst', function (inst) {         // now we override it with our method so we decide what template gets displayed for each row.         inst.templateModel.getTemplate = function (item) {             // item would be the item in your array of data provided to the datagrid.             // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.             var name = item.children ? 'group' : 'row';             // now we get the template from the name.             return inst.templateModel.getTemplateByName(name);         };     }]; });         strapped = true;
+var name = 'expandableGroups';
+ function getName(len) {
+    var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';
+    while (str.length < len) {
+        str += alpha[Math.floor(Math.random() * alpha.length)];
+    }
+    return str;
+}
+ angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        // we are going to create some grouped data. Array of items with .children arrays of items.
+        // top level items become the group headers, the children items become the rows.
+        var i = 0, j, len = 10, items = [], item, childLen = 0;
+        while (i < len) {
+            item = {id: i, title: "Family " + i, children: []};
+            items.push(item);
+            childLen = Math.random() * 10;
+            j = 0;
+            while (j < childLen) {
+                item.children.push({
+                    id: i + '.' + j,
+                    firstName: getName(10),
+                    lastName: getName(10),
+                    age: Math.floor(Math.random() * 50 + 18),
+                    kids: Math.floor(Math.random() * 10)
+                });
+                j += 1;
+            }
+            i += 1;
+        }
+        $scope.items = items;
+          // (optional) get the count of expanded groups.
+        // this is not needed for minimal example.
+        $scope.expanded = 0;
+        $scope.collapsed = items.length;
+        function getCounts() {
+            var grid = ux.datagrid.getGrid($scope);
+            var groupedAndCollapsed = grid.expandableGroups.getItems();
+            $scope.expanded = groupedAndCollapsed.expanded.length;
+            $scope.collapsed = groupedAndCollapsed.collapsed.length;
+        }
+         $scope.$on(ux.datagrid.events.EXPAND_GROUP_CHANGE, getCounts);
+    });
+angular.module('ux').factory('whichTemplate', function () {
+     return ['inst', function (inst) {
+        // now we override it with our method so we decide what template gets displayed for each row.
+        inst.templateModel.getTemplate = function (item) {
+            // item would be the item in your array of data provided to the datagrid.
+            // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.
+            var name = item.children ? 'group' : 'row';
+            // now we get the template from the name.
+            return inst.templateModel.getTemplateByName(name);
+        };
+    }];
+});
+        strapped = true;
 
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
@@ -1660,7 +1997,7 @@ var name = 'expandableGroups';   function getName(len) {     var alpha = 'abcd
             &lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .expandableRow *[ux-datagrid] {
@@ -1731,7 +2068,31 @@ var name = 'expandableGroups';   function getName(len) {     var alpha = 'abcd
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'expandableRow';   function getName(len) {     var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';     while (str.length < len) {         str += alpha[Math.floor(Math.random() * alpha.length)];     }     return str; }   angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         var i = 0, j, len = 10, items = [], item, childLen = 0;         while (i < len) {             item = {                 id: i,                 firstName: getName(10),                 lastName: getName(10),                 age: Math.floor(Math.random() * 50 + 18),                 kids: Math.floor(Math.random() * 10)             };             items.push(item);             i += 1;         }         $scope.items = items;     });         strapped = true;
+var name = 'expandableRow';
+ function getName(len) {
+    var alpha = 'abcdefghijklmnopqrstuvwxyz', str = '';
+    while (str.length < len) {
+        str += alpha[Math.floor(Math.random() * alpha.length)];
+    }
+    return str;
+}
+ angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, j, len = 10, items = [], item, childLen = 0;
+        while (i < len) {
+            item = {
+                id: i,
+                firstName: getName(10),
+                lastName: getName(10),
+                age: Math.floor(Math.random() * 50 + 18),
+                kids: Math.floor(Math.random() * 10)
+            };
+            items.push(item);
+            i += 1;
+        }
+        $scope.items = items;
+    });
+        strapped = true;
 
 </code></pre>
             <p>Clicking on the row will cause it to toggle expanded and collapsed</p>
@@ -1798,7 +2159,7 @@ var name = 'expandableRow';   function getName(len) {     var alpha = 'abcdefg
     Expand the elements below to see the data update realtime.&lt;a href="https://github.com/webux/ux-angularjs-jsonview" target="_blank" class="label fa fa-external-link"> ux-jsonview&lt;/a>
     &lt;br/>
     &lt;div ux-jsonview ng-model="items">&lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .spreadSheet *[ux-datagrid] {
@@ -1870,7 +2231,22 @@ var name = 'expandableRow';   function getName(len) {     var alpha = 'abcdefg
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'spreadSheet';   angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         // we are going to create some grouped data. Array of items with .children arrays of items.         // top level items become the group headers, the children items become the rows.         var i, j, len = 10, items = [], row, columns = ['A', 'B', 'C', 'D'], jlen = columns.length;         for (i = 0; i < len; i += 1) {             row = {};             for (j = 0; j < jlen; j += 1) {                 row[columns[j]] = '';             }             items.push(row);         }         $scope.items = items;     });         strapped = true;
+var name = 'spreadSheet';
+ angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        // we are going to create some grouped data. Array of items with .children arrays of items.
+        // top level items become the group headers, the children items become the rows.
+        var i, j, len = 10, items = [], row, columns = ['A', 'B', 'C', 'D'], jlen = columns.length;
+        for (i = 0; i < len; i += 1) {
+            row = {};
+            for (j = 0; j < jlen; j += 1) {
+                row[columns[j]] = '';
+            }
+            items.push(row);
+        }
+        $scope.items = items;
+    });
+        strapped = true;
 
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
@@ -1924,7 +2300,7 @@ var name = 'spreadSheet';   angular.module(name, ['ux'])     .controller('ctrl
             &lt;div class="gridLogger-row">&lt;span>Default {{item.id}}&lt;/span>&lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .gridLogger *[ux-datagrid] {
@@ -1945,7 +2321,29 @@ var name = 'spreadSheet';   angular.module(name, ['ux'])     .controller('ctrl
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'gridLogger'; angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         var i = 0, len = 100, items = [], types = ['row', 'alt1', 'alt2'];         while (i < len) {             items.push({id: i, type: types[Math.floor(Math.random() * types.length)]});             i += 1;         }         $scope.items = items;     }); angular.module('ux').factory('whichTemplate', function () {       return ['inst', function (inst) {         // now we override it with our method so we decide what template gets displayed for each row.         inst.templateModel.getTemplate = function (item) {             // item would be the item in your array of data provided to the datagrid.             // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.             var name = item.type || 'row';             // now we get the template from the name.             return inst.templateModel.getTemplateByName(name);         };     }]; });         strapped = true;
+var name = 'gridLogger';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, len = 100, items = [], types = ['row', 'alt1', 'alt2'];
+        while (i < len) {
+            items.push({id: i, type: types[Math.floor(Math.random() * types.length)]});
+            i += 1;
+        }
+        $scope.items = items;
+    });
+angular.module('ux').factory('whichTemplate', function () {
+     return ['inst', function (inst) {
+        // now we override it with our method so we decide what template gets displayed for each row.
+        inst.templateModel.getTemplate = function (item) {
+            // item would be the item in your array of data provided to the datagrid.
+            // let's make our default option be 'row'. Otherwise datagrid defaults this to 'default'.
+            var name = item.type || 'row';
+            // now we get the template from the name.
+            return inst.templateModel.getTemplateByName(name);
+        };
+    }];
+});
+        strapped = true;
 
 </code></pre>
             <p>There are different options for the logging to help filter it down. <span class="label">{debug:{all:1, Flow:0}}</span> is what I use most of the time. It gives you all of the logs except the Flow control. If the internal flow control logs are turned on, then you see it's internal handling of methods to make sure they are fired in the correct order. I don't think most will care to use that.. It can be quite verbose.</p>
@@ -1984,7 +2382,7 @@ var name = 'gridLogger'; angular.module(name, ['ux'])     .controller('ctrl', 
             &lt;div class="infiniteScrollEx-row">&lt;span>Default {{item.id}}&lt;/span>&lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .scrollBarExCtrl {
@@ -2010,7 +2408,20 @@ var name = 'gridLogger'; angular.module(name, ['ux'])     .controller('ctrl', 
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'scrollBarEx'; angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         $scope.add = function (len) {             var i = 0, items = $scope.items || [];             while (i < len) {                 items.push({id: items.length});                 i += 1;             }             $scope.items = items;         };         $scope.add(100);     });         strapped = true;
+var name = 'scrollBarEx';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        $scope.add = function (len) {
+            var i = 0, items = $scope.items || [];
+            while (i < len) {
+                items.push({id: items.length});
+                i += 1;
+            }
+            $scope.items = items;
+        };
+        $scope.add(100);
+    });
+        strapped = true;
 
 </code></pre>
 <!-- html:start -->
@@ -2046,7 +2457,7 @@ var name = 'scrollBarEx'; angular.module(name, ['ux'])     .controller('ctrl',
             &lt;div class="infiniteScrollEx-row">&lt;span>Default {{item.id}}&lt;/span>&lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .scrollBounceExCtrl {
@@ -2072,7 +2483,20 @@ var name = 'scrollBarEx'; angular.module(name, ['ux'])     .controller('ctrl',
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'scrollBounceEx'; angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         $scope.add = function (len) {             var i = 0, items = $scope.items || [];             while (i < len) {                 items.push({id: items.length});                 i += 1;             }             $scope.items = items;         };         $scope.add(50);     });         strapped = true;
+var name = 'scrollBounceEx';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        $scope.add = function (len) {
+            var i = 0, items = $scope.items || [];
+            while (i < len) {
+                items.push({id: items.length});
+                i += 1;
+            }
+            $scope.items = items;
+        };
+        $scope.add(50);
+    });
+        strapped = true;
 
 </code></pre>
             <p><i class="label">ScrollBounce</i> needs the <i class="label">ScrollBar</i> to work. Because it uses the events from it.</p>
@@ -2110,7 +2534,7 @@ var name = 'scrollBounceEx'; angular.module(name, ['ux'])     .controller('ctr
             &lt;div class="sorting-row">&lt;span>{{item.id}}&lt;/span>&lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .sorting *[ux-datagrid] {
@@ -2131,7 +2555,20 @@ var name = 'scrollBounceEx'; angular.module(name, ['ux'])     .controller('ctr
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-var name = 'sorting'; angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         var i = 0, len = 100, items = [];         while (i < len) {             items.push({id: i});             i += 1;         }         $scope.items = items;           $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (evt, grid) {             $scope.grid = grid;         });     });         strapped = true;
+var name = 'sorting';
+angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, len = 100, items = [];
+        while (i < len) {
+            items.push({id: i});
+            i += 1;
+        }
+        $scope.items = items;
+         $scope.$on(ux.datagrid.events.ON_STARTUP_COMPLETE, function (evt, grid) {
+            $scope.grid = grid;
+        });
+    });
+        strapped = true;
 
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>
@@ -2173,7 +2610,7 @@ var name = 'sorting'; angular.module(name, ['ux'])     .controller('ctrl', fun
             &lt;/div>
         &lt;/script>
     &lt;/div>
-&lt;/div>
+&lt;/div>
 </code></pre>
 <pre ng-show="tab=='css'"><code class="css railscasts">
 .variableRowHeights *[ux-datagrid] {
@@ -2208,7 +2645,36 @@ var name = 'sorting'; angular.module(name, ['ux'])     .controller('ctrl', fun
 }
 </code></pre>
 <pre ng-show="tab=='js'"><code class="javascript railscasts">
-// requires ux-datagrid 1.4.0+ var name = 'variableRowHeights';   var abc = 'abcdefghijklmnopqrstuvwxyz'; var spacing = 4; var period = 20;   function randomOf(val) {     return Math.round((Math.random() * val)) % val === 0; }   function randomLetter() {     return abc[Math.floor(Math.random() * abc.length)]; }   function makeStr(len) {     var str = '';     while(str.length < len) {         str += randomLetter();         str += randomOf(spacing) ? ' ' : '';         str += randomOf(period) ? '. ' + randomLetter().toUpperCase() : '';     }     return str; }   angular.module(name, ['ux'])     .controller('ctrl', function ($scope) {         var i = 0, len = 1000, items = [], overrideHeights = {};         while (i < len) {             items.push({id: i, desc: makeStr(Math.random() * 500)});             i += 1;         }         $scope.items = items;     });         strapped = true;
+// requires ux-datagrid 1.4.0+
+var name = 'variableRowHeights';
+ var abc = 'abcdefghijklmnopqrstuvwxyz';
+var spacing = 4;
+var period = 20;
+ function randomOf(val) {
+    return Math.round((Math.random() * val)) % val === 0;
+}
+ function randomLetter() {
+    return abc[Math.floor(Math.random() * abc.length)];
+}
+ function makeStr(len) {
+    var str = '';
+    while(str.length < len) {
+        str += randomLetter();
+        str += randomOf(spacing) ? ' ' : '';
+        str += randomOf(period) ? '. ' + randomLetter().toUpperCase() : '';
+    }
+    return str;
+}
+ angular.module(name, ['ux'])
+    .controller('ctrl', function ($scope) {
+        var i = 0, len = 1000, items = [], overrideHeights = {};
+        while (i < len) {
+            items.push({id: i, desc: makeStr(Math.random() * 500)});
+            i += 1;
+        }
+        $scope.items = items;
+    });
+        strapped = true;
 
 </code></pre>
             <p>The datagrid will then need you to pass some data to it. The simplest way it so set an array on your $scope.</p>

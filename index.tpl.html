@@ -137,7 +137,7 @@ bower install "ux-datagrid"
     </div>
 
 
-<div>
+
     <!-- Default Recommended CSS -->
     <a name="defaultCSS"></a>
     <div class="panel-ex">
@@ -186,7 +186,7 @@ bower install "ux-datagrid"
 
     ##cloak##
 
-    <div>
+
     <!-- Using Addons -->
     <a name="usingAddons"></a>
     <div class="panel-ex">
@@ -210,7 +210,6 @@ bower install "ux-datagrid"
         </div>
     </div>
 
-<div>
     <!-- Using Options -->
     <a name="usingOptions"></a>
     <div class="panel-ex">
@@ -230,9 +229,6 @@ bower install "ux-datagrid"
         </div>
     </div>
 
-    <div>
-
-    <div>
     <!-- Using Templates -->
     <a name="templates"></a>
     <div class="panel-ex">
@@ -263,51 +259,6 @@ bower install "ux-datagrid"
         </div>
     </div>
 
-    <div>
-    <!-- Using Addons -->
-    <a name="usingAddons"></a>
-    <div class="panel-ex">
-        <div class="panel-ex-head">Using Addons</div>
-
-        <div class="panel-ex-body">
-            <p><span class="label">Addons</span> allow you to change the behavior or add features to the datagrid. First you need to include the addon that you want. Let's start with <a href="https://github.com/webux/ux-angularjs-datagrid/blob/master/build/latest/addons/ux-datagrid-scrollBar.js" target="ref">ScrollBar</a></span>.</p>
-<pre><code class="javascript railscasts">
-    &lt;script src="ux-datagrid-scrollBar.js"&gt;&lt;/script&gt;
-</code></pre>
-        <p>Now we need add the addon to the grid that we are using. We do this by adding an addons attribute to the html.</p>
-<pre><code class="javascript railscasts">
-    &ltdiv ux-datagrid="items" <i>addons="scrollBar"</i>>...
-</code></pre>
-
-        <p>That's really it. You can add as many addons to a grid as you like.</p>
-<pre><code class="javascript railscasts">
-    &ltdiv ux-datagrid="items" <i>addons="scrollBar scrollBounce"</i>>...
-</code></pre>
-
-        </div>
-    </div>
-
-    <div>
-    <!-- Using Options -->
-    <a name="usingOptions"></a>
-    <div class="panel-ex">
-        <div class="panel-ex-head">Using Options</div>
-
-        <div class="panel-ex-body">
-            <p><span class="label">Options</span> configure different parts or the datagrid, or configure an addon. The datagrid comes with a list of global options. Those are on <span class="label">ux.datagrid.options</span>. When you add options to a grid gets a copy of the global options. Any options that you pass to the grid then override or add to that options object on that grid only.</p>
-<pre><code class="html railscasts">
-    &ltdiv ux-datagrid="items" <i>options="{smartUpdate:false}"</i>>...
-</code></pre>
-
-        <p>So if you want to change the behavior for all grids, then you can modify the global options by just overriding them directly on the <span class="label">ux.datagrid.options</span>.</p>
-<pre><code class="javascript railscasts">
-    ux.datgrid.options.smartUpdate = false;
-</code></pre>
-
-        </div>
-    </div>
-
-    <div>
     <!-- Build Your First Addon -->
     <a name="buildAddon"></a>
     <div class="panel-ex">
@@ -405,7 +356,7 @@ angular.module('ux').factory('whichTemplate', function () {
         <a href="https://github.com/webux/ux-angularjs-datagrid" fm-parent="14" fm-id="53" tabindex="-1">View on GitHub</a>
     </div>
 </div>
-<link href="bower_components/stuff/font-awesome.min.css" rel="stylesheet">
-<!--<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">-->
+<!--<link href="bower_components/stuff/font-awesome.min.css" rel="stylesheet">-->
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 </body>
 </html>

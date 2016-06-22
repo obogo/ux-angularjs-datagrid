@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.2
+* ux-angularjs-datagrid v.1.5.4
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.5.2
+* ux-angularjs-datagrid v.1.5.4
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -455,7 +455,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.5.2",
+    version: "1.5.4",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -648,7 +648,9 @@ exports.datagrid = {
         // - **<a name="options.readyToRenderRetryMax">readyToRenderRetryMax</a>** how many times the datagrid will try to get a height before it gives up.
         readyToRenderRetryMax: 10,
         // - **<a name="options.minHeight">minHeight</a>** if a height cannot be found, the datagrid will assume this minHeight. It will then resize to whatever height the element is resized to later.
-        minHeight: 100
+        minHeight: 100,
+        // - **<a name="options.iosWebkitScrolling">iosWebkitScrolling</a>** Smooth scrolling on ios device. Seems to sometimes be glitchy with ios devices.
+        iosWebkitScrolling: false
     },
     /**
      * ###<a name="coreAddons">coreAddons</a>###
@@ -1096,8 +1098,8 @@ exports.logWrapper = function LogWrapper(name, instance, theme, inst) {
     return instance;
 };
 
-function Flow(inst, dispatch, pauseFn, $timeout) {
-    var running = false, current = null, list = [], history = [], historyLimit = 10, uniqueMethods = {}, execStartTime, execEndTime, timeouts = {}, nextPromise, consoleMethodStyle = "color:#666666;";
+function Flow(inst, pauseFn, $timeout, dg) {
+    var initTime = Date.now(), lifespan = 0, running = false, current = null, list = [], history = [], historyLimit = 10, uniqueMethods = {}, execStartTime, execEndTime, timeouts = {}, nextPromise, consoleMethodStyle = "color:#666666;";
     function getMethodName(method) {
         // TODO: there might be a faster way to get the function name.
         return method.toString().split(/\b/)[2];
@@ -1115,7 +1117,8 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
         uniqueMethods[name] = method;
     }
     function clearSimilarItemsFromList(item) {
-        var i = 0, len = list.length;
+        var i = 1, len = list.length;
+        // clearing should never remove the first one, because it is the current one.
         while (i < len) {
             if (list[i].label === item.label) {
                 if (list[i] === current && nextPromise) {
@@ -1138,7 +1141,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
         }
     }
     function add(method, args, delay) {
-        var item = createItem(method, args, delay), index = -1;
+        var item = createItem(method, args, delay);
         if (uniqueMethods[item.label]) {
             clearSimilarItemsFromList(item);
         }
@@ -1203,6 +1206,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     }
     function next() {
         inst.log("next %s", list.length);
+        inst.lifespan = lifespan = Date.now() - initTime;
         if (!current && list.length) {
             current = list[0];
             if (inst.async && current.delay !== undefined) {
@@ -1259,7 +1263,7 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
     function count(name) {
         var c = 0;
         for (var i = 0; i < list.length; i += 1) {
-            if (list[i].label === name) {
+            if (name instanceof Array && name.indexOf(list[i].label) !== -1 || list[i].label === name) {
                 c += 1;
             }
         }
@@ -1269,7 +1273,8 @@ function Flow(inst, dispatch, pauseFn, $timeout) {
         list.length = 0;
         inst = null;
     }
-    exports.logWrapper("Flow", inst, "grey", inst);
+    exports.logWrapper("Flow", inst, "grey", dg || inst);
+    // if no dg. It will not log.
     //    inst.async = exports.util.apply(Object.prototype.hasOwnProperty, inst, ['async']) ? inst.async : true;
     inst.debug = exports.util.apply(Object.prototype.hasOwnProperty, inst, [ "debug" ]) ? inst.debug : 0;
     inst.insert = insert;
@@ -1385,6 +1390,8 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         flow.unique(reset);
         flow.unique(render);
         flow.unique(updateRowWatchers);
+        flow.unique(onDataChanged);
+        flow.unique(changeData);
     }
     /**
      * ###<a name="setupExports">setupExports</a>###
@@ -1439,7 +1446,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         inst.flow = flow = new Flow({
             async: exports.util.apply(Object.prototype.hasOwnProperty, options, [ "async" ]) ? !!options.async : true,
             debug: exports.util.apply(Object.prototype.hasOwnProperty, options, [ "debug" ]) ? options.debug : 0
-        }, inst.dispatch, isDigesting, $timeout);
+        }, isDigesting, $timeout, inst.options.debug && inst.options.debug.Flow ? inst : null);
         // this needs to be set immediately so that it will be available to other views.
         inst.grouped = scope.$eval(attr.grouped);
         inst.gc = forceGarbageCollection;
@@ -1596,12 +1603,12 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     /**
      * ###<a name="onDataChangeFromWatcher">onDataChangeFromWatcher</a>###
      * when the watcher fires.
-     * @param {*} newValue
-     * @param {*} oldValue
-     * @param {Scope} scope
+     * @param {*} newVal
+     * @param {*} oldVal
      */
-    function onDataChangeFromWatcher(newValue, oldValue, scope) {
-        flow.add(onDataChanged, [ newValue, oldValue ]);
+    function onDataChangeFromWatcher(newVal, oldVal) {
+        inst.info("	onDataChangeFromWatcher |" + flow.lifespan + "| new:" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
+        flow.add(onDataChanged, [ newVal, oldVal, flow.lifespan ]);
     }
     /**
      * ###<a name="updateViewportHeight">updateViewportHeight</a>###
@@ -1845,6 +1852,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         var tplName, tpl, $c;
         tplName = inst.templateModel.getTemplateName(inst.data[index]);
         tpl = inst.templateModel.getTemplate(inst.data[index]);
+        tplName = tplName || tpl.name;
         s = s || getScope(index);
         scopes[index] = s;
         s.$status = options.compiledClass;
@@ -2020,7 +2028,9 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         if (s && !isActive(s)) {
             // do not deactivate one that is already deactivated.
             //console.log("\t%cdeactivate %s index:%s", "color:#F60", s.$id, s.$index);
-            s.$emit(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);
+            // s.$emit(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);// not sure why anyone would need to know outside of the grid about this.
+            s.$broadcast(exports.datagrid.events.ON_BEFORE_ROW_DEACTIVATE);
+            // the row may want to set flags or remove listeners before the deactivate.
             s.$$$watchers = s.$$watchers;
             s.$$watchers = [];
             s.$$$watchersCount = s.$$watchersCount;
@@ -2063,7 +2073,9 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             delete s.$$$watchers;
             addEvents(s, s.$$$listenerCount);
             delete s.$$$listenerCount;
-            s.$emit(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);
+            // s.$emit(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);// does anyone need to know that this row is active?
+            // the row it'self may need to know to update values if they are not bound to functions.
+            s.$broadcast(exports.datagrid.events.ON_AFTER_ROW_ACTIVATE);
             return true;
         }
         return !!(s && !s.$$$watchers);
@@ -2474,9 +2486,12 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * ###<a name="onDataChanged">onDataChanged</a>###
      * when the data changes. It is compared by reference, not value for speed
      * (this is the default angular setting).
+     * @param {Array} newVal
+     * @param {Array} oldVal
+     * @returns {boolean}
      */
-    function onDataChanged(newVal, oldVal) {
-        inst.log("onDataChanged");
+    function onDataChanged(newVal, oldVal, lifespan) {
+        inst.info("	onDataChanged |" + lifespan + "| new:" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
         inst.grouped = scope.$eval(attr.grouped);
         if (oldVal !== inst.getOriginalData()) {
             oldVal = inst.getOriginalData();
@@ -2487,7 +2502,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 newVal = evt.newValue;
             }
             values.dirty = true;
-            flow.add(changeData, [ newVal, oldVal ]);
+            flow.add(changeData, [ newVal, oldVal, lifespan ]);
             return true;
         } else if (isDataReallyChanged(newVal)) {
             // we just want to update the data values and scope values, because no templates changed.
@@ -2509,12 +2524,13 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         }
         return false;
     }
-    function changeData(newVal, oldVal) {
-        if (inst.flow.count("changeData") > 1) {
+    function changeData(newVal, oldVal, lifespan) {
+        if (inst.flow.count([ "changeData", "onDataChanged" ]) > 1) {
             // the first one is this call.
+            inst.info("	SKIPPED changeData |" + lifespan + "| another is pending.");
             return;
         }
-        inst.log("	changeData");
+        inst.info("	changeData |" + lifespan + "| :" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
         inst.templateModel.clearAllRowHeights();
         dispatch(exports.datagrid.events.ON_BEFORE_RESET, inst);
         inst.data = inst.setData(newVal, inst.grouped) || [];
@@ -2630,7 +2646,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @returns {Object}
      */
     function dispatch(event) {
-        if (options.debug) eventLogger.log("$emit %s", event);
+        if (inst.options.debug) eventLogger.log("$emit %s", event);
         // THIS SHOULD ONLY EMIT. Broadcast could perform very poorly especially if there are a lot of rows.
         return exports.util.apply(scope.$emit, scope, arguments);
     }
@@ -3570,9 +3586,19 @@ ChunkArray.prototype.updateDomHeight = function(recursiveDirection) {
     }
 };
 
+ChunkArray.prototype.isNoInlineStyle = function() {
+    var csp = angular.$$csp();
+    if (angular.isObject(csp)) {
+        // angular: >=1.4.4
+        return csp.noInlineStyle;
+    }
+    // angular: >=1.2.0 <1.4.4
+    return csp;
+};
+
 ChunkArray.prototype.createDomTemplates = function() {
     if (!this.templateReady && this.templateStart) {
-        var str = this.templateStart.substr(0, this.templateStart.length - 1) + ' style="';
+        var str = this.templateStart.substr(0, this.templateStart.length - 1) + (this.isNoInlineStyle() ? ' ng-style="' : ' style="');
         if (this.mode === ChunkArray.DETACHED) {
             this.calculateTop();
             str += "position:absolute;top:" + this.top + "px;left:0px;";
@@ -4025,7 +4051,7 @@ exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
 exports.datagrid.events.ON_TOUCH_MOVE = "datagrid:touchMove";
 
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
-    var result = exports.logWrapper("scrollModel", {}, "orange", inst), setup = false, enable = true, unwatchSetup, waitForStopIntv, lastTouchUpdateTime = 0, hasScrollListener = false, lastScroll, bottomOffset = 0, lastRenderTime, // start easing
+    var result = exports.logWrapper("scrollModel", {}, "orange", inst), setup = false, enable = true, unwatchSetup, waiting, waitForStopIntv, lastTouchUpdateTime = 0, hasScrollListener = false, lastScroll, bottomOffset = 0, lastRenderTime, // start easing
     startOffsetY, startOffsetX, offsetY, offsetX, startScroll, lastDeltaY, lastDeltaX, speed = 0, speedX = 0, startTime, distance, scrollingIntv, // end easing
     listenerData = [ {
         event: "touchstart",
@@ -4054,7 +4080,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             inst.element.css({
                 overflow: "auto"
             });
-        } else if (exports.datagrid.isIOS) {
+        } else if (exports.datagrid.isIOS && inst.options.iosWebkitScrolling) {
             inst.element.css({
                 overflowY: "scroll",
                 webkitOverflowScrolling: "touch"
@@ -4141,7 +4167,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         return inst.values.scroll;
     }
     function setElementScroll(value) {
-        inst.element[0].scrollTop = value;
+        if (!waiting) {
+            inst.element[0].scrollTop = value;
+        }
         inst.values.scroll = value;
     }
     result.onTouchStart = function onTouchStart(event) {
@@ -4335,6 +4363,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
     function flowWaitForStop() {
         lastRenderTime = Date.now();
+        waiting = false;
         inst.scrollModel.onScrollingStop();
     }
     /**
@@ -4343,6 +4372,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.waitForStop = function waitForStop() {
         var forceRender = false;
         clearTimeout(waitForStopIntv);
+        waiting = true;
         result.log("waitForStop scroll = %s", inst.values.scroll);
         if (inst.options.renderWhileScrolling) {
             if (Date.now() - (inst.options.renderWhileScrolling > 0 || 0) > lastRenderTime) {

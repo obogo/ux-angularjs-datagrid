@@ -10,6 +10,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         setup = false,
         enable = true,
         unwatchSetup,
+        waiting,
         waitForStopIntv,
         lastTouchUpdateTime = 0,
         hasScrollListener = false,
@@ -141,7 +142,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     }
 
     function setElementScroll(value) {
-        inst.element[0].scrollTop = value;
+        if (!waiting) {
+            inst.element[0].scrollTop = value;
+        }
         inst.values.scroll = value;
     }
 
@@ -358,6 +361,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
     function flowWaitForStop() {
         lastRenderTime = Date.now();
+        waiting = false;
         inst.scrollModel.onScrollingStop();
     }
 
@@ -367,6 +371,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.waitForStop = function waitForStop() {
         var forceRender = false;
         clearTimeout(waitForStopIntv);
+        waiting = true;
         result.log("waitForStop scroll = %s", inst.values.scroll);
         if (inst.options.renderWhileScrolling) {
             if (Date.now() - (inst.options.renderWhileScrolling > 0 || 0) > lastRenderTime) {

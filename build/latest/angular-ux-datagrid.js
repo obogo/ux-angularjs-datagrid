@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.3
+* ux-angularjs-datagrid v.1.5.4
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.5.3
+* ux-angularjs-datagrid v.1.5.4
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -455,7 +455,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.5.3",
+    version: "1.5.4",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -3586,9 +3586,19 @@ ChunkArray.prototype.updateDomHeight = function(recursiveDirection) {
     }
 };
 
+ChunkArray.prototype.isNoInlineStyle = function() {
+    var csp = angular.$$csp();
+    if (angular.isObject(csp)) {
+        // angular: >=1.4.4
+        return csp.noInlineStyle;
+    }
+    // angular: >=1.2.0 <1.4.4
+    return csp;
+};
+
 ChunkArray.prototype.createDomTemplates = function() {
     if (!this.templateReady && this.templateStart) {
-        var str = this.templateStart.substr(0, this.templateStart.length - 1) + ' style="';
+        var str = this.templateStart.substr(0, this.templateStart.length - 1) + (this.isNoInlineStyle() ? ' ng-style="' : ' style="');
         if (this.mode === ChunkArray.DETACHED) {
             this.calculateTop();
             str += "position:absolute;top:" + this.top + "px;left:0px;";
@@ -4041,7 +4051,7 @@ exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
 exports.datagrid.events.ON_TOUCH_MOVE = "datagrid:touchMove";
 
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
-    var result = exports.logWrapper("scrollModel", {}, "orange", inst), setup = false, enable = true, unwatchSetup, waitForStopIntv, lastTouchUpdateTime = 0, hasScrollListener = false, lastScroll, bottomOffset = 0, lastRenderTime, // start easing
+    var result = exports.logWrapper("scrollModel", {}, "orange", inst), setup = false, enable = true, unwatchSetup, waiting, waitForStopIntv, lastTouchUpdateTime = 0, hasScrollListener = false, lastScroll, bottomOffset = 0, lastRenderTime, // start easing
     startOffsetY, startOffsetX, offsetY, offsetX, startScroll, lastDeltaY, lastDeltaX, speed = 0, speedX = 0, startTime, distance, scrollingIntv, // end easing
     listenerData = [ {
         event: "touchstart",
@@ -4157,7 +4167,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         return inst.values.scroll;
     }
     function setElementScroll(value) {
-        inst.element[0].scrollTop = value;
+        if (!waiting) {
+            inst.element[0].scrollTop = value;
+        }
         inst.values.scroll = value;
     }
     result.onTouchStart = function onTouchStart(event) {
@@ -4351,6 +4363,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
     function flowWaitForStop() {
         lastRenderTime = Date.now();
+        waiting = false;
         inst.scrollModel.onScrollingStop();
     }
     /**
@@ -4359,6 +4372,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     result.waitForStop = function waitForStop() {
         var forceRender = false;
         clearTimeout(waitForStopIntv);
+        waiting = true;
         result.log("waitForStop scroll = %s", inst.values.scroll);
         if (inst.options.renderWhileScrolling) {
             if (Date.now() - (inst.options.renderWhileScrolling > 0 || 0) > lastRenderTime) {

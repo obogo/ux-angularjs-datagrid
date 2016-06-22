@@ -819,9 +819,18 @@ ChunkArray.prototype.updateDomHeight = function (recursiveDirection) {
         this.each(this.updateDomHeight, [recursiveDirection]);
     }
 };
+ChunkArray.prototype.isNoInlineStyle = function () {
+    var csp = angular.$$csp();
+    if (angular.isObject(csp)) {
+        // angular: >=1.4.4
+        return csp.noInlineStyle;
+    }
+    // angular: >=1.2.0 <1.4.4
+    return csp;
+};
 ChunkArray.prototype.createDomTemplates = function() {
     if (!this.templateReady && this.templateStart) {
-        var str = this.templateStart.substr(0, this.templateStart.length - 1) + ' style="';
+        var str = this.templateStart.substr(0, this.templateStart.length - 1) + (this.isNoInlineStyle() ? ' ng-style="' : ' style="');
         if (this.mode === ChunkArray.DETACHED) {
             this.calculateTop();
             str += 'position:absolute;top:' + this.top + 'px;left:0px;';

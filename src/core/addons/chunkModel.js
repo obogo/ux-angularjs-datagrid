@@ -278,6 +278,35 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         return recompile;
     }
 
+    function setStylesViaCssom(children) {
+        var length = children.length;
+        for (var i = 0; i < length; i++) {
+            var child = children[i];
+            var dataStyleAttribute = child.getAttribute('data-style');
+            if (!dataStyleAttribute) {
+                continue;
+            }
+
+            var stylesArray = dataStyleAttribute.split(';');
+            var stylesArrayLength = stylesArray.length;
+            for (var j = 0; j < stylesArrayLength; j++) {
+                var style = stylesArray[j];
+                if (!style || style.indexOf(':') === -1) {
+                    continue;
+                }
+
+                var css = style.split(':');
+                var propertyName = css[0];
+                var propertyValue = css[1];
+
+                var camelCasedPropertyName = propertyName.replace(/-(.)/g, function (a, $1) {
+                    return $1.toUpperCase();
+                });
+                child.style[camelCasedPropertyName] = propertyValue;
+            }
+        }
+    }
+
     /**
      * ###<a name="unrendered">unrendered</a>###
      * How to handle array chunks that have not been rendered yet. They may copy from cache or even create new
@@ -291,6 +320,10 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         children = el.children();
         ca.rendered = el;
         if (ca.hasChildChunks()) {// assign the dom element.
+            if (isNoInlineStyle) {
+                setStylesViaCssom(children);
+            }
+
             iLen = children.length;
             while (i < iLen) {
                 ca[i].dom = children[i];
@@ -819,18 +852,9 @@ ChunkArray.prototype.updateDomHeight = function (recursiveDirection) {
         this.each(this.updateDomHeight, [recursiveDirection]);
     }
 };
-ChunkArray.prototype.isNoInlineStyle = function () {
-    var csp = angular.$$csp();
-    if (angular.isObject(csp)) {
-        // angular: >=1.4.4
-        return csp.noInlineStyle;
-    }
-    // angular: >=1.2.0 <1.4.4
-    return csp;
-};
 ChunkArray.prototype.createDomTemplates = function() {
     if (!this.templateReady && this.templateStart) {
-        var str = this.templateStart.substr(0, this.templateStart.length - 1) + (this.isNoInlineStyle() ? ' ng-style="' : ' style="');
+        var str = this.templateStart.substr(0, this.templateStart.length - 1) + (isNoInlineStyle ? ' data-style="' : ' style="');
         if (this.mode === ChunkArray.DETACHED) {
             this.calculateTop();
             str += 'position:absolute;top:' + this.top + 'px;left:0px;';

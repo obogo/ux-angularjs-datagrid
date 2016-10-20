@@ -7,6 +7,15 @@
  * Create the default module of ux if it doesn't already exist.
  */
 var ngModule, isIOS = !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g);
+var isNoInlineStyle = function () {
+        var csp = angular.$$csp();
+        if (angular.isObject(csp)) {
+            // angular: >=1.4.4
+            return csp.noInlineStyle;
+        }
+        // angular: >=1.2.0 <1.4.4
+        return csp;
+    }();
 try {
     ngModule = angular.module('ux', ['ng']);
 } catch (e) {
@@ -36,6 +45,11 @@ exports.datagrid = {
      * So a [virtualScroll](#virtualScroll) was implemented for iOS to make it scroll using translate3d.
      */
     isIOS: isIOS,
+    /**
+     * ###<a name="isNoInlineStyle">isNoInlineStyle</a>###
+     * If you're using a strict Content Securiy Policy (CSP), which forbids the use of `style`-attributes, the datagrid has to set some styles via the CSS Object Model (CSSOM).
+     */
+    isNoInlineStyle: isNoInlineStyle,
     /**
      * ###<a name="states">states</a>###
      *  - **<a name="states.BUILDING">BUILDING</a>**: is the startup phase of the grid before it is ready to perform the first render. This may include

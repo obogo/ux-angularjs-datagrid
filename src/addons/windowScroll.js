@@ -8,7 +8,7 @@ angular.module('ux').factory('windowScroll', function () {
             return window.screen.height;
         };
         result.onUpdateScroll = function onUpadateScroll(event) {
-            var val = window.pageYOffset;
+            var val = window.hasOwnProperty('scrollY') ? window.scrollY : window.pageYOffset;
             if (inst.values.scroll !== val) {
                 inst.dispatch(ux.datagrid.events.ON_SCROLL_START, val);
                 inst.values.speed = val - inst.values.scroll;

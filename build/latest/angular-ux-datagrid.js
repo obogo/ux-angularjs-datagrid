@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.4
+* ux-angularjs-datagrid v.1.5.5
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.5.4
+* ux-angularjs-datagrid v.1.5.5
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -34,6 +34,9 @@ if (typeof define === "function" && define.amd) {
         defined = get("d");
         pending = get("p");
         initDefinition = function(name) {
+            if (defined[name]) {
+                return;
+            }
             var args = arguments;
             var val = args[1];
             if (typeof val === "function") {
@@ -57,8 +60,8 @@ if (typeof define === "function" && define.amd) {
                 for (i = 0; i < len; i++) {
                     dependencyName = deps[i];
                     if (definitions[dependencyName]) {
-                        if (pending.hasOwnProperty(dependencyName)) {
-                            throw new Error('Cyclical reference: "' + name + '" referencing "' + dependencyName + '"');
+                        if (!pending.hasOwnProperty(dependencyName)) {
+                            resolve(dependencyName, definitions[dependencyName]);
                         }
                         resolve(dependencyName, definitions[dependencyName]);
                         delete definitions[dependencyName];
@@ -411,6 +414,7 @@ if (typeof define === "function" && define.amd) {
     });
     //! #################  YOUR CODE ENDS HERE  #################### //
     finalize();
+    return global["util"];
 })(this["util"] || {}, function() {
     return exports;
 }());
@@ -432,6 +436,16 @@ exports.errors = {
  * Create the default module of ux if it doesn't already exist.
  */
 var ngModule, isIOS = !!navigator.userAgent.match(/(iPad|iPhone|iPod)/g);
+
+var isNoInlineStyle = function() {
+    var csp = angular.$$csp();
+    if (angular.isObject(csp)) {
+        // angular: >=1.4.4
+        return csp.noInlineStyle;
+    }
+    // angular: >=1.2.0 <1.4.4
+    return csp;
+}();
 
 try {
     ngModule = angular.module("ux", [ "ng" ]);
@@ -455,7 +469,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.5.4",
+    version: "1.5.5",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -463,6 +477,11 @@ exports.datagrid = {
      * So a [virtualScroll](#virtualScroll) was implemented for iOS to make it scroll using translate3d.
      */
     isIOS: isIOS,
+    /**
+     * ###<a name="isNoInlineStyle">isNoInlineStyle</a>###
+     * If you're using a strict Content Securiy Policy (CSP), which forbids the use of `style`-attributes, the datagrid has to set some styles via the CSS Object Model (CSSOM).
+     */
+    isNoInlineStyle: isNoInlineStyle,
     /**
      * ###<a name="states">states</a>###
      *  - **<a name="states.BUILDING">BUILDING</a>**: is the startup phase of the grid before it is ready to perform the first render. This may include
@@ -650,7 +669,7 @@ exports.datagrid = {
         // - **<a name="options.minHeight">minHeight</a>** if a height cannot be found, the datagrid will assume this minHeight. It will then resize to whatever height the element is resized to later.
         minHeight: 100,
         // - **<a name="options.iosWebkitScrolling">iosWebkitScrolling</a>** Smooth scrolling on ios device. Seems to sometimes be glitchy with ios devices.
-        iosWebkitScrolling: false
+        iosWebkitScrolling: true
     },
     /**
      * ###<a name="coreAddons">coreAddons</a>###
@@ -1757,6 +1776,12 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 return parseInt(el[0].getAttribute("row-id"), 10);
             }
             return s.$index;
+        } else if (el && el.attr) {
+            // if a row is detached because of detached dom. We can still get the index.
+            while (el && el.attr("row-id") === undefined) {
+                el = el.parent();
+            }
+            return parseInt(el.attr("row-id"), 10);
         }
         return -1;
     }
@@ -3034,6 +3059,32 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         }
         return recompile;
     }
+    function setStylesViaCssom(children) {
+        var length = children.length;
+        function replacement(a, $1) {
+            return $1.toUpperCase();
+        }
+        for (var i = 0; i < length; i++) {
+            var child = children[i];
+            var dataStyleAttribute = child.getAttribute("data-style");
+            if (!dataStyleAttribute) {
+                continue;
+            }
+            var stylesArray = dataStyleAttribute.split(";");
+            var stylesArrayLength = stylesArray.length;
+            for (var j = 0; j < stylesArrayLength; j++) {
+                var style = stylesArray[j];
+                if (!style || style.indexOf(":") === -1) {
+                    continue;
+                }
+                var css = style.split(":");
+                var propertyName = css[0];
+                var propertyValue = css[1];
+                var camelCasedPropertyName = propertyName.replace(/-(.)/g, replacement);
+                child.style[camelCasedPropertyName] = propertyValue;
+            }
+        }
+    }
     /**
      * ###<a name="unrendered">unrendered</a>###
      * How to handle array chunks that have not been rendered yet. They may copy from cache or even create new
@@ -3048,6 +3099,9 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
         ca.rendered = el;
         if (ca.hasChildChunks()) {
             // assign the dom element.
+            if (isNoInlineStyle) {
+                setStylesViaCssom(children);
+            }
             iLen = children.length;
             while (i < iLen) {
                 ca[i].dom = children[i];
@@ -3586,19 +3640,9 @@ ChunkArray.prototype.updateDomHeight = function(recursiveDirection) {
     }
 };
 
-ChunkArray.prototype.isNoInlineStyle = function() {
-    var csp = angular.$$csp();
-    if (angular.isObject(csp)) {
-        // angular: >=1.4.4
-        return csp.noInlineStyle;
-    }
-    // angular: >=1.2.0 <1.4.4
-    return csp;
-};
-
 ChunkArray.prototype.createDomTemplates = function() {
     if (!this.templateReady && this.templateStart) {
-        var str = this.templateStart.substr(0, this.templateStart.length - 1) + (this.isNoInlineStyle() ? ' ng-style="' : ' style="');
+        var str = this.templateStart.substr(0, this.templateStart.length - 1) + (isNoInlineStyle ? ' data-style="' : ' style="');
         if (this.mode === ChunkArray.DETACHED) {
             this.calculateTop();
             str += "position:absolute;top:" + this.top + "px;left:0px;";
@@ -4359,23 +4403,23 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         return false;
     };
     result.clearOnScrollingStop = function clearOnScrollingStop() {
-        result.onScrollingStop();
+        clearTimeout(waitForStopIntv);
     };
     function flowWaitForStop() {
-        lastRenderTime = Date.now();
-        waiting = false;
         inst.scrollModel.onScrollingStop();
     }
     /**
      * Wait for the datagrid to slow down enough to render.
      */
     result.waitForStop = function waitForStop() {
-        var forceRender = false;
+        var forceRender = false, now;
         clearTimeout(waitForStopIntv);
         waiting = true;
         result.log("waitForStop scroll = %s", inst.values.scroll);
         if (inst.options.renderWhileScrolling) {
-            if (Date.now() - (inst.options.renderWhileScrolling > 0 || 0) > lastRenderTime) {
+            if ((now = Date.now()) - (inst.options.renderWhileScrolling > 0 || 0) > lastRenderTime) {
+                lastRenderTime = now;
+                // don't let it get in here a second time while rendering.
                 forceRender = true;
             }
         }
@@ -4389,6 +4433,8 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * When it stops render.
      */
     result.onScrollingStop = function onScrollingStop() {
+        waiting = false;
+        lastRenderTime = Date.now();
         result.log("onScrollingStop %s", inst.values.scroll);
         result.checkForEnds();
         inst.values.speed = 0;
@@ -4445,6 +4491,29 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         }
         // otherwise it is in view so do nothing.
         return false;
+    };
+    /**
+     * scroll up one page view if available otherwise scroll to the top.
+     */
+    result.pageUp = function() {
+        var vh = inst.getViewportHeight();
+        if (inst.values.scroll - vh > 0) {
+            inst.scrollModel.scrollTo(inst.values.scroll - vh);
+        } else {
+            inst.scrollModel.scrollTo(0);
+        }
+    };
+    /**
+     * scroll down one page view if available otherwise scroll to the bottom.
+     */
+    result.pageDown = function() {
+        var vh = inst.getViewportHeight();
+        var ch = inst.getContentHeight();
+        if (inst.values.scroll + vh < ch - vh) {
+            inst.scrollModel.scrollTo(inst.values.scroll + vh);
+        } else {
+            inst.scrollModel.scrollTo(ch - vh);
+        }
     };
     function compileRowSiblings(index) {
         if (inst.data[index - 1] && !inst.isCompiled(index - 1)) {

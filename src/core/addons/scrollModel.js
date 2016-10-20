@@ -356,12 +356,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
 
     result.clearOnScrollingStop = function clearOnScrollingStop() {
-        result.onScrollingStop();
+        clearTimeout(waitForStopIntv);
     };
 
     function flowWaitForStop() {
-        lastRenderTime = Date.now();
-        waiting = false;
         inst.scrollModel.onScrollingStop();
     }
 
@@ -369,12 +367,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * Wait for the datagrid to slow down enough to render.
      */
     result.waitForStop = function waitForStop() {
-        var forceRender = false;
+        var forceRender = false, now;
         clearTimeout(waitForStopIntv);
         waiting = true;
         result.log("waitForStop scroll = %s", inst.values.scroll);
         if (inst.options.renderWhileScrolling) {
-            if (Date.now() - (inst.options.renderWhileScrolling > 0 || 0) > lastRenderTime) {
+            if ((now = Date.now()) - (inst.options.renderWhileScrolling > 0 || 0) > lastRenderTime) {
+                lastRenderTime = now;// don't let it get in here a second time while rendering.
                 forceRender = true;
             }
         }
@@ -389,6 +388,8 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * When it stops render.
      */
     result.onScrollingStop = function onScrollingStop() {
+        waiting = false;
+        lastRenderTime = Date.now();
         result.log("onScrollingStop %s", inst.values.scroll);
         result.checkForEnds();
         inst.values.speed = 0;
@@ -446,6 +447,31 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         }
         // otherwise it is in view so do nothing.
         return false;
+    };
+
+    /**
+     * scroll up one page view if available otherwise scroll to the top.
+     */
+    result.pageUp = function () {
+        var vh = inst.getViewportHeight();
+        if (inst.values.scroll - vh > 0) {
+            inst.scrollModel.scrollTo(inst.values.scroll - vh);
+        } else {
+            inst.scrollModel.scrollTo(0);//scroll to top
+        }
+    };
+
+    /**
+     * scroll down one page view if available otherwise scroll to the bottom.
+     */
+    result.pageDown = function () {
+        var vh = inst.getViewportHeight();
+        var ch = inst.getContentHeight();
+        if (inst.values.scroll + vh < ch - vh) {
+            inst.scrollModel.scrollTo(inst.values.scroll + vh);
+        } else {
+            inst.scrollModel.scrollTo(ch - vh);//scroll to bottom
+        }
     };
 
     function compileRowSiblings(index) {

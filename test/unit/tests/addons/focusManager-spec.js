@@ -70,6 +70,8 @@ describe("gridFocusManager", function () {
         input.focus();
 //        fireKey(input, 13);
         grid.gridFocusManager.focusToNextRowElement(document.activeElement);
+        //TODO: is this really failing?
+        debugger;
         expect(document.activeElement).toBe(q(rows[1], 'input')[1]);
     });
 

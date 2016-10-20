@@ -487,6 +487,12 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 return parseInt(el[0].getAttribute('row-id'), 10);
             }
             return s.$index;
+        } else if (el && el.attr) {
+            // if a row is detached because of detached dom. We can still get the index.
+            while(el && el.attr('row-id') === undefined) {
+                el = el.parent();
+            }
+            return parseInt(el.attr('row-id'), 10);
         }
         return -1;
     }

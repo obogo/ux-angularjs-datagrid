@@ -280,6 +280,11 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
 
     function setStylesViaCssom(children) {
         var length = children.length;
+
+        function replacement(a, $1) {
+            return $1.toUpperCase();
+        }
+
         for (var i = 0; i < length; i++) {
             var child = children[i];
             var dataStyleAttribute = child.getAttribute('data-style');
@@ -299,9 +304,7 @@ exports.datagrid.coreAddons.chunkModel = function chunkModel(inst) {
                 var propertyName = css[0];
                 var propertyValue = css[1];
 
-                var camelCasedPropertyName = propertyName.replace(/-(.)/g, function (a, $1) {
-                    return $1.toUpperCase();
-                });
+                var camelCasedPropertyName = propertyName.replace(/-(.)/g, replacement);
                 child.style[camelCasedPropertyName] = propertyValue;
             }
         }

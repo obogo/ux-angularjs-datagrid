@@ -235,7 +235,7 @@ exports.datagrid = {
         // - **<a name="options.minHeight">minHeight</a>** if a height cannot be found, the datagrid will assume this minHeight. It will then resize to whatever height the element is resized to later.
         minHeight: 100,
         // - **<a name="options.iosWebkitScrolling">iosWebkitScrolling</a>** Smooth scrolling on ios device. Seems to sometimes be glitchy with ios devices.
-        iosWebkitScrolling: false,
+        iosWebkitScrolling: true
     },
     /**
      * ###<a name="coreAddons">coreAddons</a>###

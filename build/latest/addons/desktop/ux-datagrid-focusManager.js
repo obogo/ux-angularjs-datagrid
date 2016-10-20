@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.4
+* ux-angularjs-datagrid v.1.5.5
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -724,8 +724,19 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @param {HTMLElement} focusedEl
          * @returns {boolean}
          */
-        function hasPrevRowFocusElement(focusedEl) {
-            var el = getPrevRowFocusElement(focusedEl);
+        function hasPrevRowFocusElement(focusedEl, isAvailable) {
+            if (isAvailable) {
+                var d = inst.getData();
+                for (var i = inst.getRowIndexFromElement(focusedEl) - 1; i >= 0; i -= 1) {
+                    if (isAvailable(d[i])) {
+                        return true;
+                    }
+                }
+                if (!inst.options.gridFocusManager || !inst.options.gridFocusManager.multipleEnterFocusPerRow) {
+                    return false;
+                }
+            }
+            var el = getPrevRowFocusElement(focusedEl, isAvailable);
             return !!(el && el.length && el[0] !== focusedEl);
         }
         /**
@@ -734,8 +745,19 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @param {HTMLElement} focusedEl
          * @returns {boolean}
          */
-        function hasNextRowFocusElement(focusedEl) {
-            var el = getNextRowFocusElement(focusedEl);
+        function hasNextRowFocusElement(focusedEl, isAvailable) {
+            if (isAvailable) {
+                var d = inst.getData();
+                for (var i = inst.getRowIndexFromElement(focusedEl) + 1; i < inst.rowsLength; i += 1) {
+                    if (isAvailable(d[i])) {
+                        return true;
+                    }
+                }
+                if (!inst.options.gridFocusManager || !inst.options.gridFocusManager.multipleEnterFocusPerRow) {
+                    return false;
+                }
+            }
+            var el = getNextRowFocusElement(focusedEl, isAvailable);
             return !!(el && el.length && el[0] !== focusedEl);
         }
         /**
@@ -773,48 +795,28 @@ angular.module("ux").factory("gridFocusManager", function() {
         function focusToRowElement(focusedEl, dir, isAvailable) {
             // dir should be 1 or -1
             result.log("	focusToRowElement");
-            var multiple, max;
             focusedEl = wrap(focusedEl);
             if (!inst.element[0].contains(focusedEl[0])) {
                 return;
             }
-            var resultEl, currentIndex = inst.getRowIndexFromElement(focusedEl), nextIndex = currentIndex + dir, selector;
-            if (isAvailable && !isAvailable(inst.getData()[currentIndex])) {
-                return focusedEl;
-            }
+            var resultEl, currentIndex = inst.getRowIndexFromElement(focusedEl), nextIndex = currentIndex + dir, selector, d = inst.getData(), multiIndex = -1, match;
             selector = getSelector(focusedEl, currentIndex);
-            if (inst.options.gridFocusManager && inst.options.gridFocusManager.multipleEnterFocusPerRow && (multiple = selector.match(eqrx))) {
-                max = query(inst.getRowElm(currentIndex), selector.replace(eqrx, "")).length - 1;
-                multiple[1] = parseInt(multiple[1] || 0, 10);
-                if (dir > 0) {
-                    if (multiple[1] < max) {
-                        selector = selector.replace(eqrx, ":eq(" + (multiple[1] + 1) + ")");
-                        nextIndex -= 1;
-                    } else if (multiple[1] >= max) {
-                        selector = selector.replace(eqrx, ":eq(0)");
-                    }
-                } else if (dir < 0) {
-                    if (multiple[1] > 0) {
-                        selector = selector.replace(eqrx, ":eq(" + (multiple[1] - 1) + ")");
-                        nextIndex += 1;
-                    } else if (multiple[1] <= 0) {
-                        var ci = currentIndex - 1;
-                        max = -1;
-                        // we need to find the max of the prev row.
-                        while (ci > 0 && max < 0) {
-                            max = query(inst.getRowElm(ci), selector.replace(eqrx, "")).length - 1;
-                            selector = selector.replace(eqrx, ":eq(" + max + ")");
-                            // we are going to the next index. reset to 0.
-                            ci -= 1;
-                        }
-                    }
+            if (inst.options.gridFocusManager && inst.options.gridFocusManager.multipleEnterFocusPerRow) {
+                match = selector.match(eqrx);
+                selector = selector.split(":").shift();
+                multiIndex = match ? parseInt(match[1], 10) : -1;
+                if (multiIndex >= -1) {
+                    nextIndex -= dir;
                 }
             }
             if (nextIndex < 0 || nextIndex >= inst.rowsLength) {
                 return focusedEl;
             }
+            while (isAvailable && d[nextIndex] && !isAvailable(d[nextIndex])) {
+                nextIndex += dir;
+            }
             result.log("	selector: %s", selector);
-            resultEl = findNextRowWithSelection(nextIndex, dir, selector);
+            resultEl = findNextRowWithSelection(nextIndex, dir, selector, isAvailable, currentIndex, multiIndex);
             return resultEl && resultEl.length ? resultEl : focusedEl;
         }
         /**
@@ -859,17 +861,21 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @param {Number} nextIndex
          * @param {Number} dir
          * @param {String} selector
+         * @param {Function} isAvailable
+         * @param {int} currentIndex
+         * @param {int} multiIndex
          * @returns {JQLite}
          */
-        function findNextRowWithSelection(nextIndex, dir, selector) {
+        function findNextRowWithSelection(nextIndex, dir, selector, isAvailable, currentIndex, multiIndex) {
             result.log("	findNextRowWithSelection");
+            var multi = inst.options.gridFocusManager && inst.options.gridFocusManager.multipleEnterFocusPerRow;
             if (inst.options.gridFocusManager && inst.options.gridFocusManager.filterNextPattern) {
                 // make it look just through the objects to jump to that item.
                 while (nextIndex > 0 && nextIndex < inst.rowsLength - 1 && !exports.util.isMatch(inst.data[nextIndex], inst.options.gridFocusManager.filterNextPattern)) {
                     nextIndex += dir;
                 }
             }
-            var nextEl = inst.getRowElm(nextIndex), focusEl;
+            var nextEl = inst.getRowElm(nextIndex), focusEl, index;
             if (nextEl[0].classList.contains("uncompiled")) {
                 // we must remove the hidden value on the uncompiled or it will not pass visibility.
                 nextEl[0].classList.remove("uncompiled");
@@ -878,16 +884,71 @@ angular.module("ux").factory("gridFocusManager", function() {
             } else {
                 focusEl = query(nextEl[0], selector);
             }
-            var content = inst.getContent();
-            while (!focusEl[0] && (dir > 0 && nextIndex < inst.rowsLength - 1 || dir < 0 && nextIndex > 0)) {
+            if (multi && multiIndex !== -1 && focusEl.length > 1 && (dir > 0 && multiIndex < focusEl.length - 1 || dir < 0 && multiIndex > 0)) {
+                if (currentIndex === nextIndex) {
+                    index = multiIndex + dir;
+                }
+                if (focusEl[index]) {
+                    focusEl = angular.element(focusEl[index]);
+                } else {
+                    focusEl = null;
+                }
+            } else if (multi && currentIndex === nextIndex) {
                 nextIndex += dir;
                 nextEl = inst.getRowElm(nextIndex);
-                if (nextEl[0] === content) {
+                if (nextEl[0] === inst.getContent()[0]) {
                     return;
                 }
-                focusEl = query(nextEl[0], selector);
+                if (nextEl[0].classList.contains("uncompiled")) {
+                    // we must remove the hidden value on the uncompiled or it will not pass visibility.
+                    nextEl[0].classList.remove("uncompiled");
+                    focusEl = query(nextEl[0], selector);
+                    nextEl[0].classList.add("uncompiled");
+                } else {
+                    focusEl = query(nextEl[0], selector);
+                }
+                if (focusEl.length > 1) {
+                    index = offsetIndex(dir, focusEl);
+                    if (focusEl[index]) {
+                        focusEl = angular.element(focusEl[index]);
+                    } else {
+                        focusEl = null;
+                    }
+                }
+            }
+            var content = inst.getContent(), d = inst.getData();
+            while (!focusEl[0] && (dir > 0 && nextIndex < inst.rowsLength - 1 || dir < 0 && nextIndex > 0)) {
+                nextIndex += dir;
+                if (!isAvailable || isAvailable && isAvailable(d[nextIndex])) {
+                    nextEl = inst.getRowElm(nextIndex);
+                    if (nextEl[0] === content[0]) {
+                        return;
+                    }
+                    if (nextEl.hasClass("uncompiled")) {
+                        inst.forceRenderScope(nextIndex);
+                        nextEl = inst.getRowElm(nextIndex);
+                    }
+                    focusEl = multi ? angular.element(nextEl[0].querySelectorAll(selector)) : query(nextEl[0], selector);
+                    //query(nextEl[0], selector);
+                    if (multi && focusEl.length > 1) {
+                        index = offsetIndex(dir, focusEl);
+                        if (focusEl[index]) {
+                            focusEl = angular.element(focusEl[index]);
+                        } else {
+                            focusEl = angular.element(focusEl[0]);
+                        }
+                    }
+                }
             }
             return focusEl;
+        }
+        function offsetIndex(dir, focusEl) {
+            if (dir < 0) {
+                return focusEl.length - 1;
+            } else if (dir > 0) {
+                return 0;
+            }
+            return;
         }
         function onResize(event) {
             var index;
@@ -916,6 +977,8 @@ angular.module("ux").factory("gridFocusManager", function() {
                     var found = focusToPrevRowElement(activeElement, checkFn);
                     stopWaitingForPrevRetry();
                     if (!found) {
+                        result.info("pageUp");
+                        inst.scrollModel.pageUp();
                         inst.scope.$emit(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME_FAILURE);
                         waitingForPrevFocusRetryUnwatch = inst.scope.$on(exports.datagrid.events.ON_AFTER_RENDER, function() {
                             stopWaitingForPrevRetry();
@@ -933,6 +996,8 @@ angular.module("ux").factory("gridFocusManager", function() {
                     var found = focusToNextRowElement(activeElement, checkFn);
                     stopWaitingForNextRetry();
                     if (!found) {
+                        result.info("pageDown");
+                        inst.scrollModel.pageDown();
                         inst.scope.$emit(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME_FAILURE);
                         waitingForNextFocusRetryUnwatch = inst.scope.$on(exports.datagrid.events.ON_AFTER_RENDER, function() {
                             stopWaitingForNextRetry();

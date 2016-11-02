@@ -62,7 +62,9 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         // - <a name="values.scrollingStopIntv"></a>interval that allows waits for checks to know when the scrolling has stopped and a render is needed.
         scrollingStopIntv: null,
         // - <a name="values.activeRange"></a>the current range of active scopes.
-        activeRange: {min: 0, max: 0}
+        activeRange: {min: 0, max: 0},
+        // - <a name="values.direction"></a>-1 | 0 | 1 depending on weather it is scrolling or not. Used by creepModel and scrollModel to optimize the direction of the creep rendering.
+        direction: 0
     };
     // <a name="logEvents"></a>listing the log events so they can be ignored if needed.
     var logEvents = [exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR];

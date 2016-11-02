@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.5
+* ux-angularjs-datagrid v.1.6.0
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -146,7 +146,7 @@ angular.module("ux").factory("scrollHistory", function() {
          */
         result.scroll = function() {
             if (inst.getContentHeight() - inst.getViewportHeight() < scrollPos && inst.values.scroll) {
-                result.log("	scrollTo 0 because scroll %s is too tall for the content", scrollPos);
+                result.log("\tscrollTo 0 because scroll %s is too tall for the content", scrollPos);
                 inst.scrollModel.setScroll(0);
                 inst.scrollModel.scrollTo(0, true);
             }

@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.5
+* ux-angularjs-datagrid v.1.6.0
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -360,7 +360,7 @@ exports.selector = function() {
         },
         resetOmitAttrs: function() {
             omitAttrs = {
-                "class": true,
+                class: true,
                 style: true
             };
         },
@@ -500,7 +500,7 @@ angular.module("ux").factory("gridFocusManager", function() {
             if (isNaN(inst.values.activeRange.max) || inst.values.activeRange.max < 0) {
                 return;
             }
-            result.log("	applyTo: %s - %s", inst.values.activeRange.min, inst.values.activeRange.max);
+            result.log("\tapplyTo: %s - %s", inst.values.activeRange.min, inst.values.activeRange.max);
             var i = inst.values.activeRange.min, row;
             while (i <= inst.values.activeRange.max) {
                 row = inst.getRowElm(i);
@@ -627,11 +627,11 @@ angular.module("ux").factory("gridFocusManager", function() {
                 nodeName: "INPUT"
             })).length) {
                 // only add keydown to input fields
-                result.log("		addListenersToRow");
+                result.log("\t\taddListenersToRow");
                 focusable = angular.element(focusable);
                 focusable.bind("keydown", onKeyDown);
             } else {
-                result.log("		no focusable elements found in row");
+                result.log("\t\tno focusable elements found in row");
             }
         }
         /**
@@ -645,11 +645,11 @@ angular.module("ux").factory("gridFocusManager", function() {
                 nodeName: "INPUT"
             })).length) {
                 // only add keydown to input fields
-                result.log("		removeListenersToRow");
+                result.log("\t\tremoveListenersToRow");
                 focusable = angular.element(focusable);
                 focusable.unbind("keydown", onKeyDown);
             } else {
-                result.log("		no focusable elements found in row");
+                result.log("\t\tno focusable elements found in row");
             }
         }
         /**
@@ -777,7 +777,7 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @returns {*}
          */
         function getNextRowFocusElement(focusedEl, isAvailable) {
-            result.log("	FM: getNextRowFocusElement");
+            result.log("\tFM: getNextRowFocusElement");
             return focusToRowElement(focusedEl, 1, isAvailable);
         }
         /**
@@ -794,7 +794,7 @@ angular.module("ux").factory("gridFocusManager", function() {
          */
         function focusToRowElement(focusedEl, dir, isAvailable) {
             // dir should be 1 or -1
-            result.log("	focusToRowElement");
+            result.log("\tfocusToRowElement");
             focusedEl = wrap(focusedEl);
             if (!inst.element[0].contains(focusedEl[0])) {
                 return;
@@ -815,7 +815,7 @@ angular.module("ux").factory("gridFocusManager", function() {
             while (isAvailable && d[nextIndex] && !isAvailable(d[nextIndex])) {
                 nextIndex += dir;
             }
-            result.log("	selector: %s", selector);
+            result.log("\tselector: %s", selector);
             resultEl = findNextRowWithSelection(nextIndex, dir, selector, isAvailable, currentIndex, multiIndex);
             return resultEl && resultEl.length ? resultEl : focusedEl;
         }
@@ -840,7 +840,7 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @param {JQLite} focusEl
          */
         function performFocus(focusEl) {
-            result.log("	performFocus %o", focusEl[0]);
+            result.log("\tperformFocus %o", focusEl[0]);
             var success = false;
             // we now need to scroll the row into view if it is not.
             if (focusEl[0]) {
@@ -867,7 +867,7 @@ angular.module("ux").factory("gridFocusManager", function() {
          * @returns {JQLite}
          */
         function findNextRowWithSelection(nextIndex, dir, selector, isAvailable, currentIndex, multiIndex) {
-            result.log("	findNextRowWithSelection");
+            result.log("\tfindNextRowWithSelection");
             var multi = inst.options.gridFocusManager && inst.options.gridFocusManager.multipleEnterFocusPerRow;
             if (inst.options.gridFocusManager && inst.options.gridFocusManager.filterNextPattern) {
                 // make it look just through the objects to jump to that item.

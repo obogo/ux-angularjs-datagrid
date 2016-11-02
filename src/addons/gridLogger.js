@@ -48,11 +48,7 @@ angular.module('ux').factory('gridLogger', function () {
 
         function hasPermissionToLog(lvl, name) {
             if (inst.options.debug) {
-                if ((inst.options.debug.all && inst.options.debug.all > lvl) || inst.options.debug[name] === 0) {
-                    return false;
-                } else if (lvl >= inst.options.debug.all) {
-                    return true;
-                } else if (inst.options.debug[name] >= lvl) {
+                if ((inst.options.debug[name] && inst.options.debug[name] <= lvl) || (inst.options.debug.all && inst.options.debug.all <= lvl)) {
                     return true;
                 }
             }

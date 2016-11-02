@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.5
+* ux-angularjs-datagrid v.1.6.0
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -93,7 +93,7 @@ angular.module("ux").factory("iScrollAddon", function() {
                 clearRefreshRender();
             } else if (h = inst.element[0].offsetHeight) {
                 clearRefreshRender();
-                result.log("	refresh iscroll height:%s/%s", h, inst.getContentHeight());
+                result.log("\trefresh iscroll height:%s/%s", h, inst.getContentHeight());
                 myScroll.refresh();
             }
         }

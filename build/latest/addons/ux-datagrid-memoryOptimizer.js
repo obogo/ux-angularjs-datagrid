@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.5
+* ux-angularjs-datagrid v.1.6.0
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -74,7 +74,7 @@ angular.module("ux").factory("memoryOptimizer", function() {
         * @param chunk
         */
         function decompileChunk(chunk) {
-            result.log("	decompile %s %s-%s", chunk.getId(), chunk.min, chunk.max);
+            result.log("\tdecompile %s %s-%s", chunk.getId(), chunk.min, chunk.max);
             var i = chunk.min, iLen = chunk.max;
             while (i <= iLen) {
                 if (inst.scopes[i]) {

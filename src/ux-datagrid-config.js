@@ -170,7 +170,7 @@ exports.datagrid = {
         },
         // - **<a name="creepStartDelay">creepStartDelay</a>**
         // when the creep render starts. How long after the scrolling has stopped.
-        creepStartDelay: 1000,
+        creepStartDelay: 50,
         // - **<a name="options.cushion">cushion</a>** this it used by the updateRowWatchers and what rows it will update. It can be handy for debugging to make sure only
         // the correct rows are digesting by making the value positive it will take off space from the top and bottom of the viewport that number of pixels to match what
         // rows are activated and which ones are not. Also a negative number will cause the grid to render past the viewable area and digest rows that are out of view.
@@ -220,10 +220,7 @@ exports.datagrid = {
         renderThreshold: 1,
         // - **<a name="options.renderThresholdWait">renderThresholdWait</a>** used in conjunction with options.renderThreshold this will wait this amount of time before
         // trying to render more rows.
-        renderThresholdWait: 50,
-        // - **<a name="options.renderWhileScrolling">renderWhileScrolling</a>** cause the grid to render while scrolling. This can will drastically reduce scrolling performance.
-        // this can be optimized by setting a number of milliseconds between each render while scrolling.
-        renderWhileScrolling: false,
+        renderThresholdWait: 20,
         // - **<a name="options.creepLimit">creepLimit</a>** used with options.renderThreshold and options.renderThresholdWait this will give a maximum amount of renders
         // that can be done before the creep render is turned off.
         creepLimit: 500,
@@ -235,7 +232,11 @@ exports.datagrid = {
         // - **<a name="options.minHeight">minHeight</a>** if a height cannot be found, the datagrid will assume this minHeight. It will then resize to whatever height the element is resized to later.
         minHeight: 100,
         // - **<a name="options.iosWebkitScrolling">iosWebkitScrolling</a>** Smooth scrolling on ios device. Seems to sometimes be glitchy with ios devices.
-        iosWebkitScrolling: true
+        iosWebkitScrolling: true,
+        // - **<a name="options.scrollEndRenderAmount">scrollEndRenderAmount</a>**When a render stops it will force render x number of rows. It does this on a touch end and every forceRenderAfterScrollEventsCount
+        scrollEndRenderAmount: 2,
+        // - **<a name="options.forceRenderAfterScrollEventsCount">forceRenderAfterScrollEventsCount</a>**When scrolling. Every forceRenderAfterScrollEventsCount of events, it will force render rows in the direction it is scrolling.
+        forceRenderAfterScrollEventsCount: 4
     },
     /**
      * ###<a name="coreAddons">coreAddons</a>###

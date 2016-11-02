@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.5
+* ux-angularjs-datagrid v.1.6.0
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.5.5
+* ux-angularjs-datagrid v.1.6.0
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -85,23 +85,26 @@ if (typeof define === "function" && define.amd) {
         return define;
     })();
     //! ################# YOUR CODE STARTS HERE #################### //
-    //! node_modules/hbjs/src/utils/formatters/toArray.js
-    define("toArray", [ "isArguments", "isArray", "isUndefined" ], function(isArguments, isArray, isUndefined) {
-        var toArray = function(value) {
-            if (isArguments(value)) {
-                return Array.prototype.slice.call(value, 0) || [];
+    //! node_modules/hbjs/src/utils/validators/isArguments.js
+    define("isArguments", function() {
+        var toString = function() {
+            var value = [];
+            for (var e in this) {
+                if (this.hasOwnProperty(e)) {
+                    value.push("" + e);
+                }
             }
-            try {
-                if (isArray(value)) {
-                    return value;
-                }
-                if (!isUndefined(value)) {
-                    return [].concat(value);
-                }
-            } catch (e) {}
-            return [];
+            return "[" + value.join(", ") + "]";
         };
-        return toArray;
+        var isArguments = function(value) {
+            var str = String(value);
+            var isArguments = str === "[object Arguments]";
+            if (!isArguments) {
+                isArguments = str !== "[object Array]" && value !== null && typeof value === "object" && typeof value.length === "number" && value.length >= 0 && (!value.callee || toString.call(value.callee) === "[object Function]");
+            }
+            return isArguments;
+        };
+        return isArguments;
     });
     //! util/hb/src/api.js
     define("dg.api", [ "isMatch", "apply", "toArray", "sort", "dispatcher", "matchAll" ], function(isMatch, apply, toArray, sort, dispatcher, matchAll) {
@@ -167,6 +170,24 @@ if (typeof define === "function" && define.amd) {
         };
         return isFunction;
     });
+    //! node_modules/hbjs/src/utils/formatters/toArray.js
+    define("toArray", [ "isArguments", "isArray", "isUndefined" ], function(isArguments, isArray, isUndefined) {
+        var toArray = function(value) {
+            if (isArguments(value)) {
+                return Array.prototype.slice.call(value, 0) || [];
+            }
+            try {
+                if (isArray(value)) {
+                    return value;
+                }
+                if (!isUndefined(value)) {
+                    return [].concat(value);
+                }
+            } catch (e) {}
+            return [];
+        };
+        return toArray;
+    });
     //! node_modules/hbjs/src/utils/validators/isMatch.js
     define("isMatch", [ "isRegExp", "isDate" ], function(isRegExp, isDate) {
         var primitive = [ "string", "number", "boolean" ];
@@ -212,18 +233,6 @@ if (typeof define === "function" && define.amd) {
             return false;
         }
         return isMatch;
-    });
-    //! node_modules/hbjs/src/utils/validators/isArguments.js
-    define("isArguments", [ "toString" ], function(toString) {
-        var isArguments = function(value) {
-            var str = String(value);
-            var isArguments = str === "[object Arguments]";
-            if (!isArguments) {
-                isArguments = str !== "[object Array]" && value !== null && typeof value === "object" && typeof value.length === "number" && value.length >= 0 && (!value.callee || toString.call(value.callee) === "[object Function]");
-            }
-            return isArguments;
-        };
-        return isArguments;
     });
     //! node_modules/hbjs/src/utils/validators/isArray.js
     define("isArray", function() {
@@ -282,25 +291,7 @@ if (typeof define === "function" && define.amd) {
         };
     });
     //! node_modules/hbjs/src/utils/async/dispatcher.js
-    define("dispatcher", [ "apply", "isFunction" ], function(apply, isFunction) {
-        function Event(type) {
-            this.type = type;
-            this.defaultPrevented = false;
-            this.propagationStopped = false;
-            this.immediatePropagationStopped = false;
-        }
-        Event.prototype.preventDefault = function() {
-            this.defaultPrevented = true;
-        };
-        Event.prototype.stopPropagation = function() {
-            this.propagationStopped = true;
-        };
-        Event.prototype.stopImmediatePropagation = function() {
-            this.immediatePropagationStopped = true;
-        };
-        Event.prototype.toString = function() {
-            return this.type;
-        };
+    define("dispatcher", [ "apply", "isFunction", "dispatcherEvent" ], function(apply, isFunction, Event) {
         function validateEvent(e) {
             if (!e) {
                 throw Error("event cannot be undefined");
@@ -312,41 +303,54 @@ if (typeof define === "function" && define.amd) {
             }
             target = target || {};
             var listeners = {};
-            function off(event, callback) {
-                validateEvent(event);
-                var index, list;
-                list = listeners[event];
+            function getIndexOfListener(event, callback) {
+                var list = listeners[event];
                 if (list) {
-                    if (callback) {
-                        index = list.indexOf(callback);
-                        if (index !== -1) {
-                            list.splice(index, 1);
+                    for (var i = 0; i < list.length; i += 1) {
+                        if (list[i].cb === callback) {
+                            return i;
                         }
-                    } else {
-                        list.length = 0;
                     }
                 }
+                return -1;
             }
-            function on(event, callback) {
+            function off(event, callback) {
+                validateEvent(event);
+                var index = getIndexOfListener(event, callback), list = listeners[event];
+                if (index !== -1) {
+                    list.splice(index, 1);
+                }
+            }
+            function on(event, callback, priority) {
                 if (isFunction(callback)) {
                     validateEvent(event);
                     listeners[event] = listeners[event] || [];
-                    listeners[event].push(callback);
+                    listeners[event].push({
+                        cb: callback,
+                        priority: priority !== undefined ? priority : 10
+                    });
+                    listeners[event].sort(prioritySort);
                     return function() {
                         off(event, callback);
                     };
                 }
             }
             on.dispatcher = true;
-            function once(event, callback) {
+            function once(event, callback, priority) {
                 if (isFunction(callback)) {
                     validateEvent(event);
                     function fn() {
                         off(event, fn);
                         apply(callback, scope || target, arguments);
                     }
-                    return on(event, fn);
+                    return on(event, fn, priority);
                 }
+            }
+            function prioritySort(a, b) {
+                return a.priority - b.priority;
+            }
+            function mapListeners(item, number, list) {
+                list[number] = item.cb;
             }
             function getListeners(event, strict) {
                 validateEvent(event);
@@ -359,6 +363,7 @@ if (typeof define === "function" && define.amd) {
                     if (listeners[event]) {
                         list = listeners[event].concat(list);
                     }
+                    list.map(mapListeners);
                     return list;
                 }
                 return listeners;
@@ -398,6 +403,28 @@ if (typeof define === "function" && define.amd) {
             return target;
         };
         return dispatcher;
+    });
+    //! node_modules/hbjs/src/utils/async/dispatcher-event.js
+    define("dispatcherEvent", function() {
+        function Event(type) {
+            this.type = type;
+            this.defaultPrevented = false;
+            this.propagationStopped = false;
+            this.immediatePropagationStopped = false;
+        }
+        Event.prototype.preventDefault = function() {
+            this.defaultPrevented = true;
+        };
+        Event.prototype.stopPropagation = function() {
+            this.propagationStopped = true;
+        };
+        Event.prototype.stopImmediatePropagation = function() {
+            this.immediatePropagationStopped = true;
+        };
+        Event.prototype.toString = function() {
+            return this.type;
+        };
+        return Event;
     });
     //! node_modules/hbjs/src/utils/iterators/matchAll.js
     define("matchAll", [ "isMatch" ], function(isMatch) {
@@ -469,7 +496,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.5.5",
+    version: "1.6.0",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -604,7 +631,7 @@ exports.datagrid = {
         },
         // - **<a name="creepStartDelay">creepStartDelay</a>**
         // when the creep render starts. How long after the scrolling has stopped.
-        creepStartDelay: 1e3,
+        creepStartDelay: 50,
         // - **<a name="options.cushion">cushion</a>** this it used by the updateRowWatchers and what rows it will update. It can be handy for debugging to make sure only
         // the correct rows are digesting by making the value positive it will take off space from the top and bottom of the viewport that number of pixels to match what
         // rows are activated and which ones are not. Also a negative number will cause the grid to render past the viewable area and digest rows that are out of view.
@@ -654,10 +681,7 @@ exports.datagrid = {
         renderThreshold: 1,
         // - **<a name="options.renderThresholdWait">renderThresholdWait</a>** used in conjunction with options.renderThreshold this will wait this amount of time before
         // trying to render more rows.
-        renderThresholdWait: 50,
-        // - **<a name="options.renderWhileScrolling">renderWhileScrolling</a>** cause the grid to render while scrolling. This can will drastically reduce scrolling performance.
-        // this can be optimized by setting a number of milliseconds between each render while scrolling.
-        renderWhileScrolling: false,
+        renderThresholdWait: 20,
         // - **<a name="options.creepLimit">creepLimit</a>** used with options.renderThreshold and options.renderThresholdWait this will give a maximum amount of renders
         // that can be done before the creep render is turned off.
         creepLimit: 500,
@@ -669,7 +693,11 @@ exports.datagrid = {
         // - **<a name="options.minHeight">minHeight</a>** if a height cannot be found, the datagrid will assume this minHeight. It will then resize to whatever height the element is resized to later.
         minHeight: 100,
         // - **<a name="options.iosWebkitScrolling">iosWebkitScrolling</a>** Smooth scrolling on ios device. Seems to sometimes be glitchy with ios devices.
-        iosWebkitScrolling: true
+        iosWebkitScrolling: true,
+        // - **<a name="options.scrollEndRenderAmount">scrollEndRenderAmount</a>**When a render stops it will force render x number of rows. It does this on a touch end and every forceRenderAfterScrollEventsCount
+        scrollEndRenderAmount: 2,
+        // - **<a name="options.forceRenderAfterScrollEventsCount">forceRenderAfterScrollEventsCount</a>**When scrolling. Every forceRenderAfterScrollEventsCount of events, it will force render rows in the direction it is scrolling.
+        forceRenderAfterScrollEventsCount: 4
     },
     /**
      * ###<a name="coreAddons">coreAddons</a>###
@@ -1229,7 +1257,7 @@ function Flow(inst, pauseFn, $timeout, dg) {
         if (!current && list.length) {
             current = list[0];
             if (inst.async && current.delay !== undefined) {
-                inst.log("	delay for %c%s %sms (len:%s)", consoleMethodStyle, current.label, current.delay, list.length);
+                inst.log("\tdelay for %c%s %sms (len:%s)", consoleMethodStyle, current.label, current.delay, list.length);
                 nextPromise = $timeout(exec, current.delay, false);
             } else {
                 exec();
@@ -1244,7 +1272,7 @@ function Flow(inst, pauseFn, $timeout, dg) {
             $timeout.cancel(nextPromise);
         }
         if (pauseFn && pauseFn()) {
-            inst.warn("	wait for pauseFn");
+            inst.warn("\twait for pauseFn");
             nextPromise = $timeout(exec, 0, false);
             return;
         }
@@ -1273,7 +1301,7 @@ function Flow(inst, pauseFn, $timeout, dg) {
         inst.info("clear");
         while (list.length > len) {
             item = list.splice(len, 1)[0];
-            inst.log("	remove %s from flow", item.label);
+            inst.log("\tremove %s from flow", item.label);
         }
     }
     function length() {
@@ -1378,7 +1406,9 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         activeRange: {
             min: 0,
             max: 0
-        }
+        },
+        // - <a name="values.direction"></a>-1 | 0 | 1 depending on weather it is scrolling or not. Used by creepModel and scrollModel to optimize the direction of the creep rendering.
+        direction: 0
     };
     // <a name="logEvents"></a>listing the log events so they can be ignored if needed.
     var logEvents = [ exports.datagrid.events.LOG, exports.datagrid.events.INFO, exports.datagrid.events.WARN, exports.datagrid.events.ERROR ];
@@ -1626,7 +1656,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @param {*} oldVal
      */
     function onDataChangeFromWatcher(newVal, oldVal) {
-        inst.info("	onDataChangeFromWatcher |" + flow.lifespan + "| new:" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
+        inst.info("\tonDataChangeFromWatcher |" + flow.lifespan + "| new:" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
         flow.add(onDataChanged, [ newVal, oldVal, flow.lifespan ]);
     }
     /**
@@ -1921,7 +1951,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @param {Boolean=} forceRender
      */
     function buildRows(list, forceRender) {
-        inst.log("	buildRows %s", list.length);
+        inst.log("\tbuildRows %s", list.length);
         state = states.BUILDING;
         createDom(list);
         flow.add(updateHeightValues, 0);
@@ -1937,7 +1967,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * Set the state to <a href="states.READY">states.READY</a> and start the first render.
      */
     function ready() {
-        inst.log("	ready");
+        inst.log("\tready");
         state = states.READY;
         flow.add(fireReadyEvent);
         flow.add(safeDigest, [ scope ]);
@@ -2203,7 +2233,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         // this needs to always be set after the dispatch of before update watchers in case they need the before activeRange.
         active.length = 0;
         // make sure not to reset until after getStartingIndex.
-        inst.log("	scroll %s visibleScrollStart %s visibleScrollEnd %s", values.scroll, loop.visibleScrollStart, loop.visibleScrollEnd);
+        inst.log("\tscroll %s visibleScrollStart %s visibleScrollEnd %s", values.scroll, loop.visibleScrollStart, loop.visibleScrollEnd);
         while (loop.i < inst.rowsLength) {
             prevS = scope.$$childHead ? scopes[loop.i - 1] : null;
             offset = inst.getRowOffset(loop.i);
@@ -2245,10 +2275,10 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         if (inst.rowsLength && values.activeRange.min < 0 && values.activeRange.max < 0) {
             inst.throwError(exports.errors.E1002);
         }
-        inst.log("	startIndex %s endIndex %s", loop.startIndex, loop.i);
+        inst.log("\tstartIndex %s endIndex %s", loop.startIndex, loop.i);
         deactivateList(lastActive);
         lastVisibleScrollStart = loop.visibleScrollStart;
-        inst.log("	activated %s", active.join(", "));
+        inst.log("\tactivated %s", active.join(", "));
         updateLinks();
         // update the $$childHead and $$nextSibling values to keep digest loops at a minimum count.
         // this dispatch needs to be after the digest so that it doesn't cause {} to show up in the render.
@@ -2280,7 +2310,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 inst.getRowElm(lastActiveIndex).attr("status", "inactive");
             }
         }
-        inst.log("	deactivated %s", deactivated.join(", "));
+        inst.log("\tdeactivated %s", deactivated.join(", "));
     }
     /**
      * ###<a name="updateLinks">updateLinks</a>###
@@ -2383,7 +2413,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         inst.info("render");
         if (readyToRender()) {
             waitCount = 0;
-            inst.log("	render %s", state);
+            inst.log("\trender %s", state);
             // Where [states.BUILDING](#states.BUILDING) is used
             if (state === states.BUILDING) {
                 buildRows(inst.data);
@@ -2399,7 +2429,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 inst.throwError(exports.errors.E1001);
             }
         } else {
-            inst.log("	not ready to render.");
+            inst.log("\tnot ready to render.");
         }
     }
     /**
@@ -2440,7 +2470,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 i += 1;
             }
             if (inst.data.length !== inst.normalize(newVal, inst.grouped).length) {
-                inst.log("	dirtyCheckData length is different");
+                inst.log("\tdirtyCheckData length is different");
                 return true;
             }
             return false;
@@ -2455,7 +2485,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      */
     function dirtyCheckItemTemplate(newItem, oldItem) {
         if (inst.templateModel.getTemplate(newItem) !== inst.templateModel.getTemplate(oldItem)) {
-            inst.log("	dirtyCheckData row template changed");
+            inst.log("\tdirtyCheckData row template changed");
             return true;
         }
         return false;
@@ -2466,7 +2496,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      */
     function mapData(newVal, oldVal) {
         //TODO: there is some error here that is causing the rows now not to compile.
-        inst.log("	mapData()");
+        inst.log("\tmapData()");
         var oldTemplates = [];
         // get temp cache for templates
         exports.each(inst.getData(), cacheOldTemplates, oldTemplates);
@@ -2516,7 +2546,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @returns {boolean}
      */
     function onDataChanged(newVal, oldVal, lifespan) {
-        inst.info("	onDataChanged |" + lifespan + "| new:" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
+        inst.info("\tonDataChanged |" + lifespan + "| new:" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
         inst.grouped = scope.$eval(attr.grouped);
         if (oldVal !== inst.getOriginalData()) {
             oldVal = inst.getOriginalData();
@@ -2552,10 +2582,10 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     function changeData(newVal, oldVal, lifespan) {
         if (inst.flow.count([ "changeData", "onDataChanged" ]) > 1) {
             // the first one is this call.
-            inst.info("	SKIPPED changeData |" + lifespan + "| another is pending.");
+            inst.info("\tSKIPPED changeData |" + lifespan + "| another is pending.");
             return;
         }
-        inst.info("	changeData |" + lifespan + "| :" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
+        inst.info("\tchangeData |" + lifespan + "| :" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
         inst.templateModel.clearAllRowHeights();
         dispatch(exports.datagrid.events.ON_BEFORE_RESET, inst);
         inst.data = inst.setData(newVal, inst.grouped) || [];
@@ -3704,7 +3734,7 @@ exports.datagrid.events.ENABLE_CREEP = "datagrid:enableCreep";
 exports.datagrid.events.DISABLE_CREEP = "datagrid:disableCreep";
 
 exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
-    var intv = 0, creepCount = 0, model = exports.logWrapper("creepModel", {}, "blue", inst), upIndex = 0, downIndex = 0, waitHandle, waitingOnReset, time, lastPercent, unwatchers = [], forceScroll = false, scrollIndex = 0, scrollIndexPadding = 0;
+    var intv = 0, creepCount = 0, model = exports.logWrapper("creepModel", {}, "blue", inst), upIndex = 0, downIndex = 0, waitingOnReset, time, lastPercent, unwatchers = [], forceScroll = false, scrollIndex = 0, scrollIndexPadding = 0;
     function digest(index) {
         if (inst.scope.$root.$$phase) {
             return false;
@@ -3733,6 +3763,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         result.count += s ? 1 : 0;
     }
     function onInterval(started, ended, force) {
+        model.log("\tonInterval");
         if (!inst.values.touchDown) {
             waitingOnReset = false;
             time = Date.now() + inst.options.renderThreshold;
@@ -3742,17 +3773,21 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         }
     }
     function wait(method, time) {
+        model.log("wait", time);
         var args = exports.util.array.toArray(arguments);
         args.splice(0, 2);
         if (inst.options.async) {
-            clearTimeout(waitHandle);
-            waitHandle = setTimeout(function() {
+            // clearTimeout(waitHandle);
+            model.log("\tstart waiting", time);
+            return setTimeout(function() {
+                model.log("\twait HANDLE execute");
+                // clearTimeout(waitHandle);
                 exports.util.apply(method, null, args);
             }, time);
         } else {
+            model.log("\twait execute");
             exports.util.apply(method, this, args);
         }
-        return waitHandle;
     }
     function findUncompiledIndex(index, dir) {
         while (index >= 0 && index < inst.rowsLength && inst.isCompiled(index)) {
@@ -3764,25 +3799,12 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         return dir > 0 ? inst.rowsLength : -1;
     }
     function render(complete, force) {
-        var now = Date.now(), dynamicHeights;
+        var now = Date.now(), dynamicHeights, direction;
         if (time > now && hasIndexesLeft()) {
             dynamicHeights = inst.templateModel.hasVariableRowHeights();
-            upIndex = force ? upIndex : findUncompiledIndex(upIndex, -1);
-            if (upIndex >= 0) {
-                if (digest(upIndex)) {
-                    if (force) {
-                        upIndex -= 1;
-                    }
-                }
-            }
-            downIndex = force ? downIndex : findUncompiledIndex(downIndex, 1);
-            if (downIndex !== inst.rowsLength) {
-                if (digest(downIndex)) {
-                    if (force) {
-                        downIndex += 1;
-                    }
-                }
-            }
+            direction = inst.values.direction;
+            model.info("direction", direction);
+            applyRender(direction, force);
             render(complete, force);
             // making this async was counter effective on performance.
             if (dynamicHeights) {
@@ -3792,8 +3814,50 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
             complete();
         }
     }
+    function applyRender(direction, force, amount) {
+        amount = amount || 2;
+        var fn;
+        if (direction) {
+            // optimized for the direction the grid is scrolling.
+            fn = direction === -1 ? renderUp : renderDown;
+            for (var i = 0; i < amount; i += 1) {
+                if (!fn(force)) {
+                    break;
+                }
+            }
+        } else {
+            // render up one and down one if not scrolling.
+            renderUp(force);
+            renderDown(force);
+        }
+    }
+    function renderUp(force) {
+        upIndex = force ? upIndex : findUncompiledIndex(upIndex, -1);
+        if (upIndex >= 0) {
+            if (digest(upIndex)) {
+                if (force) {
+                    model.warn("\trenderUp " + upIndex);
+                }
+                upIndex -= 1;
+                return true;
+            }
+        }
+    }
+    function renderDown(force) {
+        downIndex = force ? downIndex : findUncompiledIndex(downIndex, 1);
+        if (downIndex !== inst.rowsLength) {
+            if (digest(downIndex)) {
+                if (force) {
+                    model.warn("\trenderDown " + downIndex);
+                }
+                downIndex += 1;
+                return true;
+            }
+        }
+    }
     function onComplete() {
-        stop();
+        model.info("onComplete " + creepCount + "/" + inst.options.creepLimit);
+        // stop();
         if (!hasIndexesLeft()) {
             creepCount = 0;
             model.disable();
@@ -3814,14 +3878,16 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         return !!(upIndex > -1 || downIndex < inst.rowsLength);
     }
     function stop() {
+        model.warn("stop");
         time = 0;
         clearTimeout(intv);
-        clearTimeout(waitHandle);
-        intv = 0;
     }
     function resetInterval(started, ended, waitTime, forceCompileRowRender) {
-        stop();
+        model.info("resetInterval");
         if (creepCount < inst.options.creepLimit) {
+            model.info("creep " + creepCount + "/" + inst.options.creepLimit);
+            clearTimeout(intv);
+            time = 0;
             intv = wait(onInterval, waitTime || inst.options.renderThresholdWait, started, ended, forceCompileRowRender);
         }
     }
@@ -3835,21 +3901,23 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         forceScroll = false;
     }
     function onBeforeRender(event) {
+        model.info("onBeforeRender");
         if (!forceScroll) {
             if (inst.templateModel.hasVariableRowHeights()) {
                 scrollIndex = inst.getOffsetIndex(inst.values.scroll);
                 scrollIndexPadding = inst.values.scroll - inst.getRowOffset(scrollIndex);
             }
-            stop();
         }
     }
     function onAfterRender(event, loopData, forceCompileRowRender) {
+        model.info("onAfterRender");
         creepCount = 0;
         upIndex = loopData.started || 0;
         downIndex = loopData.ended || 0;
         renderLater(event, forceCompileRowRender);
     }
     function onBeforeReset(event) {
+        model.info("onBeforeReset");
         onBeforeRender(event);
         if (inst.options.creepRender && inst.options.creepRender.enable !== false) {
             model.enable();
@@ -3857,18 +3925,17 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     }
     model.stop = stop;
     // allow external stop of creep render.
+    model.forceRenderNext = function() {
+        model.warn("forceRenderNext");
+        applyRender(inst.values.direction, true, inst.options.scrollEndRenderAmount);
+    };
     model.destroy = function destroy() {
         model.disable();
-        stop();
         inst = null;
         model = null;
     };
     model.enable = function() {
         if (!unwatchers.length) {
-            unwatchers.push(inst.scope.$on(exports.datagrid.events.BEFORE_VIRTUAL_SCROLL_START, onBeforeRender));
-            unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_VIRTUAL_SCROLL_UPDATE, onBeforeRender));
-            unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_TOUCH_DOWN, onBeforeRender));
-            unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_SCROLL_START, onBeforeRender));
             unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_UPDATE_WATCHERS, onAfterRender));
         }
     };
@@ -4095,8 +4162,8 @@ exports.datagrid.events.ON_TOUCH_UP = "datagrid:touchUp";
 exports.datagrid.events.ON_TOUCH_MOVE = "datagrid:touchMove";
 
 exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
-    var result = exports.logWrapper("scrollModel", {}, "orange", inst), setup = false, enable = true, unwatchSetup, waiting, waitForStopIntv, lastTouchUpdateTime = 0, hasScrollListener = false, lastScroll, bottomOffset = 0, lastRenderTime, // start easing
-    startOffsetY, startOffsetX, offsetY, offsetX, startScroll, lastDeltaY, lastDeltaX, speed = 0, speedX = 0, startTime, distance, scrollingIntv, // end easing
+    var result = exports.logWrapper("scrollModel", {}, "orange", inst), setup = false, enable = true, unwatchSetup, waiting, waitForStopIntv, lastTouchUpdateTime = 0, hasScrollListener = false, lastScroll, bottomOffset = 0, // start easing
+    startOffsetY, startOffsetX, offsetY, offsetX, startScroll, lastDeltaY, lastDeltaX, speed = 0, speedX = 0, startTime, distance, scrollThresholdUpdateIntv, // end easing
     listenerData = [ {
         event: "touchstart",
         method: "onTouchStart",
@@ -4119,7 +4186,6 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     function setupScrolling() {
         unwatchSetup();
-        inst.element.css("willChange", "scroll-position");
         if (!inst.element.css("overflow") || inst.element.css("overflow") === "visible") {
             inst.element.css({
                 overflow: "auto"
@@ -4130,7 +4196,6 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
                 webkitOverflowScrolling: "touch"
             });
         }
-        result.log("addScrollListener");
         addScrollListener();
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.SCROLL_TO_INDEX, function(event, index) {
             inst.scrollModel.scrollToIndex(index, true);
@@ -4147,7 +4212,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     function addScrollListener() {
         result.log("addScrollListener");
         hasScrollListener = true;
-        inst.element[0].addEventListener("scroll", onUpdateScrollHandler);
+        inst.element[0].addEventListener("scroll", onUpdateScrollHandler, {
+            passive: true
+        });
     }
     function onBeforeReset() {
         if (inst.options.scrollModel && inst.options.scrollModel.manual) {
@@ -4170,8 +4237,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         var content = inst.getContent();
         exports.each(listenerData, function(item) {
             if (item.enabled) {
-                result.log("	add %s", item.event);
-                content.bind(item.event, result[item.method]);
+                result.log("\tadd %s", item.event);
+                content[0].addEventListener(item.event, result[item.method], {
+                    passive: true
+                });
             }
         });
     }
@@ -4191,8 +4260,8 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             result.log("removeTouchEvents");
             var content = inst.getContent();
             exports.each(listenerData, function(item) {
-                result.log("	remove %s", item.event);
-                content.unbind(item.event, result[item.method]);
+                result.log("\tremove %s", item.event);
+                content[0].removeEventListener(item.event, result[item.method]);
             });
         }
     };
@@ -4220,7 +4289,6 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         if (!enable) {
             return;
         }
-        clearTimeout(scrollingIntv);
         inst.values.touchDown = true;
         offsetY = startOffsetY = getTouches(event)[0].clientY || 0;
         offsetX = startOffsetX = getTouches(event)[0].clientX || 0;
@@ -4230,6 +4298,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             inst.values.scroll = bottomOffset;
         }
         startScroll = inst.values.scroll;
+        inst.values.direction = 0;
         lastDeltaY = 0;
         lastDeltaX = 0;
         inst.dispatch(exports.datagrid.events.ON_TOUCH_DOWN, event);
@@ -4246,20 +4315,18 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             return;
         }
         lastTouchUpdateTime = now;
-        var y = getTouches(event)[0].clientY, x = getTouches(event)[0].clientX, deltaY = offsetY - y, deltaX = offsetX - x, scroll;
+        var y = getTouches(event)[0].clientY, x = getTouches(event)[0].clientX, deltaY = offsetY - y, deltaX = offsetX - x;
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
             return;
         }
         if (offsetY !== y) {
-            scroll = result.capScrollValue(getScrollTop() + deltaY);
-            result.setScroll(scroll);
+            inst.values.direction = deltaY > 0 ? 1 : -1;
             speed = deltaY;
             offsetY = y;
             lastDeltaY = deltaY;
         }
         if (deltaX !== lastDeltaX) {
             // horizontal scrolling is not complete. prevent until completed otherwise it is firing multiple setScroll values.
-            //result.setScroll(result.capScrollValue(startScroll + deltaY));
             speedX = deltaX - lastDeltaX;
             lastDeltaX = deltaX;
         }
@@ -4280,7 +4347,6 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             } else {
                 startTime = Date.now();
                 distance = speed * inst.options.scrollModel.speed;
-                result.scrollSlowDown(exports.datagrid.isIOS);
             }
         } else {
             result.onUpdateScroll();
@@ -4291,27 +4357,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         } else if (sTop > inst.getContentHeight() - inst.getViewportHeight()) {
             setElementScroll(inst.getContentHeight() - inst.getViewportHeight());
         }
-    };
-    result.scrollSlowDown = function(wait) {
-        clearTimeout(scrollingIntv);
-        var value, duration = Math.abs(speed) * inst.options.scrollModel.speed, t = duration - (Date.now() - startTime), prevDistance = distance, change;
-        distance = result.easeOut(t, distance, speed || 0, duration);
-        change = distance - prevDistance;
-        if (Math.abs(change) < 5) {
-            t = 0;
+        if (inst.values.direction) {
+            // we don't want it getting in here on a click.
+            inst.creepRenderModel.forceRenderNext();
         }
-        if (t > 0) {
-            value = result.capScrollValue(getScrollTop() + change);
-            if (!wait) {
-                //                result.log("\tscroll %s of %s", value, inst.element[0].scrollHeight);
-                setElementScroll(value);
-                return;
-            }
-            scrollingIntv = setTimeout(result.scrollSlowDown, 20);
-        }
-    };
-    result.easeOut = function easeOutQuad(t, b, c, d) {
-        return -c * (t /= d) * (t - 2) + b;
     };
     result.click = function(e) {
         //TODO: this needs to deprecate because this has finally been fixed in android. (Feb 5th 2015)
@@ -4339,6 +4388,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         return getScrollTop();
     };
     result.setScroll = function setScroll(value) {
+        result.warn("setScroll(" + value + ")");
         var unwatch, chunkList = inst.chunkModel.getChunkList();
         if (!chunkList || !chunkList.height) {
             // wait until that height is ready then scroll.
@@ -4352,34 +4402,47 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         }
     };
     function onUpdateScrollHandler(event) {
-        inst.scrollModel.onUpdateScroll(event);
+        clearTimeout(scrollThresholdUpdateIntv);
+        if (!event.target || inst.values.touchDown) {
+            return;
+        }
+        inst.values.scrollEventsSinceLastRender = inst.values.scrollEventsSinceLastRender || 0;
+        result.onUpdateScroll(event);
+        // updates the direction.
+        inst.values.scrollEventsSinceLastRender += 1;
+        if (inst.values.scrollEventsSinceLastRender > inst.options.forceRenderAfterScrollEventsCount) {
+            inst.values.scrollEventsSinceLastRender = 0;
+            result.warn("direction " + inst.values.direction);
+            inst.creepRenderModel.forceRenderNext();
+        }
     }
     /**
      * When a scrollEvent is fired, recalculate the values.
      * @param event
      */
-    result.onUpdateScroll = function onUpdateScroll(event) {
+    result.onUpdateScroll = function onUpdateScroll(event, force) {
         var val = inst.scrollModel.getScroll(event && (event.target || event.srcElement));
         if (inst.values.scroll !== val) {
             inst.dispatch(exports.datagrid.events.ON_SCROLL_START, val);
             inst.values.speed = val - inst.values.scroll;
             inst.values.absSpeed = Math.abs(inst.values.speed);
+            inst.values.direction = val > inst.values.scroll ? 1 : val < inst.values.scroll ? -1 : 0;
             inst.values.scroll = val;
             inst.values.scrollPercent = (inst.values.scroll / inst.getContentHeight() * 100).toFixed(2);
         }
-        inst.scrollModel.waitForStop();
+        inst.scrollModel.waitForStop(force);
         result.fireOnScroll();
     };
     result.capScrollValue = function(value) {
         var newVal;
         if (inst.getContentHeight() < inst.getViewportHeight()) {
-            inst.log("	CAPPED scroll value from %s to 0", value);
+            result.log("\tCAPPED scroll value from %s to 0", value);
             value = 0;
         } else if (inst.getContentHeight() - value < inst.getViewportHeight()) {
             // don't allow to scroll past the bottom.
             newVal = inst.getContentHeight() - inst.getViewportHeight();
             // this will be the bottom scroll.
-            inst.log("	CAPPED scroll value to keep it from scrolling past the bottom. changed %s to %s", value, newVal);
+            result.log("\tCAPPED scroll value to keep it from scrolling past the bottom. changed %s to %s", value, newVal);
             value = newVal;
         }
         return value;
@@ -4411,18 +4474,11 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     /**
      * Wait for the datagrid to slow down enough to render.
      */
-    result.waitForStop = function waitForStop() {
-        var forceRender = false, now;
+    result.waitForStop = function waitForStop(force) {
+        var forceRender = force || false, now;
         clearTimeout(waitForStopIntv);
         waiting = true;
-        result.log("waitForStop scroll = %s", inst.values.scroll);
-        if (inst.options.renderWhileScrolling) {
-            if ((now = Date.now()) - (inst.options.renderWhileScrolling > 0 || 0) > lastRenderTime) {
-                lastRenderTime = now;
-                // don't let it get in here a second time while rendering.
-                forceRender = true;
-            }
-        }
+        result.info("waitForStop scroll = %s", inst.values.scroll);
         if (!forceRender && (inst.flow.async || inst.values.touchDown)) {
             waitForStopIntv = setTimeout(flowWaitForStop, inst.options.updateDelay);
         } else {
@@ -4434,11 +4490,12 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.onScrollingStop = function onScrollingStop() {
         waiting = false;
-        lastRenderTime = Date.now();
-        result.log("onScrollingStop %s", inst.values.scroll);
+        result.info("onScrollingStop %s", inst.values.scroll);
         result.checkForEnds();
         inst.values.speed = 0;
         inst.values.absSpeed = 0;
+        inst.values.direction = 0;
+        inst.values.scrollEventsSinceLastRender = 0;
         inst.render();
         result.fireOnScroll();
         inst.dispatch(exports.datagrid.events.ON_SCROLL_STOP, inst.values);

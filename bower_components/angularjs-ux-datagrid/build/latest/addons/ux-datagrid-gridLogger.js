@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.4
+* ux-angularjs-datagrid v.1.6.0
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -55,11 +55,7 @@ angular.module("ux").factory("gridLogger", function() {
         }
         function hasPermissionToLog(lvl, name) {
             if (inst.options.debug) {
-                if (inst.options.debug.all && inst.options.debug.all > lvl || inst.options.debug[name] === 0) {
-                    return false;
-                } else if (lvl >= inst.options.debug.all) {
-                    return true;
-                } else if (inst.options.debug[name] >= lvl) {
+                if (inst.options.debug[name] && inst.options.debug[name] <= lvl || inst.options.debug.all && inst.options.debug.all <= lvl) {
                     return true;
                 }
             }
@@ -82,7 +78,7 @@ angular.module("ux").factory("gridLogger", function() {
         result.error = onError;
         result.format = function format(args, lvl) {
             var name = args.shift(), theme = args.shift() || "grey", i = 0, len = args[0].length, indent = "", char = args[0].charAt(i);
-            while (i < len && (char === " " || char === "	")) {
+            while (i < len && (char === " " || char === "\t")) {
                 indent += char;
                 i += 1;
                 char = args[0].charAt(i);

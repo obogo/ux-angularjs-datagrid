@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.4
+* ux-angularjs-datagrid v.1.6.0
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -506,7 +506,7 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
                     // prevent default on event to prevent sort.
                     if (!event.defaultPrevented) {
                         if (!result.getCache(key) || result.getCache(key).length !== original.length) {
-                            result.log("	store sort %s", key);
+                            result.log("\tstore sort %s", key);
                             result.setCache(key, original && original.slice(0) || []);
                             // clone it
                             ux.each(pathState.$order, applyListSort, {
@@ -515,7 +515,7 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
                                 ary: result.getCache(key)
                             });
                         } else {
-                            result.log("	pull sort from cache");
+                            result.log("\tpull sort from cache");
                         }
                         lastSortResult = result.getCache(key);
                         sortStatesModel.clearDirty(pathStateRef);

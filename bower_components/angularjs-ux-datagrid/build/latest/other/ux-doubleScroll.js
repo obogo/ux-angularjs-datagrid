@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.4
+* ux-angularjs-datagrid v.1.6.0
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -187,7 +187,7 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                 result.log("enable doubleScroll disable scroll");
                 if (useIScroll && !enabled) {
                     if (scrollModel && scrollModel.iScroll && (!grid.scrollHistory || !grid.scrollHistory.getCurrentScroll())) {
-                        result.log("	scroll grid to 0");
+                        result.log("\tscroll grid to 0");
                         scrollModel.iScroll.scrollTo(0, 0);
                         scrollModel.iScroll.disable();
                     }
@@ -236,11 +236,11 @@ angular.module("ux").directive("uxDoubleScroll", [ "$window", function($window) 
                 if (target) {
                     if (el.scrollTop + el.offsetHeight < el.scrollHeight) {
                         if (target.style.overflowY !== "hidden") {
-                            result.log("	target.overflowY = hidden");
+                            result.log("\ttarget.overflowY = hidden");
                             target.style.overflowY = "hidden";
                         }
                     } else if (target.style.overflowY !== "auto") {
-                        result.log("	target.overflowY = auto");
+                        result.log("\ttarget.overflowY = auto");
                         target.style.overflowY = "auto";
                     }
                 } else {

@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.5.4
+* ux-angularjs-datagrid v.1.6.0
 * (c) 2016, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -66,7 +66,7 @@ angular.module("ux").factory("infiniteScroll", function() {
                     selector: ux.selector.quickSelector(activeElement, rowEl[0], inst.options.gridFocusManager && inst.options.gridFocusManager.filterClasses || [])
                 };
                 // drop the visible off selector if it exists.
-                focusAfterSelector.selector = focusAfterSelector.selector.replace(/:visible$/, "");
+                focusAfterSelector.selector = focusAfterSelector.selector.replace(/(:eq\(\d+\)|:visible)/g, "");
             } else {
                 focusAfterSelector = null;
             }
@@ -104,7 +104,7 @@ angular.module("ux").factory("infiniteScroll", function() {
             if (focusAfterSelector) {
                 el = inst.getRowElm(focusAfterSelector.rowIndex);
                 focusEl = el[0].querySelector(focusAfterSelector.selector);
-                if (focusEl.select) {
+                if (focusEl && focusEl.select) {
                     focusEl.select();
                 }
                 if (focusEl) {

@@ -622,6 +622,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 }
             }
             parent.replaceChild(clone[0], el[0]);
+            deactivateScope(s, index);
         });
         if (inst.templateModel.hasVariableRowHeights()) {
             inst.chunkModel.updateAllChunkHeights(index);

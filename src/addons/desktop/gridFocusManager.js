@@ -46,8 +46,8 @@ angular.module('ux').factory('gridFocusManager', function () {
          * ###<a name="addListeners">addListeners</a>###
          * Add all of the listeners to the visible rows.
          */
-        function addListeners() {
-            result.log("addListeners");
+        function addListeners(event) {
+            result.info("addListeners " + event.name);
             applyToListeners(addListenersToRow);
         }
 
@@ -55,8 +55,8 @@ angular.module('ux').factory('gridFocusManager', function () {
          * ###<a name="removeListeners">removeListeners</a>###
          * remove all of the listeners from min to max.
          */
-        function removeListeners() {// this needs executed before the activeRange changes.
-            result.log("removeListeners");
+        function removeListeners(event) {// this needs executed before the activeRange changes.
+            result.info("removeListeners " + event.name);
             applyToListeners(removeListenersToRow);
         }
 
@@ -69,7 +69,7 @@ angular.module('ux').factory('gridFocusManager', function () {
             if (isNaN(inst.values.activeRange.max) || inst.values.activeRange.max < 0) {
                 return;// prevent undefined or negative numbers. Can be index 0.
             }
-            result.log("\tapplyTo: %s - %s", inst.values.activeRange.min, inst.values.activeRange.max);
+            result.info("\tapplyTo: %s - %s", inst.values.activeRange.min, inst.values.activeRange.max);
             var i = inst.values.activeRange.min, row;
             while (i <= inst.values.activeRange.max) {
                 row = inst.getRowElm(i);
@@ -387,6 +387,7 @@ angular.module('ux').factory('gridFocusManager', function () {
                 multiIndex = -1,
                 match;
             selector = getSelector(focusedEl, currentIndex);
+            result.log("\t" + selector);
             if (inst.options.gridFocusManager && inst.options.gridFocusManager.multipleEnterFocusPerRow) {
                 match = selector.match(eqrx);
                 selector = selector.split(":").shift();
@@ -394,29 +395,6 @@ angular.module('ux').factory('gridFocusManager', function () {
                 if (multiIndex >= -1) {
                     nextIndex -= dir;// invert direction change.
                 }
-            //     max = query(inst.getRowElm(currentIndex), selector.replace(eqrx, '')).length - 1;
-            //     multiple[1] = parseInt(multiple[1] || 0, 10);
-            //     if (dir > 0) {
-            //         if (multiple[1] < max) {
-            //             selector = selector.replace(eqrx, ':eq(' + (multiple[1] + 1) + ')');
-            //             nextIndex -= 1;
-            //         } else if (multiple[1] >= max) {
-            //             selector = selector.replace(eqrx, ':eq(0)');// we are going to the next index. reset to 0.
-            //         }
-            //     } else if (dir < 0) {
-            //         if (multiple[1] > 0) {
-            //             selector = selector.replace(eqrx, ':eq(' + (multiple[1] - 1) + ')');
-            //             nextIndex += 1;
-            //         } else if (multiple[1] <= 0) {
-            //             var ci = currentIndex - 1;
-            //             max = -1;// we need to find the max of the prev row.
-            //             while(ci > 0 && max < 0) {
-            //                 max = query(inst.getRowElm(ci), selector.replace(eqrx, '')).length - 1;
-            //                 selector = selector.replace(eqrx, ':eq(' + max + ')');// we are going to the next index. reset to 0.
-            //                 ci -= 1;
-            //             }
-            //         }
-            //     }
             }
             if (nextIndex < 0 || nextIndex >= inst.rowsLength) {
                 return focusedEl;

@@ -1,6 +1,6 @@
 /*!
-* ux-angularjs-datagrid v.1.6.0
-* (c) 2016, Obogo
+* ux-angularjs-datagrid v.1.6.2
+* (c) 2017, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -14,8 +14,8 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.6.0
-* (c) 2016, Obogo
+* ux-angularjs-datagrid v.1.6.2
+* (c) 2017, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -496,7 +496,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.6.0",
+    version: "1.6.2",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -2423,7 +2423,8 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 flow.add(beforeRenderAfterDataChange);
                 flow.add(updateRowWatchers);
                 // if we do not wait here row heights show too tall because the rows are evaluated at their height before being digetsted.
-                flow.add(afterRenderAfterDataChange, [], 0);
+                flow.add(afterRenderAfterDataChange);
+                //, [], 0);
                 //                flow.add(destroyOldContent);
                 flow.add(inst.dispatch, [ exports.datagrid.events.ON_AFTER_RENDER ]);
             } else {
@@ -4390,11 +4391,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
     };
     result.setScroll = function setScroll(value) {
         result.warn("setScroll(" + value + ")");
-        var unwatch, chunkList = inst.chunkModel.getChunkList();
+        var chunkList = inst.chunkModel.getChunkList();
         if (!chunkList || !chunkList.height) {
             // wait until that height is ready then scroll.
-            unwatch = inst.scope.$on(exports.datagrid.events.ON_AFTER_RENDER, function() {
-                unwatch();
+            inst.flow.add(function() {
                 result.setScroll(value);
             });
         } else if (inst.getContentHeight() - inst.getViewportHeight() >= value) {
@@ -4408,8 +4408,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             return;
         }
         inst.values.scrollEventsSinceLastRender = inst.values.scrollEventsSinceLastRender || 0;
-        result.onUpdateScroll(event);
-        // updates the direction.
+        if (event && (event.target || event.srcElement).scrollTop) {
+            result.onUpdateScroll(event);
+        }
         inst.values.scrollEventsSinceLastRender += 1;
         if (inst.values.scrollEventsSinceLastRender > inst.options.forceRenderAfterScrollEventsCount) {
             inst.values.scrollEventsSinceLastRender = 0;
@@ -4430,9 +4431,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             inst.values.direction = val > inst.values.scroll ? 1 : val < inst.values.scroll ? -1 : 0;
             inst.values.scroll = val;
             inst.values.scrollPercent = (inst.values.scroll / inst.getContentHeight() * 100).toFixed(2);
+            // this should only be here. Because if after, then a scroll to index will render twice.
+            // once for the immediate scroll, and once for the event listener. So the event listener
+            // should only update when it has changed.
+            inst.scrollModel.waitForStop(force);
+            result.fireOnScroll();
+        } else {
+            result.warn("skip fireOnScroll");
         }
-        inst.scrollModel.waitForStop(force);
-        result.fireOnScroll();
     };
     result.capScrollValue = function(value) {
         var newVal;

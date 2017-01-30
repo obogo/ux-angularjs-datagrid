@@ -263,11 +263,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
 
     result.setScroll = function setScroll(value) {
         result.warn("setScroll(" + value + ")");
-        var unwatch, chunkList = inst.chunkModel.getChunkList();
+        var chunkList = inst.chunkModel.getChunkList();
         if (!chunkList || !chunkList.height) {
             // wait until that height is ready then scroll.
-            unwatch = inst.scope.$on(exports.datagrid.events.ON_AFTER_RENDER, function () {
-                unwatch();
+            inst.flow.add(function() {
                 result.setScroll(value);
             });
         } else if (inst.getContentHeight() - inst.getViewportHeight() >= value) {
@@ -283,7 +282,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             return;
         }
         inst.values.scrollEventsSinceLastRender = inst.values.scrollEventsSinceLastRender || 0;
-        result.onUpdateScroll(event);// updates the direction.
+        if (event && (event.target || event.srcElement).scrollTop) {
+            result.onUpdateScroll(event);// updates the direction.
+        }
         inst.values.scrollEventsSinceLastRender += 1;
         if (inst.values.scrollEventsSinceLastRender > inst.options.forceRenderAfterScrollEventsCount) {
             inst.values.scrollEventsSinceLastRender = 0;
@@ -305,9 +306,14 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             inst.values.direction = val > inst.values.scroll ? 1 : (val < inst.values.scroll ? -1 : 0);
             inst.values.scroll = val;
             inst.values.scrollPercent = ((inst.values.scroll / inst.getContentHeight()) * 100).toFixed(2);
+            // this should only be here. Because if after, then a scroll to index will render twice.
+            // once for the immediate scroll, and once for the event listener. So the event listener
+            // should only update when it has changed.
+            inst.scrollModel.waitForStop(force);
+            result.fireOnScroll();
+        } else {
+            result.warn('skip fireOnScroll');
         }
-        inst.scrollModel.waitForStop(force);
-        result.fireOnScroll();
     };
 
     result.capScrollValue = function (value) {

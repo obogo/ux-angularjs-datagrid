@@ -1124,7 +1124,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 flow.add(beforeRenderAfterDataChange);
                 flow.add(updateRowWatchers);
                 // if we do not wait here row heights show too tall because the rows are evaluated at their height before being digetsted.
-                flow.add(afterRenderAfterDataChange, [], 0);
+                flow.add(afterRenderAfterDataChange);//, [], 0);
 //                flow.add(destroyOldContent);
                 flow.add(inst.dispatch, [exports.datagrid.events.ON_AFTER_RENDER]);
             } else {

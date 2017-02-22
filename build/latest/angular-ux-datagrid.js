@@ -4408,7 +4408,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             return;
         }
         inst.values.scrollEventsSinceLastRender = inst.values.scrollEventsSinceLastRender || 0;
-        if (event && (event.target || event.srcElement).scrollTop) {
+        if (event && typeof (event.target || event.srcElement).scrollTop !== "undefined") {
             result.onUpdateScroll(event);
         }
         inst.values.scrollEventsSinceLastRender += 1;

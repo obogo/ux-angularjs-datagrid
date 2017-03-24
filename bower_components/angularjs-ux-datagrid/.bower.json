@@ -1,6 +1,6 @@
 {
   "name": "angularjs-ux-datagrid",
-  "version": "1.6.0",
+  "version": "1.6.5",
   "homepage": "https://github.com/webux/ux-angularjs-datagrid",
   "authors": [
     "wesjones <cybus10@gmail.com>"
@@ -35,11 +35,11 @@
     "ux-datagrid"
   ],
   "license": "MIT",
-  "_release": "1.6.0",
+  "_release": "1.6.5",
   "_resolution": {
     "type": "version",
-    "tag": "v1.6.0",
-    "commit": "f6d80fda5dbaff967e4d1defe72341e9a6643a02"
+    "tag": "v1.6.5",
+    "commit": "38193b6cedbcf3a9599f9e258221c232db56d6e8"
   },
   "_source": "https://github.com/webux/ux-angularjs-datagrid.git",
   "_target": "^1.5.2",

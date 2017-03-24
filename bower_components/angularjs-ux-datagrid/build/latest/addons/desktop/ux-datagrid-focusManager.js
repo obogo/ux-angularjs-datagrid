@@ -1,6 +1,6 @@
 /*!
-* ux-angularjs-datagrid v.1.6.0
-* (c) 2016, Obogo
+* ux-angularjs-datagrid v.1.6.5
+* (c) 2017, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -478,17 +478,17 @@ angular.module("ux").factory("gridFocusManager", function() {
          * ###<a name="addListeners">addListeners</a>###
          * Add all of the listeners to the visible rows.
          */
-        function addListeners() {
-            result.log("addListeners");
+        function addListeners(event) {
+            result.info("addListeners " + event && event.name || "");
             applyToListeners(addListenersToRow);
         }
         /**
          * ###<a name="removeListeners">removeListeners</a>###
          * remove all of the listeners from min to max.
          */
-        function removeListeners() {
+        function removeListeners(event) {
             // this needs executed before the activeRange changes.
-            result.log("removeListeners");
+            result.info("removeListeners " + event && event.name || "");
             applyToListeners(removeListenersToRow);
         }
         /**
@@ -500,7 +500,7 @@ angular.module("ux").factory("gridFocusManager", function() {
             if (isNaN(inst.values.activeRange.max) || inst.values.activeRange.max < 0) {
                 return;
             }
-            result.log("\tapplyTo: %s - %s", inst.values.activeRange.min, inst.values.activeRange.max);
+            result.info("\tapplyTo: %s - %s", inst.values.activeRange.min, inst.values.activeRange.max);
             var i = inst.values.activeRange.min, row;
             while (i <= inst.values.activeRange.max) {
                 row = inst.getRowElm(i);
@@ -801,6 +801,7 @@ angular.module("ux").factory("gridFocusManager", function() {
             }
             var resultEl, currentIndex = inst.getRowIndexFromElement(focusedEl), nextIndex = currentIndex + dir, selector, d = inst.getData(), multiIndex = -1, match;
             selector = getSelector(focusedEl, currentIndex);
+            result.log("\t" + selector);
             if (inst.options.gridFocusManager && inst.options.gridFocusManager.multipleEnterFocusPerRow) {
                 match = selector.match(eqrx);
                 selector = selector.split(":").shift();
@@ -1075,6 +1076,10 @@ angular.module("ux").factory("gridFocusManager", function() {
         ux.selector.config.allowId = false;
         ux.selector.config.allowAttributes = false;
         ux.selector.config.addVisible = true;
+        result.resetListeners = function(el) {
+            removeListenersToRow(el);
+            addListenersToRow(el);
+        };
         result.hasPrevRowFocusElement = hasPrevRowFocusElement;
         result.hasNextRowFocusElement = hasNextRowFocusElement;
         result.focusToPrevRowElement = focusToPrevRowElement;

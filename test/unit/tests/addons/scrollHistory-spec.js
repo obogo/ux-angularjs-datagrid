@@ -64,7 +64,7 @@ describe("scrollHistory", function () {
 
     it("should update every time the scroll finishes", function () {
         exp.values.scroll = 60;
-        exp.dispatch(ux.datagrid.events.ON_BEFORE_DATA_CHANGE);
+        exp.dispatch(ux.datagrid.events.ON_AFTER_HEIGHTS_UPDATED);
         exp.dispatch(ux.datagrid.events.ON_RENDER_AFTER_DATA_CHANGE);
         exp.dispatch(ux.datagrid.events.ON_AFTER_UPDATE_WATCHERS);
         expect(sh.getCurrentScroll()).toBe(exp.values.scroll);
@@ -97,7 +97,7 @@ describe("scrollHistory", function () {
 
     it("should update the value before the initial render.", function () {
         sh.storeScroll('/myPath', 20);// needs to be the current path.
-        exp.dispatch(ux.datagrid.events.ON_BEFORE_DATA_CHANGE);
+        exp.dispatch(ux.datagrid.events.ON_AFTER_HEIGHTS_UPDATED);
         expect(exp.values.scroll).toBe(20);
     });
 })

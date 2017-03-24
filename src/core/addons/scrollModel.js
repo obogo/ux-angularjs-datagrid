@@ -261,13 +261,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         return getScrollTop();
     };
 
-    result.setScroll = function setScroll(value) {
+    result.setScroll = function setScroll(value, attempt) {
         result.warn("setScroll(" + value + ")");
         var chunkList = inst.chunkModel.getChunkList();
-        if (!chunkList || !chunkList.height) {
+        if (inst.data.length && (!chunkList || !chunkList.height) && attempt < 20) {
             // wait until that height is ready then scroll.
             inst.flow.add(function() {
-                result.setScroll(value);
+                result.setScroll(value, (attempt || 0) + 1);
             });
         } else if (inst.getContentHeight() - inst.getViewportHeight() >= value) {
             setElementScroll(value);

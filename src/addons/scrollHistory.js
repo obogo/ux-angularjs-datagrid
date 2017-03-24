@@ -150,7 +150,7 @@ angular.module('ux').factory('scrollHistory', function () {
         /**
          * watch only once to have it start at that scrolling position on startup.
          */
-        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, function () {
+        unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_AFTER_HEIGHTS_UPDATED, function () {
             result.log("found scrollHistory so scrollTo %s", result.getCurrentScroll());
             // need to set the scroll before the data is changed.
             ready = true;

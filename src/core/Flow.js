@@ -11,7 +11,8 @@ function Flow(inst, pauseFn, $timeout, dg) {
         execEndTime,
         timeouts = {},
         nextPromise,
-        consoleMethodStyle = "color:#666666;";
+        consoleMethodStyle = "color:#666666;",
+        infin = 0;
 
     function getMethodName(method) {
         // TODO: there might be a faster way to get the function name.
@@ -53,6 +54,7 @@ function Flow(inst, pauseFn, $timeout, dg) {
 
     function add(method, args, delay) {
         var item = createItem(method, args, delay);
+        inst.info("add", item.label);
         if (uniqueMethods[item.label]) {
             clearSimilarItemsFromList(item);
         }
@@ -106,7 +108,7 @@ function Flow(inst, pauseFn, $timeout, dg) {
 
     function done() {
         execEndTime = Date.now();
-        inst.log("finish %c%s took %dms (len:%s)", consoleMethodStyle, current.label, execEndTime - execStartTime, list.length);
+        inst.log("\tfinish %c%s took %dms (len:%s)", consoleMethodStyle, current.label, execEndTime - execStartTime, list.length);
         current = null;
         addToHistory(list.shift());
         next();
@@ -125,6 +127,7 @@ function Flow(inst, pauseFn, $timeout, dg) {
         inst.log("next %s", list.length);
         inst.lifespan = lifespan = Date.now() - initTime;
         if (!current && list.length) {
+            infin = 0;
             current = list[0];
             if (inst.async && current.delay !== undefined) {
                 inst.log("\tdelay for %c%s %sms (len:%s)", consoleMethodStyle, current.label, current.delay, list.length);
@@ -132,6 +135,13 @@ function Flow(inst, pauseFn, $timeout, dg) {
             } else {
                 exec();
             }
+        } else if (current && list.length && current.label === list[0].label) {
+            inst.info("\tskip", current.label);
+            if (infin > 100) {
+                inst.warn("Exceeded max repeat of 100 iterations on the same method. Dropping Method.");
+                list.shift();// we are somehow stuck. Throw warning and skip this step
+            }
+            infin += 1;
         }
     }
 

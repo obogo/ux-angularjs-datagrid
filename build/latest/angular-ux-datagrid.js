@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.6.4
+* ux-angularjs-datagrid v.1.6.5
 * (c) 2017, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.6.4
+* ux-angularjs-datagrid v.1.6.5
 * (c) 2017, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -496,7 +496,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.6.4",
+    version: "1.6.5",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1146,7 +1146,7 @@ exports.logWrapper = function LogWrapper(name, instance, theme, inst) {
 };
 
 function Flow(inst, pauseFn, $timeout, dg) {
-    var initTime = Date.now(), lifespan = 0, running = false, current = null, list = [], history = [], historyLimit = 10, uniqueMethods = {}, execStartTime, execEndTime, timeouts = {}, nextPromise, consoleMethodStyle = "color:#666666;";
+    var initTime = Date.now(), lifespan = 0, running = false, current = null, list = [], history = [], historyLimit = 10, uniqueMethods = {}, execStartTime, execEndTime, timeouts = {}, nextPromise, consoleMethodStyle = "color:#666666;", infin = 0;
     function getMethodName(method) {
         // TODO: there might be a faster way to get the function name.
         return method.toString().split(/\b/)[2];
@@ -1189,6 +1189,7 @@ function Flow(inst, pauseFn, $timeout, dg) {
     }
     function add(method, args, delay) {
         var item = createItem(method, args, delay);
+        inst.info("add", item.label);
         if (uniqueMethods[item.label]) {
             clearSimilarItemsFromList(item);
         }
@@ -1238,7 +1239,7 @@ function Flow(inst, pauseFn, $timeout, dg) {
     }
     function done() {
         execEndTime = Date.now();
-        inst.log("finish %c%s took %dms (len:%s)", consoleMethodStyle, current.label, execEndTime - execStartTime, list.length);
+        inst.log("\tfinish %c%s took %dms (len:%s)", consoleMethodStyle, current.label, execEndTime - execStartTime, list.length);
         current = null;
         addToHistory(list.shift());
         next();
@@ -1255,6 +1256,7 @@ function Flow(inst, pauseFn, $timeout, dg) {
         inst.log("next %s", list.length);
         inst.lifespan = lifespan = Date.now() - initTime;
         if (!current && list.length) {
+            infin = 0;
             current = list[0];
             if (inst.async && current.delay !== undefined) {
                 inst.log("\tdelay for %c%s %sms (len:%s)", consoleMethodStyle, current.label, current.delay, list.length);
@@ -1262,6 +1264,13 @@ function Flow(inst, pauseFn, $timeout, dg) {
             } else {
                 exec();
             }
+        } else if (current && list.length && current.label === list[0].label) {
+            inst.info("\tskip", current.label);
+            if (infin > 100) {
+                inst.warn("Exceeded max repeat of 100 iterations on the same method. Dropping Method.");
+                list.shift();
+            }
+            infin += 1;
         }
     }
     function exec() {
@@ -1808,7 +1817,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             return s.$index;
         } else if (el && el.attr) {
             // if a row is detached because of detached dom. We can still get the index.
-            while (el && el.attr("row-id") === undefined) {
+            while (el && el.attr("row-id") === undefined && el[0] !== inst.element[0] && el[0] !== document.body) {
                 el = el.parent();
             }
             return parseInt(el.attr("row-id"), 10);
@@ -2591,8 +2600,8 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         inst.templateModel.clearAllRowHeights();
         dispatch(exports.datagrid.events.ON_BEFORE_RESET, inst);
         inst.data = inst.setData(newVal, inst.grouped) || [];
-        dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal);
         reset();
+        flow.add(dispatch, [ exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal ]);
     }
     /**
      * ###<a name="reset">reset</a>###
@@ -4389,13 +4398,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         }
         return getScrollTop();
     };
-    result.setScroll = function setScroll(value) {
+    result.setScroll = function setScroll(value, attempt) {
         result.warn("setScroll(" + value + ")");
         var chunkList = inst.chunkModel.getChunkList();
-        if (!chunkList || !chunkList.height) {
+        if (inst.data.length && (!chunkList || !chunkList.height) && attempt < 20) {
             // wait until that height is ready then scroll.
             inst.flow.add(function() {
-                result.setScroll(value);
+                result.setScroll(value, (attempt || 0) + 1);
             });
         } else if (inst.getContentHeight() - inst.getViewportHeight() >= value) {
             setElementScroll(value);

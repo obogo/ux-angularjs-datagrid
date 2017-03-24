@@ -491,7 +491,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             return s.$index;
         } else if (el && el.attr) {
             // if a row is detached because of detached dom. We can still get the index.
-            while(el && el.attr('row-id') === undefined) {
+            while(el && el.attr('row-id') === undefined && el[0] !== inst.element[0] && el[0] !== document.body) {
                 el = el.parent();
             }
             return parseInt(el.attr('row-id'), 10);
@@ -1297,8 +1297,8 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         inst.templateModel.clearAllRowHeights();
         dispatch(exports.datagrid.events.ON_BEFORE_RESET, inst);
         inst.data = inst.setData(newVal, inst.grouped) || [];
-        dispatch(exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal);
         reset();
+        flow.add(dispatch, [exports.datagrid.events.ON_AFTER_DATA_CHANGE, inst.data, oldVal]);
     }
 
     /**

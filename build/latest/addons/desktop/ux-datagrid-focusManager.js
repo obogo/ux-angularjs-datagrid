@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.6.4
+* ux-angularjs-datagrid v.1.6.5
 * (c) 2017, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -479,7 +479,7 @@ angular.module("ux").factory("gridFocusManager", function() {
          * Add all of the listeners to the visible rows.
          */
         function addListeners(event) {
-            result.info("addListeners " + event.name);
+            result.info("addListeners " + event && event.name || "");
             applyToListeners(addListenersToRow);
         }
         /**
@@ -488,7 +488,7 @@ angular.module("ux").factory("gridFocusManager", function() {
          */
         function removeListeners(event) {
             // this needs executed before the activeRange changes.
-            result.info("removeListeners " + event.name);
+            result.info("removeListeners " + event && event.name || "");
             applyToListeners(removeListenersToRow);
         }
         /**
@@ -1076,6 +1076,10 @@ angular.module("ux").factory("gridFocusManager", function() {
         ux.selector.config.allowId = false;
         ux.selector.config.allowAttributes = false;
         ux.selector.config.addVisible = true;
+        result.resetListeners = function(el) {
+            removeListenersToRow(el);
+            addListenersToRow(el);
+        };
         result.hasPrevRowFocusElement = hasPrevRowFocusElement;
         result.hasNextRowFocusElement = hasNextRowFocusElement;
         result.focusToPrevRowElement = focusToPrevRowElement;

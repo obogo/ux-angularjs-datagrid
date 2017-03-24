@@ -1,6 +1,6 @@
 {
   "name": "ux-angularjs-datagrid",
-  "version": "1.6.4",
+  "version": "1.6.5",
   "filename": "datagrid",
   "packageName": "ux",
   "main": "./build/latest/angular-ux-datagrid.js",
@@ -26,12 +26,12 @@
     "grunt-contrib-clean": "latest",
     "grunt-contrib-copy": "latest",
     "grunt-contrib-htmlmin": "latest",
-    "grunt-contrib-jasmine": "^1.0.3",
+    "grunt-contrib-jasmine": "^1.1.0",
     "grunt-contrib-jshint": "latest",
     "grunt-contrib-uglify": "latest",
     "grunt-contrib-watch": "latest",
     "grunt-replace": "latest",
-    "hbjs": "^0.20.32",
+    "hbjs": "^0.21.11",
     "optimist": "latest"
   },
   "engines": {

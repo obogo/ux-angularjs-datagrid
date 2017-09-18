@@ -4371,6 +4371,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         if (inst.values.direction) {
             // we don't want it getting in here on a click.
             inst.creepRenderModel.forceRenderNext();
+            result.onUpdateScroll();
         }
     };
     result.click = function(e) {
@@ -4433,6 +4434,12 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.onUpdateScroll = function onUpdateScroll(event, force) {
         var val = inst.scrollModel.getScroll(event && (event.target || event.srcElement));
+        var actual;
+        if (inst.values.scroll === val) {
+            if ((actual = inst.element.scrollTop()) !== val) {
+                val = actual;
+            }
+        }
         if (inst.values.scroll !== val) {
             inst.dispatch(exports.datagrid.events.ON_SCROLL_START, val);
             inst.values.speed = val - inst.values.scroll;
@@ -4491,7 +4498,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      * Wait for the datagrid to slow down enough to render.
      */
     result.waitForStop = function waitForStop(force) {
-        var forceRender = force || false, now;
+        var forceRender = force || false;
         clearTimeout(waitForStopIntv);
         waiting = true;
         result.info("waitForStop scroll = %s", inst.values.scroll);

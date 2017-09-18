@@ -31,7 +31,7 @@
     "grunt-contrib-uglify": "latest",
     "grunt-contrib-watch": "latest",
     "grunt-replace": "latest",
-    "hbjs": "^0.21.11",
+    "hbjs": "^0.21.25",
     "optimist": "latest"
   },
   "engines": {

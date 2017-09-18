@@ -362,6 +362,9 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
         function createAscSort(property) {
             return function asc(a, b) {
                 var av = a[property], bv = b[property];
+                if (api.customSorts && api.customSorts[property]) {
+                    return api.customSorts[property](av, bv, "asc", property, a, b);
+                }
                 return api.sortValueCompare(av, bv);
             };
         }
@@ -374,6 +377,9 @@ angular.module("ux").service("sortStatesModel", [ "$location", "$rootScope", fun
         function createDescSort(property) {
             return function desc(a, b) {
                 var av = a[property], bv = b[property];
+                if (api.customSorts && api.customSorts[property]) {
+                    return api.customSorts[property](av, bv, "desc", property, a, b);
+                }
                 return -api.sortValueCompare(av, bv);
             };
         }
@@ -453,6 +459,7 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
         result.addSortColumn = function addSortColumn(name, methods) {
             sorts[name] = methods;
             var pathState = sortStatesModel.getPathState();
+            sortStatesModel.customSorts = options.custom;
             pathState[name] = pathState[name] || sortStatesModel.sortOptions.NONE;
         };
         /**

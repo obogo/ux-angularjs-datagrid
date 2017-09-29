@@ -1,4 +1,5 @@
 #### [Releases](https://github.com/obogo/ux-angularjs-datagrid/releases)
+- Release 1.6.7 [Source Code (zip)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.7.zip) | [Source Code (tar.gz)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.7.tar.gz)
 - Release 1.6.6 [Source Code (zip)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.6.zip) | [Source Code (tar.gz)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.6.tar.gz)
 - Release 1.6.5 [Source Code (zip)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.5.zip) | [Source Code (tar.gz)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.5.tar.gz)
 - Release 1.6.4 [Source Code (zip)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.4.zip) | [Source Code (tar.gz)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.4.tar.gz)
@@ -223,14 +224,14 @@ Here is a JSFiddle example of how to make your grid work like tables with column
 Collapsible groups is meant to work with grouped data. Given an array like the following.
 
 ```js
-    [{id:'a', list:[{id:'a.1'}, {'a.2'}]}, {id:'b', list:[{id:'b.1'}, {id:'b.2'}]}]
+    [{id:'a', list:[{id:'a.1'}, {id:'a.2'}]}, {id:'b', list:[{id:'b.1'}, {id:'b.2'}]}]
 ```
 
 Each Group has sub groups of list. In the template we pass the data-grouped="'list'" so that the datagrid knows which child property to normalize.
 The datagrid will convert the structure into a single array like the one below.
 
 ```js
-    [{id:'a}, {id:'a.1'}, {'a.2'}, {id:'b'}, {id:'b.1'}, {id:'b.2'}]
+    [{id:'a'}, {id:'a.1'}, {id:'a.2'}, {id:'b'}, {id:'b.1'}, {id:'b.2'}]
 ```
 
 Then we have group `a` and group `b` that are now indexed and no longer actual groups. The `collapseGroups` addon will take this new structure and when a group is clicked it will hide all children from that group and update the heights accordingly.

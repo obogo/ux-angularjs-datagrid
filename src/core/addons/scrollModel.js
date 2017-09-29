@@ -17,17 +17,12 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         lastScroll,
         bottomOffset = 0,
         // start easing
-        startOffsetY,
-        startOffsetX,
         offsetY,
         offsetX,
-        startScroll,
         lastDeltaY,
         lastDeltaX,
         speed = 0,
         speedX = 0,
-        startTime,
-        distance,
         scrollThresholdUpdateIntv,
         // end easing
         listenerData = [
@@ -150,14 +145,13 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             return;
         }
         inst.values.touchDown = true;
-        offsetY = startOffsetY = getTouches(event)[0].clientY || 0;
-        offsetX = startOffsetX = getTouches(event)[0].clientX || 0;
+        offsetY = getTouches(event)[0].clientY || 0;
+        offsetX = getTouches(event)[0].clientX || 0;
         if (inst.values.scroll < 0) {
             inst.values.scroll = 0;
         } else if (inst.values.scroll > bottomOffset) {
             inst.values.scroll = bottomOffset;
         }
-        startScroll = inst.values.scroll;
         inst.values.direction = 0;
         lastDeltaY = 0;
         lastDeltaX = 0;
@@ -208,9 +202,6 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         if (listenerData[1].enabled) {
             if (Math.abs(lastDeltaY) < 2 && Math.abs(lastDeltaX) < 2) {
                 result.click(event);
-            } else {
-                startTime = Date.now();
-                distance = speed * inst.options.scrollModel.speed;
             }
         } else {
             result.onUpdateScroll();
@@ -302,7 +293,7 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         var val = inst.scrollModel.getScroll(event && (event.target || event.srcElement));
         var actual;
         if (inst.values.scroll === val) {
-            if((actual = inst.element.scrollTop()) !== val) {
+            if(inst.element.scrollTop && (actual = inst.element.scrollTop()) !== val) {
                 val = actual;
             }
         }

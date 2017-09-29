@@ -1,4 +1,4 @@
-####[Releases](https://github.com/obogo/ux-angularjs-datagrid/releases)
+#### [Releases](https://github.com/obogo/ux-angularjs-datagrid/releases)
 - Release 1.6.6 [Source Code (zip)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.6.zip) | [Source Code (tar.gz)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.6.tar.gz)
 - Release 1.6.5 [Source Code (zip)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.5.zip) | [Source Code (tar.gz)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.5.tar.gz)
 - Release 1.6.4 [Source Code (zip)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.4.zip) | [Source Code (tar.gz)](https://github.com/obogo/ux-angularjs-datagrid/archive/v1.6.4.tar.gz)
@@ -71,7 +71,7 @@ The script template has 3 properties.
 - **template-name** if this is not defined it will be changed to 'default'. So this one is not required if you only have one template, but if you have more than one the second will overwrite the first without this property.
 - **template-item** this is what you want the data to be referenced by on the row scope. Such as in angular if you do a repeat with "item in items" you then reference `item` in your template. This does the same thing with this property.
 
-###Dynamically specify your templates instead of using script templates###
+### Dynamically specify your templates instead of using script templates ###
 - [Demo](https://rawgithub.com/obogo/ux-angularjs-datagrid/master/samples/app/index.html#/other/templateData)
 - [Fiddle](http://jsfiddle.net/m2tRh/1/)
 
@@ -136,11 +136,11 @@ It is also handy to have addons that will update based on events. Here is an exa
 	})
 ```
 
-##Why use iScroll##
+## Why use iScroll ##
 I had my own version of a scroller. However, datagrid is not a scrolling solution, it is a long list rendering solution. Scrolling can be done with any javascript scrolling solution. iScroll is a popular scroller so I used it to leverage the reuse of other libraries with the addition of addons to make them compatible.
 Also notice that I only implemented this for the iOS. Android works well with native scrolling.
 
-##Without iScroll##
+## Without iScroll ##
 I found that in some really long lists in a project that I was using the datagrid in that iScroll would crash in Safari on mobile devices. These lists were over 7k items and had very complex rows. However, I made an addition so that we have ux-datagrid-scrollBar.js now so you can make your app work without iScroll and avoid the memory leak.
 I am not sure if the memory leak is the fault of Safari or iScroll, but the combination of the two was crashing with an out of memory error on iOS devices.
 To use the scrollbar on iOS devices (Android 4.0 devices do not need an extra addon because they already handle much of the scrolling natively) you need to add to the options {scrollModel:{manual:true}}. This will enable touch events to cause the iOS devices to work with their native scroll and still be able to flick. And of course, don't forget to add the scrollBar addon in your addons.
@@ -164,12 +164,12 @@ inside of the app directory. Then starting the server.
 
 Then you can just pull it up in your browser on "http://localhost:4000/".
 
-##About Addons##
+## About Addons ##
 
-###Addon: disableHoverWhileScrolling (desktop/ux-datagrid-disableHoverWhileScrolling.js) ###
+### Addon: disableHoverWhileScrolling (desktop/ux-datagrid-disableHoverWhileScrolling.js) ###
 This addon is used to do obviously what it says. This increases performance while scrolling because hover events if there are a lot on the page can affect performance.
 
-###Addon: focusManager (desktop/ux-datagrid-focusManager.js) ###
+### Addon: focusManager (desktop/ux-datagrid-focusManager.js) ###
 While this is listed under desktop, it actually has several uses for touch browsers as well. It has built-in functionality to move next and previous through rows selecting similar items.
 
 So for example let's say you have an input in a row. Focus manager on focus would build a selector for that input. Then when you have a button that tells it go to to the next item. It will look up that next item based on the selector from the previous row. If the selector doesn't match it will skip that row. Making it jump over rows that might be headers and such. You can see an example of this in the example app under focus manager.
@@ -219,7 +219,7 @@ Using the above HTML, and having a controller like the one below we could access
 
 Here is a JSFiddle example of how to make your grid work like tables with columns. [ux-angularjs-datagrid tables](http://jsfiddle.net/wesjones/8r4xP/)
 
-###Addon: Collapsible Groups (ux-datagrid-collapsibleGroups.js)###
+### Addon: Collapsible Groups (ux-datagrid-collapsibleGroups.js) ###
 Collapsible groups is meant to work with grouped data. Given an array like the following.
 
 ```js
@@ -236,14 +236,14 @@ The datagrid will convert the structure into a single array like the one below.
 Then we have group `a` and group `b` that are now indexed and no longer actual groups. The `collapseGroups` addon will take this new structure and when a group is clicked it will hide all children from that group and update the heights accordingly.
 This will essentially hide all children of that group leaving the group header.
 
-###Addon: Expandable Groups (ux-datagrid-expandableGroups.js)###
+### Addon: Expandable Groups (ux-datagrid-expandableGroups.js) ###
 While this is easy to confuse with collapsible groups this addon performs very differently. It is optimized to remove rows instead of just hiding them like with `collapsibleGroups`. This has pros and cons to it.
 
 While it will be able to do an `expandAll` and `collapseAll` which the collapsibleGroups cannot do, it cannot change without reloading the data, which means that you can see a flicker of the list. (This is if you are using the built-in styles; if you take the transitions off then the flicker is unnoticeable).
 
 If you need to async load data into expandable groups then this example may work better for you. It shows how to do it without an addon. [jsFiddle Example](http://jsfiddle.net/wesjones/3Wg79/)
 
-###Addon: Expanded Rows (ux-datagrid-expandRows.js)###
+### Addon: Expanded Rows (ux-datagrid-expandRows.js) ###
 This one works in a similar way to collapsible groups. It changes the heights of rows to simulate an effect. In this case it makes the rows taller. Collapsible Groups actually changes their heights to 0 and makes them not display.
 Expand rows work with different templates. So you need to setup some options. Given the following grid, see the options.
 
@@ -283,7 +283,7 @@ Expand rows work with different templates. So you need to setup some options. Gi
 Notice that `expandRows` option gives a `template`, and `cls` property. The `template` property is the name of the template to affect, and the `cls` is the CSS class that gets assigned to that row when it is expanded.
 Then the CSS transitions can be done or just popped open as well. Transitions may suffer from chunks that do not transition as well, so in my examples I have just had them snap open. All I needed to do is add a new height to that CSS class so that when it is added the row expands. The datagrid does the rest.
 
-###Addon: Grid Logger (ux-datagrid-gridLogger.js)###
+### Addon: Grid Logger (ux-datagrid-gridLogger.js) ###
 The grid logger is a way to display errors or other log data from the grid. It is set to listen to grid events and log those values. The datagrid doesn't log directly, it throws events for logs.
 Notice the options. Grid logger can capture events for all addons, or it can capture them for only items specified.
 
@@ -301,7 +301,7 @@ With `debug:{all: 1}` you're going to get a lot of log data.
 With `debug:{scrollModel:1}` you just get events from the scroll model. So when building your addon this can be handy for debugging.
 You can also turn logs off. `debug:{all:1, Flow:0}` turns off the flow control logs, but logs everything else. `debug:{all:1, Flow:0, scrollModel: 0}` turns off Flow and scrollModel, but logs the rest.
 
-###Addon: Infinite Scroll (ux-datagrid-infiniteScroll.js)###
+### Addon: Infinite Scroll (ux-datagrid-infiniteScroll.js) ###
 Infinite Scroll needs a couple of hooks to work. First your data to start, then a method that will update the data when it reaches the bottom. This method can be asynchronous because the datagrid watches for its data to change. So once the data changes in the array, it will update.
 The `limit` property can be helpful as well. With this it will tell the addon that it should not show the loading row once the limit has reached this value.
 
@@ -318,7 +318,7 @@ The `limit` property can be helpful as well. With this it will tell the addon th
     </div>
 ```
 
-###Addon: Sort Model (ux-datagrid-sortModel.js)###
+### Addon: Sort Model (ux-datagrid-sortModel.js) ###
 Allows you to sort the datagrid by its columns. This has options to sort grouped data as well. When sorting grouped data you may want to sort the groups or the items inside of the groups. By default it sorts the items inside of the groups. To sort the groups you need to set the option `sortModel:{groupSort:true}`.
 Here is an example where it has grouped data and you want to sort the groups instead. You can see it setting the options. You then just `toggleSort()` on the `sortModel`.
 
@@ -355,7 +355,7 @@ Here is an example where it has grouped data and you want to sort the groups ins
     </div>
 ```
 
-###Get a reference to the datagrid from your scope###
+### Get a reference to the datagrid from your scope ###
 Often times you want to communicate directly with the datagrid in a directive or a controller.
 To get a reference to the datagrid instance you just need to listen for its startup event. (v1.1.1)
 
@@ -365,8 +365,8 @@ To get a reference to the datagrid instance you just need to listen for its star
         });
 ```
 
-###ng-show###
+### ng-show ###
 The datagrid has an incompatibility with `ng-show` because it needs a height when initialized to calculate how many rows to show. Please do not use an `ng-show`, use an `ng-if` which will create the datagrid when it is shown, where an `ng-show` will create it but not allow it to get a height because of the `display:none` of the parent. See issue [#28](https://github.com/obogo/ux-angularjs-datagrid/issues/28).
 
-##IE8 Compatibility##
+## IE8 Compatibility ##
 IE8 may work with ux-datagrid by adding some polyfills for emulating missing ES5 features in IE8. First it's required to add [ES5 Shim](https://github.com/es-shims/es5-shim) and also an additional file [Polyfill IE8](/build/latest/IE/Polyfill_IE8.js), located in this repository from this repository.

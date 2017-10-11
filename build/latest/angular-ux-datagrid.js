@@ -1724,7 +1724,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             }
             inst.normalizeModel.replace(newItem, index);
             if (oldTpl !== newTpl) {
-                inst.templateModel.setTemplate(index, newTpl);
+                inst.templateModel.setTemplate(index, newTpl.name);
             } else {
                 // nothing changed except the reference. So just update the scope and digest.
                 scopes[index][newTpl.item] = newItem;

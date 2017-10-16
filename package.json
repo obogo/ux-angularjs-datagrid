@@ -1,6 +1,6 @@
 {
   "name": "ux-angularjs-datagrid",
-  "version": "1.6.5",
+  "version": "1.6.8",
   "filename": "datagrid",
   "packageName": "ux",
   "main": "./build/latest/angular-ux-datagrid.js",

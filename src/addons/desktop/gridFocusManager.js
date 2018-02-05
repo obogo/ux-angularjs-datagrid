@@ -415,9 +415,15 @@ angular.module('ux').factory('gridFocusManager', function () {
          */
         function getSelector(el, currentIndex) {
             el = el[0] || el;
+            var len, matches;
             if (el) {
                 currentIndex = currentIndex || inst.getRowIndexFromElement(el);
                 var rowEl = inst.getRowElm(currentIndex);
+                if (inst.options.gridFocusManager.enter) {
+                    matches = rowEl[0].querySelectorAll(inst.options.gridFocusManager.enter) || [];
+                    len = matches && matches.length || 0;
+                    return inst.options.gridFocusManager.enter + (len > 1 ? ":eq(" + Array.prototype.indexOf.call(matches, el) + ")" : "");
+                }
                 return ux.selector.quickSelector(el, rowEl[0], filterClasses);
             }
             return '';
@@ -620,55 +626,6 @@ angular.module('ux').factory('gridFocusManager', function () {
                 fn();
             }
         }
-
-        // function focusToSiblingRowBackupPlan(activeElement, checkFn, delta) {
-        //     // if it failed. Then use the checkFn to look further if it exists.
-        //     var toIndex = inst.getRowIndexFromElement(activeElement) + (inst.options.gridFocusManager && inst.options.gridFocusManager.multipleEnterFocusPerRow ? 0 : delta);
-        //     var list = inst.getData();
-        //     var selector = getSelector(activeElement);
-        //     var focusToIndex;
-        //     var i;
-        //     var unwatch;
-        //     function onAfterRender() {
-        //         unwatch();
-        //         var row = inst.getRowElm(focusToIndex);
-        //         var fel = query(row, selector);
-        //         if (fel) {
-        //             performFocus(fel);
-        //         } else {
-        //             if (delta < 0) {
-        //                 inst.scope.$emit(exports.datagrid.events.FOCUS_TO_PREV_ELEMENT_OF_SAME_FAILURE);
-        //             } else {
-        //                 inst.scope.$emit(exports.datagrid.events.FOCUS_TO_NEXT_ELEMENT_OF_SAME_FAILURE);
-        //             }
-        //         }
-        //     }
-        //     function check(i) {
-        //         if (checkFn(list[i])) {
-        //             focusToIndex = i;
-        //             unwatch = inst.scope.$on(exports.datagrid.events.ON_AFTER_RENDER, onAfterRender);
-        //             if (!inst.scrollModel.scrollIntoView(i, true)){
-        //                 onAfterRender();
-        //             }
-        //             return true;
-        //         }
-        //         return false;
-        //     }
-        //     if (delta < 0) {
-        //         for (i = toIndex; i >= 0; i -= 1) {
-        //             if (check(i)) {
-        //                 return true;
-        //             }
-        //         }
-        //     } else {
-        //         for (i = toIndex; i < inst.rowsLength; i += 1) {
-        //             if (check(i)) {
-        //                 return true;
-        //             }
-        //         }
-        //     }
-        //     return false;
-        // }
 
         // it has to match a pattern for each row. These are too unique.
         ux.selector.config.allowId = false;

@@ -9,8 +9,7 @@ exports.datagrid.options.expandRows.scrollOnExpand = true;
 angular.module('ux').factory('expandRows', function () {
     //TODO: on change row template. This needs to collapse the row.
     return ['inst', function (inst) {
-        var intv,
-            result = exports.logWrapper('expandRows', {}, 'green', inst),
+        var result = exports.logWrapper('expandRows', {}, 'green', inst),
             lastGetIndex,
             cache = {},
             opened = {},
@@ -72,20 +71,26 @@ angular.module('ux').factory('expandRows', function () {
 
         function getState(itemOrIndex) {
             var index = getIndex(itemOrIndex);
-            return opened[index] ? states.opened : states.closed;
+            return opened[index] && opened[index].name || states.closed;
         }
 
-        function toggle(itemOrIndex) {
-            if (getState(itemOrIndex) === states.closed) {
-                expand(itemOrIndex);
+        function getType(type) {
+            return type && type || 'opened';
+        }
+
+        function toggle(itemOrIndex, type) {
+            type = getType(type);
+            if (getState(itemOrIndex) !== type) {
+                expand(itemOrIndex, type);
             } else {
                 collapse(itemOrIndex);
             }
         }
 
-        function expand(itemOrIndex) {
+        function expand(itemOrIndex, type) {
+            type = getType(type);
             var index = getIndex(itemOrIndex);
-            if (getState(index) === states.closed) {
+            if (getState(index) !== type) {
                 result.log("expand %s", itemOrIndex);
                 // prevent multi-finger expand rows.
                 if (inst.options.expandRows.autoClose && opening) {
@@ -93,13 +98,13 @@ angular.module('ux').factory('expandRows', function () {
                 }
                 opening = true;
                 autoClose([index], true);
-                setState(index, states.opened);
+                setState(index, type);
             }
         }
 
         function collapse(itemOrIndex, immediate) {
             var index = getIndex(itemOrIndex);
-            if (getState(index) === states.opened) {
+            if (getState(index) !== states.closed) {
                 result.log("collapse %s", itemOrIndex);
                 setState(index, states.closed, immediate);
             }
@@ -123,10 +128,11 @@ angular.module('ux').factory('expandRows', function () {
                     }
                 }
             });
+            opening = false;
         }
 
         function setState(index, state, immediate) {
-            var template = inst.templateModel.getTemplate(inst.data[index]), elm, tpl, swapTpl, s, visible;
+            var template = inst.templateModel.getTemplate(inst.data[index], state), elm, tpl, swapTpl, s, visible, swap;
             if (cache[template.name]) {
                 elm = inst.getExistingRow(index);
                 s = inst.scopes[index];
@@ -144,15 +150,16 @@ angular.module('ux').factory('expandRows', function () {
                     if (!tpl.reverse) {
                         tpl.reverse = makeReverseStyle(elm, tpl.style);
                     }
-                    elm.css(state === states.opened ? tpl.style : tpl.reverse);
+                    elm.css(state !== states.closed ? tpl.style : tpl.reverse);
                 }
                 if (tpl.swap && tpl.state !== state) {
-                    swapTpl = cache[tpl.swap];
+                    swap = typeof tpl.swap === 'function' ? tpl.swap(inst.data[index], state) : tpl.swap;
+                    swapTpl = cache[swap];
                     swapTpl.cls = swapTpl.cls || '';
-                    inst.templateModel.setTemplate(index, tpl.swap, [swapTpl.cls]);
+                    inst.templateModel.setTemplate(index, swap, [swapTpl.cls]);
                     elm = inst.getRowElm(index);
                 } else if (tpl.cls) {
-                    elm[(state === states.opened ? "addClass" : "removeClass")](tpl.cls);
+                    elm[(state !== states.closed ? "addClass" : "removeClass")](tpl.cls);
                     elm.addClass('animating');
                 }
                 // we need to wait for the heights to update before updating positions.
@@ -196,8 +203,9 @@ angular.module('ux').factory('expandRows', function () {
             }
             elm[0].removeEventListener(TRNEND_EV, onTransitionEnd);
             elm.removeClass('animating');
-            if (state === states.opened) {
+            if (state !== states.closed) {
                 opened[index] = {
+                    name: state,
                     index: index,
                     height: parseInt(elm[0].offsetHeight || 0, 10)
                 };
@@ -224,7 +232,7 @@ angular.module('ux').factory('expandRows', function () {
                     if (inst.options.expandRows.scrollOnExpand) {
                         inst.flow.add(function () {
                             // check for last row. On expansion it needs to scroll down.
-                            if (state === states.opened && index === inst.data.length - 1 && inst.getViewportHeight() < inst.getContentHeight()) {
+                            if (state !== states.closed && index === inst.data.length - 1 && inst.getViewportHeight() < inst.getContentHeight()) {
                                 inst.scrollModel.scrollToBottom(true);
                             }
                         }, [], 0);
@@ -259,16 +267,17 @@ angular.module('ux').factory('expandRows', function () {
 
         result.states = states;
         result.getIndex = getIndex;
-        result.toggle = function(itemOrIndex) {
-            inst.flow.add(toggle, [itemOrIndex]);
+        result.toggle = function(itemOrIndex, type) {
+            inst.flow.add(toggle, [itemOrIndex, type]);
         };
-        result.expand = function (itemOrIndex) {
-            inst.flow.add(expand, [itemOrIndex]);
+        result.expand = function (itemOrIndex, type) {
+            inst.flow.add(expand, [itemOrIndex, type]);
         };
         result.collapse = function (itemOrIndex) {
             inst.flow.add(collapse, [itemOrIndex]);
         };
         result.isExpanded = isExpanded;
+        result.getState = getState;
         result.destroy = destroy;
 
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_READY, setupTemplates));
@@ -278,8 +287,8 @@ angular.module('ux').factory('expandRows', function () {
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.COLLAPSE_ROW, function (event, itemOrIndex) {
             result.collapse(itemOrIndex);
         }));
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.TOGGLE_ROW, function (event, itemOrIndex) {
-            result.toggle(itemOrIndex);
+        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.TOGGLE_ROW, function (event, itemOrIndex, type) {
+            result.toggle(itemOrIndex, type);
         }));
         inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_ROW_COMPILE, function (event, $s, el) {
             if (opened[$s.$index]) {

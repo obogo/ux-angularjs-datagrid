@@ -4,6 +4,7 @@ exports.datagrid.events.ON_BEFORE_TOGGLE_SORT = "datagrid:onBeforeToggleSort";
 exports.datagrid.events.ON_AFTER_TOGGLE_SORT = "datagrid:onAfterToggleSort";
 exports.datagrid.events.CLEAR_SORTS = "datagrid:clearSorts";
 exports.datagrid.events.CLEAR_ALL_SORTS = "datagrid:clearAllSorts";
+var PATH = '$path';
 angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', function ($location, $rootScope) {
     /**************************************************************************************
      * ##<a name="sortStatesModel">sortStatesModel</a>##
@@ -82,8 +83,8 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
          * fall back on the defaultAllowMultipleStates
          * @return {Boolean}
          */
-        function getAllowMultipleStates() {
-            var result = multipleStates[api.getPath()];
+        function getAllowMultipleStates(path) {
+            var result = multipleStates[path || api.getPath()];
             if (result === true || result === false) {
                 return result;
             }
@@ -144,7 +145,8 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
         function getPathState(path) {
             path = path || api.getPath();
             if (!states[path]) {
-                states[path] = {$dirty: false, $path: path, $order: []};
+                states[path] = {$dirty: false, $order: []};
+                states[path][PATH] = path;
             }
             return states[path];
         }
@@ -157,12 +159,13 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
          */
         function setPathState(pathState) {
             var columnName,
-                currentPathState = api.getPathState();
+                path = pathState[PATH],
+                currentPathState = api.getPathState(path);
             api.log("setPathState %s to %s", currentPathState, pathState);
             api.setIgnoreParamsInPath(true);
             for (columnName in pathState) {
-                if (exports.util.apply(Object.prototype.hasOwnProperty, pathState, [columnName]) && pathState[columnName] !== currentPathState[columnName] && !isPrivate(columnName)) {
-                    api.setState(columnName, pathState[columnName], currentPathState);
+                if (columnName !== PATH && exports.util.apply(Object.prototype.hasOwnProperty, pathState, [columnName]) && pathState[columnName] !== currentPathState[columnName] && !isPrivate(columnName)) {
+                    api.setState(columnName, pathState[columnName], currentPathState, path);
                 }
             }
         }
@@ -172,10 +175,11 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
          * Returns the current state at the currentPath of the columnName.
          * 'none', 'asc', 'desc'
          * @param columnName
+         * @param {String=} path
          * @return {String}
          */
-        function getState(columnName) {
-            var pathState = api.getPathState(api.getPath());
+        function getState(columnName, path) {
+            var pathState = api.getPathState(path || api.getPath());
             if (pathState[columnName] === undefined) {
                 pathState[columnName] = sortOptions.NONE;
             }
@@ -188,20 +192,21 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
          * @param {String} columnName
          * @param {String} state
          * @param {Object=} pathState
+         * @param {Object=} path
          */
-        function setState(columnName, state, pathState) {
+        function setState(columnName, state, pathState, path) {
             var index, prevState;
-            pathState = pathState || api.getPathState(api.getPath());
+            pathState = pathState || api.getPathState(path || api.getPath());
             if (!api.isPrivate(columnName) && pathState[columnName] !== state) {
                 prevState = pathState[columnName];
-                if (api.getAllowMultipleStates(pathState.$path)) {
+                if (api.getAllowMultipleStates(pathState[PATH])) {
                     index = pathState.$order.indexOf(columnName);
                     if (index !== -1) {
                         pathState.$order.splice(index, 1);
                     }
                 }
                 if (state !== sortOptions.NONE) {
-                    if (!api.getAllowMultipleStates()) {
+                    if (!api.getAllowMultipleStates(path)) {
                         api.clear(pathState);
                     }
                     pathState.$order.push(columnName);
@@ -218,10 +223,11 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
          * ###<a name="createKeyFromStates">createKeyFromStates</a>###
          * converts the path state into a string key. ex("description:asc|index:desc")
          * @param {Object=} pathState
+         * @param {Object=} path
          * @returns {string}
          */
-        function createKeyFromStates(pathState) {
-            pathState = pathState || api.getPathState(api.getPath());
+        function createKeyFromStates(pathState, path) {
+            pathState = pathState || api.getPathState(path || api.getPath());
             var combo = {text: '', pathState: pathState};
             exports.each(pathState.$order, api.createKeyFromState, combo);
             return combo.text;
@@ -245,11 +251,12 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
          * ###<a name="toggle">toggle</a>###
          * Increment the columnName's state to the next in the list.
          * @param {String} columnName
+         * @param {String=} path
          */
-        function toggle(columnName) {
-            var state = api.getState(columnName), nextState = api.getNextState(state);
+        function toggle(columnName, path) {
+            var state = api.getState(columnName, path), nextState = api.getNextState(state);
             api.info('toggle %s from %s to %s', columnName, state, nextState);
-            api.setState(columnName, nextState);
+            api.setState(columnName, nextState, null, path);
             api.dirtyState();
         }
 
@@ -257,9 +264,10 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
          * ###<a name="dirtyState">dirtyState</a>###
          * Sets a state to dirty for the next lookup.
          * @param {Object=} pathState
+         * @param {Object=} path
          */
-        function dirtyState(pathState) {
-            pathState = pathState || api.getPathState(api.getPath());
+        function dirtyState(pathState, path) {
+            pathState = pathState || api.getPathState(path || api.getPath());
             api.log("dirtyState %s", pathState);
             pathState.$dirty = true;
         }
@@ -268,9 +276,10 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
          * ###<a name="clearDirty">clearDirty</a>###
          * clears the dirty state.
          * @param {Object=} pathState
+         * @param {Object=} path
          */
         function clearDirty(pathState) {
-            pathState = pathState || api.getPathState(api.getPath());
+            pathState = pathState || api.getPathState(path || api.getPath());
             api.log("clearDirty %s", pathState);
             pathState.$dirty = false;
         }
@@ -301,10 +310,11 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
          * ###<a name="hasDirtySortState">hasDirtySortState</a>###
          * Determines if a state is dirty or not.
          * @param {String=} pathState
+         * @param {String=} path
          * @returns {boolean|*|pathState.$dirty}
          */
-        function hasDirtySortState(pathState) {
-            pathState = pathState || api.getPathState(api.getPath());
+        function hasDirtySortState(pathState, path) {
+            pathState = pathState || api.getPathState(path || api.getPath());
             return pathState.$dirty;
         }
 
@@ -391,10 +401,11 @@ angular.module('ux').service('sortStatesModel', ['$location', '$rootScope', func
          * ###<a name="clear">clear</a>###
          * Clear the states for the currentPath.
          * @param {Object=} pathState
+         * @param {Object=} path
          */
-        function clear(pathState) {
+        function clear(pathState, path) {
             var i;
-            pathState = pathState || api.getPathState(api.getPath());
+            pathState = pathState || api.getPathState(path || api.getPath());
             pathState.$order.length = 0;
             for (i in pathState) {
                 if (exports.util.apply(Object.prototype.hasOwnProperty, pathState, [i]) && !api.isPrivate(i) && pathState[i] !== sortOptions.NONE) {
@@ -469,7 +480,7 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
          */
         result.addSortColumn = function addSortColumn(name, methods) {
             sorts[name] = methods;
-            var pathState = sortStatesModel.getPathState();
+            var pathState = sortStatesModel.getPathState(inst.options.sortModel[PATH]);
             sortStatesModel.customSorts = options.custom;
             pathState[name] = pathState[name] || sortStatesModel.sortOptions.NONE;
         };
@@ -502,13 +513,13 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
          * @returns {*}
          */
         result.applySorts = function applySorts(ary, sortOptions, clear) {
-            var pathStateRef = sortStatesModel.getPathState(),
+            var pathStateRef = sortStatesModel.getPathState(inst.options.sortModel[PATH]),
                 currentPathState = angular.copy(pathStateRef);
             if (sortOptions) {
                 result.log("apply sortOptions");
                 sortStatesModel.setPathState(sortOptions);
             }
-            if (original !== ary || sortStatesModel.hasDirtySortState(pathStateRef)) {
+            if (original !== ary || sortStatesModel.hasDirtySortState(pathStateRef, inst.options.sortModel[PATH])) {
                 original = ary;
                 if (!original) {
                     lastSortResult = original;
@@ -538,7 +549,7 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
                             result.log("\tpull sort from cache");
                         }
                         lastSortResult = result.getCache(key);
-                        sortStatesModel.clearDirty(pathStateRef);
+                        sortStatesModel.clearDirty(pathStateRef, inst.options.sortModel[PATH]);
                         if (options.enableCache === false) {
                             result.clear();
                         }
@@ -598,7 +609,7 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
          * @returns {boolean}
          */
         result.isApplied = function isApplied(name, methodName) {
-            return sortStatesModel.getPathState()[name] === methodName;
+            return sortStatesModel.getPathState(inst.options.sortModel[PATH])[name] === methodName;
         };
 
         /**
@@ -608,7 +619,7 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
          * @returns {*}
          */
         result.getSortStateOf = function getSortStateOf(name) {
-            return sortStatesModel.getPathState()[name];
+            return sortStatesModel.getPathState(inst.options.sortModel[PATH])[name];
         };
 
         /**
@@ -631,16 +642,16 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
          * If the states already exist apply those states on the render.
          */
         function addSortsFromOptions() {
-            var i, methods, alreadyHasState = sortStatesModel.hasPathState(), pathState = sortStatesModel.getPathState();
+            var i, methods, alreadyHasState = sortStatesModel.hasPathState(inst.options.sortModel[PATH]), pathState = sortStatesModel.getPathState(inst.options.sortModel[PATH]);
             options.sorts = options.sorts || inst.options.sorts;
             if (options.sorts) {
                 for (i in options.sorts) {
                     if (typeof options.sorts[i] === 'object') {
-                        sortStatesModel.setState(i, options.sorts[i].value, pathState);// value is the default sort state.
+                        sortStatesModel.setState(i, options.sorts[i].value, pathState, inst.options.sortModel[PATH]);// value is the default sort state.
                         methods = options.sorts[i];// allow them to pass in their own sort methods.
                     } else {
                         if (!alreadyHasState) {
-                            sortStatesModel.setState(i, options.sorts[i], pathState); // set the default sort state.
+                            sortStatesModel.setState(i, options.sorts[i], pathState, inst.options.sortModel[PATH]); // set the default sort state.
                         }
                         methods = {
                             asc: sortStatesModel.createAscSort(i),
@@ -664,7 +675,7 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
             if (inst.creepRenderModel) {
                 inst.creepRenderModel.stop();
             }
-            sortStatesModel.toggle(name);
+            sortStatesModel.toggle(name, inst.options.sortModel[PATH]);
             result.applySorts(original);
             inst.dispatch(exports.datagrid.events.ON_AFTER_TOGGLE_SORT, name);
         };
@@ -677,7 +688,7 @@ angular.module('ux').factory('sortModel', ['sortStatesModel', function (sortStat
          */
         result.setSortStateOf = function (name, state) {
             if (state === 'none' || state === 'asc' || state === 'desc') {
-                sortStatesModel.setState(name, state);
+                sortStatesModel.setState(name, state, null, inst.options.sortModel[PATH]);
             }
         };
 

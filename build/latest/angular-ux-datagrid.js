@@ -1,6 +1,6 @@
 /*!
-* ux-angularjs-datagrid v.1.6.5
-* (c) 2017, Obogo
+* ux-angularjs-datagrid v.1.6.8
+* (c) 2018, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -14,8 +14,8 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.6.5
-* (c) 2017, Obogo
+* ux-angularjs-datagrid v.1.6.8
+* (c) 2018, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
 */
@@ -496,7 +496,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.6.5",
+    version: "1.6.8",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -4730,7 +4730,7 @@ exports.datagrid.coreAddons.templateModel = function templateModel(inst) {
             template = result.prepTemplate(name, template, base);
             template = angular.element(template)[0];
             if (!base) {
-                template.className += " " + inst.options.rowClass + " " + inst.options.uncompiledClass + " {{$status}}";
+                template.className += " " + name + " " + inst.options.rowClass + " " + inst.options.uncompiledClass + " {{$status}}";
             }
             template.setAttribute("template", name);
             inst.getContent()[0].appendChild(wrapper);

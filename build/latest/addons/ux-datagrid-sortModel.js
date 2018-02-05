@@ -468,7 +468,7 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
          */
         result.addSortColumn = function addSortColumn(name, methods) {
             sorts[name] = methods;
-            var pathState = sortStatesModel.getPathState(inst.options.sortModel[PATH]);
+            var pathState = sortStatesModel.getPathState(options[PATH]);
             sortStatesModel.customSorts = options.custom;
             pathState[name] = pathState[name] || sortStatesModel.sortOptions.NONE;
         };
@@ -498,12 +498,12 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
          * @returns {*}
          */
         result.applySorts = function applySorts(ary, sortOptions, clear) {
-            var pathStateRef = sortStatesModel.getPathState(inst.options.sortModel[PATH]), currentPathState = angular.copy(pathStateRef);
+            var pathStateRef = sortStatesModel.getPathState(options[PATH]), currentPathState = angular.copy(pathStateRef);
             if (sortOptions) {
                 result.log("apply sortOptions");
                 sortStatesModel.setPathState(sortOptions);
             }
-            if (original !== ary || sortStatesModel.hasDirtySortState(pathStateRef, inst.options.sortModel[PATH])) {
+            if (original !== ary || sortStatesModel.hasDirtySortState(pathStateRef, options[PATH])) {
                 original = ary;
                 if (!original) {
                     lastSortResult = original;
@@ -535,7 +535,7 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
                             result.log("\tpull sort from cache");
                         }
                         lastSortResult = result.getCache(key);
-                        sortStatesModel.clearDirty(pathStateRef, inst.options.sortModel[PATH]);
+                        sortStatesModel.clearDirty(pathStateRef, options[PATH]);
                         if (options.enableCache === false) {
                             result.clear();
                         }
@@ -593,7 +593,7 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
          * @returns {boolean}
          */
         result.isApplied = function isApplied(name, methodName) {
-            return sortStatesModel.getPathState(inst.options.sortModel[PATH])[name] === methodName;
+            return sortStatesModel.getPathState(options[PATH])[name] === methodName;
         };
         /**
          * ###<a name="getSortStateOf">getSortStateOf</a>###
@@ -602,7 +602,7 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
          * @returns {*}
          */
         result.getSortStateOf = function getSortStateOf(name) {
-            return sortStatesModel.getPathState(inst.options.sortModel[PATH])[name];
+            return sortStatesModel.getPathState(options[PATH])[name];
         };
         /**
          * ###<a name="multipleSort"></a>###
@@ -622,17 +622,17 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
          * If the states already exist apply those states on the render.
          */
         function addSortsFromOptions() {
-            var i, methods, alreadyHasState = sortStatesModel.hasPathState(inst.options.sortModel[PATH]), pathState = sortStatesModel.getPathState(inst.options.sortModel[PATH]);
+            var i, methods, alreadyHasState = sortStatesModel.hasPathState(options[PATH]), pathState = sortStatesModel.getPathState(options[PATH]);
             options.sorts = options.sorts || inst.options.sorts;
             if (options.sorts) {
                 for (i in options.sorts) {
                     if (typeof options.sorts[i] === "object") {
-                        sortStatesModel.setState(i, options.sorts[i].value, pathState, inst.options.sortModel[PATH]);
+                        sortStatesModel.setState(i, options.sorts[i].value, pathState, options[PATH]);
                         // value is the default sort state.
                         methods = options.sorts[i];
                     } else {
                         if (!alreadyHasState) {
-                            sortStatesModel.setState(i, options.sorts[i], pathState, inst.options.sortModel[PATH]);
+                            sortStatesModel.setState(i, options.sorts[i], pathState, options[PATH]);
                         }
                         methods = {
                             asc: sortStatesModel.createAscSort(i),
@@ -655,7 +655,7 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
             if (inst.creepRenderModel) {
                 inst.creepRenderModel.stop();
             }
-            sortStatesModel.toggle(name, inst.options.sortModel[PATH]);
+            sortStatesModel.toggle(name, options[PATH]);
             result.applySorts(original);
             inst.dispatch(exports.datagrid.events.ON_AFTER_TOGGLE_SORT, name);
         };
@@ -667,7 +667,7 @@ angular.module("ux").factory("sortModel", [ "sortStatesModel", function(sortStat
          */
         result.setSortStateOf = function(name, state) {
             if (state === "none" || state === "asc" || state === "desc") {
-                sortStatesModel.setState(name, state, null, inst.options.sortModel[PATH]);
+                sortStatesModel.setState(name, state, null, options[PATH]);
             }
         };
         /**

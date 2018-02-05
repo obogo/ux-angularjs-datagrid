@@ -419,8 +419,9 @@ angular.module('ux').factory('gridFocusManager', function () {
             if (el) {
                 currentIndex = currentIndex || inst.getRowIndexFromElement(el);
                 var rowEl = inst.getRowElm(currentIndex);
-                if (inst.options.gridFocusManager.enter) {
-                    matches = rowEl[0].querySelectorAll(inst.options.gridFocusManager.enter) || [];
+                var options = inst.options.gridFocusManager;
+                if (options && options.enter) {
+                    matches = rowEl[0].querySelectorAll(options.enter) || [];
                     len = matches && matches.length || 0;
                     return inst.options.gridFocusManager.enter + (len > 1 ? ":eq(" + Array.prototype.indexOf.call(matches, el) + ")" : "");
                 }
@@ -440,6 +441,9 @@ angular.module('ux').factory('gridFocusManager', function () {
             // we now need to scroll the row into view if it is not.
             if (focusEl[0]) {
                 inst.scrollModel.scrollIntoView(inst.getRowIndexFromElement(focusEl), true);
+                if (focusEl[0].scrollIntoViewIfNeeded) {
+                    focusEl[0].scrollIntoViewIfNeeded({behavior: 'smooth'});
+                }
                 if (focusEl[0].select) {
                     focusEl[0].select();
                 }

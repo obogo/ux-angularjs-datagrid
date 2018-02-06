@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.6.9
+* ux-angularjs-datagrid v.1.6.10
 * (c) 2018, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.

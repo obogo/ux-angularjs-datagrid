@@ -617,7 +617,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             for(var i = 0; i < len; i += 1) {
                 var attr = attrs[i];
                 // copy the attr from el to clone
-                if (attr.name !== 'class' && clone.attr(attr.name) !== attr.value) {
+                if (attr.name !== 'class' && clone.attr(attr.name) !== attr.value && attr.value !== undefined) {
                     clone.attr(attr.name, attr.value);
                 }
             }

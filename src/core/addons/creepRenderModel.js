@@ -7,6 +7,8 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     var intv = 0,
         creepCount = 0,
         model = exports.logWrapper('creepModel', {}, 'blue', inst),
+        min,
+        max,
         upIndex = 0,
         downIndex = 0,
         waitingOnReset,
@@ -15,7 +17,8 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         unwatchers = [],
         forceScroll = false,
         scrollIndex = 0,
-        scrollIndexPadding = 0;
+        scrollIndexPadding = 0,
+        MAX_SYNC_RENDER = 50;// should not be more than 50.
 
     function digest(index) {
         if (inst.scope.$root.$$phase) {
@@ -44,6 +47,9 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     function onInterval(started, ended, force) {
         model.log('\tonInterval');
         if (!inst.values.touchDown) {
+            if (!creepCount) {// it was reset.
+                model.info("start creeping", upIndex + '..' + downIndex + ' - ' + min + '..' + max);
+            }
             waitingOnReset = false;
             time = Date.now() + inst.options.renderThreshold;
             upIndex = started;
@@ -80,14 +86,15 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         return dir > 0 ? inst.rowsLength : -1;
     }
 
-    function render(complete, force) {
+    function render(complete, force, recur) {
         var now = Date.now(), dynamicHeights, direction;
-        if (time > now && hasIndexesLeft()) {
+        recur = recur || 0;
+        if (time > now && hasIndexesLeft() && recur < MAX_SYNC_RENDER) {// hard limit. cannot render more than 50 synchronously.
             dynamicHeights = inst.templateModel.hasVariableRowHeights();
             direction = inst.values.direction;
             model.info('direction', direction);
             applyRender(direction, force);
-            render(complete, force);// making this async was counter effective on performance.
+            render(complete, force, recur += 1);// making this async was counter effective on performance.
             if (dynamicHeights) {
                 forceScrollToIndex();
             }
@@ -114,10 +121,10 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
 
     function renderUp(force) {
         upIndex = force ? upIndex : findUncompiledIndex(upIndex, -1);
-        if (upIndex >= 0) {
+        if (upIndex >= min) {
             if (digest(upIndex)) {
                 if (force) {
-                    model.warn("\trenderUp " + upIndex);
+                    model.info("\trenderUp " + upIndex);
                 }
                 upIndex -= 1;
                 return true;
@@ -127,10 +134,10 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
 
     function renderDown(force) {
         downIndex = force ? downIndex : findUncompiledIndex(downIndex, 1);
-        if (downIndex !== inst.rowsLength) {
+        if (downIndex <= max) {
             if (digest(downIndex)) {
                 if (force) {
-                    model.warn("\trenderDown " + downIndex);
+                    model.info("\trenderDown " + downIndex);
                 }
                 downIndex += 1;
                 return true;
@@ -175,6 +182,8 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
             clearTimeout(intv);
             time = 0;
             intv = wait(onInterval, waitTime || inst.options.renderThresholdWait, started, ended, forceCompileRowRender);
+        } else {
+            model.warn('finish creeping: ' + creepCount + '/' + inst.options.creepLimit, upIndex + '..' + downIndex + ' is creeped out');
         }
     }
 
@@ -204,6 +213,8 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         creepCount = 0;
         upIndex = loopData.started || 0;
         downIndex = loopData.ended || 0;
+        min = Math.max(upIndex - inst.options.creepLimit, 0);// top creep should stop at
+        max = Math.min(downIndex + inst.options.creepLimit, inst.rowsLength);// bottom creep should stop at
         renderLater(event, forceCompileRowRender);
     }
 
@@ -217,7 +228,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
 
     model.stop = stop; // allow external stop of creep render.
     model.forceRenderNext = function() {
-        model.warn("forceRenderNext");
+        model.info("forceRenderNext");
         applyRender(inst.values.direction, true, inst.options.scrollEndRenderAmount);
     };
 

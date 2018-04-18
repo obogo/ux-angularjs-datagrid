@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.6.10
+* ux-angularjs-datagrid v.1.6.12
 * (c) 2018, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -29,10 +29,17 @@ exports.datagrid.options.expandRows.autoClose = true;
 
 exports.datagrid.options.expandRows.scrollOnExpand = true;
 
+exports.datagrid.options.expandRows.store = true;
+
 angular.module("ux").factory("expandRows", function() {
-    //TODO: on change row template. This needs to collapse the row.
+    var store = {};
+    function getStore() {
+        var path = document.location.href;
+        store[path] = store[path] || {};
+        return store[path];
+    }
     return [ "inst", function(inst) {
-        var result = exports.logWrapper("expandRows", {}, "green", inst), lastGetIndex, cache = {}, opened = {}, opening = false, states = {
+        var result = exports.logWrapper("expandRows", {}, "green", inst), lastGetIndex, cache = {}, opened = getStore(), opening = false, states = {
             opened: "opened",
             closed: "closed"
         }, superGetTemplateHeight = inst.templateModel.getTemplateHeight, // transition end lookup.
@@ -97,6 +104,7 @@ angular.module("ux").factory("expandRows", function() {
                 }
                 opening = true;
                 autoClose([ index ], true);
+                opening = true;
                 setState(index, type);
             }
         }
@@ -149,7 +157,7 @@ angular.module("ux").factory("expandRows", function() {
                     elm.css(state !== states.closed ? tpl.style : tpl.reverse);
                 }
                 if (tpl.swap && tpl.state !== state) {
-                    swap = typeof tpl.swap === "function" ? tpl.swap(inst.data[index], state) : tpl.swap;
+                    swap = state === states.closed ? runSwap(tpl, state) : state;
                     swapTpl = cache[swap];
                     swapTpl.cls = swapTpl.cls || "";
                     inst.templateModel.setTemplate(index, swap, [ swapTpl.cls ]);
@@ -172,6 +180,9 @@ angular.module("ux").factory("expandRows", function() {
             } else {
                 inst.throwError("unable to toggle template. cls for template '" + template.name + "' was not set.");
             }
+        }
+        function runSwap(tpl, state) {
+            return typeof tpl.swap === "function" ? tpl.swap(inst.data[index], state) : tpl.swap;
         }
         function makeReverseStyle(elm, style) {
             var params = {
@@ -297,9 +308,9 @@ angular.module("ux").factory("expandRows", function() {
                 closeAll();
             }));
         }
-        inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, function(event) {
-            closeAll(null, true);
-        }));
+        // inst.unwatchers.push(inst.scope.$on(exports.datagrid.events.ON_BEFORE_DATA_CHANGE, function (event) {
+        //     closeAll(null, true);
+        // }));
         inst.expandRows = result;
         return inst;
     } ];

@@ -471,30 +471,32 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @returns {*}
      */
     function getRowIndexFromElement(el) {
-        if (el && element[0].contains(el[0] || el)) {
-            el = el.scope ? el : angular.element(el);
-            var s = el.scope();
-            if (s === inst.scope) {
-                inst.throwError("Unable to get row scope... something went wrong.");
-            }
-            // make sure we get the right scope to grab the index from. We need to get it from a row.
-            while (s && s.$parent && s.$parent !== inst.scope) {
-                s = s.$parent;
-            }
-            if (s.$index === undefined) {
-                flow.warn("Unable to get Index from row scope. Row scope is not activated or not compiled to that row.");
-                while (el.length && !el[0].getAttribute('row-id') && el[0] !== element[0]) {
-                    el = el.parent();// moving up dom parents in the browser is slow. So we avoid it if we can.
+        if (element) {
+            if (el && element[0].contains(el[0] || el)) {
+                el = el.scope ? el : angular.element(el);
+                var s = el.scope();
+                if (s === inst.scope) {
+                    inst.throwError("Unable to get row scope... something went wrong.");
                 }
-                return parseInt(el[0].getAttribute('row-id'), 10);
+                // make sure we get the right scope to grab the index from. We need to get it from a row.
+                while (s && s.$parent && s.$parent !== inst.scope) {
+                    s = s.$parent;
+                }
+                if (s.$index === undefined) {
+                    flow.warn("Unable to get Index from row scope. Row scope is not activated or not compiled to that row.");
+                    while (el.length && !el[0].getAttribute('row-id') && el[0] !== element[0]) {
+                        el = el.parent();// moving up dom parents in the browser is slow. So we avoid it if we can.
+                    }
+                    return parseInt(el[0].getAttribute('row-id'), 10);
+                }
+                return s.$index;
+            } else if (el && el.attr) {
+                // if a row is detached because of detached dom. We can still get the index.
+                while (el && el.attr('row-id') === undefined && el[0] !== inst.element[0] && el[0] !== document.body) {
+                    el = el.parent();
+                }
+                return parseInt(el.attr('row-id'), 10);
             }
-            return s.$index;
-        } else if (el && el.attr) {
-            // if a row is detached because of detached dom. We can still get the index.
-            while(el && el.attr('row-id') === undefined && el[0] !== inst.element[0] && el[0] !== document.body) {
-                el = el.parent();
-            }
-            return parseInt(el.attr('row-id'), 10);
         }
         return -1;
     }
@@ -617,7 +619,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             for(var i = 0; i < len; i += 1) {
                 var attr = attrs[i];
                 // copy the attr from el to clone
-                if (attr.name !== 'class' && clone.attr(attr.name) !== attr.value && attr.value !== undefined) {
+                if (attr.name !== 'class' && clone.attr(attr.name) !== attr.value && attr.value !== undefined && !(attr.name === "style" && !attr.value)) {
                     clone.attr(attr.name, attr.value);
                 }
             }
@@ -953,7 +955,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                     }
                     // make sure to put them into active in the right order.
                     active.push(loop.i);
-                    if (!safeDigest(s, true)) {
+                    if (!safeDigest(s)) {
                         digestLater = true;
                     }
                     s.$digested = true;
@@ -1533,6 +1535,7 @@ ngModule.directive('uxDatagrid', ['$compile', 'gridAddons', '$timeout', function
                 each(exports.datagrid.coreAddons, function (method) {
                     exports.util.apply(method, inst, [inst]);
                 });
+                gridAddons(inst, exports.datagrid.defaultAddons || '');
                 gridAddons(inst, attr.addons);
 //                scope.$parent[inst.name] = inst;
             },

@@ -222,11 +222,12 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         //TODO: this needs to deprecate because this has finally been fixed in android. (Feb 5th 2015)
         // simulate click on android. Ignore on IOS.
         if (inst.options.scrollModel.simulateClick) {
+            var target = e.target,
+                ev;
+
             if (inst.options.scrollModel.simulateClick && target && !(/(SELECT|INPUT|TEXTAREA)/i).test(target.tagName)) {
                 result.killEvent(e);
             }
-            var target = e.target,
-                ev;
 
             if (!inst.isDigesting(inst.$scope) && target && !(/(SELECT|INPUT|TEXTAREA)/i).test(target.tagName)) {
                 ev = document.createEvent('MouseEvents');

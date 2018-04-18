@@ -53,6 +53,7 @@ describe("creepRenderModel", function () {
         exp.forceRenderScope = function () {
             started = true;
         };
+        exp.values.direction = -1;
         exp.afterUpdateWatchers(2, 2);
         expect(started).toBe(true);
     });

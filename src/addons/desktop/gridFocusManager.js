@@ -415,15 +415,18 @@ angular.module('ux').factory('gridFocusManager', function () {
          */
         function getSelector(el, currentIndex) {
             el = el[0] || el;
-            var len, matches;
+            var len, matches, index, rowEl, options;
             if (el) {
                 currentIndex = currentIndex || inst.getRowIndexFromElement(el);
-                var rowEl = inst.getRowElm(currentIndex);
-                var options = inst.options.gridFocusManager;
+                rowEl = inst.getRowElm(currentIndex);
+                options = inst.options.gridFocusManager;
                 if (options && options.enter) {
                     matches = rowEl[0].querySelectorAll(options.enter) || [];
-                    len = matches && matches.length || 0;
-                    return inst.options.gridFocusManager.enter + (len > 1 ? ":eq(" + Array.prototype.indexOf.call(matches, el) + ")" : "");
+                    index = Array.prototype.indexOf.call(matches, el);
+                    if (index !== -1) {
+                        len = matches && matches.length || 0;
+                        return inst.options.gridFocusManager.enter + (len > 1 ? ":eq(" + index + ")" : "");
+                    }
                 }
                 return ux.selector.quickSelector(el, rowEl[0], filterClasses);
             }

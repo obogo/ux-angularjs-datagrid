@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.6.10
+* ux-angularjs-datagrid v.1.6.12
 * (c) 2018, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -14,7 +14,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 /*!
-* ux-angularjs-datagrid v.1.6.10
+* ux-angularjs-datagrid v.1.6.12
 * (c) 2018, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -496,7 +496,7 @@ exports.datagrid = {
      * ###<a name="version">version</a>###
      * Current datagrid version.
      */
-    version: "1.6.10",
+    version: "1.6.12",
     /**
      * ###<a name="isIOS">isIOS</a>###
      * iOS does not natively support smooth scrolling without a css attribute. `-webkit-overflow-scrolling: touch`
@@ -1797,30 +1797,32 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @returns {*}
      */
     function getRowIndexFromElement(el) {
-        if (el && element[0].contains(el[0] || el)) {
-            el = el.scope ? el : angular.element(el);
-            var s = el.scope();
-            if (s === inst.scope) {
-                inst.throwError("Unable to get row scope... something went wrong.");
-            }
-            // make sure we get the right scope to grab the index from. We need to get it from a row.
-            while (s && s.$parent && s.$parent !== inst.scope) {
-                s = s.$parent;
-            }
-            if (s.$index === undefined) {
-                flow.warn("Unable to get Index from row scope. Row scope is not activated or not compiled to that row.");
-                while (el.length && !el[0].getAttribute("row-id") && el[0] !== element[0]) {
+        if (element) {
+            if (el && element[0].contains(el[0] || el)) {
+                el = el.scope ? el : angular.element(el);
+                var s = el.scope();
+                if (s === inst.scope) {
+                    inst.throwError("Unable to get row scope... something went wrong.");
+                }
+                // make sure we get the right scope to grab the index from. We need to get it from a row.
+                while (s && s.$parent && s.$parent !== inst.scope) {
+                    s = s.$parent;
+                }
+                if (s.$index === undefined) {
+                    flow.warn("Unable to get Index from row scope. Row scope is not activated or not compiled to that row.");
+                    while (el.length && !el[0].getAttribute("row-id") && el[0] !== element[0]) {
+                        el = el.parent();
+                    }
+                    return parseInt(el[0].getAttribute("row-id"), 10);
+                }
+                return s.$index;
+            } else if (el && el.attr) {
+                // if a row is detached because of detached dom. We can still get the index.
+                while (el && el.attr("row-id") === undefined && el[0] !== inst.element[0] && el[0] !== document.body) {
                     el = el.parent();
                 }
-                return parseInt(el[0].getAttribute("row-id"), 10);
+                return parseInt(el.attr("row-id"), 10);
             }
-            return s.$index;
-        } else if (el && el.attr) {
-            // if a row is detached because of detached dom. We can still get the index.
-            while (el && el.attr("row-id") === undefined && el[0] !== inst.element[0] && el[0] !== document.body) {
-                el = el.parent();
-            }
-            return parseInt(el.attr("row-id"), 10);
         }
         return -1;
     }
@@ -1941,7 +1943,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
             for (var i = 0; i < len; i += 1) {
                 var attr = attrs[i];
                 // copy the attr from el to clone
-                if (attr.name !== "class" && clone.attr(attr.name) !== attr.value && attr.value !== undefined) {
+                if (attr.name !== "class" && clone.attr(attr.name) !== attr.value && attr.value !== undefined && !(attr.name === "style" && !attr.value)) {
                     clone.attr(attr.name, attr.value);
                 }
             }
@@ -2267,7 +2269,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                     }
                     // make sure to put them into active in the right order.
                     active.push(loop.i);
-                    if (!safeDigest(s, true)) {
+                    if (!safeDigest(s)) {
                         digestLater = true;
                     }
                     s.$digested = true;
@@ -2830,6 +2832,7 @@ ngModule.directive("uxDatagrid", [ "$compile", "gridAddons", "$timeout", functio
                 each(exports.datagrid.coreAddons, function(method) {
                     exports.util.apply(method, inst, [ inst ]);
                 });
+                gridAddons(inst, exports.datagrid.defaultAddons || "");
                 gridAddons(inst, attr.addons);
             },
             post: function(scope, element, attr) {
@@ -3745,7 +3748,8 @@ exports.datagrid.events.ENABLE_CREEP = "datagrid:enableCreep";
 exports.datagrid.events.DISABLE_CREEP = "datagrid:disableCreep";
 
 exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
-    var intv = 0, creepCount = 0, model = exports.logWrapper("creepModel", {}, "blue", inst), upIndex = 0, downIndex = 0, waitingOnReset, time, lastPercent, unwatchers = [], forceScroll = false, scrollIndex = 0, scrollIndexPadding = 0;
+    var intv = 0, creepCount = 0, model = exports.logWrapper("creepModel", {}, "blue", inst), min, max, upIndex = 0, downIndex = 0, waitingOnReset, time, lastPercent, unwatchers = [], forceScroll = false, scrollIndex = 0, scrollIndexPadding = 0, MAX_SYNC_RENDER = 50;
+    // should not be more than 50.
     function digest(index) {
         if (inst.scope.$root.$$phase) {
             return false;
@@ -3776,6 +3780,10 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     function onInterval(started, ended, force) {
         model.log("\tonInterval");
         if (!inst.values.touchDown) {
+            if (!creepCount) {
+                // it was reset.
+                model.info("start creeping", upIndex + ".." + downIndex + " - " + min + ".." + max);
+            }
             waitingOnReset = false;
             time = Date.now() + inst.options.renderThreshold;
             upIndex = started;
@@ -3809,14 +3817,16 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         }
         return dir > 0 ? inst.rowsLength : -1;
     }
-    function render(complete, force) {
+    function render(complete, force, recur) {
         var now = Date.now(), dynamicHeights, direction;
-        if (time > now && hasIndexesLeft()) {
+        recur = recur || 0;
+        if (time > now && hasIndexesLeft() && recur < MAX_SYNC_RENDER) {
+            // hard limit. cannot render more than 50 synchronously.
             dynamicHeights = inst.templateModel.hasVariableRowHeights();
             direction = inst.values.direction;
             model.info("direction", direction);
             applyRender(direction, force);
-            render(complete, force);
+            render(complete, force, recur += 1);
             // making this async was counter effective on performance.
             if (dynamicHeights) {
                 forceScrollToIndex();
@@ -3844,10 +3854,10 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     }
     function renderUp(force) {
         upIndex = force ? upIndex : findUncompiledIndex(upIndex, -1);
-        if (upIndex >= 0) {
+        if (upIndex >= min) {
             if (digest(upIndex)) {
                 if (force) {
-                    model.warn("\trenderUp " + upIndex);
+                    model.info("\trenderUp " + upIndex);
                 }
                 upIndex -= 1;
                 return true;
@@ -3856,10 +3866,10 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     }
     function renderDown(force) {
         downIndex = force ? downIndex : findUncompiledIndex(downIndex, 1);
-        if (downIndex !== inst.rowsLength) {
+        if (downIndex <= max) {
             if (digest(downIndex)) {
                 if (force) {
-                    model.warn("\trenderDown " + downIndex);
+                    model.info("\trenderDown " + downIndex);
                 }
                 downIndex += 1;
                 return true;
@@ -3900,6 +3910,8 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
             clearTimeout(intv);
             time = 0;
             intv = wait(onInterval, waitTime || inst.options.renderThresholdWait, started, ended, forceCompileRowRender);
+        } else {
+            model.warn("finish creeping: " + creepCount + "/" + inst.options.creepLimit, upIndex + ".." + downIndex + " is creeped out");
         }
     }
     function renderLater(event, forceCompileRowRender) {
@@ -3925,6 +3937,10 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
         creepCount = 0;
         upIndex = loopData.started || 0;
         downIndex = loopData.ended || 0;
+        min = Math.max(upIndex - inst.options.creepLimit, 0);
+        // top creep should stop at
+        max = Math.min(downIndex + inst.options.creepLimit, inst.rowsLength);
+        // bottom creep should stop at
         renderLater(event, forceCompileRowRender);
     }
     function onBeforeReset(event) {
@@ -3937,7 +3953,7 @@ exports.datagrid.coreAddons.creepRenderModel = function creepRenderModel(inst) {
     model.stop = stop;
     // allow external stop of creep render.
     model.forceRenderNext = function() {
-        model.warn("forceRenderNext");
+        model.info("forceRenderNext");
         applyRender(inst.values.direction, true, inst.options.scrollEndRenderAmount);
     };
     model.destroy = function destroy() {
@@ -4374,10 +4390,10 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
         //TODO: this needs to deprecate because this has finally been fixed in android. (Feb 5th 2015)
         // simulate click on android. Ignore on IOS.
         if (inst.options.scrollModel.simulateClick) {
+            var target = e.target, ev;
             if (inst.options.scrollModel.simulateClick && target && !/(SELECT|INPUT|TEXTAREA)/i.test(target.tagName)) {
                 result.killEvent(e);
             }
-            var target = e.target, ev;
             if (!inst.isDigesting(inst.$scope) && target && !/(SELECT|INPUT|TEXTAREA)/i.test(target.tagName)) {
                 ev = document.createEvent("MouseEvents");
                 ev.initMouseEvent("click", true, true, e.view, 1, target.screenX, target.screenY, target.clientX, target.clientY, e.ctrlKey, e.altKey, e.shiftKey, e.metaKey, 0, null);

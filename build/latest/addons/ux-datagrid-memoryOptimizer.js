@@ -1,5 +1,5 @@
 /*!
-* ux-angularjs-datagrid v.1.6.10
+* ux-angularjs-datagrid v.1.6.12
 * (c) 2018, Obogo
 * https://github.com/obogo/ux-angularjs-datagrid
 * License: MIT.
@@ -18,7 +18,7 @@ exports.datagrid.events.ON_MEMORY_OPTIMIZED = "datagrid:onMemoryOptimized";
 angular.module("ux").factory("memoryOptimizer", function() {
     return [ "inst", function(inst) {
         inst.options.memoryOptimizer = inst.options.memoryOptimizer || {};
-        var result = exports.logWrapper("memoryOptimizer", {}, "redOrange", inst), intv, defaultOptions = {
+        var result = exports.logWrapper("memoryOptimizer", {}, "red", inst), pendingCount = 0, intv, defaultOptions = {
             range: inst.options.creepLimit * 2 || 200
         }, options = inst.options.memoryOptimizer = exports.extend(defaultOptions, inst.options.memoryOptimizer);
         /**
@@ -40,13 +40,21 @@ angular.module("ux").factory("memoryOptimizer", function() {
         */
         function optimizeRows() {
             clearPending();
-            intv = setTimeout(_optimizeRows, 3e3);
+            pendingCount += 1;
+            if (pendingCount > inst.options.creepLimit) {
+                // the grid hasn't had enough time to catch up. force cleanup to prevent a memory crash.
+                result.warn("---- FORCE CLEANUP ----");
+                _optimizeRows();
+            } else {
+                intv = setTimeout(_optimizeRows, 1e3);
+            }
         }
         function clearPending() {
             clearTimeout(intv);
             intv = 0;
         }
         function _optimizeRows() {
+            result.warn("optomizeRows");
             // first we need to destroy each scope that is not active.
             var i = 0, iLen = inst.scopes.length, indexes, chunk, chunks = {}, chunksLength = 0;
             while (i < iLen) {
@@ -67,6 +75,7 @@ angular.module("ux").factory("memoryOptimizer", function() {
                 inst.gc();
                 inst.updateLinks();
             }
+            pendingCount = 0;
         }
         /**
         * ###<a name="decompileChunk">decompileChunk</a>###
@@ -74,7 +83,7 @@ angular.module("ux").factory("memoryOptimizer", function() {
         * @param chunk
         */
         function decompileChunk(chunk) {
-            result.log("\tdecompile %s %s-%s", chunk.getId(), chunk.min, chunk.max);
+            result.warn("\tdecompile %s %s-%s", chunk.getId(), chunk.min, chunk.max);
             var i = chunk.min, iLen = chunk.max;
             while (i <= iLen) {
                 if (inst.scopes[i]) {
@@ -83,7 +92,7 @@ angular.module("ux").factory("memoryOptimizer", function() {
                     s.$$prevSibling = null;
                     s.$$nextSibling = null;
                     s.$destroy();
-                    inst.scopes[i] = undefined;
+                    inst.scopes[i] = null;
                 }
                 i += 1;
             }

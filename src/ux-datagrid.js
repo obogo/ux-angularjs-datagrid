@@ -578,6 +578,12 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
                 scope.$$childTail = scopes[index - 1];
             }
             s = scope.$new();
+            // if the parent scope is isolate then the new scope will use prototypial inheritence
+            // to get this property during the destroy phase. the issue is at the point of destruction
+            // the parent scope has already been destroyed so it will bypass the destroy phase for this scope.
+            // setting it to false will ensure that it does not go up the prototype chain and properly maintains the state
+            // whether it has been destroyed.
+            s.$$destroyed = false;
             //s.$on('$destroy', function() {
             //   console.log('DESTROY ' + s.$id + ' index:' + s.$index);
             //});

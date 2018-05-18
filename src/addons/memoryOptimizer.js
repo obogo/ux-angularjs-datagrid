@@ -46,7 +46,7 @@ angular.module('ux').factory('memoryOptimizer', function () {
        }
 
        function _optimizeRows() {
-           result.warn("optomizeRows");
+           result.warn("optimizeRows");
            // first we need to destroy each scope that is not active.
            var i = 0, iLen = inst.scopes.length, indexes, chunk, chunks = {}, chunksLength = 0;
            while (i < iLen) {

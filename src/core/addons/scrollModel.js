@@ -292,6 +292,9 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
      */
     result.onUpdateScroll = function onUpdateScroll(event, force) {
         var val = inst.scrollModel.getScroll(event && (event.target || event.srcElement));
+        if (!val && inst.values.direction !== -1) {
+            val = inst.values.scroll;// IE11 bug. set scroll to 0 when still scrolling down.
+        }
         var actual;
         if (inst.values.scroll === val) {
             if(inst.element.scrollTop && (actual = inst.element.scrollTop()) !== val) {
@@ -311,7 +314,6 @@ exports.datagrid.coreAddons.scrollModel = function scrollModel(inst) {
             inst.scrollModel.waitForStop(force);
             result.fireOnScroll();
         } else {
-
             result.warn('skip fireOnScroll');
         }
     };

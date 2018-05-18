@@ -46,11 +46,15 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
     // **<a name="state">state</a>** `state` of the app. Building || Ready.
     var state = states.BUILDING;
     // **<a name="values">values</a>** `values` is the object that is used to share data for scrolling and other shared values.
+    var _scrollVal = 0;
     var values = {
         // - <a name="values.dirty"></a>if the data is dirty and a render has not happened since the data change.
         dirty: false,
         // - <a name="values.scroll"></a>current scroll value of the grid
-        scroll: 0,
+        get scroll() { return _scrollVal; },
+        set scroll(val) {
+            _scrollVal = val;
+        },
         // - <a name="values.speed"></a>current speed of the scroll
         speed: 0,
         // - <a name="values.absSpeed"></a>current absSpeed of the grid.
@@ -326,7 +330,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
      * @param {*} oldVal
      */
     function onDataChangeFromWatcher(newVal, oldVal) {
-        inst.info("\tonDataChangeFromWatcher |" + flow.lifespan + "| new:" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
+        inst.warn("\tonDataChangeFromWatcher |" + flow.lifespan + "| new:" + (newVal && newVal.length || 0) + " old:" + (oldVal && oldVal.length || 0));
         flow.add(onDataChanged, [newVal, oldVal, flow.lifespan]);
     }
 
@@ -979,7 +983,7 @@ function Datagrid(scope, element, attr, $compile, $timeout) {
         if (inst.rowsLength && values.activeRange.min < 0 && values.activeRange.max < 0) {
             inst.throwError(exports.errors.E1002);
         }
-        inst.log("\tstartIndex %s endIndex %s", loop.startIndex, loop.i);
+        inst.warn("\tRENDERED %s to %s", loop.startIndex, loop.i);
         deactivateList(lastActive);
         lastVisibleScrollStart = loop.visibleScrollStart;
         inst.log("\tactivated %s", active.join(', '));
